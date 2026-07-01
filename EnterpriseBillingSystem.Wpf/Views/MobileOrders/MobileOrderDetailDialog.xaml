@@ -1,0 +1,298 @@
+<Window x:Class="EnterpriseBillingSystem.Wpf.Views.MobileOrders.MobileOrderDetailDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
+        mc:Ignorable="d"
+        Title="Detalle del Pedido Móvil" Height="680" Width="950"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="14"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+
+    <Window.Resources>
+        <converters:InverseBooleanConverter x:Key="InverseBoolConverter" />
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <converters:BooleanToVisibilityConverter x:Key="InverseBoolToVis" Inverse="True" />
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
+                    <TextBlock Text="Pedido " Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                    <TextBlock Text="{Binding OrderNumber}" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                </StackPanel>
+                
+                <WrapPanel Orientation="Horizontal" Margin="0,2,0,0">
+                    <TextBlock Text="Cliente: " FontWeight="SemiBold" Opacity="0.8" />
+                    <TextBlock Text="{Binding CustomerName}" Margin="0,0,8,0" FontWeight="Bold" />
+                    <TextBlock Text="(" Opacity="0.6" />
+                    <TextBlock Text="{Binding CustomerCode}" Opacity="0.6" />
+                    <TextBlock Text=")  |  " Opacity="0.6" />
+                    
+                    <TextBlock Text="Fecha: " FontWeight="SemiBold" Opacity="0.8" />
+                    <TextBlock Text="{Binding OrderDate, StringFormat={}{0:dd/MM/yyyy HH:mm}}" FontWeight="Bold" />
+                </WrapPanel>
+            </StackPanel>
+
+            <!-- Status Badge -->
+            <Border Grid.Column="1" CornerRadius="4" Padding="12,6" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <Border.Style>
+                    <Style TargetType="Border">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding Status}" Value="Solicitud">
+                                <Setter Property="Background" Value="#FFF3E0" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="Recibido">
+                                <Setter Property="Background" Value="#E8F5E9" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="Anulado">
+                                <Setter Property="Background" Value="#FFEBEE" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="EnProceso">
+                                <Setter Property="Background" Value="#E3F2FD" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="EnCamino">
+                                <Setter Property="Background" Value="#EDE7F6" />
+                            </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="Completado">
+                                <Setter Property="Background" Value="#E0F2F1" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Border.Style>
+                <TextBlock FontWeight="Bold" FontSize="13">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding Status}" Value="Solicitud">
+                                    <Setter Property="Text" Value="SOLICITUD" />
+                                    <Setter Property="Foreground" Value="#E65100" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="Recibido">
+                                    <Setter Property="Text" Value="RECIBIDO" />
+                                    <Setter Property="Foreground" Value="#2E7D32" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="Anulado">
+                                    <Setter Property="Text" Value="ANULADO" />
+                                    <Setter Property="Foreground" Value="#C62828" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="EnProceso">
+                                    <Setter Property="Text" Value="EN PROCESO" />
+                                    <Setter Property="Foreground" Value="#0D47A1" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="EnCamino">
+                                    <Setter Property="Text" Value="EN CAMINO" />
+                                    <Setter Property="Foreground" Value="#4A148C" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="Completado">
+                                    <Setter Property="Text" Value="COMPLETADO" />
+                                    <Setter Property="Foreground" Value="#004D40" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+            </Border>
+        </Grid>
+
+        <!-- Content Area -->
+        <Grid Grid.Row="1" Margin="0,0,0,16">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Product Lines DataGrid -->
+            <materialDesign:Card Grid.Row="0" Margin="0,0,0,16" materialDesign:ElevationAssist.Elevation="Dp1">
+                <Grid>
+                    <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}" IsIndeterminate="True" 
+                                 Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVis}}" 
+                                 VerticalAlignment="Top" Height="4" Panel.ZIndex="10" />
+
+                    <DataGrid ItemsSource="{Binding Details}" AutoGenerateColumns="False" IsReadOnly="False" HeadersVisibility="Column">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="110" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="80" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Cantidad" Binding="{Binding Quantity, StringFormat={}{0:N2}}" Width="95" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Precio Unit." Binding="{Binding UnitPrice, StringFormat={}{0:C2}}" Width="115" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Descto. %" Binding="{Binding DiscountPercentage, StringFormat={}{0:N1}}" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="IVA %" Binding="{Binding TaxPercentage, StringFormat={}{0:N1}}" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Neto" Binding="{Binding NetAmount, StringFormat={}{0:C2}}" Width="130" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" IsReadOnly="True" />
+                            <DataGridTemplateColumn Header="Cant. Devolver" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding ReturnedQuantity, StringFormat={}{0:N2}}" 
+                                                   Style="{StaticResource RightAlignedColumnStyle}" 
+                                                   VerticalAlignment="Center" Margin="8,0" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding ReturnedQuantity, UpdateSourceTrigger=PropertyChanged}" 
+                                                 HorizontalContentAlignment="Right"
+                                                 VerticalContentAlignment="Center" Margin="4,0" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </materialDesign:Card>
+
+            <!-- Bottom Notes and Totals Row -->
+            <Grid Grid.Row="1">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="380" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Seller Notes -->
+                <StackPanel Grid.Column="0" Margin="0,0,16,0">
+                    <TextBlock Text="Notas / Observaciones del Vendedor" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" FontWeight="Bold" Margin="0,0,0,6" />
+                    <TextBox Text="{Binding Notes}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" 
+                             VerticalScrollBarVisibility="Auto" Height="100" 
+                             Style="{StaticResource MaterialDesignOutlinedTextBox}" VerticalContentAlignment="Top" />
+                </StackPanel>
+
+                <!-- Totals Card -->
+                <materialDesign:Card Grid.Column="1" Padding="16" materialDesign:ElevationAssist.Elevation="Dp1">
+                    <Grid>
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Subtotal -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Subtotal:" VerticalAlignment="Center" Margin="0,3" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SubTotal, StringFormat={}{0:C2}}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,3" />
+
+                        <!-- Descuento -->
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Descuento:" VerticalAlignment="Center" Margin="0,3" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DiscountAmount, StringFormat={}-{0:C2}}" Foreground="#C62828" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,3" />
+
+                        <!-- Impuestos -->
+                        <TextBlock Grid.Row="2" Grid.Column="0" Text="Impuestos (IVA):" VerticalAlignment="Center" Margin="0,3" />
+                        <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding TaxAmount, StringFormat={}{0:C2}}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,3" />
+
+                        <!-- Divider -->
+                        <Separator Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,4" />
+
+                        <!-- Total -->
+                        <TextBlock Grid.Row="3" Grid.Column="0" Text="TOTAL:" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Center" Margin="0,8,0,0" />
+                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding TotalAmount, StringFormat={}{0:C2}}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Center" Margin="0,8,0,0" />
+                    </Grid>
+                </materialDesign:Card>
+            </Grid>
+        </Grid>
+
+        <!-- Footer Actions -->
+        <Grid Grid.Row="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="Auto" />
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <!-- Grouped Actions (Confirm, Cancel, Return Partial, Return Total) -->
+            <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+                <!-- Cancel / Reject Button (Red) -->
+                <Button Command="{Binding CancelOrderCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="#C62828" BorderBrush="#C62828" 
+                        IsEnabled="{Binding IsActionEnabled}"
+                        Visibility="{Binding IsActionEnabled, Converter={StaticResource BoolToVis}}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Cancel" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Anular Pedido" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Confirm Button (Green) -->
+                <Button Command="{Binding ConfirmOrderCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="#2E7D32" BorderBrush="#2E7D32" 
+                        IsEnabled="{Binding IsActionEnabled}"
+                        Visibility="{Binding IsActionEnabled, Converter={StaticResource BoolToVis}}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Check" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Confirmar Pedido" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Devolución Parcial (Blue) -->
+                <Button Command="{Binding ReturnPartialCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="#1976D2" BorderBrush="#1976D2" 
+                        IsEnabled="{Binding IsReturnEnabled}"
+                        Visibility="{Binding IsReturnEnabled, Converter={StaticResource BoolToVis}}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="KeyboardReturn" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Devolución Parcial" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Devolución Total (Deep Orange) -->
+                <Button Command="{Binding ReturnTotalCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="#E65100" BorderBrush="#E65100" 
+                        IsEnabled="{Binding IsReturnEnabled}"
+                        Visibility="{Binding IsReturnEnabled, Converter={StaticResource BoolToVis}}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="History" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Devolución Total" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+
+            <!-- Status Update Panel (visible for non-finalized states) -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" 
+                        Visibility="{Binding IsStatusChangeVisible, Converter={StaticResource BoolToVis}}">
+                <TextBlock Text="Actualizar Estado: " VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource MaterialDesignBody2TextBlock}" />
+                <ComboBox ItemsSource="{Binding AvailableStatuses}" SelectedItem="{Binding SelectedNewStatus}" 
+                          Width="130" Margin="0,0,8,0" 
+                          Style="{StaticResource MaterialDesignFilledComboBox}" />
+                <Button Command="{Binding UpdateStatusCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Content="Actualizar" />
+            </StackPanel>
+
+            <!-- Close Button (Normal) -->
+            <Button Grid.Column="3" Style="{StaticResource MaterialDesignFlatButton}" 
+                    Click="CloseButton_Click" 
+                    IsEnabled="{Binding IsProcessing, Converter={StaticResource InverseBoolConverter}}"
+                    Content="Cerrar" />
+        </Grid>
+    </Grid>
+</Window>

@@ -1,0 +1,122 @@
+<UserControl x:Class="EnterpriseBillingSystem.Wpf.Views.Dashboard.DashboardView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="600" d:DesignWidth="800">
+    <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <Grid Margin="24">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+
+            <!-- Title -->
+            <StackPanel Grid.Row="0" Margin="0,0,0,24">
+                <TextBlock Text="Resumen de Operaciones" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" />
+                <TextBlock Text="Indicadores clave de rendimiento financiero en tiempo real" Style="{StaticResource MaterialDesignBody1TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+            </StackPanel>
+
+            <!-- KPI Cards Grid -->
+            <UniformGrid Grid.Row="1" Columns="3" Margin="-8">
+                <!-- Ventas del Día -->
+                <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Ventas de Hoy" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            <materialDesign:PackIcon Grid.Column="1" Kind="TrendingUp" Width="28" Height="28" Foreground="Green" />
+                        </Grid>
+                        <TextBlock Text="{Binding SalesToday, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
+                        <TextBlock Text="+15% vs ayer" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Green" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Compras del Día -->
+                <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Compras de Hoy" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            <materialDesign:PackIcon Grid.Column="1" Kind="TrendingDown" Width="28" Height="28" Foreground="Red" />
+                        </Grid>
+                        <TextBlock Text="{Binding PurchasesToday, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
+                        <TextBlock Text="-5% vs ayer" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Red" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Caja Actual -->
+                <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Caja Actual" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            <materialDesign:PackIcon Grid.Column="1" Kind="Cash" Width="28" Height="28" Foreground="Blue" />
+                        </Grid>
+                        <TextBlock Text="{Binding CurrentCash, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
+                        <TextBlock Text="Arqueado" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Blue" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- CxC Pendientes -->
+                <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Cuentas por Cobrar" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            <materialDesign:PackIcon Grid.Column="1" Kind="AccountArrowRightOutline" Width="28" Height="28" Foreground="Orange" />
+                        </Grid>
+                        <TextBlock Text="{Binding ArBalance, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
+                        <TextBlock Text="Cartera pendiente" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Orange" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- CxP Pendientes -->
+                <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Cuentas por Pagar" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            <materialDesign:PackIcon Grid.Column="1" Kind="AccountArrowLeftOutline" Width="28" Height="28" Foreground="Purple" />
+                        </Grid>
+                        <TextBlock Text="{Binding ApBalance, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
+                        <TextBlock Text="Proveedores por pagar" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Purple" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Bancos -->
+                <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Bancos" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            <materialDesign:PackIcon Grid.Column="1" Kind="Bank" Width="28" Height="28" Foreground="Teal" />
+                        </Grid>
+                        <TextBlock Text="{Binding BankBalance, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
+                        <TextBlock Text="Saldo en cuentas" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Teal" />
+                    </StackPanel>
+                </materialDesign:Card>
+            </UniformGrid>
+        </Grid>
+    </ScrollViewer>
+</UserControl>

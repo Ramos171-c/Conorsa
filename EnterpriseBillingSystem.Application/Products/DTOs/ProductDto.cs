@@ -1,0 +1,50 @@
+using System;
+using System.Collections.Generic;
+using EnterpriseBillingSystem.Domain.Enums;
+using EnterpriseBillingSystem.Application.Taxes.DTOs;
+
+namespace EnterpriseBillingSystem.Application.Products.DTOs;
+
+public record ProductDto(
+    Guid Id,
+    string InternalCode,
+    string? Barcode,
+    string Name,
+    string? Description,
+    ProductType ProductType,
+    ProductStatus ProductStatus,
+    bool TrackInventory,
+    bool RequiresSerialNumber,
+    bool RequiresBatchControl,
+    Guid CategoryId,
+    string CategoryName,
+    Guid? BrandId,
+    string? BrandName,
+    Guid DefaultUnitOfMeasureId,
+    string DefaultUnitOfMeasureCode,
+    decimal DefaultPurchasePrice,
+    decimal DefaultSalePrice,
+    decimal CurrentCost,
+    string? ImagePath,
+    bool IsCatalogVisible,
+    bool IsSoldOut,
+    DateTime? SoldOutAt,
+    string? SoldOutBy,
+    decimal MinimumStock,
+    bool IsFavorite,
+    int FavoriteOrder,
+    bool AllowPromotions,
+    bool HighlightInCatalog,
+    string? ShortDescription,
+    string? CatalogBadge,
+    int DisplayOrder,
+    bool AutoMarkSoldOut,
+    bool IsActive,
+    ICollection<ProductPresentationDto> Presentations,
+    ProductPresentationDto? DefaultPresentation,
+    decimal DefaultPrice,
+    string? ImageUrl,
+    string Availability,
+    ICollection<TaxDto> Taxes,
+    ICollection<BranchProductDto> BranchProducts
+);

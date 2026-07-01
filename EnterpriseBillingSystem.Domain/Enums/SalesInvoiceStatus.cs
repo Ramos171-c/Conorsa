@@ -1,0 +1,8 @@
+namespace EnterpriseBillingSystem.Domain.Enums;
+
+public enum SalesInvoiceStatus
+{
+    Draft = 1,
+    Posted = 2,
+    Cancelled = 3
+}

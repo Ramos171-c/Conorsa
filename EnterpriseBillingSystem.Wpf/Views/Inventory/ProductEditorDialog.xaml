@@ -1,0 +1,287 @@
+<Window x:Class="EnterpriseBillingSystem.Wpf.Views.Inventory.ProductEditorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="{Binding Title}" Height="680" Width="800"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="14"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="{Binding Title}" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,16" />
+
+        <!-- Form Scroll Area -->
+        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,0,16">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="220" /> <!-- Left side: Image selection -->
+                    <ColumnDefinition Width="*" />   <!-- Right side: Fields -->
+                </Grid.ColumnDefinitions>
+
+                <!-- Left side: Image upload/preview -->
+                <StackPanel Grid.Column="0" Margin="0,0,16,0" HorizontalAlignment="Center">
+                    <TextBlock Text="Imagen del Producto" Style="{StaticResource MaterialDesignBody2TextBlock}" FontWeight="Bold" Margin="0,0,0,8" HorizontalAlignment="Center" />
+                    
+                    <materialDesign:Card Width="180" Height="180" Padding="4" materialDesign:ElevationAssist.Elevation="Dp2" Margin="0,0,0,12" Background="#F5F5F5">
+                        <Grid>
+                            <!-- Image Preview -->
+                            <Image Source="{Binding ImagePath}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            
+                            <!-- Placeholder if no image -->
+                            <materialDesign:PackIcon Kind="ImageOutline" Width="64" Height="64" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                <materialDesign:PackIcon.Style>
+                                    <Style TargetType="materialDesign:PackIcon">
+                                        <Setter Property="Visibility" Value="Collapsed" />
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding ImagePath}" Value="{x:Null}">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding ImagePath}" Value="">
+                                                <Setter Property="Visibility" Value="Visible" />
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </materialDesign:PackIcon.Style>
+                            </materialDesign:PackIcon>
+                        </Grid>
+                    </materialDesign:Card>
+
+                    <Button Command="{Binding SelectImageCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Margin="0,0,0,8" Width="160">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Upload" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Subir Imagen" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding RemoveImageCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" Width="160" Foreground="Red" BorderBrush="Red">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Quitar Imagen" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+                </StackPanel>
+
+                <!-- Right side: Form Fields -->
+                <Grid Grid.Column="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Row 0: Code (SKU) -->
+                    <Grid Grid.Row="0" Margin="0,0,0,12">
+                        <TextBox Text="{Binding InternalCode}" 
+                                 materialDesign:HintAssist.Hint="Código SKU (Requerido)" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" />
+                    </Grid>
+
+                    <!-- Row 1: Name -->
+                    <TextBox Grid.Row="1" Text="{Binding Name}" 
+                              materialDesign:HintAssist.Hint="Nombre del Producto (Requerido)" 
+                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                              Margin="0,0,0,12" />
+
+                    <!-- Row 2: Description -->
+                    <TextBox Grid.Row="2" Text="{Binding Description}" 
+                              materialDesign:HintAssist.Hint="Descripción completa" 
+                              AcceptsReturn="True" TextWrapping="Wrap" Height="60"
+                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                              Margin="0,0,0,12" />
+
+                    <!-- Row 3: Short Description & Catalog Badge -->
+                    <Grid Grid.Row="3" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="2*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox Grid.Column="0" Text="{Binding ShortDescription}" 
+                                 materialDesign:HintAssist.Hint="Descripción Corta (Catálogo)" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                 Margin="0,0,8,0" />
+
+                        <TextBox Grid.Column="1" Text="{Binding CatalogBadge}" 
+                                 materialDesign:HintAssist.Hint="Etiqueta Catálogo (e.g. Hot, -20%)" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                 Margin="8,0,0,0" />
+                    </Grid>
+
+                    <!-- Row 4: Category & Tax -->
+                    <Grid Grid.Row="4" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <ComboBox Grid.Column="0" ItemsSource="{Binding Categories}" 
+                                   SelectedValue="{Binding CategoryId}" 
+                                   SelectedValuePath="Id" 
+                                   DisplayMemberPath="Name" 
+                                   materialDesign:HintAssist.Hint="Categoría"
+                                   Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                                   Margin="0,0,8,0" />
+
+                        <ComboBox Grid.Column="1" ItemsSource="{Binding AvailableTaxes}" 
+                                   SelectedValue="{Binding TaxId}" 
+                                   SelectedValuePath="Id" 
+                                   DisplayMemberPath="Name" 
+                                   materialDesign:HintAssist.Hint="Impuesto Aplicable"
+                                   Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                                   Margin="8,0,0,0" />
+                    </Grid>
+
+                    <!-- Row 5: UOM, Cost, Min Stock -->
+                    <Grid Grid.Row="5" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <ComboBox Grid.Column="0" ItemsSource="{Binding UnitsOfMeasure}" 
+                                   SelectedValue="{Binding DefaultUnitOfMeasureId}" 
+                                   SelectedValuePath="Id" 
+                                   DisplayMemberPath="Name" 
+                                   materialDesign:HintAssist.Hint="U.M. Base"
+                                   Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                                   Margin="0,0,6,0" />
+
+                        <TextBox Grid.Column="1" Text="{Binding CurrentCost, UpdateSourceTrigger=PropertyChanged}" 
+                                 materialDesign:HintAssist.Hint="Costo Base" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                 Margin="6,0,6,0" />
+
+                        <TextBox Grid.Column="2" Text="{Binding MinimumStock, UpdateSourceTrigger=PropertyChanged}" 
+                                 materialDesign:HintAssist.Hint="Stock Mínimo" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                 Margin="6,0,0,0" />
+                    </Grid>
+
+                    <!-- Row 6: Display Order & Favorite Order -->
+                    <Grid Grid.Row="6" Margin="0,0,0,12">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+
+                        <TextBox Grid.Column="0" Text="{Binding DisplayOrder, UpdateSourceTrigger=PropertyChanged}" 
+                                 materialDesign:HintAssist.Hint="Orden Visual Catálogo" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                 Margin="0,0,8,0" />
+
+                        <TextBox Grid.Column="1" Text="{Binding FavoriteOrder, UpdateSourceTrigger=PropertyChanged}" 
+                                 materialDesign:HintAssist.Hint="Orden Favoritos POS" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                 Margin="8,0,0,0" />
+                    </Grid>
+
+                    <!-- Price change audit block -->
+                    <TextBox Grid.Row="7" Text="{Binding PriceChangeReason}" 
+                              materialDesign:HintAssist.Hint="Motivo de cambio de precio/costo (Requerido)" 
+                              Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                              Foreground="Red" BorderBrush="Red"
+                              Visibility="{Binding IsPriceChanged, Converter={StaticResource BoolToVis}}" 
+                              Margin="0,0,0,12" />
+
+                    <!-- Row 8: Presentations Section -->
+                    <Grid Grid.Row="8" Margin="0,0,0,16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
+                        </Grid.RowDefinitions>
+                        
+                        <Grid Grid.Row="0" Margin="0,0,0,8">
+                            <TextBlock Text="Presentaciones de Venta" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" VerticalAlignment="Center" />
+                            <Button Command="{Binding AddPresentationCommand}" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Right" Content="Agregar Presentación" />
+                        </Grid>
+                        
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding Presentations}" AutoGenerateColumns="False" CanUserAddRows="False" Height="160" HeadersVisibility="Column">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Nombre" Binding="{Binding Name}" IsReadOnly="True" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasureCode}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                <DataGridTextColumn Header="Factor" Binding="{Binding ConversionFactor, StringFormat=N2}" IsReadOnly="True" Width="60" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                <DataGridTextColumn Header="C. Barras" Binding="{Binding Barcode}" IsReadOnly="True" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                <DataGridTextColumn Header="Costo" Binding="{Binding Cost, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                <DataGridTextColumn Header="P. Retail" Binding="{Binding RetailPrice, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                <DataGridTextColumn Header="P. Semi" Binding="{Binding SemiWholesalePrice, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                <DataGridTextColumn Header="P. Mayor" Binding="{Binding WholesalePrice, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                <DataGridCheckBoxColumn Header="Base" Binding="{Binding IsBaseUnit}" IsReadOnly="True" Width="50" />
+                                <DataGridCheckBoxColumn Header="Defecto" Binding="{Binding IsDefaultSalePresentation}" IsReadOnly="True" Width="60" />
+                                <DataGridCheckBoxColumn Header="Activo" Binding="{Binding IsActive}" IsReadOnly="True" Width="65" />
+                                <DataGridTemplateColumn Width="90">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Orientation="Horizontal">
+                                                <Button Command="{Binding DataContext.EditPresentationCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30" Padding="0" ToolTip="Editar">
+                                                    <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16" />
+                                                </Button>
+                                                <Button Command="{Binding DataContext.DeletePresentationCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" CommandParameter="{Binding}" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30" Padding="0" Foreground="Red" ToolTip="Eliminar">
+                                                    <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" />
+                                                </Button>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Grid>
+            </Grid>
+        </ScrollViewer>
+
+        <!-- Bottom Options: Catalog, SoldOut, Favorite & Save Actions -->
+        <Border Grid.Row="2" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,1,0,0" Padding="0,16,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Checkboxes group -->
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <CheckBox Content="Visible Catálogo" IsChecked="{Binding IsCatalogVisible}" Margin="0,0,12,0" />
+                    <CheckBox Content="Destacar Catálogo" IsChecked="{Binding HighlightInCatalog}" Margin="0,0,12,0" />
+                    <CheckBox Content="Auto Agotar" IsChecked="{Binding AutoMarkSoldOut}" Margin="0,0,12,0" />
+                    <CheckBox Content="Agotado" IsChecked="{Binding IsSoldOut}" Margin="0,0,12,0" Foreground="Red" />
+                    <CheckBox Content="Favorito POS" IsChecked="{Binding IsFavorite}" Foreground="Orange" />
+                </StackPanel>
+
+                <StackPanel Grid.Column="1" Orientation="Horizontal">
+                    <Button Command="{Binding CancelCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,12,0" Width="100">
+                        <TextBlock Text="Cancelar" />
+                    </Button>
+
+                    <Button Command="{Binding SaveCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Width="100">
+                        <TextBlock Text="Guardar" />
+                    </Button>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

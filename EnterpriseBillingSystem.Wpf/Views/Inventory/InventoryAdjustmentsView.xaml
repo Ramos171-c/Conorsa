@@ -1,0 +1,93 @@
+<UserControl x:Class="EnterpriseBillingSystem.Wpf.Views.Inventory.InventoryAdjustmentsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Inventory"
+             xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000"
+             Loaded="UserControl_Loaded">
+
+    <UserControl.Resources>
+        <converters:InverseBooleanConverter x:Key="InverseBooleanConverter" />
+    </UserControl.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="Ajustes de Inventario" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+            <TextBlock Text="Registre entradas o salidas manuales de mercadería para correcciones de inventario, mermas o auditorías." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.7" />
+        </StackPanel>
+
+        <!-- Form Card -->
+        <materialDesign:Card Grid.Row="1" VerticalAlignment="Top" HorizontalAlignment="Left" Width="600" Padding="24" materialDesign:ElevationAssist.Elevation="Dp2">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}" IsIndeterminate="True" 
+                             Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                             VerticalAlignment="Top" Height="4" Margin="0,-24,0,24" />
+
+                <!-- Warehouse Selection -->
+                <ComboBox Grid.Row="0" ItemsSource="{Binding Warehouses}" 
+                          SelectedValue="{Binding SelectedWarehouseId}" 
+                          SelectedValuePath="Id" 
+                          DisplayMemberPath="Name" 
+                          materialDesign:HintAssist.Hint="Seleccionar Bodega"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                          Margin="0,0,0,16" />
+
+                <!-- Product Selection -->
+                <ComboBox Grid.Row="1" ItemsSource="{Binding Products}" 
+                          SelectedItem="{Binding SelectedProduct}" 
+                          DisplayMemberPath="Name" 
+                          materialDesign:HintAssist.Hint="Seleccionar Producto"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                          Margin="0,0,0,16" />
+
+                <!-- Type Selector (Entry / Exit) -->
+                <GroupBox Grid.Row="2" Header="Tipo de Ajuste" Style="{StaticResource MaterialDesignCardGroupBox}" Margin="0,0,0,16" Padding="8">
+                    <StackPanel Orientation="Horizontal">
+                        <RadioButton Content="Entrada (+)" IsChecked="{Binding IsPositive}" Margin="16,0,32,0" Foreground="Green" FontWeight="Bold" />
+                        <RadioButton Content="Salida (-)" IsChecked="{Binding IsPositive, Converter={StaticResource InverseBooleanConverter}, FallbackValue=False}" Foreground="Red" FontWeight="Bold" />
+                    </StackPanel>
+                </GroupBox>
+
+                <!-- Quantity -->
+                <TextBox Grid.Row="3" Text="{Binding Quantity}" 
+                         materialDesign:HintAssist.Hint="Cantidad" 
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                         Margin="0,0,0,16" />
+
+                <!-- Notes / Reason -->
+                <TextBox Grid.Row="4" Text="{Binding Notes}" 
+                         materialDesign:HintAssist.Hint="Motivo del ajuste / Observaciones" 
+                         AcceptsReturn="True" TextWrapping="Wrap" Height="80"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                         Margin="0,0,0,24" />
+
+                <!-- Action button -->
+                <Button Grid.Row="5" Command="{Binding ExecuteAdjustmentCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Height="48" materialDesign:ButtonAssist.CornerRadius="8">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Check" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Procesar Ajuste de Inventario" VerticalAlignment="Center" FontWeight="Bold" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

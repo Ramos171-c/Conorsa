@@ -1,0 +1,304 @@
+<UserControl x:Class="EnterpriseBillingSystem.Wpf.Views.AdministrationView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:EnterpriseBillingSystem.Wpf.Views"
+             mc:Ignorable="d" 
+             d:DesignHeight="750" d:DesignWidth="1000"
+             Loaded="UserControl_Loaded">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <StackPanel>
+                <TextBlock Text="{Binding Title}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                <TextBlock Text="Gestione las monedas del sistema, configure los umbrales de precios dinámicos y asigne metas mensuales a sus vendedores." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.7" />
+            </StackPanel>
+        </Grid>
+
+        <!-- Main Content (Tabs) -->
+        <materialDesign:Card Grid.Row="1" materialDesign:ElevationAssist.Elevation="Dp1" UniformCornerRadius="8">
+            <Grid>
+                <!-- Indeterminate Loader -->
+                <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}" IsIndeterminate="True" 
+                             Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                             VerticalAlignment="Top" Height="4" Panel.ZIndex="10" />
+
+                <TabControl materialDesign:ColorZoneAssist.Mode="Standard" 
+                            TabStripPlacement="Top" 
+                            Style="{StaticResource MaterialDesignTabControl}">
+                    
+                    <!-- TAB 1: UMBRALES DE PRECIOS -->
+                    <TabItem Header="Umbrales de Precios">
+                        <ScrollViewer VerticalScrollBarVisibility="Auto">
+                            <StackPanel Margin="24" MaxWidth="600" HorizontalAlignment="Left">
+                                <TextBlock Text="Umbrales del Motor de Precios Dinámicos" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Margin="0,0,0,8" />
+                                <TextBlock Text="Defina los subtotales base acumulados (en moneda principal) necesarios para que una compra aplique de forma reactiva al precio de Semi Mayorista o Mayorista en caja y POS móvil." 
+                                           TextWrapping="Wrap" Style="{StaticResource MaterialDesignBody1TextBlock}" Margin="0,0,0,24" Opacity="0.8" />
+
+                                <materialDesign:Card Padding="20" Margin="0,0,0,16" Background="{DynamicResource MaterialDesignCardBackground}">
+                                    <StackPanel>
+                                        <TextBlock Text="Umbral para SEMI MAYORISTA" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,12" />
+                                        <TextBox Text="{Binding SemiWholesaleThreshold, UpdateSourceTrigger=PropertyChanged}"
+                                                 materialDesign:HintAssist.Hint="Monto mínimo C$"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 materialDesign:TextFieldAssist.PrefixText="C$ "
+                                                 KeyboardNavigation.IsTabStop="True"/>
+                                        <TextBlock Text="Las compras que superen este monto base en precios retail recibirán automáticamente precios semi-mayoristas." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.6" Margin="0,6,0,0" />
+                                    </StackPanel>
+                                </materialDesign:Card>
+
+                                <materialDesign:Card Padding="20" Margin="0,0,0,16" Background="{DynamicResource MaterialDesignCardBackground}">
+                                    <StackPanel>
+                                        <TextBlock Text="Umbral para MAYORISTA" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,12" />
+                                        <TextBox Text="{Binding WholesaleThreshold, UpdateSourceTrigger=PropertyChanged}"
+                                                 materialDesign:HintAssist.Hint="Monto mínimo C$"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 materialDesign:TextFieldAssist.PrefixText="C$ "
+                                                 KeyboardNavigation.IsTabStop="True"/>
+                                        <TextBlock Text="Las compras que superen este monto base en precios retail recibirán automáticamente precios mayoristas." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.6" Margin="0,6,0,0" />
+                                    </StackPanel>
+                                </materialDesign:Card>
+
+                                <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource MaterialDesignCardBackground}">
+                                    <StackPanel>
+                                        <TextBlock Text="Compra Mínima (Facturación/Pedidos)" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,12" />
+                                        <TextBox Text="{Binding MinimumInvoiceAmount, UpdateSourceTrigger=PropertyChanged}"
+                                                 materialDesign:HintAssist.Hint="Monto mínimo C$"
+                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                                                 materialDesign:TextFieldAssist.PrefixText="C$ "
+                                                 KeyboardNavigation.IsTabStop="True"/>
+                                        <TextBlock Text="Monto mínimo total requerido para emitir una factura de venta o registrar un pedido de venta." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.6" Margin="0,6,0,0" />
+                                    </StackPanel>
+                                </materialDesign:Card>
+
+                                <Button Command="{Binding SaveThresholdsCommand}" 
+                                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                                        HorizontalAlignment="Left" Width="200" Height="44">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="ContentSave" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Guardar Cambios" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </TabItem>
+
+                    <!-- TAB 2: MONEDAS / DIVISAS -->
+                    <TabItem Header="Monedas y Divisas">
+                        <Grid Margin="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="1*" MinWidth="300" MaxWidth="450" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left: Currency List -->
+                            <Grid Grid.Column="0" Margin="0,0,16,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Button Grid.Row="0" Command="{Binding StartNewCurrencyCommand}" Style="{StaticResource MaterialDesignRaisedButton}" HorizontalAlignment="Left" Margin="0,0,0,12">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Agregar Divisa" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding Currencies}" SelectedItem="{Binding SelectedCurrency}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Código" Binding="{Binding Code}" Width="80" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                                        <DataGridTextColumn Header="Moneda" Binding="{Binding Name}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                        <DataGridTextColumn Header="Símbolo" Binding="{Binding Symbol}" Width="80" ElementStyle="{StaticResource CenterAlignedColumnStyle}" />
+                                        <DataGridTextColumn Header="Tasa Cambio" Binding="{Binding ExchangeRate, StringFormat={}{0:F4}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                        
+                                        <!-- Default indicator -->
+                                        <DataGridTemplateColumn Header="Principal" Width="90">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <materialDesign:PackIcon Kind="CheckCircle" 
+                                                                             Visibility="{Binding IsDefault, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                                                                             Foreground="Green" Width="20" Height="20" HorizontalAlignment="Center"/>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <!-- Acciones -->
+                                        <DataGridTemplateColumn Header="Acciones" Width="100">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button Style="{StaticResource MaterialDesignIconButton}" 
+                                                                Command="{Binding DataContext.SelectCurrencyForEditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                                CommandParameter="{Binding}" ToolTip="Editar" Width="30" Height="30">
+                                                            <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16"/>
+                                                        </Button>
+                                                        <Button Style="{StaticResource MaterialDesignIconButton}" 
+                                                                Command="{Binding DataContext.DeleteCurrencyCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                                CommandParameter="{Binding}" ToolTip="Eliminar" Foreground="Red" Width="30" Height="30"
+                                                                IsEnabled="{Binding IsDefault, Converter={StaticResource InverseBool}}">
+                                                            <materialDesign:PackIcon Kind="Delete" Width="16" Height="16"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+
+                            <!-- Right: Add/Edit Panel -->
+                            <materialDesign:Card Grid.Column="1" Padding="16" Background="{DynamicResource MaterialDesignCardBackground}"
+                                                 Visibility="{Binding IsEditingCurrency, Converter={StaticResource BoolToVis}}">
+                                <StackPanel>
+                                    <TextBlock Text="Detalle de Divisa" Style="{StaticResource MaterialDesignHeadline6TextBlock}" FontWeight="Bold" Margin="0,0,0,16" />
+                                    
+                                    <TextBox Text="{Binding NewCurrencyCode, UpdateSourceTrigger=PropertyChanged}"
+                                             materialDesign:HintAssist.Hint="Código (ej. USD, NIO)"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12" />
+
+                                    <TextBox Text="{Binding NewCurrencyName, UpdateSourceTrigger=PropertyChanged}"
+                                             materialDesign:HintAssist.Hint="Nombre completo (ej. Dólar)"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12" />
+
+                                    <TextBox Text="{Binding NewCurrencySymbol, UpdateSourceTrigger=PropertyChanged}"
+                                             materialDesign:HintAssist.Hint="Símbolo (ej. $, C$)"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12" />
+
+                                    <TextBox Text="{Binding NewCurrencyExchangeRate, UpdateSourceTrigger=PropertyChanged}"
+                                             materialDesign:HintAssist.Hint="Tasa de cambio (relativa a principal)"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12"
+                                             IsEnabled="{Binding NewCurrencyIsDefault, Converter={StaticResource InverseBool}}"/>
+
+                                    <CheckBox IsChecked="{Binding NewCurrencyIsDefault}" Content="Es Moneda Principal (Base)" Margin="0,0,0,12" />
+                                    <CheckBox IsChecked="{Binding NewCurrencyIsActive}" Content="Activa" Margin="0,0,0,20" />
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Command="{Binding CancelCurrencyEditCommand}" Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,8,0" Content="Cancelar" />
+                                        <Button Command="{Binding SaveCurrencyCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Content="Guardar" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </materialDesign:Card>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- TAB 3: METAS DE VENDEDORES -->
+                    <TabItem Header="Metas de Ventas">
+                        <Grid Margin="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2.5*" />
+                                <ColumnDefinition Width="1.5*" MinWidth="320" MaxWidth="500" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left: Goals List -->
+                            <Grid Grid.Column="0" Margin="0,0,16,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Button Grid.Row="0" Command="{Binding StartNewGoalCommand}" Style="{StaticResource MaterialDesignRaisedButton}" HorizontalAlignment="Left" Margin="0,0,0,12">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Target" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Asignar Meta" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding SalesGoals}" SelectedItem="{Binding SelectedGoal}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Vendedor" Binding="{Binding UserFullName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                                        <DataGridTextColumn Header="Periodo" Binding="{Binding PeriodName}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                        <DataGridTextColumn Header="Objetivo" Binding="{Binding TargetAmount, StringFormat={}C$ {0:N2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                        <DataGridTextColumn Header="Vendido" Binding="{Binding CurrentAmount, StringFormat={}C$ {0:N2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                        
+                                        <!-- Progress Percentage and Bar -->
+                                        <DataGridTemplateColumn Header="Avance" Width="150">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <Grid Margin="4,0">
+                                                        <Grid.RowDefinitions>
+                                                            <RowDefinition Height="Auto"/>
+                                                            <RowDefinition Height="Auto"/>
+                                                        </Grid.RowDefinitions>
+                                                        <ProgressBar Grid.Row="0" Minimum="0" Maximum="100" Value="{Binding ProgressPercentage}" Height="6" Foreground="Purple" Background="#E0E0E0"/>
+                                                        <TextBlock Grid.Row="1" Text="{Binding ProgressPercentage, StringFormat={}{0:F1}%}" FontSize="10" HorizontalAlignment="Right" FontWeight="Bold" Margin="0,2,0,0"/>
+                                                    </Grid>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <!-- Acciones -->
+                                        <DataGridTemplateColumn Header="Acciones" Width="100">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button Style="{StaticResource MaterialDesignIconButton}" 
+                                                                Command="{Binding DataContext.SelectGoalForEditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                                CommandParameter="{Binding}" ToolTip="Editar" Width="30" Height="30">
+                                                            <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16"/>
+                                                        </Button>
+                                                        <Button Style="{StaticResource MaterialDesignIconButton}" 
+                                                                Command="{Binding DataContext.DeleteGoalCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                                CommandParameter="{Binding}" ToolTip="Eliminar" Foreground="Red" Width="30" Height="30">
+                                                            <materialDesign:PackIcon Kind="Delete" Width="16" Height="16"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+
+                            <!-- Right: Goal Assign Form -->
+                            <materialDesign:Card Grid.Column="1" Padding="16" Background="{DynamicResource MaterialDesignCardBackground}"
+                                                 Visibility="{Binding IsEditingGoal, Converter={StaticResource BoolToVis}}">
+                                <StackPanel>
+                                    <TextBlock Text="Asignación de Meta de Venta" Style="{StaticResource MaterialDesignHeadline6TextBlock}" FontWeight="Bold" Margin="0,0,0,16" />
+
+                                    <ComboBox ItemsSource="{Binding Salespeople}" 
+                                              SelectedItem="{Binding SelectedSalesperson}"
+                                              DisplayMemberPath="FullName"
+                                              materialDesign:HintAssist.Hint="Seleccionar Vendedor"
+                                              Style="{StaticResource MaterialDesignOutlinedComboBox}" Margin="0,0,0,12" />
+
+                                    <TextBox Text="{Binding NewGoalPeriodName, UpdateSourceTrigger=PropertyChanged}"
+                                             materialDesign:HintAssist.Hint="Nombre del Periodo (ej. Junio 2026)"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12" />
+
+                                    <TextBox Text="{Binding NewGoalTargetAmount, UpdateSourceTrigger=PropertyChanged}"
+                                             materialDesign:HintAssist.Hint="Monto de la Meta"
+                                             materialDesign:TextFieldAssist.PrefixText="C$ "
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12" />
+
+                                    <DatePicker SelectedDate="{Binding NewGoalStartDate}"
+                                                materialDesign:HintAssist.Hint="Fecha de Inicio"
+                                                Style="{StaticResource MaterialDesignOutlinedDatePicker}" Margin="0,0,0,12" />
+
+                                    <DatePicker SelectedDate="{Binding NewGoalEndDate}"
+                                                materialDesign:HintAssist.Hint="Fecha de Finalización"
+                                                Style="{StaticResource MaterialDesignOutlinedDatePicker}" Margin="0,0,0,12" />
+
+                                    <CheckBox IsChecked="{Binding NewGoalIsActive}" Content="Meta Activa" Margin="0,0,0,20" />
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Command="{Binding CancelGoalEditCommand}" Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,8,0" Content="Cancelar" />
+                                        <Button Command="{Binding SaveGoalCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Content="Asignar Meta" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </materialDesign:Card>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

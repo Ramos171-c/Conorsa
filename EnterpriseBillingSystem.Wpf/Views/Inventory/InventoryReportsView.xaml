@@ -1,0 +1,190 @@
+<UserControl x:Class="EnterpriseBillingSystem.Wpf.Views.Inventory.InventoryReportsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Inventory"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000"
+             Loaded="UserControl_Loaded">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <StackPanel Grid.Row="0" Margin="0,0,0,24">
+            <TextBlock Text="Reportes de Inventario" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+            <TextBlock Text="Genere reportes detallados de existencias, valorización contable y flujo de movimientos (Kardex)." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.7" />
+        </StackPanel>
+
+        <!-- Common Filters Card -->
+        <materialDesign:Card Grid.Row="1" Margin="0,0,0,16" Padding="16" materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <ComboBox Grid.Column="0" ItemsSource="{Binding Warehouses}" 
+                          SelectedValue="{Binding SelectedWarehouseId}" 
+                          SelectedValuePath="Id" 
+                          DisplayMemberPath="Name" 
+                          materialDesign:HintAssist.Hint="Bodega"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                          Margin="0,0,8,0" />
+
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Products}" 
+                          SelectedValue="{Binding SelectedProductId}" 
+                          SelectedValuePath="Id" 
+                          DisplayMemberPath="Name" 
+                          materialDesign:HintAssist.Hint="Producto"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                          Margin="8,0,8,0" />
+
+                <DatePicker Grid.Column="2" SelectedDate="{Binding StartDate}" 
+                            materialDesign:HintAssist.Hint="Fecha Inicio" 
+                            Style="{StaticResource MaterialDesignOutlinedDatePicker}" 
+                            Width="150" Margin="8,0,8,0" />
+
+                <DatePicker Grid.Column="3" SelectedDate="{Binding EndDate}" 
+                            materialDesign:HintAssist.Hint="Fecha Fin" 
+                            Style="{StaticResource MaterialDesignOutlinedDatePicker}" 
+                            Width="150" Margin="8,0,0,0" />
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Report Tabs -->
+        <materialDesign:Card Grid.Row="2" materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}" IsIndeterminate="True" 
+                             Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                             VerticalAlignment="Top" Height="4" Panel.ZIndex="10" />
+
+                <TabControl Style="{StaticResource MaterialDesignNavigationRailTabControl}" materialDesign:ColorZoneAssist.Mode="PrimaryLight">
+                    
+                    <!-- Tab 1: Existencias -->
+                    <TabItem Header="Existencias">
+                        <Grid Margin="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+                            
+                            <Button Grid.Row="0" Command="{Binding LoadStockReportCommand}" Style="{StaticResource MaterialDesignRaisedButton}" HorizontalAlignment="Right" Margin="0,0,0,16">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Magnify" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Cargar Existencias" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <DataGrid Grid.Row="1" ItemsSource="{Binding StockReportItems}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Bodega" Binding="{Binding WarehouseName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Código" Binding="{Binding ProductInternalCode}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Físico" Binding="{Binding PhysicalStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                    <DataGridTextColumn Header="Reservado" Binding="{Binding ReservedStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                    <DataGridTextColumn Header="Disponible" Binding="{Binding AvailableStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- Tab 2: Valorización -->
+                    <TabItem Header="Valorización">
+                        <Grid Margin="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                                <RowDefinition Height="Auto" />
+                            </Grid.RowDefinitions>
+
+                            <Button Grid.Row="0" Command="{Binding LoadValuationReportCommand}" Style="{StaticResource MaterialDesignRaisedButton}" HorizontalAlignment="Right" Margin="0,0,0,16">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Calculator" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Calcular Valoración" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <DataGrid Grid.Row="1" ItemsSource="{Binding ValuationReportItems}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Bodega" Binding="{Binding WarehouseName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Existencia" Binding="{Binding PhysicalStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                    <DataGridTextColumn Header="Costo Unitario" Binding="{Binding PurchasePrice, StringFormat={}{0:C}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                    <DataGridTextColumn Header="Valor Total" Binding="{Binding TotalValue, StringFormat={}{0:C}}" Width="150" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <!-- Valuation Summary -->
+                            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+                                <TextBlock Text="VALOR TOTAL DEL INVENTARIO: " Style="{StaticResource MaterialDesignBody1TextBlock}" FontWeight="Bold" VerticalAlignment="Center" />
+                                <TextBlock Text="{Binding TotalValuationSum, StringFormat={}{0:C}}" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Foreground="Green" VerticalAlignment="Center" Margin="8,0,0,0" />
+                            </StackPanel>
+                        </Grid>
+                    </TabItem>
+
+                    <!-- Tab 3: Movimientos (Kardex) -->
+                    <TabItem Header="Movimientos (Kardex)">
+                        <Grid Margin="16">
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="Auto" />
+                                <RowDefinition Height="*" />
+                            </Grid.RowDefinitions>
+
+                            <Button Grid.Row="0" Command="{Binding LoadMovementReportCommand}" Style="{StaticResource MaterialDesignRaisedButton}" HorizontalAlignment="Right" Margin="0,0,0,16">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ViewList" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Consultar Movimientos" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <DataGrid Grid.Row="1" ItemsSource="{Binding MovementReportItems}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Fecha (UTC)" Binding="{Binding MovementDate, StringFormat={}{0:g}}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Nº Movimiento" Binding="{Binding MovementNumber}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Tipo" Binding="{Binding MovementTypeName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Documento Ref." Binding="{Binding ReferenceDocument}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Cantidad" Binding="{Binding Quantity, StringFormat={}{0:N2}}" Width="100" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                    <DataGridTextColumn Header="Unidad" Binding="{Binding UnitOfMeasureCode}" Width="80" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTemplateColumn Header="Sentencia" Width="100">
+                                        <!-- Custom format for Entry / Exit -->
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock FontWeight="Bold" FontSize="12">
+                                                    <TextBlock.Style>
+                                                        <Style TargetType="TextBlock">
+                                                            <Style.Triggers>
+                                                                <DataTrigger Binding="{Binding IsEntry}" Value="True">
+                                                                    <Setter Property="Text" Value="ENTRADA (+)" />
+                                                                    <Setter Property="Foreground" Value="Green" />
+                                                                </DataTrigger>
+                                                                <DataTrigger Binding="{Binding IsEntry}" Value="False">
+                                                                    <Setter Property="Text" Value="SALIDA (-)" />
+                                                                    <Setter Property="Foreground" Value="Red" />
+                                                                </DataTrigger>
+                                                            </Style.Triggers>
+                                                        </Style>
+                                                    </TextBlock.Style>
+                                                </TextBlock>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTextColumn Header="Observaciones" Binding="{Binding Notes}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                </DataGrid.Columns>
+                            </DataGrid>
+                        </Grid>
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </materialDesign:Card>
+    </Grid>
+</UserControl>

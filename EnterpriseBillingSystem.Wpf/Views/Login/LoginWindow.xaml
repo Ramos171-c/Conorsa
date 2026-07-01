@@ -1,0 +1,90 @@
+<Window x:Class="EnterpriseBillingSystem.Wpf.Views.Login.LoginWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
+        mc:Ignorable="d"
+        Title="Dulces y Caramelos a Todo — Iniciar Sesión" 
+        Height="550" Width="420"
+        WindowStartupLocation="CenterScreen"
+        ResizeMode="NoResize"
+        WindowStyle="None"
+        AllowsTransparency="True"
+        Background="Transparent"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+    <Window.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <converters:BooleanToVisibilityConverter x:Key="InverseBoolToVis" Inverse="True" />
+    </Window.Resources>
+    
+    <Border CornerRadius="20" Background="{DynamicResource MaterialDesignPaper}" BorderBrush="{DynamicResource PrimaryHueMidBrush}" BorderThickness="1.5">
+        <Grid Margin="32">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
+            </Grid.RowDefinitions>
+
+            <!-- Close/Exit Button -->
+            <Button Grid.Row="0" HorizontalAlignment="Right" Style="{StaticResource MaterialDesignFlatButton}" Padding="4" Width="32" Height="32" Click="ExitButton_Click" ToolTip="Cerrar">
+                <materialDesign:PackIcon Kind="Close" Width="24" Height="24" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+            </Button>
+
+            <!-- Logo / Brand Header -->
+            <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,8,0,24">
+                <materialDesign:PackIcon Kind="Domain" Width="64" Height="64" Foreground="{DynamicResource PrimaryHueMidBrush}" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                <TextBlock Text="Dulces y Caramelos a Todo" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" HorizontalAlignment="Center" />
+                <TextBlock Text="Cliente de Escritorio Corporativo" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" HorizontalAlignment="Center" Margin="0,4,0,0" />
+            </StackPanel>
+
+            <!-- Login Form Fields -->
+            <StackPanel Grid.Row="2" VerticalAlignment="Center" Margin="0,0,0,16">
+                <!-- Username -->
+                <TextBox materialDesign:HintAssist.Hint="Usuario"
+                         Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}"
+                         Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                         FontSize="15" Margin="0,0,0,20"
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolToVis}}">
+                    <TextBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding LoginCommand}" />
+                    </TextBox.InputBindings>
+                </TextBox>
+
+                <!-- Password -->
+                <PasswordBox x:Name="PasswordInput" 
+                             materialDesign:HintAssist.Hint="Contraseña"
+                             Style="{StaticResource MaterialDesignFloatingHintPasswordBox}"
+                             FontSize="15" Margin="0,0,0,24"
+                             PasswordChanged="PasswordInput_PasswordChanged"
+                             IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolToVis}}">
+                    <PasswordBox.InputBindings>
+                        <KeyBinding Key="Enter" Command="{Binding LoginCommand}" />
+                    </PasswordBox.InputBindings>
+                </PasswordBox>
+
+                <!-- Error Message Alert -->
+                <TextBlock Text="{Binding ErrorMessage}" Foreground="Red" FontSize="12.5" TextWrapping="Wrap" Margin="0,0,0,16" HorizontalAlignment="Center" FontWeight="SemiBold" Visibility="{Binding ErrorMessage, Converter={StaticResource BoolToVis}}" />
+            </StackPanel>
+
+            <!-- Action Buttons and Loading -->
+            <StackPanel Grid.Row="3">
+                <!-- Loading Indicator -->
+                <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}" IsIndeterminate="True" Margin="0,0,0,16" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}" />
+
+                <!-- Login Button -->
+                <Button Content="INICIAR SESIÓN"
+                        Command="{Binding LoginCommand}"
+                        Style="{StaticResource MaterialDesignRaisedButton}"
+                        Height="46" FontSize="15" FontWeight="Bold"
+                        materialDesign:ButtonAssist.CornerRadius="8"
+                        IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolToVis}}" />
+
+                <TextBlock Text="Desarrollado para Dulces y Caramelos a Todo © 2026" FontSize="10.5" Foreground="{DynamicResource MaterialDesignBodyLight}" HorizontalAlignment="Center" Margin="0,20,0,0" Opacity="0.7" />
+            </StackPanel>
+        </Grid>
+    </Border>
+</Window>

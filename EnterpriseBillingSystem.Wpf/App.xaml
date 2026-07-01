@@ -1,0 +1,188 @@
+<Application x:Class="EnterpriseBillingSystem.Wpf.App"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:local="clr-namespace:EnterpriseBillingSystem.Wpf"
+             xmlns:v="clr-namespace:EnterpriseBillingSystem.Wpf.Views"
+             xmlns:vd="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Dashboard"
+             xmlns:vp="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Pos"
+             xmlns:vi="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Inventory"
+             xmlns:vu="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Users"
+             xmlns:vo="clr-namespace:EnterpriseBillingSystem.Wpf.Views.MobileOrders"
+             xmlns:vpu="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Purchases"
+             xmlns:vc="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Customers"
+             xmlns:vs="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Suppliers"
+             xmlns:vm="clr-namespace:EnterpriseBillingSystem.Wpf.ViewModels"
+             xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
+    <Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <materialDesign:BundledTheme BaseTheme="Light" PrimaryColor="DeepPurple" SecondaryColor="Lime" />
+                <ResourceDictionary Source="pack://application:,,,/MaterialDesignThemes.Wpf;component/Themes/MaterialDesign3.Defaults.xaml" />
+            </ResourceDictionary.MergedDictionaries>
+
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
+            <converters:BooleanToVisibilityConverter x:Key="InverseBoolToVis" Inverse="True" />
+            <converters:InverseBooleanConverter x:Key="InverseBool" />
+
+            <!-- Estilo Premium Global para todas las tablas (DataGrid) del sistema -->
+            <Style x:Key="RightAlignedColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignDataGridTextColumnStyle}">
+                <Setter Property="HorizontalAlignment" Value="Right" />
+                <Setter Property="TextAlignment" Value="Right" />
+                <Setter Property="Margin" Value="0,0,8,0" />
+            </Style>
+
+            <Style x:Key="CenterAlignedColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignDataGridTextColumnStyle}">
+                <Setter Property="HorizontalAlignment" Value="Center" />
+                <Setter Property="TextAlignment" Value="Center" />
+            </Style>
+
+            <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+                <Setter Property="GridLinesVisibility" Value="None" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="AlternationCount" Value="2" />
+                <Setter Property="materialDesign:DataGridAssist.CellPadding" Value="16 12" />
+                <Setter Property="ColumnHeaderStyle">
+                    <Setter.Value>
+                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
+                            <Setter Property="Background" Value="#F3E8FF" />
+                            <Setter Property="Foreground" Value="#4A148C" />
+                            <Setter Property="FontWeight" Value="Bold" />
+                            <Setter Property="FontSize" Value="13" />
+                            <Setter Property="Height" Value="48" />
+                            <Setter Property="Padding" Value="16,0" />
+                            <Setter Property="BorderBrush" Value="#E0E0E0" />
+                            <Setter Property="BorderThickness" Value="0,0,0,2" />
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                                    <Setter Property="Background" Value="#2A1B3D" />
+                                    <Setter Property="Foreground" Value="#E1BEE7" />
+                                    <Setter Property="BorderBrush" Value="#4F3674" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Setter.Value>
+                </Setter>
+                <Setter Property="RowStyle">
+                    <Setter.Value>
+                        <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
+                            <Setter Property="Background" Value="Transparent" />
+                            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
+                            <Setter Property="BorderThickness" Value="0,0,0,1" />
+                            <Style.Triggers>
+                                <Trigger Property="ItemsControl.AlternationIndex" Value="1">
+                                    <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
+                                </Trigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True" />
+                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}" Value="True" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Background" Value="#2E223A" />
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True" />
+                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}" Value="False" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Background" Value="#F5EDFA" />
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected}" Value="True" />
+                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}" Value="True" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Background" Value="#4F3674" />
+                                    <Setter Property="Foreground" Value="White" />
+                                </MultiDataTrigger>
+                                <MultiDataTrigger>
+                                    <MultiDataTrigger.Conditions>
+                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected}" Value="True" />
+                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}" Value="False" />
+                                    </MultiDataTrigger.Conditions>
+                                    <Setter Property="Background" Value="#EADDF6" />
+                                    <Setter Property="Foreground" Value="#4A148C" />
+                                </MultiDataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Setter.Value>
+                </Setter>
+            </Style>
+
+            <!-- DataTemplates for navigation mapping ViewModels to Views -->
+            <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+                <vd:DashboardView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type vm:PosViewModel}">
+                <vp:PosView />
+            </DataTemplate>
+
+            <DataTemplate DataType="{x:Type vm:CustomersViewModel}">
+                <vc:CustomersView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SuppliersViewModel}">
+                <vs:SuppliersView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:InventoryDashboardViewModel}">
+                <vi:InventoryDashboardView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ProductsViewModel}">
+                <vi:ProductsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:InventoryStockViewModel}">
+                <vi:InventoryStockView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:InventoryAdjustmentsViewModel}">
+                <vi:InventoryAdjustmentsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:InventoryTransfersViewModel}">
+                <vi:InventoryTransfersView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:InventoryReportsViewModel}">
+                <vi:InventoryReportsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:InventoryMovementsViewModel}">
+                <vi:InventoryMovementsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:InventoryAuditsViewModel}">
+                <vi:InventoryAuditsView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:UsersViewModel}">
+                <vu:UsersView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:MobileOrdersViewModel}">
+                <vo:MobileOrdersView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SalesViewModel}">
+                <v:GenericModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PurchasesViewModel}">
+                <vpu:PurchasesView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:CashViewModel}">
+                <v:GenericModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AccountsReceivableViewModel}">
+                <v:GenericModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AccountsPayableViewModel}">
+                <v:GenericModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AccountingViewModel}">
+                <v:GenericModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:TreasuryViewModel}">
+                <v:GenericModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:FixedAssetsViewModel}">
+                <v:GenericModuleView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AdministrationViewModel}">
+                <v:AdministrationView />
+            </DataTemplate>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

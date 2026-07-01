@@ -1,0 +1,242 @@
+<UserControl x:Class="EnterpriseBillingSystem.Wpf.Views.Customers.CustomersView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:local="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Customers"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1000"
+             Loaded="UserControl_Loaded">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <Grid Grid.Row="0" Margin="0,0,0,16">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <StackPanel Grid.Column="0">
+                <TextBlock Text="Base de Datos de Clientes" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                <TextBlock Text="Gestione la información comercial de sus clientes, perfiles de precios y condiciones de crédito." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.7" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Command="{Binding CreateCustomerCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="AccountPlus" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Nuevo Cliente" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+                <Button Command="{Binding RefreshCommand}" Style="{StaticResource MaterialDesignFlatButton}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Actualizar" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
+        </Grid>
+
+        <!-- Filters -->
+        <materialDesign:Card Grid.Row="1" Margin="0,0,0,16" Padding="16" materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+
+                <!-- Search -->
+                <TextBox Grid.Column="0" Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}" 
+                         materialDesign:HintAssist.Hint="Buscar por nombre, código o identificación..." 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         Margin="0,0,8,0" />
+
+                <!-- Category Filter -->
+                <ComboBox Grid.Column="1" 
+                          ItemsSource="{Binding Categories}" 
+                          SelectedValue="{Binding SelectedCategoryId}"
+                          SelectedValuePath="Id"
+                          DisplayMemberPath="Name"
+                          materialDesign:HintAssist.Hint="Categoría"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Margin="8,0" />
+
+                <!-- Status Filter -->
+                <ComboBox Grid.Column="2" 
+                          ItemsSource="{Binding Statuses}" 
+                          SelectedItem="{Binding SelectedStatus}"
+                          materialDesign:HintAssist.Hint="Estado"
+                          materialDesign:TextFieldAssist.HasClearButton="True"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                          Margin="8,0,0,0" />
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Data Grid -->
+        <materialDesign:Card Grid.Row="2" materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}" IsIndeterminate="True" 
+                             Visibility="{Binding IsLoading, Converter={StaticResource BooleanToVisibilityConverter}}" 
+                             VerticalAlignment="Top" Height="4" Panel.ZIndex="10" />
+
+                <DataGrid ItemsSource="{Binding Customers}" AutoGenerateColumns="False" IsReadOnly="True" 
+                          HeadersVisibility="Column">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Código" Binding="{Binding CustomerCode}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Identificación" Binding="{Binding IdentificationNumber}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Nombre / Razón Social" Binding="{Binding Name}" Width="2*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Categoría" Binding="{Binding CustomerCategoryName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Lista de Precios" Binding="{Binding CustomerPricingProfileName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Lím. Crédito" Binding="{Binding CreditLimit, StringFormat={}{0:C}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                        <DataGridTextColumn Header="Días Crédito" Binding="{Binding CreditDays}" Width="100" ElementStyle="{StaticResource CenterAlignedColumnStyle}" />
+
+                        <!-- Status Badge -->
+                        <DataGridTemplateColumn Header="Estado" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="4" Padding="8,3" HorizontalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Active">
+                                                        <Setter Property="Background" Value="#E8F5E9" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Blocked">
+                                                        <Setter Property="Background" Value="#FFEBEE" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                        <Setter Property="Background" Value="#F5F5F5" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Status}" Value="Suspended">
+                                                        <Setter Property="Background" Value="#FFF3E0" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock FontWeight="Bold" FontSize="11">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Active">
+                                                            <Setter Property="Text" Value="ACTIVO" />
+                                                            <Setter Property="Foreground" Value="#2E7D32" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Blocked">
+                                                            <Setter Property="Text" Value="BLOQUEADO" />
+                                                            <Setter Property="Foreground" Value="#C62828" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                            <Setter Property="Text" Value="INACTIVO" />
+                                                            <Setter Property="Foreground" Value="#616161" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Suspended">
+                                                            <Setter Property="Text" Value="SUSPENDIDO" />
+                                                            <Setter Property="Foreground" Value="#E65100" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Actions -->
+                        <DataGridTemplateColumn Header="Acciones" Width="140">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                        <!-- Edit -->
+                                        <Button Command="{Binding DataContext.EditCustomerCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                CommandParameter="{Binding}" 
+                                                Style="{StaticResource MaterialDesignIconButton}" 
+                                                Width="30" Height="30" ToolTip="Editar Cliente">
+                                            <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                        </Button>
+
+                                        <!-- Toggle Status (Block / Activate) -->
+                                        <Button Command="{Binding DataContext.ToggleStatusCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                CommandParameter="{Binding}" 
+                                                Width="30" Height="30" Margin="4,0">
+                                            <Button.Style>
+                                                <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Active">
+                                                            <Setter Property="ToolTip" Value="Bloquear Cliente" />
+                                                            <Setter Property="Content">
+                                                                <Setter.Value>
+                                                                    <materialDesign:PackIcon Kind="Lock" Width="16" Height="16" Foreground="#C62828" />
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Blocked">
+                                                            <Setter Property="ToolTip" Value="Activar Cliente" />
+                                                            <Setter Property="Content">
+                                                                <Setter.Value>
+                                                                    <materialDesign:PackIcon Kind="LockOpen" Width="16" Height="16" Foreground="#2E7D32" />
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Inactive">
+                                                            <Setter Property="ToolTip" Value="Activar Cliente" />
+                                                            <Setter Property="Content">
+                                                                <Setter.Value>
+                                                                    <materialDesign:PackIcon Kind="LockOpen" Width="16" Height="16" Foreground="#2E7D32" />
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Status}" Value="Suspended">
+                                                            <Setter Property="ToolTip" Value="Activar Cliente" />
+                                                            <Setter Property="Content">
+                                                                <Setter.Value>
+                                                                    <materialDesign:PackIcon Kind="LockOpen" Width="16" Height="16" Foreground="#2E7D32" />
+                                                                </Setter.Value>
+                                                            </Setter>
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </Button.Style>
+                                        </Button>
+
+                                        <!-- Delete -->
+                                        <Button Command="{Binding DataContext.DeleteCustomerCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                CommandParameter="{Binding}" 
+                                                Style="{StaticResource MaterialDesignIconButton}" 
+                                                Width="30" Height="30" ToolTip="Eliminar Cliente">
+                                            <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Foreground="#C62828" />
+                                        </Button>
+                                    </StackPanel>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                    </DataGrid.Columns>
+                </DataGrid>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Pagination -->
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <TextBlock Text="Página: " VerticalAlignment="Center" Margin="0,0,8,0" />
+            <TextBlock Text="{Binding PageNumber}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0" />
+
+            <Button Command="{Binding PreviousPageCommand}" Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32" Margin="0,0,4,0">
+                <materialDesign:PackIcon Kind="ChevronLeft" />
+            </Button>
+
+            <Button Command="{Binding NextPageCommand}" Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32">
+                <materialDesign:PackIcon Kind="ChevronRight" />
+            </Button>
+        </StackPanel>
+    </Grid>
+</UserControl>

@@ -1,0 +1,440 @@
+<UserControl x:Class="EnterpriseBillingSystem.Wpf.Views.Pos.PosView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
+             mc:Ignorable="d" 
+             d:DesignHeight="700" d:DesignWidth="1100"
+             Loaded="UserControl_Loaded">
+    <UserControl.Resources>
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <converters:BooleanToVisibilityConverter x:Key="InverseBoolToVis" Inverse="True" />
+    </UserControl.Resources>
+
+    <Grid Background="{DynamicResource MaterialDesignPaper}">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <!-- HEADER BANNER -->
+        <materialDesign:Card Grid.Row="0" Margin="12,12,12,6" Padding="16" UniformCornerRadius="8" Background="{DynamicResource PrimaryHueLightBrush}" Foreground="{DynamicResource PrimaryHueLightForegroundBrush}">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <materialDesign:PackIcon Kind="StorefrontOutline" Width="28" Height="28" Margin="0,0,12,0" VerticalAlignment="Center" />
+                    <StackPanel VerticalAlignment="Center" Margin="0,0,24,0">
+                        <TextBlock Text="PUNTO DE VENTA (POS)" FontSize="18" FontWeight="Bold" />
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Cajero: " FontSize="12" Opacity="0.8" />
+                            <TextBlock Text="{Binding CashierName}" FontSize="12" FontWeight="Bold" Margin="0,0,16,0" />
+                            <TextBlock Text="Caja: " FontSize="12" Opacity="0.8" />
+                            <TextBlock Text="{Binding ActiveRegisterName}" FontSize="12" FontWeight="Bold" Margin="0,0,16,0" />
+                            <TextBlock Text="Sucursal: " FontSize="12" Opacity="0.8" />
+                            <TextBlock Text="{Binding BranchName}" FontSize="12" FontWeight="Bold" />
+                        </StackPanel>
+                    </StackPanel>
+                </StackPanel>
+
+                <!-- Daily stats -->
+                <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                    <Border BorderThickness="0,0,1,0" BorderBrush="White" Opacity="0.3" Margin="0,0,16,0" Height="32" />
+                    <StackPanel Margin="0,0,24,0" HorizontalAlignment="Right">
+                        <TextBlock Text="Vendido Hoy" FontSize="11" Opacity="0.8" />
+                        <TextBlock Text="{Binding DailySalesTotal, StringFormat=C}" FontSize="18" FontWeight="Bold" />
+                    </StackPanel>
+                    <StackPanel HorizontalAlignment="Right">
+                        <TextBlock Text="Transacciones" FontSize="11" Opacity="0.8" />
+                        <TextBlock Text="{Binding DailySalesCount}" FontSize="18" FontWeight="Bold" HorizontalAlignment="Right" />
+                    </StackPanel>
+                </StackPanel>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- MAIN LAYOUT -->
+        <Grid Grid.Row="1" Margin="12,6,12,12">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="7*" />
+                <ColumnDefinition Width="3*" />
+            </Grid.ColumnDefinitions>
+
+            <!-- LEFT PANEL: Scanner, Cart, Search -->
+            <Grid Grid.Column="0" Margin="0,0,8,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="*" />
+                </Grid.RowDefinitions>
+
+                <!-- Scanning and Searching Box -->
+                <materialDesign:Card Grid.Row="0" Margin="0,0,0,8" Padding="16" UniformCornerRadius="8">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="3*" />
+                            <ColumnDefinition Width="4*" />
+                            <ColumnDefinition Width="3*" />
+                        </Grid.ColumnDefinitions>
+
+                        <!-- Barcode Scanner Input -->
+                        <TextBox Grid.Column="0" x:Name="BarcodeScannerInput"
+                                 materialDesign:HintAssist.Hint="Escanear Código [ENTER]"
+                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                 Margin="0,0,16,0" FontSize="14"
+                                 KeyDown="BarcodeScannerInput_KeyDown" />
+
+                        <!-- Product Keyword Search -->
+                        <TextBox Grid.Column="1" x:Name="ProductSearchInput"
+                                 materialDesign:HintAssist.Hint="Buscar Producto (F2)"
+                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                 Text="{Binding ProductSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 Margin="0,0,16,0" FontSize="14"
+                                 TextChanged="ProductSearchInput_TextChanged" />
+
+                        <!-- Customer Search -->
+                        <TextBox Grid.Column="2" x:Name="CustomerSearchInput"
+                                 materialDesign:HintAssist.Hint="Cliente (F4)"
+                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                 Text="{Binding CustomerSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                 FontSize="14"
+                                 TextChanged="CustomerSearchInput_TextChanged" />
+                    </Grid>
+                </materialDesign:Card>
+
+                <!-- Cart and Search Results -->
+                <Grid Grid.Row="1">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <!-- Popups/Lists for Search Results (visible only when searching) -->
+                    <!-- Customer search results list -->
+                    <materialDesign:Card Grid.Row="0" Margin="0,0,0,8" Padding="8" MaxHeight="120" 
+                                         Visibility="{Binding CustomerSearchResults.Count, Converter={StaticResource BoolToVis}}">
+                        <ListBox ItemsSource="{Binding CustomerSearchResults}" SelectionChanged="CustomerResults_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding CustomerCode}" FontWeight="Bold" Margin="0,0,8,0" />
+                                        <TextBlock Text="{Binding Name}" />
+                                    </StackPanel>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </materialDesign:Card>
+
+                    <!-- Product search results list -->
+                    <materialDesign:Card Grid.Row="0" Margin="0,0,0,8" Padding="8" MaxHeight="150" 
+                                         Visibility="{Binding ProductSearchResults.Count, Converter={StaticResource BoolToVis}}">
+                        <ListBox x:Name="ProductsResultList" ItemsSource="{Binding ProductSearchResults}" SelectionChanged="ProductResults_SelectionChanged">
+                            <ListBox.ItemTemplate>
+                                <DataTemplate>
+                                    <Grid Width="600">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="Auto" />
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Grid.Column="0" Text="{Binding InternalCode}" FontWeight="Bold" Margin="0,0,12,0" />
+                                        <TextBlock Grid.Column="1" Text="{Binding Name}" />
+                                        <TextBlock Grid.Column="2" Text="{Binding DefaultSalePrice, StringFormat=C}" Foreground="Green" FontWeight="Bold" />
+                                    </Grid>
+                                </DataTemplate>
+                            </ListBox.ItemTemplate>
+                        </ListBox>
+                    </materialDesign:Card>
+
+                    <!-- Shopping Cart DataGrid -->
+                    <materialDesign:Card Grid.Row="1" Padding="0" UniformCornerRadius="8" materialDesign:ElevationAssist.Elevation="Dp2">
+                        <Grid>
+                            <DataGrid ItemsSource="{Binding CartItems}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column">
+                                <DataGrid.Columns>
+                                    <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" IsReadOnly="True" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" IsReadOnly="True" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    
+                                    <!-- Presentation Combobox -->
+                                    <DataGridTemplateColumn Header="Presentación" Width="130">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <ComboBox ItemsSource="{Binding AvailablePresentations}"
+                                                          SelectedItem="{Binding SelectedPresentation, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                                          DisplayMemberPath="Name"
+                                                          HorizontalAlignment="Stretch" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!-- Stock Disp -->
+                                    <DataGridTextColumn Header="Stock Disp" Binding="{Binding EquivalentAvailableStock, StringFormat={}{0:N2}}" IsReadOnly="True" Width="95" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+
+                                    <!-- Price -->
+                                    <DataGridTextColumn Header="Precio" Binding="{Binding UnitPrice, StringFormat=C}" IsReadOnly="True" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                    
+                                    <!-- Price Level -->
+                                    <DataGridTextColumn Header="Nivel" Binding="{Binding PriceLevel}" IsReadOnly="True" Width="95" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    
+                                    <!-- Quantity (Editable inline) -->
+                                    <DataGridTemplateColumn Header="Cant" Width="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" 
+                                                         HorizontalAlignment="Stretch" TextAlignment="Center" BorderThickness="0,0,0,1" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!-- Discount % (Editable inline) -->
+                                    <DataGridTemplateColumn Header="Desc %" Width="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBox Text="{Binding DiscountPercentage, UpdateSourceTrigger=PropertyChanged}" 
+                                                         HorizontalAlignment="Stretch" TextAlignment="Center" BorderThickness="0,0,0,1" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <!-- Subtotal and Total -->
+                                    <DataGridTextColumn Header="IVA" Binding="{Binding TaxAmount, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                    <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat=C}" IsReadOnly="True" Width="100" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+
+                                    <!-- Delete Button -->
+                                    <DataGridTemplateColumn Width="60">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <Button Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32" Padding="0" 
+                                                        Click="DeleteCartItem_Click">
+                                                    <materialDesign:PackIcon Kind="DeleteOutline" Foreground="Red" />
+                                                </Button>
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                </DataGrid.Columns>
+                            </DataGrid>
+
+                            <!-- Warning banner if no cash session -->
+                            <Border Background="#FFFFD7D7" CornerRadius="8" Padding="12" Margin="32" 
+                                    VerticalAlignment="Top" HorizontalAlignment="Center" BorderBrush="Red" BorderThickness="1"
+                                    Visibility="{Binding IsCashSessionActive, Converter={StaticResource InverseBoolToVis}}">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="AlertCircleOutline" Foreground="Red" Width="24" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding SessionWarningMessage}" Foreground="Red" FontWeight="Bold" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Border>
+                        </Grid>
+                    </materialDesign:Card>
+                </Grid>
+            </Grid>
+
+            <!-- RIGHT PANEL: Financial Summary, Sale settings, and Checkout actions -->
+            <Grid Grid.Column="1" Margin="8,0,0,0">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="*" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <materialDesign:Card Grid.Row="0" Padding="16" UniformCornerRadius="8" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <StackPanel>
+                        <!-- Active Customer Card -->
+                        <TextBlock Text="Cliente Seleccionado" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                        <Border BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,0,0,1" Padding="0,4,0,8" Margin="0,0,0,16">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <StackPanel Grid.Column="0">
+                                    <StackPanel Orientation="Horizontal">
+                                        <TextBlock Text="{Binding SelectedCustomer.Name}" FontSize="15" FontWeight="Bold" />
+                                        <Border CornerRadius="4" Background="{DynamicResource SecondaryHueMidBrush}" Margin="8,0,0,0" Padding="6,2,6,2" VerticalAlignment="Center">
+                                            <TextBlock Text="{Binding SelectedCustomer.CustomerPricingProfileName, StringFormat='[{0}]'}" FontSize="10" FontWeight="Bold" Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" />
+                                        </Border>
+                                    </StackPanel>
+                                    <TextBlock Text="{Binding SelectedCustomer.CustomerCode}" FontSize="12" Opacity="0.7" />
+                                    
+                                    <!-- Selector de Tipo de Cliente -->
+                                    <ComboBox ItemsSource="{Binding CustomerTypes}" 
+                                              SelectedItem="{Binding SelectedCustomerType}"
+                                              materialDesign:HintAssist.Hint="Tipo Cliente Factura"
+                                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                              Height="36" Padding="8,4" Margin="0,8,0,0"
+                                              HorizontalAlignment="Left" Width="180" />
+                                </StackPanel>
+                                <materialDesign:PackIcon Grid.Column="1" Kind="AccountOutline" Width="28" Height="28" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                            </Grid>
+                        </Border>
+
+                        <!-- Bill Type (Contado vs Credito) - Ocultado ya que siempre es Contado -->
+                        <TextBlock Text="Condición de Pago" Visibility="Collapsed" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8" />
+                        <Grid Margin="0,0,0,16" Visibility="Collapsed">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <RadioButton Grid.Column="0" Content="Contado" IsChecked="{Binding IsCreditSale, Converter={StaticResource InverseBoolToVis}, Mode=OneWay}" GroupName="SaleType" Checked="Contado_Checked" />
+                            <RadioButton Grid.Column="1" Content="Crédito" IsChecked="{Binding IsCreditSale}" GroupName="SaleType" Checked="Credito_Checked" />
+                        </Grid>
+
+                        <!-- Credit terms days (visible only for credit sale) - Ocultado -->
+                        <StackPanel Visibility="Collapsed" Margin="0,0,0,16">
+                            <TextBox materialDesign:HintAssist.Hint="Días de crédito" 
+                                     Text="{Binding CreditDays}"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                     FontSize="13" />
+                            <TextBlock Text="Verifique que el cliente tenga autorizado crédito." FontSize="11" Foreground="Orange" Margin="0,4,0,0" />
+                        </StackPanel>
+
+                        <!-- Totals Summary Card -->
+                        <Border Background="{DynamicResource MaterialDesignBackground}" CornerRadius="8" Padding="16" Margin="0,0,0,16">
+                            <StackPanel>
+                                <Grid Margin="0,0,0,8">
+                                    <TextBlock Text="Subtotal" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <TextBlock Text="{Binding Subtotal, StringFormat=C}" HorizontalAlignment="Right" />
+                                </Grid>
+                                <Grid Margin="0,0,0,8">
+                                    <TextBlock Text="Descuentos" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <TextBlock Text="{Binding Discounts, StringFormat=C}" HorizontalAlignment="Right" Foreground="Red" />
+                                </Grid>
+                                <Grid Margin="0,0,0,8">
+                                    <TextBlock Text="Impuestos" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                    <TextBlock Text="{Binding Taxes, StringFormat=C}" HorizontalAlignment="Right" />
+                                </Grid>
+                                <Separator Margin="0,8" Style="{StaticResource MaterialDesignSeparator}" />
+                                <Grid>
+                                    <TextBlock Text="TOTAL" FontSize="20" FontWeight="Black" />
+                                    <TextBlock Text="{Binding Total, StringFormat=C}" FontSize="20" FontWeight="Black" HorizontalAlignment="Right" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                </Grid>
+                            </StackPanel>
+                        </Border>
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Actions Bottom Panel -->
+                <materialDesign:Card Grid.Row="1" Margin="0,8,0,0" Padding="16" UniformCornerRadius="8">
+                    <StackPanel>
+                        <!-- Cobrar (F8) -->
+                        <Button Style="{StaticResource MaterialDesignRaisedButton}"
+                                Height="54" FontSize="16" FontWeight="Black"
+                                Command="{Binding OpenPaymentCommand}"
+                                materialDesign:ButtonAssist.CornerRadius="8"
+                                Margin="0,0,0,8" Background="Green" BorderBrush="Green">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="CashRegister" Width="24" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" />
+                                <TextBlock Text="COBRAR (F8)" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+                            <!-- Guardar Borrador (F9) -->
+                            <Button Grid.Column="0" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Height="40" Margin="0,0,4,0"
+                                    Command="{Binding OpenPaymentCommand}"
+                                    materialDesign:ButtonAssist.CornerRadius="6" ToolTip="Guardar factura en borrador sin publicar">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="ContentSaveOutline" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Borrador" VerticalAlignment="Center" FontSize="12" />
+                                </StackPanel>
+                            </Button>
+                            
+                            <!-- Cancelar (ESC) -->
+                            <Button Grid.Column="1" Style="{StaticResource MaterialDesignOutlinedButton}"
+                                    Height="40" Margin="4,0,0,0" Foreground="Red" BorderBrush="Red"
+                                    Command="{Binding ClearSaleCommand}"
+                                    materialDesign:ButtonAssist.CornerRadius="6">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="Cancel" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Cancelar" VerticalAlignment="Center" FontSize="12" />
+                                </StackPanel>
+                            </Button>
+                        </Grid>
+                    </StackPanel>
+                </materialDesign:Card>
+            </Grid>
+        </Grid>
+
+        <!-- PAYMENT DIALOG OVERLAY (Visible when IsPaymentPanelOpen is true) -->
+        <Grid Grid.RowSpan="2" Background="#A0000000" 
+              Visibility="{Binding IsPaymentPanelOpen, Converter={StaticResource BoolToVis}}">
+            <materialDesign:Card Width="460" VerticalAlignment="Center" HorizontalAlignment="Center" Padding="24" UniformCornerRadius="16" materialDesign:ElevationAssist.Elevation="Dp8">
+                <StackPanel>
+                    <!-- Header -->
+                    <TextBlock Text="REGISTRAR PAGO" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,16" />
+                    
+                    <!-- Total display -->
+                    <Border Background="{DynamicResource MaterialDesignBackground}" CornerRadius="8" Padding="16" Margin="0,0,0,20">
+                        <Grid>
+                            <TextBlock Text="Total Factura:" FontSize="16" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Total, StringFormat=C}" FontSize="24" FontWeight="Black" HorizontalAlignment="Right" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                        </Grid>
+                    </Border>
+
+                    <!-- Split payment methods inputs -->
+                    <TextBlock Text="Montos Recibidos" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8" />
+                    
+                    <!-- Cash -->
+                    <TextBox materialDesign:HintAssist.Hint="Efectivo"
+                             Text="{Binding PaymentReceivedCash, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             FontSize="16" Margin="0,0,0,12" />
+
+                    <!-- Card -->
+                    <TextBox materialDesign:HintAssist.Hint="Tarjeta de Crédito / Débito"
+                             Text="{Binding PaymentReceivedCard, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             FontSize="16" Margin="0,0,0,12" />
+
+                    <!-- Transfer -->
+                    <TextBox materialDesign:HintAssist.Hint="Transferencia Bancaria"
+                             Text="{Binding PaymentReceivedTransfer, UpdateSourceTrigger=PropertyChanged}"
+                             Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                             FontSize="16" Margin="0,0,0,20" />
+
+                    <Separator Style="{StaticResource MaterialDesignSeparator}" Margin="0,8" />
+
+                    <!-- Total Received and Change -->
+                    <Grid Margin="0,0,0,8">
+                        <TextBlock Text="Monto Recibido:" FontSize="14" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                        <TextBlock Text="{Binding PaymentTotalReceived, StringFormat=C}" FontSize="14" FontWeight="Bold" HorizontalAlignment="Right" />
+                    </Grid>
+                    
+                    <Grid Margin="0,0,0,24">
+                        <TextBlock Text="Cambio (Vuelto):" FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding PaymentChange, StringFormat=C}" FontSize="22" FontWeight="Black" HorizontalAlignment="Right" Foreground="Green" />
+                    </Grid>
+
+                    <!-- Action buttons -->
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="*" />
+                        </Grid.ColumnDefinitions>
+                        <Button Grid.Column="0" Content="CONFIRMAR PAGO" 
+                                Command="{Binding ConfirmPaymentCommand}"
+                                Style="{StaticResource MaterialDesignRaisedButton}"
+                                Height="46" Margin="0,0,8,0" Background="Green" BorderBrush="Green"
+                                materialDesign:ButtonAssist.CornerRadius="8" />
+                        
+                        <Button Grid.Column="1" Content="CANCELAR" 
+                                Command="{Binding CancelPaymentCommand}"
+                                Style="{StaticResource MaterialDesignOutlinedButton}"
+                                Height="46" Margin="8,0,0,0" Foreground="Red" BorderBrush="Red"
+                                materialDesign:ButtonAssist.CornerRadius="8" />
+                    </Grid>
+                </StackPanel>
+            </materialDesign:Card>
+        </Grid>
+
+        <!-- Loading Spinner -->
+        <Grid Grid.RowSpan="2" Background="#20000000" Visibility="{Binding IsBusy, Converter={StaticResource BoolToVis}}">
+            <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" Value="0" IsIndeterminate="True" Width="50" Height="50" />
+        </Grid>
+    </Grid>
+</UserControl>

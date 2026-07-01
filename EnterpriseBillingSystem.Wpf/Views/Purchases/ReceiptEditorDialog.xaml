@@ -1,0 +1,194 @@
+<Window x:Class="EnterpriseBillingSystem.Wpf.Views.Purchases.ReceiptEditorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        mc:Ignorable="d"
+        Title="Ingreso de Mercadería" Height="680" Width="850"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="14"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" Text="Registrar Ingreso de Mercadería" FontWeight="Bold" Style="{StaticResource MaterialDesignHeadline5TextBlock}" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,16" />
+
+        <!-- Form: General Info -->
+        <materialDesign:Card Grid.Row="1" Margin="0,0,0,12" Padding="12" materialDesign:ElevationAssist.Elevation="Dp1">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="150" />
+                </Grid.ColumnDefinitions>
+
+                <ComboBox Grid.Row="0" Grid.Column="0" ItemsSource="{Binding Suppliers}" 
+                          SelectedValue="{Binding SelectedSupplierId}" 
+                          SelectedValuePath="Id" 
+                          DisplayMemberPath="Name" 
+                          materialDesign:HintAssist.Hint="Proveedor"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                          Margin="0,0,8,8" />
+
+                <ComboBox Grid.Row="0" Grid.Column="1" ItemsSource="{Binding PurchaseOrders}" 
+                          SelectedValue="{Binding SelectedPurchaseOrderId}" 
+                          SelectedValuePath="Id" 
+                          DisplayMemberPath="OrderNumber" 
+                          materialDesign:HintAssist.Hint="Orden de Compra Asociada (Opcional)"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                          Margin="8,0,8,8" />
+
+                <DatePicker Grid.Row="0" Grid.Column="2" SelectedDate="{Binding ReceiptDate}" 
+                            materialDesign:HintAssist.Hint="Fecha Ingreso"
+                            Style="{StaticResource MaterialDesignOutlinedDatePicker}" 
+                            Margin="8,0,0,8" />
+
+                <ComboBox Grid.Row="1" Grid.Column="0" ItemsSource="{Binding Warehouses}" 
+                          SelectedValue="{Binding SelectedWarehouseId}" 
+                          SelectedValuePath="Id" 
+                          DisplayMemberPath="Name" 
+                          materialDesign:HintAssist.Hint="Bodega Destino"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                          Margin="0,4,8,8" />
+
+                <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding ReferenceDocument, UpdateSourceTrigger=PropertyChanged}" 
+                         materialDesign:HintAssist.Hint="Doc. Referencia (Nro. Factura o Guía)" 
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                         Margin="8,4,8,8" />
+
+                <TextBox Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3" Text="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" 
+                         materialDesign:HintAssist.Hint="Observaciones" 
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                         Margin="0,4,0,0" />
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Form: Add Detail Row -->
+        <materialDesign:Card Grid.Row="2" Margin="0,0,0,12" Padding="12" materialDesign:ElevationAssist.Elevation="Dp1" Background="#F5F5F5">
+            <materialDesign:Card.Style>
+                <Style TargetType="materialDesign:Card">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsPurchaseOrderSelected}" Value="True">
+                            <Setter Property="IsEnabled" Value="False" />
+                            <Setter Property="Opacity" Value="0.5" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </materialDesign:Card.Style>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="1.5*" />
+                    <ColumnDefinition Width="100" />
+                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <ComboBox Grid.Column="0" ItemsSource="{Binding Products}" 
+                          SelectedItem="{Binding SelectedProduct}" 
+                          DisplayMemberPath="Name" 
+                          materialDesign:HintAssist.Hint="Seleccionar Producto"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                          Margin="0,0,8,0" />
+
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Presentations}" 
+                          SelectedItem="{Binding SelectedPresentation}" 
+                          DisplayMemberPath="Name" 
+                          materialDesign:HintAssist.Hint="Presentación"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                          Margin="8,0,8,0" />
+
+                <TextBox Grid.Column="2" Text="{Binding QuantityToAdd, UpdateSourceTrigger=PropertyChanged}" 
+                         materialDesign:HintAssist.Hint="Cantidad" 
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                         Margin="8,0,8,0" />
+
+                <TextBox Grid.Column="3" Text="{Binding UnitPriceToAdd, UpdateSourceTrigger=PropertyChanged}" 
+                         materialDesign:HintAssist.Hint="Costo Unit." 
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                         Margin="8,0,8,0" />
+
+                <Button Grid.Column="4" Command="{Binding AddDetailCommand}" Style="{StaticResource MaterialDesignRaisedButton}" VerticalAlignment="Center">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="PlaylistPlus" Width="18" Height="18" Margin="0,0,4,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Agregar" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+        </materialDesign:Card>
+
+        <!-- Data Grid -->
+        <materialDesign:Card Grid.Row="3" materialDesign:ElevationAssist.Elevation="Dp1" Margin="0,0,0,12">
+            <DataGrid ItemsSource="{Binding Details}" AutoGenerateColumns="False" IsReadOnly="False" CanUserAddRows="False" HeadersVisibility="Column">
+                <DataGrid.Columns>
+                    <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="2*" IsReadOnly="True" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                    <DataGridTextColumn Header="Presentación" Binding="{Binding PresentationName}" Width="1.2*" IsReadOnly="True" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                    <DataGridTextColumn Header="Cant. Solicitada" Binding="{Binding RequestedQuantity, StringFormat={}{0:N2}}" Width="120" IsReadOnly="True" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                    <DataGridTextColumn Header="Cant. Pendiente" Binding="{Binding PendingQuantity, StringFormat={}{0:N2}}" Width="120" IsReadOnly="True" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                    <DataGridTextColumn Header="Cantidad Recibida" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N2}}" Width="130" IsReadOnly="False" EditingElementStyle="{StaticResource MaterialDesignDataGridTextColumnEditingStyle}" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                    <DataGridTextColumn Header="Costo Unitario" Binding="{Binding UnitPrice, StringFormat={}{0:C2}}" Width="120" IsReadOnly="True" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                    <DataGridTextColumn Header="Subtotal" Binding="{Binding SubTotal, StringFormat={}{0:C2}}" Width="120" IsReadOnly="True" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                    
+                    <!-- Actions -->
+                    <DataGridTemplateColumn Header="Acción" Width="80" IsReadOnly="True">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Button Command="{Binding DataContext.RemoveDetailCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                        CommandParameter="{Binding}" 
+                                        Style="{StaticResource MaterialDesignIconButton}" 
+                                        Width="30" Height="30" Foreground="Red" ToolTip="Quitar línea">
+                                    <materialDesign:PackIcon Kind="TrashCanOutline" Width="16" Height="16" />
+                                </Button>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
+        </materialDesign:Card>
+
+        <!-- Footer Actions and Total -->
+        <Border Grid.Row="4" BorderBrush="{DynamicResource MaterialDesignDivider}" BorderThickness="0,1,0,0" Padding="0,12,0,0">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                    <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" IsIndeterminate="True" 
+                                 Visibility="{Binding IsSaving, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 Width="24" Height="24" Margin="0,0,12,0" />
+                    <TextBlock Text="Total Ingreso: " FontSize="18" FontWeight="SemiBold" VerticalAlignment="Center" />
+                    <TextBlock Text="{Binding Total, StringFormat={}{0:C2}}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <Button Grid.Column="1" Command="{Binding CancelCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,12,0" Width="120">
+                    <TextBlock Text="Cancelar" />
+                </Button>
+
+                <Button Grid.Column="2" Command="{Binding SaveCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Width="120">
+                    <TextBlock Text="Guardar Ingreso" />
+                </Button>
+            </Grid>
+        </Border>
+    </Grid>
+</Window>

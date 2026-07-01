@@ -1,0 +1,52 @@
+## Ignore Visual Studio temporary files, build results, and user-specific files
+
+# User-specific files
+*.suo
+*.user
+*.userprev
+*.userdefaults
+*.sln.docstates
+
+# Build results
+[Dd]ebug/
+[Dd]ebugPublic/
+[Rr]elease/
+[Rr]eleases/
+x64/
+x86/
+[Bb]in/
+[Oo]bj/
+[Log]s/
+[Tt]est[Rr]esults/
+
+# OTI project files
+*.oti
+
+# Visual Studio Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# Visual Studio 2015/2017/2019/2022 cache/options
+.vs/
+*.[Cc]ache
+# Unused web publish log file
+*.Publish.xml
+
+# Rider
+.idea/
+*.sln.iml
+
+# Docker
+.dockerignore
+# But keep dockerfile and docker-compose
+# Docker Compose local overrides
+docker-compose.override.yml
+
+# Local settings / secrets
+appsettings.Development.json
+appsettings.Local.json
+*.usersecrets

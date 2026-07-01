@@ -1,0 +1,416 @@
+<Window x:Class="EnterpriseBillingSystem.Wpf.Views.Customers.CustomerEditorDialog"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
+        mc:Ignorable="d"
+        Title="Detalle del Cliente" Height="700" Width="750"
+        WindowStartupLocation="CenterOwner"
+        ShowInTaskbar="False"
+        ResizeMode="NoResize"
+        Background="{DynamicResource MaterialDesignPaper}"
+        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        TextElement.FontWeight="Medium"
+        TextElement.FontSize="14"
+        FontFamily="{materialDesign:MaterialDesignFont}">
+
+    <Window.Resources>
+        <converters:InverseBooleanConverter x:Key="InverseBoolConverter" />
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <converters:BooleanToVisibilityConverter x:Key="InverseBoolToVis" Inverse="True" />
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+    </Window.Resources>
+
+    <Grid Margin="16">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <TextBlock Grid.Row="0" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,16">
+            <TextBlock.Style>
+                <Style TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignHeadline5TextBlock}">
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                            <Setter Property="Text" Value="Editar Cliente" />
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding IsEditMode}" Value="False">
+                            <Setter Property="Text" Value="Nuevo Cliente" />
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </TextBlock.Style>
+        </TextBlock>
+
+        <!-- Tabs Container -->
+        <TabControl Grid.Row="1" Style="{StaticResource MaterialDesignNavigationRailTabControl}">
+            <!-- Tab 1: General Data -->
+            <TabItem Header="Datos Generales">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="8">
+                    <StackPanel Margin="4">
+                        <!-- Name & LegalName -->
+                        <TextBlock Text="Información Comercial" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,4" />
+                        <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" />
+
+                        <TextBox Text="{Binding Name, UpdateSourceTrigger=PropertyChanged}" 
+                                 materialDesign:HintAssist.Hint="Nombre del Cliente (Comercial) *" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                 Margin="0,0,0,12" />
+
+                        <TextBox Text="{Binding LegalName, UpdateSourceTrigger=PropertyChanged}" 
+                                 materialDesign:HintAssist.Hint="Razón Social / Nombre Legal (Opcional)" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                 Margin="0,0,0,12" />
+
+                        <!-- Identity and Client Type -->
+                        <TextBlock Text="Identificación Fiscal" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,12,0,4" />
+                        <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" />
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <ComboBox Grid.Column="0" 
+                                      ItemsSource="{Binding IdentificationTypes}" 
+                                      SelectedItem="{Binding SelectedIdentificationType}"
+                                      materialDesign:HintAssist.Hint="Tipo Identificación"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Margin="0,0,6,0" />
+
+                            <TextBox Grid.Column="1" 
+                                     Text="{Binding IdentificationNumber, UpdateSourceTrigger=PropertyChanged}" 
+                                     materialDesign:HintAssist.Hint="Número Identificación *" 
+                                     Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                     Margin="6,0,0,0" />
+                        </Grid>
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <ComboBox Grid.Column="0" 
+                                      ItemsSource="{Binding CustomerTypes}" 
+                                      SelectedItem="{Binding SelectedCustomerType}"
+                                      materialDesign:HintAssist.Hint="Tipo Cliente"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Margin="0,0,6,0" />
+                        </Grid>
+
+                        <!-- Categorization and Profile -->
+                        <TextBlock Text="Categorización y Tarifas" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,12,0,4" />
+                        <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" />
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="*" />
+                            </Grid.ColumnDefinitions>
+
+                            <ComboBox Grid.Column="0" 
+                                      ItemsSource="{Binding Categories}" 
+                                      SelectedValue="{Binding SelectedCategoryId}"
+                                      SelectedValuePath="Id"
+                                      DisplayMemberPath="Name"
+                                      materialDesign:HintAssist.Hint="Categoría Cliente *"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Margin="0,0,6,0" />
+
+                            <ComboBox Grid.Column="1" 
+                                      ItemsSource="{Binding PricingProfiles}" 
+                                      SelectedValue="{Binding SelectedPricingProfileId}"
+                                      SelectedValuePath="Id"
+                                      DisplayMemberPath="Name"
+                                      materialDesign:HintAssist.Hint="Perfil de Precios (Tarifa) *"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                      Margin="6,0,0,0" />
+                        </Grid>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Tab 2: Credit and Billing (Modificado para mostrar solo Impuestos y Descuentos) -->
+            <TabItem Header="Impuestos y Descuentos">
+                <ScrollViewer VerticalScrollBarVisibility="Auto" Margin="8">
+                    <StackPanel Margin="4">
+                        <StackPanel Visibility="Collapsed">
+                            <TextBlock Text="Líneas y Condiciones de Crédito" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,4" />
+                            <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" />
+
+                            <Grid Margin="0,0,0,12">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="Auto" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" Text="Permitir Compras a Crédito" VerticalAlignment="Center" FontSize="16" />
+                                <ToggleButton Grid.Column="1" IsChecked="{Binding CanUseCredit}" Style="{StaticResource MaterialDesignSwitchToggleButton}" />
+                            </Grid>
+
+                            <Grid Margin="0,0,0,12" IsEnabled="{Binding CanUseCredit}">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*" />
+                                    <ColumnDefinition Width="*" />
+                                </Grid.ColumnDefinitions>
+
+                                <TextBox Grid.Column="0" 
+                                         Text="{Binding CreditLimit, UpdateSourceTrigger=PropertyChanged}" 
+                                         materialDesign:HintAssist.Hint="Límite de Crédito" 
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                         Margin="0,0,6,0" />
+
+                                <TextBox Grid.Column="1" 
+                                         Text="{Binding CreditDays, UpdateSourceTrigger=PropertyChanged}" 
+                                         materialDesign:HintAssist.Hint="Días Plazo Crédito" 
+                                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                         Margin="6,0,0,0" />
+                            </Grid>
+                        </StackPanel>
+
+                        <TextBlock Text="Condiciones Fiscales y Descuentos" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,16,0,4" />
+                        <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" />
+
+                        <Grid Margin="0,0,0,12">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Grid.Column="0" Text="Exento de Impuestos (IVA)" VerticalAlignment="Center" FontSize="16" />
+                            <ToggleButton Grid.Column="1" IsChecked="{Binding IsTaxExempt}" Style="{StaticResource MaterialDesignSwitchToggleButton}" />
+                        </Grid>
+
+                        <TextBox Text="{Binding DefaultDiscountPercentage, UpdateSourceTrigger=PropertyChanged}" 
+                                 materialDesign:HintAssist.Hint="Descuento Comercial Predeterminado (%)" 
+                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                                 Margin="0,0,0,12" />
+
+                        <!-- Status (Only Editable or Shown when editing) -->
+                        <StackPanel Margin="0,12,0,0">
+                            <TextBlock Text="Estado del Cliente" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,4" />
+                            <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" />
+                            <ComboBox ItemsSource="{Binding CustomerStatuses}" 
+                                      SelectedItem="{Binding SelectedStatus}"
+                                      materialDesign:HintAssist.Hint="Estado Cliente"
+                                      Style="{StaticResource MaterialDesignOutlinedComboBox}" />
+                        </StackPanel>
+                    </StackPanel>
+                </ScrollViewer>
+            </TabItem>
+
+            <!-- Tab 3: Addresses -->
+            <TabItem Header="Direcciones">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Button Command="{Binding AddAddressCommand}" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Agregar Dirección" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding Addresses}" AutoGenerateColumns="False" CanUserAddRows="False" SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Calle / Dirección *" Binding="{Binding AddressLine1, UpdateSourceTrigger=PropertyChanged}" Width="2*" />
+                            <DataGridTextColumn Header="Detalles Adicionales" Binding="{Binding AddressLine2, UpdateSourceTrigger=PropertyChanged}" Width="*" />
+                            <DataGridTextColumn Header="Ciudad *" Binding="{Binding City, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+                            <DataGridTextColumn Header="Estado / Dpto." Binding="{Binding State, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+                            <DataGridTemplateColumn Header="Tipo" Width="110">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Text="{Binding AddressType}" VerticalAlignment="Center" Margin="8,0" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                                <DataGridTemplateColumn.CellEditingTemplate>
+                                    <DataTemplate>
+                                        <ComboBox ItemsSource="{Binding DataContext.AddressTypes, RelativeSource={RelativeSource AncestorType=Window}}" SelectedItem="{Binding AddressType, UpdateSourceTrigger=PropertyChanged}"/>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellEditingTemplate>
+                            </DataGridTemplateColumn>
+                            <DataGridCheckBoxColumn Header="Predet." Binding="{Binding IsDefault, UpdateSourceTrigger=PropertyChanged}" Width="70" />
+                            
+                            <!-- Delete Address Button -->
+                            <DataGridTemplateColumn Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding DataContext.RemoveAddressCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30" Padding="0">
+                                            <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Foreground="#C62828" />
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 4: Phones and Emails -->
+            <TabItem Header="Teléfonos y Correos">
+                <Grid Margin="8">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Left: Phones -->
+                    <Grid Grid.Column="0" Margin="0,0,8,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Button Command="{Binding AddPhoneCommand}" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="0,0,0,12">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Agregar Teléfono" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding Phones}" AutoGenerateColumns="False" CanUserAddRows="False" SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Número *" Binding="{Binding PhoneNumber, UpdateSourceTrigger=PropertyChanged}" Width="*" />
+                                <DataGridTemplateColumn Header="Tipo" Width="90">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding PhoneType}" VerticalAlignment="Center" Margin="8,0" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding DataContext.PhoneTypes, RelativeSource={RelativeSource AncestorType=Window}}" SelectedItem="{Binding PhoneType, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridCheckBoxColumn Header="Predet." Binding="{Binding IsDefault, UpdateSourceTrigger=PropertyChanged}" Width="70" />
+
+                                <!-- Delete Phone -->
+                                <DataGridTemplateColumn Width="50">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Command="{Binding DataContext.RemovePhoneCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource MaterialDesignIconButton}" Width="28" Height="28" Padding="0">
+                                                <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Foreground="#C62828" />
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+
+                    <!-- Right: Emails -->
+                    <Grid Grid.Column="1" Margin="8,0,0,0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <Button Command="{Binding AddEmailCommand}" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="0,0,0,12">
+                            <StackPanel Orientation="Horizontal">
+                                <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Agregar Correo" VerticalAlignment="Center" />
+                            </StackPanel>
+                        </Button>
+
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding Emails}" AutoGenerateColumns="False" CanUserAddRows="False" SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Email *" Binding="{Binding EmailAddress, UpdateSourceTrigger=PropertyChanged}" Width="*" />
+                                <DataGridTemplateColumn Header="Tipo" Width="90">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Text="{Binding EmailType}" VerticalAlignment="Center" Margin="8,0" />
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                    <DataGridTemplateColumn.CellEditingTemplate>
+                                        <DataTemplate>
+                                            <ComboBox ItemsSource="{Binding DataContext.EmailTypes, RelativeSource={RelativeSource AncestorType=Window}}" SelectedItem="{Binding EmailType, UpdateSourceTrigger=PropertyChanged}"/>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellEditingTemplate>
+                                </DataGridTemplateColumn>
+                                <DataGridCheckBoxColumn Header="Predet." Binding="{Binding IsDefault, UpdateSourceTrigger=PropertyChanged}" Width="70" />
+
+                                <!-- Delete Email -->
+                                <DataGridTemplateColumn Width="50">
+                                    <DataGridTemplateColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <Button Command="{Binding DataContext.RemoveEmailCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource MaterialDesignIconButton}" Width="28" Height="28" Padding="0">
+                                                <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Foreground="#C62828" />
+                                            </Button>
+                                        </DataTemplate>
+                                    </DataGridTemplateColumn.CellTemplate>
+                                </DataGridTemplateColumn>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </Grid>
+            </TabItem>
+
+            <!-- Tab 5: Contacts -->
+            <TabItem Header="Contactos">
+                <Grid Margin="8">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+
+                    <Button Command="{Binding AddContactCommand}" Style="{StaticResource MaterialDesignFlatButton}" HorizontalAlignment="Left" Margin="0,0,0,12">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Agregar Contacto" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <DataGrid Grid.Row="1" ItemsSource="{Binding Contacts}" AutoGenerateColumns="False" CanUserAddRows="False" SelectionMode="Single">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Nombre *" Binding="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" Width="110" />
+                            <DataGridTextColumn Header="Apellido *" Binding="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" Width="110" />
+                            <DataGridTextColumn Header="Cargo / Puesto" Binding="{Binding JobTitle, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+                            <DataGridTextColumn Header="Teléfono" Binding="{Binding Phone, UpdateSourceTrigger=PropertyChanged}" Width="100" />
+                            <DataGridTextColumn Header="Email" Binding="{Binding Email, UpdateSourceTrigger=PropertyChanged}" Width="120" />
+                            <DataGridTextColumn Header="Notas" Binding="{Binding Notes, UpdateSourceTrigger=PropertyChanged}" Width="*" />
+                            <DataGridCheckBoxColumn Header="Predet." Binding="{Binding IsDefault, UpdateSourceTrigger=PropertyChanged}" Width="70" />
+
+                            <!-- Delete Contact -->
+                            <DataGridTemplateColumn Width="60">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding DataContext.RemoveContactCommand, RelativeSource={RelativeSource AncestorType=Window}}" CommandParameter="{Binding}" Style="{StaticResource MaterialDesignIconButton}" Width="30" Height="30" Padding="0">
+                                            <materialDesign:PackIcon Kind="Delete" Width="16" Height="16" Foreground="#C62828" />
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+        </TabControl>
+
+        <!-- Footer -->
+        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,16,0,0">
+            <Button Style="{StaticResource MaterialDesignFlatButton}" 
+                    Content="Cancelar" 
+                    Click="CancelButton_Click" 
+                    Margin="0,0,8,0" 
+                    IsEnabled="{Binding IsSaving, Converter={StaticResource InverseBoolConverter}}" />
+
+            <Button Command="{Binding SaveCommand}" 
+                    Style="{StaticResource MaterialDesignRaisedButton}" 
+                    Width="120"
+                    IsEnabled="{Binding IsSaving, Converter={StaticResource InverseBoolConverter}}">
+                <Grid>
+                    <TextBlock Text="Guardar" Visibility="{Binding IsSaving, Converter={StaticResource InverseBoolToVis}}" />
+                    <ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" Value="0" IsIndeterminate="True" Width="20" Height="20" Foreground="White" Visibility="{Binding IsSaving, Converter={StaticResource BoolToVis}}" />
+                </Grid>
+            </Button>
+        </StackPanel>
+    </Grid>
+</Window>
