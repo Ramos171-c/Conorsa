@@ -29,7 +29,11 @@ public class UserApiClient
     public async Task<Guid> CreateUserAsync(CreateUserCommandDto command)
     {
         var response = await _httpClient.PostAsJsonAsync("users", command);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new Exception($"{(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body)}");
+        }
         return await response.Content.ReadFromJsonAsync<Guid>();
     }
 
@@ -54,6 +58,40 @@ public class UserApiClient
     {
         var response = await _httpClient.GetFromJsonAsync<List<RouteLookupDto>>("routes");
         return response ?? new List<RouteLookupDto>();
+    }
+
+    public async Task<List<RouteDto>> GetRoutesListAsync(bool includeInactive = true)
+    {
+        var response = await _httpClient.GetFromJsonAsync<List<RouteDto>>($"routes?includeInactive={includeInactive}");
+        return response ?? new List<RouteDto>();
+    }
+
+    public async Task<Guid> CreateRouteAsync(CreateRouteDto command)
+    {
+        var response = await _httpClient.PostAsJsonAsync("routes", command);
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new Exception($"{(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body)}");
+        }
+        return await response.Content.ReadFromJsonAsync<Guid>();
+    }
+
+    public async Task<bool> UpdateRouteAsync(Guid id, UpdateRouteDto command)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"routes/{id}", command);
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new Exception($"{(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body)}");
+        }
+        return true;
+    }
+
+    public async Task<bool> DeleteRouteAsync(Guid id)
+    {
+        var response = await _httpClient.DeleteAsync($"routes/{id}");
+        return response.IsSuccessStatusCode;
     }
 }
 

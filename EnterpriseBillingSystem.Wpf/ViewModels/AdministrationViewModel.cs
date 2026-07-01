@@ -89,6 +89,24 @@ public partial class AdministrationViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isEditingGoal;
 
+    // ─── ROUTES (RUTAS) ───────────────────────────────────────────────────────
+    public ObservableCollection<RouteDto> RoutesList { get; } = new();
+
+    [ObservableProperty]
+    private RouteDto? _selectedRoute;
+
+    [ObservableProperty]
+    private string _newRouteCode = string.Empty;
+
+    [ObservableProperty]
+    private string _newRouteName = string.Empty;
+
+    [ObservableProperty]
+    private bool _newRouteIsActive = true;
+
+    [ObservableProperty]
+    private bool _isEditingRoute;
+
     // ─── CONSTRUCTOR ──────────────────────────────────────────────────────────
     public AdministrationViewModel(
         AdministrationApiClient adminApiClient,
@@ -115,7 +133,8 @@ public partial class AdministrationViewModel : ViewModelBase
                 LoadThresholdsAsync(),
                 LoadCurrenciesAsync(),
                 LoadGoalsAsync(),
-                LoadSalespeopleAsync()
+                LoadSalespeopleAsync(),
+                LoadRoutesListAsync()
             );
         }
         catch (Exception ex)
@@ -491,6 +510,124 @@ public partial class AdministrationViewModel : ViewModelBase
         catch (Exception ex)
         {
             _notificationService.ShowError($"Error al eliminar la meta: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    // ─── ROUTES LOGIC ────────────────────────────────────────────────────────
+    private async Task LoadRoutesListAsync()
+    {
+        try
+        {
+            var list = await _userApiClient.GetRoutesListAsync(includeInactive: true);
+            RoutesList.Clear();
+            foreach (var r in list)
+            {
+                RoutesList.Add(r);
+            }
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al cargar rutas: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private void StartNewRoute()
+    {
+        SelectedRoute = null;
+        NewRouteCode = string.Empty;
+        NewRouteName = string.Empty;
+        NewRouteIsActive = true;
+        IsEditingRoute = true;
+    }
+
+    [RelayCommand]
+    private void SelectRouteForEdit(RouteDto? route)
+    {
+        if (route == null) return;
+
+        SelectedRoute = route;
+        NewRouteCode = route.Code;
+        NewRouteName = route.Name;
+        NewRouteIsActive = route.IsActive;
+        IsEditingRoute = true;
+    }
+
+    [RelayCommand]
+    private void CancelRouteEdit()
+    {
+        IsEditingRoute = false;
+        SelectedRoute = null;
+    }
+
+    [RelayCommand]
+    public async Task SaveRouteAsync()
+    {
+        if (string.IsNullOrWhiteSpace(NewRouteCode) || string.IsNullOrWhiteSpace(NewRouteName))
+        {
+            _notificationService.ShowError("Por favor complete todos los campos obligatorios para la ruta.");
+            return;
+        }
+
+        IsLoading = true;
+        try
+        {
+            if (SelectedRoute == null)
+            {
+                // Create
+                var cmd = new CreateRouteDto(NewRouteCode, NewRouteName);
+                await _userApiClient.CreateRouteAsync(cmd);
+                _notificationService.ShowSuccess("Ruta creada correctamente.");
+            }
+            else
+            {
+                // Update
+                var cmd = new UpdateRouteDto(NewRouteCode, NewRouteName, NewRouteIsActive);
+                var success = await _userApiClient.UpdateRouteAsync(SelectedRoute.Id, cmd);
+                if (success) _notificationService.ShowSuccess("Ruta actualizada correctamente.");
+                else _notificationService.ShowError("Error al actualizar la ruta.");
+            }
+
+            IsEditingRoute = false;
+            SelectedRoute = null;
+            await LoadRoutesListAsync();
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al guardar ruta: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    public async Task DeleteRouteAsync(RouteDto? route)
+    {
+        if (route == null) return;
+
+        IsLoading = true;
+        try
+        {
+            var success = await _userApiClient.DeleteRouteAsync(route.Id);
+            if (success)
+            {
+                _notificationService.ShowSuccess("Ruta desactivada correctamente.");
+                await LoadRoutesListAsync();
+            }
+            else
+            {
+                _notificationService.ShowError("Error al desactivar la ruta.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al desactivar ruta: {ex.Message}");
         }
         finally
         {

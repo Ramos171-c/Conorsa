@@ -297,6 +297,91 @@
                             </materialDesign:Card>
                         </Grid>
                     </TabItem>
+
+                    <!-- TAB 4: RUTAS DE VENTA -->
+                    <TabItem Header="Rutas de Venta">
+                        <Grid Margin="16">
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="2*" />
+                                <ColumnDefinition Width="1*" MinWidth="300" MaxWidth="450" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Left: Routes List -->
+                            <Grid Grid.Column="0" Margin="0,0,16,0">
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="*" />
+                                </Grid.RowDefinitions>
+
+                                <Button Grid.Row="0" Command="{Binding StartNewRouteCommand}" Style="{StaticResource MaterialDesignRaisedButton}" HorizontalAlignment="Left" Margin="0,0,0,12">
+                                    <StackPanel Orientation="Horizontal">
+                                        <materialDesign:PackIcon Kind="Plus" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                        <TextBlock Text="Agregar Ruta" VerticalAlignment="Center" />
+                                    </StackPanel>
+                                </Button>
+
+                                <DataGrid Grid.Row="1" ItemsSource="{Binding RoutesList}" SelectedItem="{Binding SelectedRoute}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
+                                    <DataGrid.Columns>
+                                        <DataGridTextColumn Header="Código" Binding="{Binding Code}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                                        <DataGridTextColumn Header="Ruta / Zona" Binding="{Binding Name}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                        
+                                        <!-- Active indicator using CheckBox -->
+                                        <DataGridTemplateColumn Header="Activa" Width="90">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <CheckBox IsChecked="{Binding IsActive}" IsEnabled="False" HorizontalAlignment="Center" />
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+
+                                        <!-- Actions -->
+                                        <DataGridTemplateColumn Header="Acciones" Width="100">
+                                            <DataGridTemplateColumn.CellTemplate>
+                                                <DataTemplate>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <Button Style="{StaticResource MaterialDesignIconButton}" 
+                                                                Command="{Binding DataContext.SelectRouteForEditCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                                CommandParameter="{Binding}" ToolTip="Editar" Width="30" Height="30">
+                                                            <materialDesign:PackIcon Kind="Pencil" Width="16" Height="16"/>
+                                                        </Button>
+                                                        <Button Style="{StaticResource MaterialDesignIconButton}" 
+                                                                Command="{Binding DataContext.DeleteRouteCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}" 
+                                                                CommandParameter="{Binding}" ToolTip="Desactivar" Foreground="Red" Width="30" Height="30"
+                                                                IsEnabled="{Binding IsActive}">
+                                                            <materialDesign:PackIcon Kind="Delete" Width="16" Height="16"/>
+                                                        </Button>
+                                                    </StackPanel>
+                                                </DataTemplate>
+                                            </DataGridTemplateColumn.CellTemplate>
+                                        </DataGridTemplateColumn>
+                                    </DataGrid.Columns>
+                                </DataGrid>
+                            </Grid>
+
+                            <!-- Right: Add/Edit Panel -->
+                            <materialDesign:Card Grid.Column="1" Padding="16" Background="{DynamicResource MaterialDesignCardBackground}"
+                                                 Visibility="{Binding IsEditingRoute, Converter={StaticResource BoolToVis}}">
+                                <StackPanel>
+                                    <TextBlock Text="Detalle de Ruta / Zona" Style="{StaticResource MaterialDesignHeadline6TextBlock}" FontWeight="Bold" Margin="0,0,0,16" />
+                                    
+                                    <TextBox Text="{Binding NewRouteCode, UpdateSourceTrigger=PropertyChanged}"
+                                             materialDesign:HintAssist.Hint="Código (ej. R-OESTE, R-NORTE)"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12" />
+
+                                    <TextBox Text="{Binding NewRouteName, UpdateSourceTrigger=PropertyChanged}"
+                                             materialDesign:HintAssist.Hint="Nombre de la Ruta"
+                                             Style="{StaticResource MaterialDesignOutlinedTextBox}" Margin="0,0,0,12" />
+
+                                    <CheckBox IsChecked="{Binding NewRouteIsActive}" Content="Ruta Activa" Margin="0,0,0,20" />
+
+                                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                        <Button Command="{Binding CancelRouteEditCommand}" Style="{StaticResource MaterialDesignFlatButton}" Margin="0,0,8,0" Content="Cancelar" />
+                                        <Button Command="{Binding SaveRouteCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Content="Guardar" />
+                                    </StackPanel>
+                                </StackPanel>
+                            </materialDesign:Card>
+                        </Grid>
+                    </TabItem>
                 </TabControl>
             </Grid>
         </materialDesign:Card>

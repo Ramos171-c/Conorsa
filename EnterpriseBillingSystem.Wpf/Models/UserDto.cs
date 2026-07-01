@@ -65,3 +65,7 @@ public record UpdateUserCommandDto(
     Guid? RouteId = null,
     bool IsEmployeeActive = true
 );
+
+public record RouteDto(Guid Id, string Code, string Name, bool IsActive);
+public record CreateRouteDto(string Code, string Name);
+public record UpdateRouteDto(string Code, string Name, bool IsActive);
