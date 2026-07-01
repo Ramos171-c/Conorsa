@@ -77,6 +77,20 @@ public class SalesOrdersController : ApiControllerBase
     }
 
     /// <summary>
+    /// Solicitar la anulación de un pedido de venta.
+    /// </summary>
+    [HttpPost("{id:guid}/request-cancellation")]
+    [HasPermission("sales.edit")]
+    public async Task<ActionResult> RequestCancellation(Guid id, [FromBody] RequestSalesOrderCancellationCommand command)
+    {
+        if (id != command.SalesOrderId)
+            return BadRequest(new { Message = "El Id en la ruta no coincide con el del cuerpo." });
+
+        await Mediator.Send(command);
+        return NoContent();
+    }
+
+    /// <summary>
     /// Actualizar un pedido de venta completo.
     /// </summary>
     [HttpPut("{id:guid}")]

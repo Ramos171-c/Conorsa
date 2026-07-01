@@ -36,7 +36,12 @@ public class UserApiClient
     public async Task<bool> UpdateUserAsync(Guid id, UpdateUserCommandDto command)
     {
         var response = await _httpClient.PutAsJsonAsync($"users/{id}", command);
-        return response.IsSuccessStatusCode;
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Error {(int)response.StatusCode}: {(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body)}");
+        }
+        return true;
     }
 
     public async Task<List<BranchLookupDto>> GetBranchesAsync()

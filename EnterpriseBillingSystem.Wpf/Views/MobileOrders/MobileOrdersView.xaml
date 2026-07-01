@@ -115,6 +115,9 @@
                                                                 <DataTrigger Binding="{Binding Status}" Value="Completado">
                                                                     <Setter Property="Background" Value="#E8F5E9" />
                                                                 </DataTrigger>
+                                                                <DataTrigger Binding="{Binding Status}" Value="SolicitudAnulacion">
+                                                                    <Setter Property="Background" Value="#FFEBEE" />
+                                                                </DataTrigger>
                                                             </Style.Triggers>
                                                         </Style>
                                                     </Border.Style>
@@ -145,6 +148,10 @@
                                                                     <DataTrigger Binding="{Binding Status}" Value="Completado">
                                                                         <Setter Property="Text" Value="COMPLETADO" />
                                                                         <Setter Property="Foreground" Value="#2E7D32" />
+                                                                    </DataTrigger>
+                                                                    <DataTrigger Binding="{Binding Status}" Value="SolicitudAnulacion">
+                                                                        <Setter Property="Text" Value="SOLICITUD ANULACIÓN" />
+                                                                        <Setter Property="Foreground" Value="#C62828" />
                                                                     </DataTrigger>
                                                                 </Style.Triggers>
                                                             </Style>
@@ -221,7 +228,7 @@
                                                       <!-- Cancel Button (Visible if Recibido or EnProceso) -->
                                                       <Button Command="{Binding DataContext.CancelOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                                               CommandParameter="{Binding}" 
-                                                              ToolTip="Anular Pedido" Width="30" Height="30" Padding="0">
+                                                              ToolTip="Anular Pedido" Width="30" Height="30" Padding="0" Margin="0,0,4,0">
                                                           <Button.Style>
                                                               <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
                                                                   <Setter Property="Visibility" Value="Collapsed" />
@@ -236,6 +243,40 @@
                                                               </Style>
                                                           </Button.Style>
                                                           <materialDesign:PackIcon Kind="Cancel" Width="16" Height="16" Foreground="#C62828" />
+                                                      </Button>
+
+                                                      <!-- Approve Cancellation Button (Only visible if SolicitudAnulacion) -->
+                                                      <Button Command="{Binding DataContext.ApproveCancellationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                              CommandParameter="{Binding}" 
+                                                              ToolTip="Aprobar Solicitud de Anulación" Width="30" Height="30" Padding="0" Margin="0,0,4,0">
+                                                          <Button.Style>
+                                                              <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
+                                                                  <Setter Property="Visibility" Value="Collapsed" />
+                                                                  <Style.Triggers>
+                                                                      <DataTrigger Binding="{Binding Status}" Value="SolicitudAnulacion">
+                                                                          <Setter Property="Visibility" Value="Visible" />
+                                                                      </DataTrigger>
+                                                                  </Style.Triggers>
+                                                              </Style>
+                                                          </Button.Style>
+                                                          <materialDesign:PackIcon Kind="Check" Width="16" Height="16" Foreground="#2E7D32" />
+                                                      </Button>
+
+                                                      <!-- Reject Cancellation Button (Only visible if SolicitudAnulacion) -->
+                                                      <Button Command="{Binding DataContext.RejectCancellationCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                                              CommandParameter="{Binding}" 
+                                                              ToolTip="Rechazar Solicitud de Anulación" Width="30" Height="30" Padding="0">
+                                                          <Button.Style>
+                                                              <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
+                                                                  <Setter Property="Visibility" Value="Collapsed" />
+                                                                  <Style.Triggers>
+                                                                      <DataTrigger Binding="{Binding Status}" Value="SolicitudAnulacion">
+                                                                          <Setter Property="Visibility" Value="Visible" />
+                                                                      </DataTrigger>
+                                                                  </Style.Triggers>
+                                                              </Style>
+                                                          </Button.Style>
+                                                          <materialDesign:PackIcon Kind="Close" Width="16" Height="16" Foreground="#C62828" />
                                                       </Button>
                                                 </StackPanel>
                                             </DataTemplate>

@@ -37,7 +37,7 @@ public partial class UserEditorViewModel : ViewModelBase
     private Guid _selectedBranchId;
 
     [ObservableProperty]
-    private string _selectedRole = "Vendedor";
+    private string _selectedRole = "VENDEDOR";
 
     [ObservableProperty]
     private bool _isActive = true;
@@ -77,7 +77,7 @@ public partial class UserEditorViewModel : ViewModelBase
 
     public ObservableCollection<BranchLookupDto> Branches { get; } = new();
     public ObservableCollection<RouteLookupDto> Routes { get; } = new();
-    public List<string> Roles { get; } = new() { "Admin", "Cajero", "Vendedor", "Auditor" };
+    public List<string> Roles { get; } = new() { "ADMINISTRADOR", "SUPERVISOR", "CAJERO", "VENDEDOR", "CONTADOR", "TESORERO" };
 
     public UserEditorViewModel(UserApiClient userApiClient, INotificationService notificationService, UserDto? userToEdit = null)
     {
@@ -93,7 +93,7 @@ public partial class UserEditorViewModel : ViewModelBase
             FirstName = userToEdit.FirstName;
             LastName = userToEdit.LastName;
             SelectedBranchId = userToEdit.DefaultBranchId;
-            SelectedRole = Roles.Contains(userToEdit.Role) ? userToEdit.Role : "Vendedor";
+            SelectedRole = Roles.Contains(userToEdit.Role) ? userToEdit.Role : "VENDEDOR";
             IsActive = userToEdit.IsActive;
             Cedula = userToEdit.Cedula;
             PhoneNumber = userToEdit.PhoneNumber;

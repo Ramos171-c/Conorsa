@@ -36,7 +36,11 @@ public class PurchaseApiClient
     public async Task<Guid> RegisterPurchaseReceiptAsync(RegisterPurchaseReceiptCommandDto command)
     {
         var response = await _httpClient.PostAsJsonAsync("purchase-receipts", command);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Error {(int)response.StatusCode}: {(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body)}");
+        }
         return await response.Content.ReadFromJsonAsync<Guid>();
     }
 

@@ -116,6 +116,25 @@ public partial class PosViewModel : ViewModelBase
     private Guid? _defaultWarehouseId;
     private ActiveCashSessionDto? _activeCashSession;
 
+    [ObservableProperty]
+    private CustomerPricingType _activePricingType = CustomerPricingType.Retail;
+
+    public List<PricingTypeOption> PricingTypeOptions { get; } = new()
+    {
+        new(CustomerPricingType.Retail, "Detalle"),
+        new(CustomerPricingType.SemiWholesale, "Semi Mayorista"),
+        new(CustomerPricingType.Wholesale, "Mayorista")
+    };
+
+    partial void OnActivePricingTypeChanged(CustomerPricingType value)
+    {
+        foreach (var item in CartItems)
+        {
+            item.ActivePricingType = value;
+        }
+        RecalculateCartTotals();
+    }
+
     public PosViewModel(
         PosApiClient posApiClient,
         ProductApiClient productApiClient,
@@ -146,11 +165,7 @@ public partial class PosViewModel : ViewModelBase
     partial void OnSelectedCustomerChanged(CustomerSearchResultDto? value)
     {
         var pricingType = value?.CustomerPricingProfileType ?? CustomerPricingType.Retail;
-        foreach (var item in CartItems)
-        {
-            item.ActivePricingType = pricingType;
-        }
-        RecalculateCartTotals();
+        ActivePricingType = pricingType;
         SelectedCustomerType = value?.CustomerType ?? CustomerType.Natural;
     }
 
@@ -205,7 +220,8 @@ public partial class PosViewModel : ViewModelBase
             }
             CustomerSearchResults.Clear();
 
-
+            // 5. Load default products for the catalog
+            await SearchProductsAsync(string.Empty);
         }
         catch (Exception ex)
         {
@@ -380,11 +396,6 @@ public partial class PosViewModel : ViewModelBase
 
     public async Task SearchProductsAsync(string text)
     {
-        if (string.IsNullOrWhiteSpace(text))
-        {
-            ProductSearchResults.Clear();
-            return;
-        }
         try
         {
             var results = await _posApiClient.SearchProductsAsync(text);
@@ -603,3 +614,6 @@ public static class TaskExtensions
         }
     }
 }
+
+public record PricingTypeOption(CustomerPricingType Value, string Name);
+

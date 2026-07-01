@@ -37,7 +37,8 @@ public record SalesOrderListItemDto(
     decimal DiscountAmount,
     decimal TaxAmount,
     decimal TotalAmount,
-    string Status
+    string Status,
+    string? CreatedBy
 );
 
 public record SalesOrderDetailDto(
@@ -97,7 +98,8 @@ public class GetSalesOrdersQueryHandler : IRequestHandler<GetSalesOrdersQuery, P
             so.DiscountAmount,
             so.TaxAmount,
             so.TotalAmount,
-            so.Status.ToString()));
+            so.Status.ToString(),
+            so.CreatedBy));
 
         return new PagedResult<SalesOrderListItemDto>(dtos.ToList(), totalCount, request.PageNumber, request.PageSize);
     }

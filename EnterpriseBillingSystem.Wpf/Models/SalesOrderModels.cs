@@ -13,7 +13,8 @@ public record SalesOrderListItemDto(
     decimal DiscountAmount,
     decimal TaxAmount,
     decimal TotalAmount,
-    string Status
+    string Status,
+    string? CreatedBy
 );
 
 public class SalesOrderDetailItemDto

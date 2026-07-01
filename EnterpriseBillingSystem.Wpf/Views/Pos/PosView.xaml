@@ -60,61 +60,125 @@
         <!-- MAIN LAYOUT -->
         <Grid Grid.Row="1" Margin="12,6,12,12">
             <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="7*" />
-                <ColumnDefinition Width="3*" />
+                <ColumnDefinition Width="7.5*" />
+                <ColumnDefinition Width="2.5*" />
             </Grid.ColumnDefinitions>
 
-            <!-- LEFT PANEL: Scanner, Cart, Search -->
+            <!-- LEFT/CENTER PANEL: Split Catalog and Shopping Cart -->
             <Grid Grid.Column="0" Margin="0,0,8,0">
-                <Grid.RowDefinitions>
-                    <RowDefinition Height="Auto" />
-                    <RowDefinition Height="*" />
-                </Grid.RowDefinitions>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="3.2*" /> <!-- Product Catalog -->
+                    <ColumnDefinition Width="4.3*" /> <!-- Shopping Cart -->
+                </Grid.ColumnDefinitions>
 
-                <!-- Scanning and Searching Box -->
-                <materialDesign:Card Grid.Row="0" Margin="0,0,0,8" Padding="16" UniformCornerRadius="8">
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="3*" />
-                            <ColumnDefinition Width="4*" />
-                            <ColumnDefinition Width="3*" />
-                        </Grid.ColumnDefinitions>
+                <!-- COLUMN 0: PRODUCT CATALOG -->
+                <Grid Grid.Column="0" Margin="0,0,8,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" /> <!-- Search Box -->
+                        <RowDefinition Height="*" />    <!-- Catalog List -->
+                    </Grid.RowDefinitions>
 
-                        <!-- Barcode Scanner Input -->
-                        <TextBox Grid.Column="0" x:Name="BarcodeScannerInput"
-                                 materialDesign:HintAssist.Hint="Escanear Código [ENTER]"
-                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                 Margin="0,0,16,0" FontSize="14"
-                                 KeyDown="BarcodeScannerInput_KeyDown" />
-
-                        <!-- Product Keyword Search -->
-                        <TextBox Grid.Column="1" x:Name="ProductSearchInput"
+                    <!-- Search Box -->
+                    <materialDesign:Card Grid.Row="0" Margin="0,0,0,8" Padding="12,8" UniformCornerRadius="8" materialDesign:ElevationAssist.Elevation="Dp1">
+                        <TextBox x:Name="ProductSearchInput"
                                  materialDesign:HintAssist.Hint="Buscar Producto (F2)"
                                  Style="{StaticResource MaterialDesignFloatingHintTextBox}"
                                  Text="{Binding ProductSearchText, UpdateSourceTrigger=PropertyChanged}"
-                                 Margin="0,0,16,0" FontSize="14"
+                                 FontSize="13"
                                  TextChanged="ProductSearchInput_TextChanged" />
+                    </materialDesign:Card>
 
-                        <!-- Customer Search -->
-                        <TextBox Grid.Column="2" x:Name="CustomerSearchInput"
-                                 materialDesign:HintAssist.Hint="Cliente (F4)"
-                                 Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                 Text="{Binding CustomerSearchText, UpdateSourceTrigger=PropertyChanged}"
-                                 FontSize="14"
-                                 TextChanged="CustomerSearchInput_TextChanged" />
-                    </Grid>
-                </materialDesign:Card>
+                    <!-- Scrollable Product Grid/List -->
+                    <materialDesign:Card Grid.Row="1" Padding="0" UniformCornerRadius="8" materialDesign:ElevationAssist.Elevation="Dp1" Background="#F8FAFC">
+                        <Grid>
+                            <ListBox x:Name="ProductsResultList" 
+                                     ItemsSource="{Binding ProductSearchResults}" 
+                                     SelectionChanged="ProductResults_SelectionChanged"
+                                     HorizontalContentAlignment="Stretch"
+                                     ScrollViewer.VerticalScrollBarVisibility="Auto">
+                                <ListBox.ItemContainerStyle>
+                                    <Style TargetType="ListBoxItem" BasedOn="{StaticResource {x:Type ListBoxItem}}">
+                                        <Setter Property="Padding" Value="6" />
+                                        <Setter Property="Margin" Value="0,0,0,6" />
+                                        <Setter Property="Background" Value="Transparent" />
+                                        <Setter Property="BorderThickness" Value="0" />
+                                    </Style>
+                                </ListBox.ItemContainerStyle>
+                                <ListBox.ItemTemplate>
+                                    <DataTemplate>
+                                        <materialDesign:Card Padding="12" UniformCornerRadius="8" materialDesign:ElevationAssist.Elevation="Dp1" Background="White">
+                                            <Grid>
+                                                <Grid.RowDefinitions>
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                    <RowDefinition Height="Auto" />
+                                                </Grid.RowDefinitions>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*" />
+                                                    <ColumnDefinition Width="Auto" />
+                                                </Grid.ColumnDefinitions>
 
-                <!-- Cart and Search Results -->
-                <Grid Grid.Row="1">
+                                                <!-- Product Code and Name -->
+                                                <StackPanel Grid.Row="0" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,0,0,6">
+                                                    <TextBlock Text="{Binding InternalCode}" FontWeight="Bold" FontSize="11" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                                                    <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="13" TextWrapping="Wrap" MaxHeight="40" Margin="0,2,0,0" />
+                                                </StackPanel>
+
+                                                <!-- Stock available -->
+                                                <StackPanel Grid.Row="1" Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
+                                                    <materialDesign:PackIcon Kind="CubeOutline" Width="14" Height="14" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                                    <TextBlock Text="Stock: " FontSize="11" Foreground="#64748B" />
+                                                    <TextBlock Text="{Binding AvailableStock, StringFormat={}{0:N2}}" FontWeight="SemiBold" FontSize="11" Foreground="#334155" />
+                                                </StackPanel>
+
+                                                <!-- Price -->
+                                                <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DefaultSalePrice, StringFormat=C}" Foreground="Green" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" />
+                                                
+                                                <!-- Action Indicator -->
+                                                <TextBlock Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" Text="Haga clic para agregar" FontSize="10" FontStyle="Italic" Opacity="0.5" Margin="0,4,0,0" HorizontalAlignment="Right" />
+                                            </Grid>
+                                        </materialDesign:Card>
+                                    </DataTemplate>
+                                </ListBox.ItemTemplate>
+                            </ListBox>
+                        </Grid>
+                    </materialDesign:Card>
+                </Grid>
+
+                <!-- COLUMN 1: SHOPPING CART & CLIENT SEARCH -->
+                <Grid Grid.Column="1" Margin="8,0,0,0">
                     <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="*" />
+                        <RowDefinition Height="Auto" /> <!-- Scan & Customer search box -->
+                        <RowDefinition Height="Auto" /> <!-- Customer search results ListBox -->
+                        <RowDefinition Height="*" />    <!-- Shopping Cart Grid -->
                     </Grid.RowDefinitions>
 
-                    <!-- Popups/Lists for Search Results (visible only when searching) -->
+                    <materialDesign:Card Grid.Row="0" Margin="0,0,0,8" Padding="12,8" UniformCornerRadius="8" materialDesign:ElevationAssist.Elevation="Dp1">
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="1*" />
+                                <ColumnDefinition Width="1.2*" />
+                            </Grid.ColumnDefinitions>
+
+                            <!-- Barcode Scanner Input -->
+                            <TextBox Grid.Column="0" x:Name="BarcodeScannerInput"
+                                     materialDesign:HintAssist.Hint="Escanear Código [ENTER]"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                     Margin="0,0,12,0" FontSize="13"
+                                     KeyDown="BarcodeScannerInput_KeyDown" />
+
+                            <!-- Customer Search -->
+                            <TextBox Grid.Column="1" x:Name="CustomerSearchInput"
+                                     materialDesign:HintAssist.Hint="Cliente (F4)"
+                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
+                                     Text="{Binding CustomerSearchText, UpdateSourceTrigger=PropertyChanged}"
+                                     FontSize="13"
+                                     TextChanged="CustomerSearchInput_TextChanged" />
+                        </Grid>
+                    </materialDesign:Card>
+
                     <!-- Customer search results list -->
-                    <materialDesign:Card Grid.Row="0" Margin="0,0,0,8" Padding="8" MaxHeight="120" 
+                    <materialDesign:Card Grid.Row="1" Margin="0,0,0,8" Padding="8" MaxHeight="120" materialDesign:ElevationAssist.Elevation="Dp2"
                                          Visibility="{Binding CustomerSearchResults.Count, Converter={StaticResource BoolToVis}}">
                         <ListBox ItemsSource="{Binding CustomerSearchResults}" SelectionChanged="CustomerResults_SelectionChanged">
                             <ListBox.ItemTemplate>
@@ -128,37 +192,16 @@
                         </ListBox>
                     </materialDesign:Card>
 
-                    <!-- Product search results list -->
-                    <materialDesign:Card Grid.Row="0" Margin="0,0,0,8" Padding="8" MaxHeight="150" 
-                                         Visibility="{Binding ProductSearchResults.Count, Converter={StaticResource BoolToVis}}">
-                        <ListBox x:Name="ProductsResultList" ItemsSource="{Binding ProductSearchResults}" SelectionChanged="ProductResults_SelectionChanged">
-                            <ListBox.ItemTemplate>
-                                <DataTemplate>
-                                    <Grid Width="600">
-                                        <Grid.ColumnDefinitions>
-                                            <ColumnDefinition Width="Auto" />
-                                            <ColumnDefinition Width="*" />
-                                            <ColumnDefinition Width="Auto" />
-                                        </Grid.ColumnDefinitions>
-                                        <TextBlock Grid.Column="0" Text="{Binding InternalCode}" FontWeight="Bold" Margin="0,0,12,0" />
-                                        <TextBlock Grid.Column="1" Text="{Binding Name}" />
-                                        <TextBlock Grid.Column="2" Text="{Binding DefaultSalePrice, StringFormat=C}" Foreground="Green" FontWeight="Bold" />
-                                    </Grid>
-                                </DataTemplate>
-                            </ListBox.ItemTemplate>
-                        </ListBox>
-                    </materialDesign:Card>
-
                     <!-- Shopping Cart DataGrid -->
-                    <materialDesign:Card Grid.Row="1" Padding="0" UniformCornerRadius="8" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <materialDesign:Card Grid.Row="2" Padding="0" UniformCornerRadius="8" materialDesign:ElevationAssist.Elevation="Dp2">
                         <Grid>
                             <DataGrid ItemsSource="{Binding CartItems}" AutoGenerateColumns="False" CanUserAddRows="False" HeadersVisibility="Column">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" IsReadOnly="True" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                                     <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" IsReadOnly="True" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                                     
                                     <!-- Presentation Combobox -->
-                                    <DataGridTemplateColumn Header="Presentación" Width="130">
+                                    <DataGridTemplateColumn Header="Presentación" Width="105">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <ComboBox ItemsSource="{Binding AvailablePresentations}"
@@ -169,17 +212,21 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <!-- Stock Disp -->
-                                    <DataGridTextColumn Header="Stock Disp" Binding="{Binding EquivalentAvailableStock, StringFormat={}{0:N2}}" IsReadOnly="True" Width="95" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-
-                                    <!-- Price -->
-                                    <DataGridTextColumn Header="Precio" Binding="{Binding UnitPrice, StringFormat=C}" IsReadOnly="True" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                    <!-- Price (Editable inline) -->
+                                    <DataGridTemplateColumn Header="Precio" Width="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBox Text="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N2}}" 
+                                                         HorizontalAlignment="Stretch" TextAlignment="Right" BorderThickness="0,0,0,1" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     
                                     <!-- Price Level -->
-                                    <DataGridTextColumn Header="Nivel" Binding="{Binding PriceLevel}" IsReadOnly="True" Width="95" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTextColumn Header="Nivel" Binding="{Binding PriceLevel}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                                     
                                     <!-- Quantity (Editable inline) -->
-                                    <DataGridTemplateColumn Header="Cant" Width="80">
+                                    <DataGridTemplateColumn Header="Cant" Width="60">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged}" 
@@ -188,27 +235,16 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <!-- Discount % (Editable inline) -->
-                                    <DataGridTemplateColumn Header="Desc %" Width="80">
-                                        <DataGridTemplateColumn.CellTemplate>
-                                            <DataTemplate>
-                                                <TextBox Text="{Binding DiscountPercentage, UpdateSourceTrigger=PropertyChanged}" 
-                                                         HorizontalAlignment="Stretch" TextAlignment="Center" BorderThickness="0,0,0,1" />
-                                            </DataTemplate>
-                                        </DataGridTemplateColumn.CellTemplate>
-                                    </DataGridTemplateColumn>
-
-                                    <!-- Subtotal and Total -->
-                                    <DataGridTextColumn Header="IVA" Binding="{Binding TaxAmount, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                    <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat=C}" IsReadOnly="True" Width="100" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                    <!-- Total -->
+                                    <DataGridTextColumn Header="Total" Binding="{Binding Total, StringFormat=C}" IsReadOnly="True" Width="85" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
 
                                     <!-- Delete Button -->
-                                    <DataGridTemplateColumn Width="60">
+                                    <DataGridTemplateColumn Width="50">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <Button Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32" Padding="0" 
+                                                <Button Style="{StaticResource MaterialDesignIconButton}" Width="28" Height="28" Padding="0" 
                                                         Click="DeleteCartItem_Click">
-                                                    <materialDesign:PackIcon Kind="DeleteOutline" Foreground="Red" />
+                                                    <materialDesign:PackIcon Kind="DeleteOutline" Foreground="Red" Width="18" Height="18" />
                                                 </Button>
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
@@ -217,12 +253,12 @@
                             </DataGrid>
 
                             <!-- Warning banner if no cash session -->
-                            <Border Background="#FFFFD7D7" CornerRadius="8" Padding="12" Margin="32" 
+                            <Border Background="#FFFFD7D7" CornerRadius="8" Padding="12" Margin="16" 
                                     VerticalAlignment="Top" HorizontalAlignment="Center" BorderBrush="Red" BorderThickness="1"
                                     Visibility="{Binding IsCashSessionActive, Converter={StaticResource InverseBoolToVis}}">
                                 <StackPanel Orientation="Horizontal">
-                                    <materialDesign:PackIcon Kind="AlertCircleOutline" Foreground="Red" Width="24" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding SessionWarningMessage}" Foreground="Red" FontWeight="Bold" VerticalAlignment="Center" />
+                                    <materialDesign:PackIcon Kind="AlertCircleOutline" Foreground="Red" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding SessionWarningMessage}" Foreground="Red" FontWeight="Bold" FontSize="11" VerticalAlignment="Center" TextWrapping="Wrap" MaxWidth="300" />
                                 </StackPanel>
                             </Border>
                         </Grid>
@@ -256,10 +292,20 @@
                                     </StackPanel>
                                     <TextBlock Text="{Binding SelectedCustomer.CustomerCode}" FontSize="12" Opacity="0.7" />
                                     
-                                    <!-- Selector de Tipo de Cliente -->
+                                    <!-- Selector de Tipo de Cliente (Factura) -->
                                     <ComboBox ItemsSource="{Binding CustomerTypes}" 
                                               SelectedItem="{Binding SelectedCustomerType}"
                                               materialDesign:HintAssist.Hint="Tipo Cliente Factura"
+                                              Style="{StaticResource MaterialDesignOutlinedComboBox}"
+                                              Height="36" Padding="8,4" Margin="0,8,0,0"
+                                              HorizontalAlignment="Left" Width="180" />
+
+                                    <!-- Selector de Nivel de Precios (Tarifa) -->
+                                    <ComboBox ItemsSource="{Binding PricingTypeOptions}" 
+                                              SelectedValuePath="Value"
+                                              DisplayMemberPath="Name"
+                                              SelectedValue="{Binding ActivePricingType, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                                              materialDesign:HintAssist.Hint="Tarifa de Precios"
                                               Style="{StaticResource MaterialDesignOutlinedComboBox}"
                                               Height="36" Padding="8,4" Margin="0,8,0,0"
                                               HorizontalAlignment="Left" Width="180" />
@@ -267,26 +313,6 @@
                                 <materialDesign:PackIcon Grid.Column="1" Kind="AccountOutline" Width="28" Height="28" Foreground="{DynamicResource PrimaryHueMidBrush}" />
                             </Grid>
                         </Border>
-
-                        <!-- Bill Type (Contado vs Credito) - Ocultado ya que siempre es Contado -->
-                        <TextBlock Text="Condición de Pago" Visibility="Collapsed" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" Margin="0,0,0,8" />
-                        <Grid Margin="0,0,0,16" Visibility="Collapsed">
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="*" />
-                            </Grid.ColumnDefinitions>
-                            <RadioButton Grid.Column="0" Content="Contado" IsChecked="{Binding IsCreditSale, Converter={StaticResource InverseBoolToVis}, Mode=OneWay}" GroupName="SaleType" Checked="Contado_Checked" />
-                            <RadioButton Grid.Column="1" Content="Crédito" IsChecked="{Binding IsCreditSale}" GroupName="SaleType" Checked="Credito_Checked" />
-                        </Grid>
-
-                        <!-- Credit terms days (visible only for credit sale) - Ocultado -->
-                        <StackPanel Visibility="Collapsed" Margin="0,0,0,16">
-                            <TextBox materialDesign:HintAssist.Hint="Días de crédito" 
-                                     Text="{Binding CreditDays}"
-                                     Style="{StaticResource MaterialDesignFloatingHintTextBox}"
-                                     FontSize="13" />
-                            <TextBlock Text="Verifique que el cliente tenga autorizado crédito." FontSize="11" Foreground="Orange" Margin="0,4,0,0" />
-                        </StackPanel>
 
                         <!-- Totals Summary Card -->
                         <Border Background="{DynamicResource MaterialDesignBackground}" CornerRadius="8" Padding="16" Margin="0,0,0,16">

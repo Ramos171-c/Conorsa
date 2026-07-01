@@ -5,6 +5,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using FluentValidation;
+using Microsoft.Extensions.Logging;
 using EnterpriseBillingSystem.Domain.Entities;
 using EnterpriseBillingSystem.Domain.Enums;
 using EnterpriseBillingSystem.Domain.Repositories;
@@ -40,6 +41,7 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
     private readonly IRepository<BranchWarehouse> _branchWarehouseRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediator _mediator;
+    private readonly ILogger<PostSalesInvoiceCommandHandler> _logger;
     private readonly IUnitOfWork _unitOfWork;
 
     public PostSalesInvoiceCommandHandler(
@@ -54,6 +56,7 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
         IRepository<BranchWarehouse> branchWarehouseRepository,
         ICurrentUserService currentUserService,
         IMediator mediator,
+        ILogger<PostSalesInvoiceCommandHandler> logger,
         IUnitOfWork unitOfWork)
     {
         _salesInvoiceRepository = salesInvoiceRepository;
@@ -67,6 +70,7 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
         _branchWarehouseRepository = branchWarehouseRepository;
         _currentUserService = currentUserService;
         _mediator = mediator;
+        _logger = logger;
         _unitOfWork = unitOfWork;
     }
 
@@ -308,39 +312,48 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
             await _arRepository.AddAsync(ar);
         }
 
-        // 6.7 Generar Asiento Contable Automático
-        var jeDetails = new List<JournalEntryDetailInput>();
-        if (!invoice.IsCreditSale)
+        // 6.7 Generar Asiento Contable Automático (opcional — no bloquea la venta si faltan cuentas)
+        try
         {
-            // Venta Contado: Dr 1110 Caja General / Cr 4100 Ventas
-            jeDetails.Add(new JournalEntryDetailInput("1110", invoice.TotalAmount, 0, $"Cobro Factura Contado {invoice.InvoiceNumber}"));
-            jeDetails.Add(new JournalEntryDetailInput("4100", 0, invoice.TotalAmount, $"Venta Factura Contado {invoice.InvoiceNumber}"));
+            var jeDetails = new List<JournalEntryDetailInput>();
+            if (!invoice.IsCreditSale)
+            {
+                // Venta Contado: Dr 1110 Caja General / Cr 4100 Ventas
+                jeDetails.Add(new JournalEntryDetailInput("1110", invoice.TotalAmount, 0, $"Cobro Factura Contado {invoice.InvoiceNumber}"));
+                jeDetails.Add(new JournalEntryDetailInput("4100", 0, invoice.TotalAmount, $"Venta Factura Contado {invoice.InvoiceNumber}"));
+            }
+            else
+            {
+                // Venta Crédito: Dr 1200 Cuentas por Cobrar / Cr 4100 Ventas
+                jeDetails.Add(new JournalEntryDetailInput("1200", invoice.TotalAmount, 0, $"CxC Factura Crédito {invoice.InvoiceNumber}"));
+                jeDetails.Add(new JournalEntryDetailInput("4100", 0, invoice.TotalAmount, $"Venta Factura Crédito {invoice.InvoiceNumber}"));
+            }
+
+            if (totalCost > 0)
+            {
+                // Costo: Dr 5100 Costo de Ventas / Cr 1300 Inventarios
+                jeDetails.Add(new JournalEntryDetailInput("5100", totalCost, 0, $"Costo de Venta Factura {invoice.InvoiceNumber}"));
+                jeDetails.Add(new JournalEntryDetailInput("1300", 0, totalCost, $"Descargo Inventario Factura {invoice.InvoiceNumber}"));
+            }
+
+            var createJeCmd = new CreateJournalEntryCommand(
+                EntryDate: invoice.InvoiceDate,
+                Description: $"Asiento por Venta Factura {invoice.InvoiceNumber}",
+                ReferenceDocument: invoice.InvoiceNumber,
+                ReferenceId: invoice.Id,
+                SourceModule: "Sales",
+                Details: jeDetails,
+                PostImmediately: true
+            );
+
+            await _mediator.Send(createJeCmd, cancellationToken);
         }
-        else
+        catch (Exception jeEx)
         {
-            // Venta Crédito: Dr 1200 Cuentas por Cobrar / Cr 4100 Ventas
-            jeDetails.Add(new JournalEntryDetailInput("1200", invoice.TotalAmount, 0, $"CxC Factura Crédito {invoice.InvoiceNumber}"));
-            jeDetails.Add(new JournalEntryDetailInput("4100", 0, invoice.TotalAmount, $"Venta Factura Crédito {invoice.InvoiceNumber}"));
+            // El asiento contable es informativo; si falta alguna cuenta en el catálogo
+            // no debemos bloquear la confirmación de la factura.
+            _logger.LogWarning(jeEx, "No se pudo generar el asiento contable automático para la factura {InvoiceNumber}. Verifique el catálogo de cuentas contables.", invoice.InvoiceNumber);
         }
-
-        if (totalCost > 0)
-        {
-            // Costo: Dr 5100 Costo de Ventas / Cr 1300 Inventarios
-            jeDetails.Add(new JournalEntryDetailInput("5100", totalCost, 0, $"Costo de Venta Factura {invoice.InvoiceNumber}"));
-            jeDetails.Add(new JournalEntryDetailInput("1300", 0, totalCost, $"Descargo Inventario Factura {invoice.InvoiceNumber}"));
-        }
-
-        var createJeCmd = new CreateJournalEntryCommand(
-            EntryDate: invoice.InvoiceDate,
-            Description: $"Asiento por Venta Factura {invoice.InvoiceNumber}",
-            ReferenceDocument: invoice.InvoiceNumber,
-            ReferenceId: invoice.Id,
-            SourceModule: "Sales",
-            Details: jeDetails,
-            PostImmediately: true
-        );
-
-        await _mediator.Send(createJeCmd, cancellationToken);
 
         // Guardar todo en una transacción única
         await _unitOfWork.SaveChangesAsync(cancellationToken);

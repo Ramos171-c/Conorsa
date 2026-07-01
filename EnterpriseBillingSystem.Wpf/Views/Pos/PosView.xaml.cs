@@ -95,10 +95,11 @@ public partial class PosView : UserControl
                                         {
                                             viewModel.AddProductToCart(match);
                                             BarcodeScannerInput.Text = string.Empty;
+                                            viewModel.SearchProductsAsync(string.Empty).FireAndForgetSafeAsync();
                                         }
                                         else
                                         {
-                                            viewModel.ProductSearchResults.Clear();
+                                            viewModel.SearchProductsAsync(string.Empty).FireAndForgetSafeAsync();
                                         }
                                     });
                                 });
@@ -117,8 +118,12 @@ public partial class PosView : UserControl
             if (DataContext is PosViewModel viewModel)
             {
                 viewModel.AddProductToCart(selectedProduct);
-                ProductSearchInput.Text = string.Empty;
-                viewModel.ProductSearchResults.Clear();
+                
+                // Deselect to allow subsequent clicks on the same product
+                ProductsResultList.SelectionChanged -= ProductResults_SelectionChanged;
+                ProductsResultList.SelectedItem = null;
+                ProductsResultList.SelectionChanged += ProductResults_SelectionChanged;
+
                 BarcodeScannerInput.Focus();
             }
         }

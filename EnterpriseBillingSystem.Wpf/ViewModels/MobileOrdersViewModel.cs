@@ -42,7 +42,7 @@ public partial class MobileOrdersViewModel : ViewModelBase
     private string _errorMessage = string.Empty;
 
     public ObservableCollection<SalesOrderListItemDto> Orders { get; } = new();
-    public ObservableCollection<string> Statuses { get; } = new() { "-- Todos --", "Recibido", "EnProceso", "EnCamino", "Completado", "Anulado" };
+    public ObservableCollection<string> Statuses { get; } = new() { "-- Todos --", "Recibido", "EnProceso", "EnCamino", "Completado", "Anulado", "SolicitudAnulacion" };
 
     // Consolidated verification list
     public ObservableCollection<VerifiableProduct> ConsolidatedProducts { get; } = new();
@@ -440,6 +440,80 @@ public partial class MobileOrdersViewModel : ViewModelBase
         catch (Exception ex)
         {
             _notificationService.ShowError($"Error al anular pedido: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ApproveCancellationAsync(SalesOrderListItemDto order)
+    {
+        if (order == null) return;
+
+        var confirm = Views.Dialogs.CustomMessageBox.Show(
+            $"¿Está seguro de que desea APROBAR la solicitud de anulación del pedido {order.OrderNumber}? Esto anulará el pedido permanentemente.",
+            "Aprobar Anulación",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        IsLoading = true;
+        try
+        {
+            var success = await _salesApiClient.CancelSalesOrderAsync(order.Id, "Anulación aprobada por el administrador.");
+            if (success)
+            {
+                _notificationService.ShowSuccess($"Solicitud de anulación aprobada. El pedido {order.OrderNumber} ha sido anulado.");
+                await LoadOrdersAsync();
+            }
+            else
+            {
+                _notificationService.ShowError("Error al aprobar la anulación.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al aprobar anulación: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RejectCancellationAsync(SalesOrderListItemDto order)
+    {
+        if (order == null) return;
+
+        var confirm = Views.Dialogs.CustomMessageBox.Show(
+            $"¿Está seguro de que desea RECHAZAR la solicitud de anulación del pedido {order.OrderNumber}? El pedido regresará a estado Recibido.",
+            "Rechazar Anulación",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        IsLoading = true;
+        try
+        {
+            var success = await _salesApiClient.UpdateSalesOrderStatusAsync(order.Id, 2); // 2 is Recibido
+            if (success)
+            {
+                _notificationService.ShowSuccess($"Solicitud de anulación rechazada. El pedido {order.OrderNumber} ha regresado a estado Recibido.");
+                await LoadOrdersAsync();
+            }
+            else
+            {
+                _notificationService.ShowError("Error al rechazar la solicitud de anulación.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al rechazar solicitud: {ex.Message}");
         }
         finally
         {

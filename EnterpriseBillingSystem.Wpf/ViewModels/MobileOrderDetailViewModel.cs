@@ -69,8 +69,25 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
         "Anulado"
     };
 
+    public bool IsCancellationRequested => Status.Equals("SolicitudAnulacion", StringComparison.OrdinalIgnoreCase) || Status.Equals("7", StringComparison.OrdinalIgnoreCase);
+
+    public string CancellationReason
+    {
+        get
+        {
+            if (string.IsNullOrEmpty(Notes)) return "No especificado";
+            int index = Notes.IndexOf("[SOLICITUD ANULACIÓN]:", StringComparison.OrdinalIgnoreCase);
+            if (index >= 0)
+            {
+                return Notes.Substring(index + "[SOLICITUD ANULACIÓN]:".Length).Trim();
+            }
+            return Notes;
+        }
+    }
+
     public bool IsStatusChangeVisible => !Status.Equals("Anulado", StringComparison.OrdinalIgnoreCase) && 
-                                         !Status.Equals("Completado", StringComparison.OrdinalIgnoreCase);
+                                         !Status.Equals("Completado", StringComparison.OrdinalIgnoreCase) &&
+                                         !Status.Equals("SolicitudAnulacion", StringComparison.OrdinalIgnoreCase);
 
 
     public MobileOrderDetailViewModel(SalesApiClient salesApiClient, INotificationService notificationService, SalesOrderDetailDto order)
@@ -347,6 +364,78 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
         catch (Exception ex)
         {
             _notificationService.ShowError($"Error al procesar devolución parcial: {ex.Message}");
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ApproveCancellationAsync()
+    {
+        var confirm = Views.Dialogs.CustomMessageBox.Show(
+            $"¿Está seguro de que desea APROBAR la solicitud de anulación del pedido {OrderNumber}? Esto anulará el pedido permanentemente.",
+            "Aprobar Anulación",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        IsProcessing = true;
+        try
+        {
+            var success = await _salesApiClient.CancelSalesOrderAsync(_order.Id, "Anulación aprobada por el administrador.");
+            if (success)
+            {
+                _notificationService.ShowSuccess($"Solicitud de anulación aprobada. El pedido {OrderNumber} ha sido anulado.");
+                OrderActionTaken?.Invoke();
+                RequestClose?.Invoke();
+            }
+            else
+            {
+                _notificationService.ShowError("Error al aprobar la anulación.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al aprobar anulación: {ex.Message}");
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RejectCancellationAsync()
+    {
+        var confirm = Views.Dialogs.CustomMessageBox.Show(
+            $"¿Está seguro de que desea RECHAZAR la solicitud de anulación del pedido {OrderNumber}? El pedido regresará a estado Recibido.",
+            "Rechazar Anulación",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        IsProcessing = true;
+        try
+        {
+            var success = await _salesApiClient.UpdateSalesOrderStatusAsync(_order.Id, 2); // 2 is Recibido
+            if (success)
+            {
+                _notificationService.ShowSuccess($"Solicitud de anulación rechazada. El pedido {OrderNumber} ha regresado a estado Recibido.");
+                OrderActionTaken?.Invoke();
+                RequestClose?.Invoke();
+            }
+            else
+            {
+                _notificationService.ShowError("Error al rechazar la solicitud de anulación.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al rechazar solicitud: {ex.Message}");
         }
         finally
         {

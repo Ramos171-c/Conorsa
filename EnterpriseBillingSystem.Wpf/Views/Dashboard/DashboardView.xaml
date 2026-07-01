@@ -5,23 +5,48 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="800">
+             d:DesignHeight="900" d:DesignWidth="950">
+    
+    <UserControl.Resources>
+        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+    </UserControl.Resources>
+    
     <ScrollViewer VerticalScrollBarVisibility="Auto">
         <Grid Margin="24">
             <Grid.RowDefinitions>
-                <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" /> <!-- Header -->
+                <RowDefinition Height="Auto" /> <!-- KPI cards -->
+                <RowDefinition Height="Auto" /> <!-- Ranking Header -->
+                <RowDefinition Height="*" />    <!-- Ranking List -->
             </Grid.RowDefinitions>
 
             <!-- Title -->
-            <StackPanel Grid.Row="0" Margin="0,0,0,24">
-                <TextBlock Text="Resumen de Operaciones" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" />
-                <TextBlock Text="Indicadores clave de rendimiento financiero en tiempo real" Style="{StaticResource MaterialDesignBody1TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-            </StackPanel>
+            <Grid Grid.Row="0" Margin="0,0,0,24">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                
+                <StackPanel Grid.Column="0">
+                    <TextBlock Text="Resumen de Operaciones" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Foreground="{DynamicResource MaterialDesignBody}" />
+                    <TextBlock Text="Indicadores clave de rendimiento financiero en tiempo real" Style="{StaticResource MaterialDesignBody1TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                </StackPanel>
+
+                <!-- Refresh Button -->
+                <Button Grid.Column="1" Command="{Binding LoadDashboardDataCommand}" 
+                        Style="{StaticResource MaterialDesignOutlinedButton}" 
+                        BorderBrush="{DynamicResource PrimaryHueMidBrush}" Foreground="{DynamicResource PrimaryHueMidBrush}"
+                        VerticalAlignment="Center" Height="40" Padding="12,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Actualizar" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </Grid>
 
             <!-- KPI Cards Grid -->
-            <UniformGrid Grid.Row="1" Columns="3" Margin="-8">
-                <!-- Ventas del Día -->
+            <UniformGrid Grid.Row="1" Columns="3" Margin="-8,0,-8,16">
+                <!-- Ventas de Hoy -->
                 <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
                     <StackPanel>
                         <Grid>
@@ -33,11 +58,11 @@
                             <materialDesign:PackIcon Grid.Column="1" Kind="TrendingUp" Width="28" Height="28" Foreground="Green" />
                         </Grid>
                         <TextBlock Text="{Binding SalesToday, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
-                        <TextBlock Text="+15% vs ayer" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Green" />
+                        <TextBlock Text="Total facturado hoy" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Green" />
                     </StackPanel>
                 </materialDesign:Card>
 
-                <!-- Compras del Día -->
+                <!-- Pedidos de Hoy -->
                 <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
                     <StackPanel>
                         <Grid>
@@ -45,15 +70,15 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Compras de Hoy" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                            <materialDesign:PackIcon Grid.Column="1" Kind="TrendingDown" Width="28" Height="28" Foreground="Red" />
+                            <TextBlock Text="Pedidos Realizados Hoy" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            <materialDesign:PackIcon Grid.Column="1" Kind="ClipboardListOutline" Width="28" Height="28" Foreground="Blue" />
                         </Grid>
-                        <TextBlock Text="{Binding PurchasesToday, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
-                        <TextBlock Text="-5% vs ayer" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Red" />
+                        <TextBlock Text="{Binding OrdersToday}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
+                        <TextBlock Text="Pedidos levantados activos" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Blue" />
                     </StackPanel>
                 </materialDesign:Card>
 
-                <!-- Caja Actual -->
+                <!-- Meta Global del Día -->
                 <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
                     <StackPanel>
                         <Grid>
@@ -61,62 +86,198 @@
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Caja Actual" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                            <materialDesign:PackIcon Grid.Column="1" Kind="Cash" Width="28" Height="28" Foreground="Blue" />
+                            <TextBlock Text="Meta Global de Ventas" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            <materialDesign:PackIcon Grid.Column="1" Kind="FlagCheckered" Width="28" Height="28" Foreground="#FFD700" />
                         </Grid>
-                        <TextBlock Text="{Binding CurrentCash, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
-                        <TextBlock Text="Arqueado" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Blue" />
-                    </StackPanel>
-                </materialDesign:Card>
-
-                <!-- CxC Pendientes -->
-                <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
-                    <StackPanel>
-                        <Grid>
+                        
+                        <Grid Margin="0,16,0,8">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
                             </Grid.ColumnDefinitions>
-                            <TextBlock Text="Cuentas por Cobrar" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                            <materialDesign:PackIcon Grid.Column="1" Kind="AccountArrowRightOutline" Width="28" Height="28" Foreground="Orange" />
+                            <TextBlock Text="{Binding GlobalGoal, StringFormat=C}" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" />
+                            <TextBlock Grid.Column="1" Text="{Binding GlobalProgressPercentage, StringFormat={}{0:N1}%}" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="#2E7D32" />
                         </Grid>
-                        <TextBlock Text="{Binding ArBalance, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
-                        <TextBlock Text="Cartera pendiente" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Orange" />
-                    </StackPanel>
-                </materialDesign:Card>
-
-                <!-- CxP Pendientes -->
-                <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Cuentas por Pagar" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                            <materialDesign:PackIcon Grid.Column="1" Kind="AccountArrowLeftOutline" Width="28" Height="28" Foreground="Purple" />
-                        </Grid>
-                        <TextBlock Text="{Binding ApBalance, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
-                        <TextBlock Text="Proveedores por pagar" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Purple" />
-                    </StackPanel>
-                </materialDesign:Card>
-
-                <!-- Bancos -->
-                <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
-                    <StackPanel>
-                        <Grid>
-                            <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="*" />
-                                <ColumnDefinition Width="Auto" />
-                            </Grid.ColumnDefinitions>
-                            <TextBlock Text="Bancos" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
-                            <materialDesign:PackIcon Grid.Column="1" Kind="Bank" Width="28" Height="28" Foreground="Teal" />
-                        </Grid>
-                        <TextBlock Text="{Binding BankBalance, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
-                        <TextBlock Text="Saldo en cuentas" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Teal" />
+                        
+                        <ProgressBar Value="{Binding GlobalProgressPercentage}" Height="8" Foreground="#2E7D32" Background="#F1F5F9" />
                     </StackPanel>
                 </materialDesign:Card>
             </UniformGrid>
+
+            <!-- Ranking Header -->
+            <Grid Grid.Row="2" Margin="0,16,0,16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+
+                <StackPanel Orientation="Horizontal" Grid.Column="0">
+                    <materialDesign:PackIcon Kind="TrophyVariant" Width="26" Height="26" Foreground="#FFD700" VerticalAlignment="Center" Margin="0,0,8,0" />
+                    <TextBlock Text="Ranking y Desempeño de Vendedores" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" VerticalAlignment="Center" />
+                </StackPanel>
+
+                <ProgressBar Grid.Column="1" Style="{StaticResource MaterialDesignCircularProgressBar}" 
+                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" 
+                             Value="0" IsIndeterminate="True" Width="24" Height="24" VerticalAlignment="Center" Margin="8,0,0,0" />
+            </Grid>
+
+            <!-- Ranking List -->
+            <ItemsControl Grid.Row="3" ItemsSource="{Binding SalespersonGoals}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <UniformGrid Columns="2" Margin="-8" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <materialDesign:Card Margin="8" Padding="16" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2" Background="White">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+
+                                <!-- Row 0: Position Badge, Name, Username -->
+                                <Grid Grid.Row="0" Margin="0,0,0,12">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Rank Circle Badge -->
+                                    <Border Grid.Column="0" Width="36" Height="36" CornerRadius="18" Margin="0,0,12,0" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Background" Value="#E2E8F0" />
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Rank}" Value="1">
+                                                        <Setter Property="Background" Value="#FFD700" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Rank}" Value="2">
+                                                        <Setter Property="Background" Value="#C0C0C0" />
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Rank}" Value="3">
+                                                        <Setter Property="Background" Value="#CD7F32" />
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Rank, StringFormat='#{0}'}" FontWeight="Bold" FontSize="14" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                            <TextBlock.Style>
+                                                <Style TargetType="TextBlock">
+                                                    <Setter Property="Foreground" Value="#475569" />
+                                                    <Style.Triggers>
+                                                        <DataTrigger Binding="{Binding Rank}" Value="1">
+                                                            <Setter Property="Foreground" Value="White" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Rank}" Value="2">
+                                                            <Setter Property="Foreground" Value="White" />
+                                                        </DataTrigger>
+                                                        <DataTrigger Binding="{Binding Rank}" Value="3">
+                                                            <Setter Property="Foreground" Value="White" />
+                                                        </DataTrigger>
+                                                    </Style.Triggers>
+                                                </Style>
+                                            </TextBlock.Style>
+                                        </TextBlock>
+                                    </Border>
+
+                                    <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding Name}" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource MaterialDesignBody}" />
+                                        <TextBlock Text="{Binding Username, StringFormat='Usuario: {0}'}" FontSize="12" Opacity="0.6" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                </Grid>
+
+                                <!-- Row 1: Sales Progress (Main bar) -->
+                                <StackPanel Grid.Row="1" Margin="0,0,0,12">
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Cumplimiento de Ventas (C$)" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Sales, StringFormat={}{0:N2}}" FontWeight="Bold" FontSize="12" />
+                                            <TextBlock Text=" de " FontSize="12" Opacity="0.7" />
+                                            <TextBlock Text="{Binding Goal, StringFormat={}{0:N2}}" FontSize="12" Opacity="0.7" />
+                                            <TextBlock Text=" (" FontSize="12" FontWeight="Bold" Foreground="{Binding SalesStatusColor}" />
+                                            <TextBlock Text="{Binding ProgressPercentage, StringFormat={}{0:N1}%}" FontSize="12" FontWeight="Bold" Foreground="{Binding BindingGroupName}" />
+                                            <TextBlock Text=")" FontSize="12" FontWeight="Bold" Foreground="{Binding SalesStatusColor}" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <ProgressBar Value="{Binding ProgressPercentage}" Height="10" Foreground="{Binding SalesStatusColor}" Background="#F1F5F9" />
+                                </StackPanel>
+
+                                <!-- Row 2: Customer Progress (Secondary bar) -->
+                                <StackPanel Grid.Row="2" Margin="0,0,0,16">
+                                    <Grid Margin="0,0,0,4">
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="*" />
+                                            <ColumnDefinition Width="Auto" />
+                                        </Grid.ColumnDefinitions>
+                                        <TextBlock Text="Registro de Clientes Nuevos" FontSize="12" FontWeight="SemiBold" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                                        <StackPanel Grid.Column="1" Orientation="Horizontal">
+                                            <TextBlock Text="{Binding CustomersRegistered}" FontWeight="Bold" FontSize="12" />
+                                            <TextBlock Text=" de " FontSize="12" Opacity="0.7" />
+                                            <TextBlock Text="{Binding CustomerGoal}" FontSize="12" Opacity="0.7" />
+                                            <TextBlock Text=" (" FontSize="12" FontWeight="Bold" Foreground="{Binding CustomerStatusColor}" />
+                                            <TextBlock Text="{Binding CustomerProgressPercentage, StringFormat={}{0:N1}%}" FontSize="12" FontWeight="Bold" Foreground="{Binding CustomerStatusColor}" />
+                                            <TextBlock Text=")" FontSize="12" FontWeight="Bold" Foreground="{Binding CustomerStatusColor}" />
+                                        </StackPanel>
+                                    </Grid>
+                                    <ProgressBar Value="{Binding CustomerProgressPercentage}" Height="6" Foreground="{Binding CustomerStatusColor}" Background="#F1F5F9" />
+                                </StackPanel>
+
+                                <!-- Row 3: Divider -->
+                                <Separator Grid.Row="3" Margin="0,0,0,12" Height="1" Background="#E2E8F0" />
+
+                                <!-- Row 4: Key statistics grid -->
+                                <Grid Grid.Row="4">
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                        <ColumnDefinition Width="*" />
+                                    </Grid.ColumnDefinitions>
+
+                                    <!-- Pedidos -->
+                                    <Border Grid.Column="0" BorderBrush="#F1F5F9" BorderThickness="0,0,1,0" Padding="0,0,8,0">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <materialDesign:PackIcon Kind="ClipboardTextOutline" Width="16" Height="16" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                                <TextBlock Text="{Binding TotalOrders}" FontWeight="Bold" FontSize="14" Foreground="#0F172A" />
+                                            </StackPanel>
+                                            <TextBlock Text="Pedidos" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Ticket Promedio -->
+                                    <Border Grid.Column="1" BorderBrush="#F1F5F9" BorderThickness="0,0,1,0" Padding="0,0,8,0">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <materialDesign:PackIcon Kind="CurrencyUsd" Width="16" Height="16" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                                                <TextBlock Text="{Binding AverageTicket, StringFormat={}{0:N2}}" FontWeight="Bold" FontSize="14" Foreground="#0F172A" />
+                                            </StackPanel>
+                                            <TextBlock Text="Ticket Prom." FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+
+                                    <!-- Articulo Estrella -->
+                                    <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                            <materialDesign:PackIcon Kind="StarOutline" Width="16" Height="16" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,4,0"/>
+                                            <TextBlock Text="{Binding TopProduct}" FontWeight="Bold" FontSize="12" Foreground="#0F172A" TextTrimming="CharacterEllipsis" MaxWidth="100" />
+                                        </StackPanel>
+                                        <TextBlock Text="Art. Estrella" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,2,0,0" />
+                                    </StackPanel>
+                                </Grid>
+                            </Grid>
+                        </materialDesign:Card>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
         </Grid>
     </ScrollViewer>
 </UserControl>

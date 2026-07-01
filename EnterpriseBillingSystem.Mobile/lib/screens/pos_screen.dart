@@ -95,7 +95,7 @@ class _PosScreenState extends State<PosScreen> {
     });
   }
 
-  // Show presentation & qty dialog
+  // Show presentation & qty dialog with manual price option
   void _showAddProductDialog(Product product) {
     if (product.presentations.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -115,20 +115,23 @@ class _PosScreenState extends State<PosScreen> {
     double quantity = 1.0;
     final qtyController = TextEditingController(text: '1');
 
+    // Calculate initial price based on level
+    double initialPrice = selectedPresentation.retailPrice;
+    if (posProv.currentLevel == 'MAYORISTA') {
+      initialPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
+    } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
+      initialPrice = selectedPresentation.semiWholesalePrice > 0 ? selectedPresentation.semiWholesalePrice : selectedPresentation.retailPrice;
+    }
+    final priceController = TextEditingController(text: initialPrice.toStringAsFixed(2));
+
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            // Recalculate price dynamically in dialog based on level
-            double activePrice = selectedPresentation.retailPrice;
-            if (posProv.currentLevel == 'MAYORISTA') {
-              activePrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
-            } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
-              activePrice = selectedPresentation.semiWholesalePrice > 0 ? selectedPresentation.semiWholesalePrice : selectedPresentation.retailPrice;
-            }
-
-            final subtotal = activePrice * quantity;
+            // Read user manual price
+            final userPrice = double.tryParse(priceController.text) ?? 0.0;
+            final subtotal = userPrice * quantity;
 
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
@@ -156,11 +159,38 @@ class _PosScreenState extends State<PosScreen> {
                       if (val != null) {
                         setDialogState(() {
                           selectedPresentation = val;
+                          
+                          // Recalculate price
+                          double newPrice = selectedPresentation.retailPrice;
+                          if (posProv.currentLevel == 'MAYORISTA') {
+                            newPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
+                          } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
+                            newPrice = selectedPresentation.semiWholesalePrice > 0 ? selectedPresentation.semiWholesalePrice : selectedPresentation.retailPrice;
+                          }
+                          priceController.text = newPrice.toStringAsFixed(2);
                         });
                       }
                     },
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 12),
+
+                  // Unit Price Input
+                  const Text('Precio Unitario:', style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF64748B))),
+                  const SizedBox(height: 6),
+                  TextField(
+                    controller: priceController,
+                    keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                    decoration: const InputDecoration(
+                      contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      border: OutlineInputBorder(),
+                      prefixText: 'C\$ ',
+                    ),
+                    onChanged: (val) {
+                      setDialogState(() {}); // rebuilds dialog to update subtotal live!
+                    },
+                  ),
+                  const SizedBox(height: 12),
+
                   const Text('Cantidad:', style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF64748B))),
                   const SizedBox(height: 6),
                   Row(
@@ -238,7 +268,8 @@ class _PosScreenState extends State<PosScreen> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
                   ),
                   onPressed: () {
-                    posProv.addToCart(product, selectedPresentation, quantity);
+                    final manualPrice = double.tryParse(priceController.text);
+                    posProv.addToCart(product, selectedPresentation, quantity, manualPrice: manualPrice);
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -252,6 +283,76 @@ class _PosScreenState extends State<PosScreen> {
               ],
             );
           },
+        );
+      },
+    );
+  }
+
+  // Show cart item edit modal (quantity, manual price)
+  void _showEditCartItemDialog(BuildContext context, PosProvider posProv, CartItem item) {
+    final priceController = TextEditingController(text: item.unitPriceDisplayed.toStringAsFixed(2));
+    final qtyController = TextEditingController(text: item.quantity.toStringAsFixed(0));
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Text('Ajustar ${item.product.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Text('Presentación: ${item.presentation.name}', style: const TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+              const SizedBox(height: 12),
+              
+              // Quantity Input
+              const Text('Cantidad:', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF1E293B))),
+              const SizedBox(height: 4),
+              TextField(
+                controller: qtyController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  border: OutlineInputBorder(),
+                ),
+              ),
+              const SizedBox(height: 12),
+
+              // Unit Price Override Input
+              const Text('Precio Unitario (Manual):', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 13, color: Color(0xFF1E293B))),
+              const SizedBox(height: 4),
+              TextField(
+                controller: priceController,
+                keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                decoration: const InputDecoration(
+                  contentPadding: EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+                  border: OutlineInputBorder(),
+                  prefixText: 'C\$ ',
+                ),
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancelar'),
+            ),
+            ElevatedButton(
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF0F172A),
+                foregroundColor: Colors.white,
+              ),
+              onPressed: () {
+                final qty = double.tryParse(qtyController.text) ?? item.quantity;
+                final price = double.tryParse(priceController.text) ?? item.unitPriceDisplayed;
+
+                posProv.updateCartItemManualDetails(item, qty, price);
+                Navigator.pop(context);
+              },
+              child: const Text('Guardar'),
+            ),
+          ],
         );
       },
     );
@@ -1097,20 +1198,32 @@ class _PosScreenState extends State<PosScreen> {
                           child: Row(
                             children: [
                               Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      item.product.name,
-                                      maxLines: 1,
-                                      overflow: TextOverflow.ellipsis,
-                                      style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
-                                    ),
-                                    Text(
-                                      '${item.presentation.name} | C\$ ${item.unitPriceDisplayed.toStringAsFixed(2)}',
-                                      style: const TextStyle(color: Color(0xFF64748B), fontSize: 10),
-                                    ),
-                                  ],
+                                child: InkWell(
+                                  onTap: () => _showEditCartItemDialog(context, posProv, item),
+                                  borderRadius: BorderRadius.circular(4),
+                                  child: Column(
+                                    crossAxisAlignment: CrossAxisAlignment.start,
+                                    children: [
+                                      Row(
+                                        children: [
+                                          Expanded(
+                                            child: Text(
+                                              item.product.name,
+                                              maxLines: 1,
+                                              overflow: TextOverflow.ellipsis,
+                                              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
+                                            ),
+                                          ),
+                                          const Icon(Icons.edit_rounded, size: 12, color: Color(0xFF94A3B8)),
+                                          const SizedBox(width: 4),
+                                        ],
+                                      ),
+                                      Text(
+                                        '${item.presentation.name} | C\$ ${item.unitPriceDisplayed.toStringAsFixed(2)}',
+                                        style: const TextStyle(color: Color(0xFF64748B), fontSize: 10),
+                                      ),
+                                    ],
+                                  ),
                                 ),
                               ),
                               // Quantity counters

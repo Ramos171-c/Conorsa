@@ -7,5 +7,6 @@ public enum SalesOrderStatus
     Anulado = 3,
     EnProceso = 4,
     EnCamino = 5,
-    Completado = 6
+    Completado = 6,
+    SolicitudAnulacion = 7
 }

@@ -6,7 +6,7 @@ services:
     container_name: enterprise-billing-db
     environment:
       - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=YourStrong@Password2026!
+      - MSSQL_SA_PASSWORD=Perros..1
     ports:
       - "1433:1433" # Optional: expose port 1433 if you need to run migrations or access the database from outside
     volumes:
@@ -24,7 +24,7 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Server=db;Database=EnterpriseBillingSystemDb;User Id=sa;Password=YourStrong@Password2026!;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - ConnectionStrings__DefaultConnection=Server=db;Database=EnterpriseBillingSystemDb;User Id=sa;Password=Perros..1;TrustServerCertificate=True;MultipleActiveResultSets=true
       - JwtSettings__Secret=FredermanSuperSecretKeyBillingSystem2026EnterpriseSolutions
       - JwtSettings__Issuer=EnterpriseBillingSystem.WebApi
       - JwtSettings__Audience=WpfAndFlutterClients

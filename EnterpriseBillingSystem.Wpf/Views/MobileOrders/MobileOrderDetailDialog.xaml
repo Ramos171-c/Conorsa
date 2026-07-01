@@ -77,6 +77,9 @@
                             <DataTrigger Binding="{Binding Status}" Value="Completado">
                                 <Setter Property="Background" Value="#E0F2F1" />
                             </DataTrigger>
+                            <DataTrigger Binding="{Binding Status}" Value="SolicitudAnulacion">
+                                <Setter Property="Background" Value="#FFEBEE" />
+                            </DataTrigger>
                         </Style.Triggers>
                     </Style>
                 </Border.Style>
@@ -108,6 +111,10 @@
                                     <Setter Property="Text" Value="COMPLETADO" />
                                     <Setter Property="Foreground" Value="#004D40" />
                                 </DataTrigger>
+                                <DataTrigger Binding="{Binding Status}" Value="SolicitudAnulacion">
+                                    <Setter Property="Text" Value="SOLICITUD ANULACIÓN" />
+                                    <Setter Property="Foreground" Value="#C62828" />
+                                </DataTrigger>
                             </Style.Triggers>
                         </Style>
                     </TextBlock.Style>
@@ -118,12 +125,25 @@
         <!-- Content Area -->
         <Grid Grid.Row="1" Margin="0,0,0,16">
             <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
+            <!-- Cancellation Request Warning Banner -->
+            <materialDesign:Card Grid.Row="0" Background="#FFEBEE" UniformCornerRadius="6" Margin="0,0,0,12" Padding="12"
+                                 Visibility="{Binding IsCancellationRequested, Converter={StaticResource BoolToVis}}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Alert" Foreground="#C62828" Width="24" Height="24" Margin="0,12,12,0" VerticalAlignment="Top" />
+                    <StackPanel VerticalAlignment="Center">
+                        <TextBlock Text="Solicitud de Anulación Pendiente de Aprobación" FontSize="14" FontWeight="Bold" Foreground="#C62828" />
+                        <TextBlock Text="{Binding CancellationReason, StringFormat='Motivo indicado: {0}'}" FontSize="12" Foreground="#C62828" TextWrapping="Wrap" Margin="0,2,0,0" />
+                    </StackPanel>
+                </StackPanel>
+            </materialDesign:Card>
+
             <!-- Product Lines DataGrid -->
-            <materialDesign:Card Grid.Row="0" Margin="0,0,0,16" materialDesign:ElevationAssist.Elevation="Dp1">
+            <materialDesign:Card Grid.Row="1" Margin="0,0,0,16" materialDesign:ElevationAssist.Elevation="Dp1">
                 <Grid>
                     <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}" IsIndeterminate="True" 
                                  Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVis}}" 
@@ -246,6 +266,30 @@
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Check" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
                         <TextBlock Text="Confirmar Pedido" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Approve Cancellation Button (Only visible if SolicitudAnulacion) -->
+                <Button Command="{Binding ApproveCancellationCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="#2E7D32" BorderBrush="#2E7D32" 
+                        Visibility="{Binding IsCancellationRequested, Converter={StaticResource BoolToVis}}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Check" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Aprobar Anulación" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <!-- Reject Cancellation Button (Only visible if SolicitudAnulacion) -->
+                <Button Command="{Binding RejectCancellationCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="#C62828" BorderBrush="#C62828" 
+                        Visibility="{Binding IsCancellationRequested, Converter={StaticResource BoolToVis}}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Close" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Rechazar Anulación" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
 

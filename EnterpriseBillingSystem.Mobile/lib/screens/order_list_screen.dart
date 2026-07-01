@@ -39,6 +39,10 @@ class _OrderListScreenState extends State<OrderListScreen> {
       case 'completed':
       case 'completado':
         return Colors.green;
+      case 'solicitudanulacion':
+      case 'solicitud_anulacion':
+      case '7':
+        return Colors.purple;
       default:
         return Colors.grey;
     }
@@ -58,6 +62,10 @@ class _OrderListScreenState extends State<OrderListScreen> {
         return 'Anulado';
       case 'completed':
         return 'Completado';
+      case 'solicitudanulacion':
+      case 'solicitud_anulacion':
+      case '7':
+        return 'Sol. Anulación';
       default:
         return status;
     }
@@ -70,17 +78,17 @@ class _OrderListScreenState extends State<OrderListScreen> {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: const Text('Anular Pedido'),
+          title: const Text('Solicitar Anulación'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              const Text('¿Está seguro de que desea anular este pedido?'),
+              const Text('¿Está seguro de que desea solicitar la anulación de este pedido?'),
               const SizedBox(height: 12),
               TextField(
                 controller: reasonController,
                 decoration: const InputDecoration(
-                  labelText: 'Motivo de la anulación',
+                  labelText: 'Motivo de la solicitud',
                   border: OutlineInputBorder(),
                 ),
                 maxLines: 2,
@@ -97,7 +105,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 final reason = reasonController.text.trim();
                 if (reason.isEmpty) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Debe ingresar un motivo de anulación.')),
+                    const SnackBar(content: Text('Debe ingresar un motivo de solicitud.')),
                   );
                   return;
                 }
@@ -106,15 +114,15 @@ class _OrderListScreenState extends State<OrderListScreen> {
                 final success = await orderProv.cancelOrder(orderId, reason);
                 if (success) {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Pedido anulado con éxito.')),
+                    const SnackBar(content: Text('Solicitud de anulación enviada con éxito.')),
                   );
                 } else {
                   ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text(orderProv.errorMessage ?? 'Error al anular el pedido.')),
+                    SnackBar(content: Text(orderProv.errorMessage ?? 'Error al solicitar la anulación.')),
                   );
                 }
               },
-              child: const Text('Anular', style: TextStyle(color: Colors.red)),
+              child: const Text('Solicitar', style: TextStyle(color: Colors.red)),
             ),
           ],
         );
@@ -380,10 +388,11 @@ class _OrderListScreenState extends State<OrderListScreen> {
 
                       // 10 minute rule for editing
                       final difference = DateTime.now().difference(order.orderDate.toLocal());
-                      final canCancel = order.status.toLowerCase() != 'cancelled' &&
-                          order.status.toLowerCase() != 'anulado' &&
-                          order.status.toLowerCase() != 'completed' &&
-                          order.status.toLowerCase() != 'completado';
+                      final statusLower = order.status.toLowerCase();
+                      final canCancel = statusLower == 'recibido' ||
+                          statusLower == '2' ||
+                          statusLower == 'enproceso' ||
+                          statusLower == '4';
                       final canEdit = difference.inMinutes < 10 && canCancel;
 
                       return Card(
@@ -499,7 +508,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
                                     TextButton.icon(
                                       onPressed: () => _cancelOrderDialog(context, order.id),
                                       icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.red),
-                                      label: const Text('Anular', style: TextStyle(color: Colors.red)),
+                                      label: const Text('Sol. Anulación', style: TextStyle(color: Colors.red)),
                                     ),
                                 ],
                               ),

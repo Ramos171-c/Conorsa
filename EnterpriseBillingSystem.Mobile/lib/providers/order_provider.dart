@@ -486,16 +486,16 @@ class OrderProvider extends ChangeNotifier {
     return null;
   }
 
-  // Cancel order (anular)
+  // Cancel order (solicitar anulación)
   Future<bool> cancelOrder(String orderId, String reason) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final response = await apiService.post('/sales-orders/$orderId/cancel', {
+      final response = await apiService.post('/sales-orders/$orderId/request-cancellation', {
         'SalesOrderId': orderId,
-        'CancellationReason': reason,
+        'Reason': reason,
       });
 
       if (response.statusCode == 200 || response.statusCode == 204) {
@@ -504,9 +504,9 @@ class OrderProvider extends ChangeNotifier {
       } else {
         try {
           final err = jsonDecode(response.body);
-          _errorMessage = err['detail'] ?? err['message'] ?? 'Error al anular el pedido.';
+          _errorMessage = err['detail'] ?? err['message'] ?? 'Error al solicitar la anulación del pedido.';
         } catch (_) {
-          _errorMessage = 'Error al anular el pedido (Código ${response.statusCode}).';
+          _errorMessage = 'Error al solicitar la anulación del pedido (Código ${response.statusCode}).';
         }
       }
     } catch (e) {

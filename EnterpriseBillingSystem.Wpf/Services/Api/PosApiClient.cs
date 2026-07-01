@@ -49,14 +49,22 @@ public class PosApiClient
     public async Task<Guid> CreateInvoiceAsync(object command)
     {
         var response = await _httpClient.PostAsJsonAsync("sales-invoices", command);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Error {(int)response.StatusCode} al crear factura: {(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body)}");
+        }
         return await response.Content.ReadFromJsonAsync<Guid>();
     }
 
     public async Task PostInvoiceAsync(Guid invoiceId)
     {
         var response = await _httpClient.PostAsync($"sales-invoices/{invoiceId}/post", null);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Error {(int)response.StatusCode} al confirmar factura: {(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body)}");
+        }
     }
 
     public async Task<Guid?> GetDefaultBranchWarehouseIdAsync()

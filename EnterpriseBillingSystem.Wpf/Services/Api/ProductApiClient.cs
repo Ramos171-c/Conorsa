@@ -46,7 +46,12 @@ public class ProductApiClient
     public async Task<bool> UpdateProductAsync(Guid id, object command)
     {
         var response = await _httpClient.PutAsJsonAsync($"products/{id}", command);
-        return response.IsSuccessStatusCode;
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Error {(int)response.StatusCode}: {(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body)}");
+        }
+        return true;
     }
 
     public async Task<PagedResult<CategoryDto>?> GetCategoriesAsync(int page = 1, int pageSize = 1000)

@@ -12,6 +12,8 @@ class CartItem {
   double quantity;
   double unitPriceDisplayed;
   double lineTotal;
+  double discountPercentage;
+  double? manualPriceOverride;
 
   CartItem({
     required this.product,
@@ -19,6 +21,8 @@ class CartItem {
     required this.quantity,
     required this.unitPriceDisplayed,
     required this.lineTotal,
+    this.discountPercentage = 0.0,
+    this.manualPriceOverride,
   });
 }
 
@@ -194,7 +198,7 @@ class PosProvider extends ChangeNotifier {
 
 
   // Add item to cart
-  void addToCart(Product product, ProductPresentation presentation, double quantity) {
+  void addToCart(Product product, ProductPresentation presentation, double quantity, {double? manualPrice}) {
     _errorMessage = null;
 
     final index = _cart.indexWhere(
@@ -203,13 +207,17 @@ class PosProvider extends ChangeNotifier {
 
     if (index >= 0) {
       _cart[index].quantity += quantity;
+      if (manualPrice != null) {
+        _cart[index].manualPriceOverride = manualPrice;
+      }
     } else {
       _cart.add(CartItem(
         product: product,
         presentation: presentation,
         quantity: quantity,
-        unitPriceDisplayed: presentation.retailPrice,
-        lineTotal: presentation.retailPrice * quantity,
+        unitPriceDisplayed: manualPrice ?? presentation.retailPrice,
+        lineTotal: (manualPrice ?? presentation.retailPrice) * quantity,
+        manualPriceOverride: manualPrice,
       ));
     }
 
@@ -278,17 +286,22 @@ class PosProvider extends ChangeNotifier {
 
     for (var item in _cart) {
       double price = item.presentation.retailPrice;
-      if (finalLevel == 2) {
-        price = item.presentation.wholesalePrice > 0 
-            ? item.presentation.wholesalePrice 
-            : item.presentation.retailPrice;
-      } else if (finalLevel == 1) {
-        price = item.presentation.semiWholesalePrice > 0 
-            ? item.presentation.semiWholesalePrice 
-            : item.presentation.retailPrice;
+      if (item.manualPriceOverride != null) {
+        price = item.manualPriceOverride!;
+      } else {
+        if (finalLevel == 2) {
+          price = item.presentation.wholesalePrice > 0 
+              ? item.presentation.wholesalePrice 
+              : item.presentation.retailPrice;
+        } else if (finalLevel == 1) {
+          price = item.presentation.semiWholesalePrice > 0 
+              ? item.presentation.semiWholesalePrice 
+              : item.presentation.retailPrice;
+        }
       }
 
       item.unitPriceDisplayed = price;
+      item.discountPercentage = 0.0;
       item.lineTotal = price * item.quantity;
       _subtotalCommercial += item.lineTotal;
     }
@@ -413,7 +426,13 @@ class PosProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
-
+  // Update cart item manual override details (quantity, price)
+  void updateCartItemManualDetails(CartItem item, double quantity, double manualPrice) {
+    item.quantity = quantity;
+    item.manualPriceOverride = manualPrice;
+    item.discountPercentage = 0.0;
+    recalculatePricing();
+  }
   // Load an existing order into the cart for editing
   void loadOrderToCart(SalesOrderDetail order, List<Customer> allCustomers, List<Product> catalogProducts) {
     clearCart();
@@ -507,7 +526,9 @@ class PosProvider extends ChangeNotifier {
         presentation: presentation,
         quantity: detail.quantity,
         unitPriceDisplayed: detail.unitPrice,
-        lineTotal: detail.quantity * detail.unitPrice,
+        lineTotal: detail.netAmount,
+        discountPercentage: 0.0,
+        manualPriceOverride: detail.unitPrice,
       ));
     }
 
