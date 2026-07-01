@@ -157,7 +157,7 @@
                 <vo:MobileOrdersView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:SalesViewModel}">
-                <v:GenericModuleView />
+                <v:SalesView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:PurchasesViewModel}">
                 <vpu:PurchasesView />

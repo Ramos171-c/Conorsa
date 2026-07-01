@@ -13,7 +13,7 @@ namespace EnterpriseBillingSystem.Application.Auth.Commands;
 
 public record UpdateUserCommand(
     Guid Id,
-    string Email,
+    string? Email,
     string FirstName,
     string LastName,
     Guid DefaultBranchId,
@@ -42,11 +42,11 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
         _routeRepository = routeRepository;
 
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("El correo electrónico es requerido.")
-            .EmailAddress().WithMessage("El correo electrónico no es válido.")
+            .EmailAddress().When(x => !string.IsNullOrWhiteSpace(x.Email)).WithMessage("El correo electrónico no es válido.")
             .MustAsync(async (command, email, cancellation) =>
             {
-                var existing = await _userManager.FindByEmailAsync(email);
+                if (string.IsNullOrWhiteSpace(email)) return true;
+                var existing = await _userManager.FindByEmailAsync(email.Trim());
                 return existing == null || existing.Id == command.Id;
             }).WithMessage("El correo electrónico ya está registrado por otro usuario.");
 
@@ -123,7 +123,7 @@ public class UpdateUserCommandHandler : IRequestHandler<UpdateUserCommand, bool>
         var user = await _userManager.FindByIdAsync(request.Id.ToString());
         if (user == null || user.IsDeleted) return false;
 
-        user.Email = request.Email;
+        user.Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim();
         user.FirstName = request.FirstName?.Trim() ?? string.Empty;
         user.LastName = request.LastName?.Trim() ?? string.Empty;
         user.Cedula = string.IsNullOrWhiteSpace(request.Cedula) ? null : request.Cedula.Trim();

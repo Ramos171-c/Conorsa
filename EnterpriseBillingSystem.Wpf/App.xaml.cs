@@ -127,6 +127,7 @@ public partial class App : Application
         services.AddTransient<Views.Dialogs.CustomMessageBox>();
         services.AddTransient<Views.Dialogs.CustomInputDialog>();
         services.AddTransient<Views.Purchases.PurchasesView>();
+        services.AddTransient<Views.SalesView>();
         services.AddTransient<Views.AdministrationView>();
     }
 

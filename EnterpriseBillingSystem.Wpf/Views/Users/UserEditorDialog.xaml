@@ -58,11 +58,11 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0" Text="{Binding FirstName, UpdateSourceTrigger=PropertyChanged}" 
-                             materialDesign:HintAssist.Hint="Nombre" 
+                             materialDesign:HintAssist.Hint="Nombre *" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="0,0,6,0" />
                     <TextBox Grid.Column="1" Text="{Binding LastName, UpdateSourceTrigger=PropertyChanged}" 
-                             materialDesign:HintAssist.Hint="Apellido" 
+                             materialDesign:HintAssist.Hint="Apellido *" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="6,0,0,0" />
                 </Grid>
@@ -74,12 +74,12 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <TextBox Grid.Column="0" Text="{Binding Username, UpdateSourceTrigger=PropertyChanged}" 
-                             materialDesign:HintAssist.Hint="Nombre de Usuario (Para Login)" 
+                             materialDesign:HintAssist.Hint="Nombre de Usuario (Para Login) *" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              IsEnabled="{Binding IsEditMode, Converter={StaticResource InverseBoolConverter}, FallbackValue=True}"
                              Margin="0,0,6,0" />
                     <TextBox Grid.Column="1" Text="{Binding Email, UpdateSourceTrigger=PropertyChanged}" 
-                             materialDesign:HintAssist.Hint="Correo Electrónico" 
+                             materialDesign:HintAssist.Hint="Correo Electrónico (Opcional)" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="6,0,0,0" />
                 </Grid>
@@ -95,7 +95,7 @@
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="0,0,6,0" />
                     <TextBox Grid.Column="1" Text="{Binding Cedula, UpdateSourceTrigger=PropertyChanged}" 
-                             materialDesign:HintAssist.Hint="Cédula de Identidad" 
+                             materialDesign:HintAssist.Hint="Cédula de Identidad (Opcional)" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="6,0,0,0" />
                 </Grid>
@@ -169,12 +169,12 @@
                               SelectedValue="{Binding SelectedBranchId}" 
                               SelectedValuePath="Id" 
                               DisplayMemberPath="Name" 
-                              materialDesign:HintAssist.Hint="Sucursal Principal"
+                              materialDesign:HintAssist.Hint="Sucursal Principal *"
                               Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                               Margin="0,0,6,0" />
                     <ComboBox Grid.Column="1" ItemsSource="{Binding Roles}" 
                               SelectedItem="{Binding SelectedRole}" 
-                              materialDesign:HintAssist.Hint="Rol de Usuario"
+                              materialDesign:HintAssist.Hint="Rol de Usuario *"
                               Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                               Margin="6,0,0,0" />
                 </Grid>

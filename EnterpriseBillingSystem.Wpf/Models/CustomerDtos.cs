@@ -91,7 +91,9 @@ public record CustomerDto(
     List<CustomerAddressDto> Addresses,
     List<CustomerPhoneDto> Phones,
     List<CustomerEmailDto> Emails,
-    List<CustomerContactDto> Contacts
+    List<CustomerContactDto> Contacts,
+    Guid? RouteId = null,
+    string? RouteName = null
 );
 
 // Input DTOs for Creation

@@ -3,7 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class ConfigProvider extends ChangeNotifier {
   static const String _keyApiUrl = 'api_base_url';
-  static const String defaultUrl = 'http://10.0.2.2:5002/api/v1';
+  static const String defaultUrl = 'http://167.99.13.177:8080/api/v1';
 
   String _apiUrl = defaultUrl;
   bool _isInitialized = false;

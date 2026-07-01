@@ -155,8 +155,6 @@ class ApiService {
       }
     } catch (e) {
       if (kDebugMode) print('API Error during token refresh: $e');
-      await clearAuthData();
-      onSessionExpired?.call();
       return false;
     }
   }

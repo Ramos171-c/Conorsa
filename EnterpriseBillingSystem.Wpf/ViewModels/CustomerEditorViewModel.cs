@@ -282,8 +282,7 @@ public partial class CustomerEditorViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(IdentificationNumber))
         {
-            _notificationService.ShowWarning("El número de identificación es requerido.");
-            return;
+            IdentificationNumber = "CLI-" + DateTime.Now.ToString("yyyyMMddHHmmssfff");
         }
 
         if (string.IsNullOrWhiteSpace(Name))

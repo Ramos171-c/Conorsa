@@ -5,7 +5,7 @@ namespace EnterpriseBillingSystem.Wpf.Models;
 public record UserDto(
     Guid Id,
     string Username,
-    string Email,
+    string? Email,
     string FirstName,
     string LastName,
     bool IsActive,
@@ -30,7 +30,7 @@ public record UserDto(
 public record CreateUserCommandDto(
     string Username,
     string Password,
-    string Email,
+    string? Email,
     string FirstName,
     string LastName,
     Guid DefaultBranchId,
@@ -48,7 +48,7 @@ public record CreateUserCommandDto(
 
 public record UpdateUserCommandDto(
     Guid Id,
-    string Email,
+    string? Email,
     string FirstName,
     string LastName,
     Guid DefaultBranchId,

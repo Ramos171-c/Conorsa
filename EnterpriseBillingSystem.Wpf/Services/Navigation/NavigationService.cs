@@ -32,6 +32,11 @@ public class NavigationService : INavigationService
 
     public void Navigate<TViewModel>() where TViewModel : class
     {
+        if (CurrentViewModel != null && CurrentViewModel.GetType() == typeof(TViewModel))
+        {
+            return;
+        }
+
         var viewModel = _serviceProvider.GetRequiredService<TViewModel>();
         if (CurrentViewModel != null)
         {

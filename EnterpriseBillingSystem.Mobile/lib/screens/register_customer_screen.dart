@@ -120,6 +120,10 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
     if (!_formKey.currentState!.validate()) return;
     _formKey.currentState!.save();
 
+    if (_identificationNumber.trim().isEmpty) {
+      _identificationNumber = 'CLI-${DateTime.now().millisecondsSinceEpoch}';
+    }
+
     if (_selectedCategoryId == null || _selectedPricingProfileId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -367,8 +371,6 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
                     // Section 1: General Info
                     _buildSectionHeader('Información General', Icons.person_rounded),
                     _buildCard([
-                      _buildCustomerTypeSelection(),
-                      const SizedBox(height: 16),
                       TextFormField(
                         decoration: const InputDecoration(
                           labelText: 'Nombre del Cliente *',
@@ -379,60 +381,6 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
                         validator: (value) =>
                             value == null || value.trim().isEmpty ? 'El nombre es requerido.' : null,
                         onSaved: (val) => _name = val ?? '',
-                      ),
-                      const SizedBox(height: 16),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Razón Social / Apellidos (Opcional)',
-                          hintText: 'Ej. Pérez Zelaya',
-                          prefixIcon: Icon(Icons.business_outlined),
-                          border: OutlineInputBorder(),
-                        ),
-                        onSaved: (val) => _legalName = val ?? '',
-                      ),
-                      const SizedBox(height: 16),
-                      Row(
-                        children: [
-                          Expanded(
-                            flex: 4,
-                            child: DropdownButtonFormField<int>(
-                              value: _identificationType,
-                              decoration: const InputDecoration(
-                                labelText: 'Tipo Ident.',
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 8, vertical: 12),
-                              ),
-                              items: const [
-                                DropdownMenuItem(value: 1, child: Text('Cédula')),
-                                DropdownMenuItem(value: 2, child: Text('RUC')),
-                                DropdownMenuItem(value: 3, child: Text('Pasaporte')),
-                                DropdownMenuItem(value: 4, child: Text('Otro')),
-                              ],
-                              onChanged: (val) {
-                                if (val != null) {
-                                  setState(() {
-                                    _identificationType = val;
-                                  });
-                                }
-                              },
-                            ),
-                          ),
-                          const SizedBox(width: 12),
-                          Expanded(
-                            flex: 6,
-                            child: TextFormField(
-                              decoration: const InputDecoration(
-                                labelText: 'No. Identificación *',
-                                hintText: 'Ej. 001-200394-0004A',
-                                border: OutlineInputBorder(),
-                                contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 15),
-                              ),
-                              validator: (value) =>
-                                  value == null || value.trim().isEmpty ? 'Requerido.' : null,
-                              onSaved: (val) => _identificationNumber = val ?? '',
-                            ),
-                          ),
-                        ],
                       ),
                     ]),
 
@@ -500,70 +448,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
                       ),
                     ]),
 
-                    const SizedBox(height: 20),
 
-                    // Section 3: Commercial & Pricing Rules
-                    _buildSectionHeader('Reglas de Negocio', Icons.settings_suggest_rounded),
-                    _buildCard([
-                      // Category selection
-                      DropdownButtonFormField<String>(
-                        value: _selectedCategoryId,
-                        decoration: const InputDecoration(
-                          labelText: 'Categoría del Cliente *',
-                          prefixIcon: Icon(Icons.category_rounded),
-                          border: OutlineInputBorder(),
-                        ),
-                        items: _categories.map((c) {
-                          return DropdownMenuItem<String>(
-                            value: c['id'] as String,
-                            child: Text(c['name'] as String? ?? 'Sin Nombre'),
-                          );
-                        }).toList(),
-                        onChanged: (val) {
-                          setState(() {
-                            _selectedCategoryId = val;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 16),
-                      // El perfil tarifario se asigna automáticamente a Detalle en segundo plano.
-                      const SizedBox(height: 16),
-                      // Exento de impuesto & Descuento
-                      SwitchListTile(
-                        title: const Text('Exento de Impuestos'),
-                        subtitle: const Text('No aplicar IVA en la facturación'),
-                        value: _isTaxExempt,
-                        activeColor: const Color(0xFF38BDF8),
-                        onChanged: (val) {
-                          setState(() {
-                            _isTaxExempt = val;
-                          });
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      TextFormField(
-                        decoration: const InputDecoration(
-                          labelText: 'Descuento Base (%)',
-                          hintText: '0.00',
-                          prefixIcon: Icon(Icons.percent_rounded),
-                          border: OutlineInputBorder(),
-                        ),
-                        keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                        validator: (value) {
-                          if (value == null || value.trim().isEmpty) return null;
-                          final parsed = double.tryParse(value);
-                          if (parsed == null || parsed < 0 || parsed > 100) {
-                            return 'Debe ser un número entre 0 y 100.';
-                          }
-                          return null;
-                        },
-                        onSaved: (val) {
-                          if (val != null && val.isNotEmpty) {
-                            _defaultDiscountPercentage = double.tryParse(val) ?? 0.0;
-                          }
-                        },
-                      ),
-                    ]),
 
                     const SizedBox(height: 32),
 

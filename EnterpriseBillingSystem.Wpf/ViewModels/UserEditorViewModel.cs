@@ -25,7 +25,7 @@ public partial class UserEditorViewModel : ViewModelBase
     private string _password = string.Empty;
 
     [ObservableProperty]
-    private string _email = string.Empty;
+    private string? _email = string.Empty;
 
     [ObservableProperty]
     private string _firstName = string.Empty;
@@ -162,11 +162,6 @@ public partial class UserEditorViewModel : ViewModelBase
         if (!IsEditMode && string.IsNullOrWhiteSpace(Password))
         {
             _notificationService.ShowWarning("La contraseña es requerida.");
-            return;
-        }
-        if (string.IsNullOrWhiteSpace(Email))
-        {
-            _notificationService.ShowWarning("El correo es requerido.");
             return;
         }
         if (string.IsNullOrWhiteSpace(FirstName))

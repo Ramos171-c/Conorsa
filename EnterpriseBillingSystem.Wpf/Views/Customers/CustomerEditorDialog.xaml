@@ -64,13 +64,11 @@
                         <TextBox Text="{Binding LegalName, UpdateSourceTrigger=PropertyChanged}" 
                                  materialDesign:HintAssist.Hint="Razón Social / Nombre Legal (Opcional)" 
                                  Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                                 Margin="0,0,0,12" />
+                                 Margin="0,0,0,12" />                        <!-- Identity and Client Type -->
+                        <TextBlock Text="Identificación Fiscal" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,12,0,4" Visibility="Collapsed" />
+                        <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" Visibility="Collapsed" />
 
-                        <!-- Identity and Client Type -->
-                        <TextBlock Text="Identificación Fiscal" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,12,0,4" />
-                        <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" />
-
-                        <Grid Margin="0,0,0,12">
+                        <Grid Margin="0,0,0,12" Visibility="Collapsed">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
@@ -90,7 +88,7 @@
                                      Margin="6,0,0,0" />
                         </Grid>
 
-                        <Grid Margin="0,0,0,12">
+                        <Grid Margin="0,0,0,12" Visibility="Collapsed">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
@@ -105,10 +103,10 @@
                         </Grid>
 
                         <!-- Categorization and Profile -->
-                        <TextBlock Text="Categorización y Tarifas" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,12,0,4" />
-                        <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" />
+                        <TextBlock Text="Categorización y Tarifas" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,12,0,4" Visibility="Collapsed" />
+                        <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" Visibility="Collapsed" />
 
-                        <Grid Margin="0,0,0,12">
+                        <Grid Margin="0,0,0,12" Visibility="Collapsed">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="*" />
@@ -173,10 +171,10 @@
                             </Grid>
                         </StackPanel>
 
-                        <TextBlock Text="Condiciones Fiscales y Descuentos" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,16,0,4" />
-                        <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" />
+                        <TextBlock Text="Condiciones Fiscales y Descuentos" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,16,0,4" Visibility="Collapsed" />
+                        <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" Visibility="Collapsed" />
 
-                        <Grid Margin="0,0,0,12">
+                        <Grid Margin="0,0,0,12" Visibility="Collapsed">
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*" />
                                 <ColumnDefinition Width="Auto" />
@@ -188,7 +186,8 @@
                         <TextBox Text="{Binding DefaultDiscountPercentage, UpdateSourceTrigger=PropertyChanged}" 
                                  materialDesign:HintAssist.Hint="Descuento Comercial Predeterminado (%)" 
                                  Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                                 Margin="0,0,0,12" />
+                                 Margin="0,0,0,12" 
+                                 Visibility="Collapsed" />
 
                         <!-- Status (Only Editable or Shown when editing) -->
                         <StackPanel Margin="0,12,0,0">

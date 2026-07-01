@@ -14,7 +14,7 @@ namespace EnterpriseBillingSystem.Application.Auth.Commands;
 public record CreateUserCommand(
     string Username,
     string Password,
-    string Email,
+    string? Email,
     string FirstName,
     string LastName,
     Guid DefaultBranchId,
@@ -50,11 +50,11 @@ public class CreateUserCommandValidator : AbstractValidator<CreateUserCommand>
             }).WithMessage("El nombre de usuario ya está registrado.");
 
         RuleFor(x => x.Email)
-            .NotEmpty().WithMessage("El correo electrónico es requerido.")
-            .EmailAddress().WithMessage("El correo electrónico no es válido.")
+            .EmailAddress().When(x => !string.IsNullOrWhiteSpace(x.Email)).WithMessage("El correo electrónico no es válido.")
             .MustAsync(async (email, cancellation) =>
             {
-                var existing = await _userManager.FindByEmailAsync(email);
+                if (string.IsNullOrWhiteSpace(email)) return true;
+                var existing = await _userManager.FindByEmailAsync(email.Trim());
                 return existing == null;
             }).WithMessage("El correo electrónico ya está registrado.");
 
@@ -135,7 +135,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
         var user = new ApplicationUser
         {
             UserName = request.Username,
-            Email = request.Email,
+            Email = string.IsNullOrWhiteSpace(request.Email) ? null : request.Email.Trim(),
             FirstName = request.FirstName?.Trim() ?? string.Empty,
             LastName = request.LastName?.Trim() ?? string.Empty,
             Cedula = string.IsNullOrWhiteSpace(request.Cedula) ? null : request.Cedula.Trim(),

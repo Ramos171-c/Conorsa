@@ -4,6 +4,8 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../services/api_service.dart';
 import '../models/auth.dart';
 
+class NetworkException implements Exception {}
+
 class AuthProvider extends ChangeNotifier {
   final ApiService apiService;
 
@@ -34,14 +36,20 @@ class AuthProvider extends ChangeNotifier {
     try {
       final hasToken = await apiService.hasSession();
       if (hasToken) {
-        // Load the profile to confirm token is valid
-        final success = await fetchUserProfile();
-        if (success) {
+        try {
+          // Load the profile to confirm token is valid
+          final success = await fetchUserProfile();
+          if (success) {
+            _isLoggedIn = true;
+          } else {
+            // Token is invalid/expired and refresh failed
+            _isLoggedIn = false;
+            await apiService.clearAuthData();
+          }
+        } on NetworkException {
+          // Server unreachable, but we have local token & cached profile.
+          // Keep user logged in offline.
           _isLoggedIn = true;
-        } else {
-          // Token is invalid/expired and refresh failed
-          _isLoggedIn = false;
-          await apiService.clearAuthData();
         }
       } else {
         _isLoggedIn = false;
@@ -108,11 +116,23 @@ class AuthProvider extends ChangeNotifier {
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         _userProfile = UserProfile.fromJson(data);
+        
+        // Cache user profile for offline session restoration
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('cached_user_profile', response.body);
         return true;
       }
       return false;
     } catch (e) {
-      return false;
+      // Offline: Try to load cached user profile
+      final prefs = await SharedPreferences.getInstance();
+      final cachedData = prefs.getString('cached_user_profile');
+      if (cachedData != null) {
+        try {
+          _userProfile = UserProfile.fromJson(jsonDecode(cachedData));
+        } catch (_) {}
+      }
+      throw NetworkException();
     }
   }
 

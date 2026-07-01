@@ -20,7 +20,9 @@ public class SalesApiClient
         int page, 
         int pageSize, 
         Guid? customerId = null, 
-        string? status = null)
+        string? status = null,
+        DateTime? fromDate = null,
+        DateTime? toDate = null)
     {
         var url = $"sales-orders?pageNumber={page}&pageSize={pageSize}";
         if (customerId.HasValue)
@@ -30,6 +32,14 @@ public class SalesApiClient
         if (!string.IsNullOrWhiteSpace(status))
         {
             url += $"&status={Uri.EscapeDataString(status)}";
+        }
+        if (fromDate.HasValue)
+        {
+            url += $"&fromDate={fromDate.Value:yyyy-MM-ddTHH:mm:ss}";
+        }
+        if (toDate.HasValue)
+        {
+            url += $"&toDate={toDate.Value:yyyy-MM-ddTHH:mm:ss}";
         }
         return await _httpClient.GetFromJsonAsync<PagedResult<SalesOrderListItemDto>>(url);
     }
