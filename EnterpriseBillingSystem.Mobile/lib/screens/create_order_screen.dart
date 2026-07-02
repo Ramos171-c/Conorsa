@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/order_provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/product.dart';
 
 class CreateOrderScreen extends StatefulWidget {
@@ -24,8 +25,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
     // Load initial data
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<OrderProvider>(context, listen: false);
+      final authProv = Provider.of<AuthProvider>(context, listen: false);
       provider.clearDraft();
-      provider.fetchCustomers();
+      provider.fetchCustomers(routeId: authProv.userProfile?.routeId);
       provider.fetchProducts();
     });
 
@@ -45,7 +47,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
 
   void _onCustomerSearchChanged() {
     final search = _customerSearchController.text.trim();
-    Provider.of<OrderProvider>(context, listen: false).fetchCustomers(search: search);
+    final authProv = Provider.of<AuthProvider>(context, listen: false);
+    Provider.of<OrderProvider>(context, listen: false).fetchCustomers(search: search, routeId: authProv.userProfile?.routeId);
   }
 
   void _onProductSearchChanged() {

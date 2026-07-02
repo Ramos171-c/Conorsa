@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/order_provider.dart';
 import '../providers/pos_provider.dart';
+import '../providers/auth_provider.dart';
 import '../models/order.dart';
 import 'pos_screen.dart';
 
@@ -141,11 +142,12 @@ class _OrderListScreenState extends State<OrderListScreen> {
     try {
       final orderProv = Provider.of<OrderProvider>(context, listen: false);
       final posProv = Provider.of<PosProvider>(context, listen: false);
+      final authProv = Provider.of<AuthProvider>(context, listen: false);
       
       // Cargar detalles, productos y clientes concurrentemente para tener el catálogo listo
       final detailFuture = orderProv.fetchOrderDetail(orderItem.id);
       final productsFuture = orderProv.products.isEmpty ? orderProv.fetchProducts() : Future.value();
-      final customersFuture = orderProv.customers.isEmpty ? orderProv.fetchCustomers() : Future.value();
+      final customersFuture = orderProv.customers.isEmpty ? orderProv.fetchCustomers(routeId: authProv.userProfile?.routeId) : Future.value();
 
       await Future.wait([detailFuture, productsFuture, customersFuture]);
       final detail = await detailFuture;

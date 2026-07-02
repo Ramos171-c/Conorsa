@@ -11,5 +11,6 @@ public record UserProfileDto(
     string LastName,
     Guid DefaultBranchId,
     string Role,
-    IEnumerable<string> Permissions
+    IEnumerable<string> Permissions,
+    Guid? RouteId
 );

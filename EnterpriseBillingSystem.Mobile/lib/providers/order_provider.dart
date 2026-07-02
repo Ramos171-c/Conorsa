@@ -38,8 +38,8 @@ class OrderProvider extends ChangeNotifier {
 
   OrderProvider(this.apiService);
 
-  // Fetch customers with search filter
-  Future<void> fetchCustomers({String? search}) async {
+  // Fetch customers with search filter and route filter
+  Future<void> fetchCustomers({String? search, String? routeId}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
@@ -48,7 +48,8 @@ class OrderProvider extends ChangeNotifier {
 
     try {
       final searchParam = search != null && search.isNotEmpty ? '&searchTerm=$search' : '';
-      final response = await apiService.get('/customers?pageNumber=1&pageSize=50$searchParam');
+      final routeParam = routeId != null && routeId.isNotEmpty ? '&routeId=$routeId' : '';
+      final response = await apiService.get('/customers?pageNumber=1&pageSize=50$searchParam$routeParam');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -67,6 +68,14 @@ class OrderProvider extends ChangeNotifier {
       final cached = await offlineService.getCachedCustomers();
       if (cached.isNotEmpty) {
         var parsed = cached.map((e) => Customer.fromJson(e)).toList();
+        if (routeId != null && routeId.isNotEmpty) {
+          // Filter offline cached customers by route, keeping CONSUMIDOR FINAL (CUS-000001) or null route
+          parsed = parsed.where((c) => 
+            c.routeId == routeId || 
+            c.routeId == null || 
+            c.customerCode == 'CUS-000001'
+          ).toList();
+        }
         if (search != null && search.isNotEmpty) {
           final query = search.toLowerCase();
           parsed = parsed.where((c) => c.name.toLowerCase().contains(query)).toList();

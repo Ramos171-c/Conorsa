@@ -10,6 +10,7 @@ class Customer {
   final int creditDays;
   final int customerPricingProfileType; // 0 = Retail, 1 = SemiWholesale, 2 = Wholesale
   final double currentDebt;
+  final String? routeId;
 
   Customer({
     required this.id,
@@ -23,6 +24,7 @@ class Customer {
     required this.creditDays,
     required this.customerPricingProfileType,
     required this.currentDebt,
+    this.routeId,
   });
 
   bool get isActive => status == 1;
@@ -86,6 +88,7 @@ class Customer {
       creditDays: json['creditDays'] as int? ?? 0,
       customerPricingProfileType: json['customerPricingProfileType'] as int? ?? 0,
       currentDebt: (json['currentDebt'] as num?)?.toDouble() ?? 0.0,
+      routeId: json['routeId'] as String?,
     );
   }
 
@@ -102,6 +105,7 @@ class Customer {
       'creditDays': creditDays,
       'customerPricingProfileType': customerPricingProfileType,
       'currentDebt': currentDebt,
+      'routeId': routeId,
     };
   }
 }

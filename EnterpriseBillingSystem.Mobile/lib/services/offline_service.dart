@@ -124,6 +124,7 @@ class OfflineService {
       'address': customer['address'],
       'municipality': customer['municipality'],
       'city': customer['city'],
+      'routeId': customer['routeId'],
       'routeName': 'Ruta Temporal (Offline)',
       'isTaxExempt': customer['isTaxExempt'] ?? false,
       'defaultDiscountPercentage': customer['defaultDiscountPercentage'] ?? 0.0,

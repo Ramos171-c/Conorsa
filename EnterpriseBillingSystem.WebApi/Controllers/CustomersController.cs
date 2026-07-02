@@ -64,9 +64,10 @@ public class CustomersController : ApiControllerBase
         [FromQuery] int pageSize = 10,
         [FromQuery] string? searchTerm = null,
         [FromQuery] Guid? categoryId = null,
-        [FromQuery] CustomerStatus? status = null)
+        [FromQuery] CustomerStatus? status = null,
+        [FromQuery] Guid? routeId = null)
     {
-        var result = await Mediator.Send(new GetCustomersPagedQuery(pageNumber, pageSize, searchTerm, categoryId, status));
+        var result = await Mediator.Send(new GetCustomersPagedQuery(pageNumber, pageSize, searchTerm, categoryId, status, routeId));
         return Ok(result);
     }
 

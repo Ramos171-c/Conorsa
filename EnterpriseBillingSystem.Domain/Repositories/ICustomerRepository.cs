@@ -17,6 +17,7 @@ public interface ICustomerRepository : IRepository<Customer>
         string? searchTerm,
         Guid? categoryId,
         CustomerStatus? status,
+        Guid? routeId = null,
         CancellationToken cancellationToken = default);
 
     Task<bool> ExistsByIdentificationAsync(string identificationNumber, Guid? excludeId = null, CancellationToken cancellationToken = default);

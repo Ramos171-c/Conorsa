@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../services/api_service.dart';
 import '../services/offline_service.dart';
+import '../providers/auth_provider.dart';
 
 class RegisterCustomerScreen extends StatefulWidget {
   const RegisterCustomerScreen({super.key});
@@ -274,6 +275,8 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
           });
         }
 
+        final authProv = Provider.of<AuthProvider>(context, listen: false);
+
         final offlineCustomer = {
           'tempId': tempId,
           'identificationNumber': _identificationNumber.trim(),
@@ -293,6 +296,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
           'phones': phones,
           'emails': emails,
           'contacts': [],
+          'routeId': authProv.userProfile?.routeId,
         };
 
         await offlineService.saveOfflineCustomer(offlineCustomer);

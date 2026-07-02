@@ -16,7 +16,8 @@ public record GetCustomersPagedQuery(
     int PageSize = 10,
     string? SearchTerm = null,
     Guid? CategoryId = null,
-    CustomerStatus? Status = null
+    CustomerStatus? Status = null,
+    Guid? RouteId = null
 ) : IRequest<PagedResult<CustomerDto>>;
 
 public class GetCustomersPagedQueryHandler : IRequestHandler<GetCustomersPagedQuery, PagedResult<CustomerDto>>
@@ -36,6 +37,7 @@ public class GetCustomersPagedQueryHandler : IRequestHandler<GetCustomersPagedQu
             request.SearchTerm,
             request.CategoryId,
             request.Status,
+            request.RouteId,
             cancellationToken);
 
         var dtos = items.Select(c => new CustomerDto(

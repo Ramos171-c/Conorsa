@@ -366,6 +366,7 @@ class _PosScreenState extends State<PosScreen> {
   void _showCustomerSelectionDialog() {
     final orderProv = Provider.of<OrderProvider>(context, listen: false);
     final posProv = Provider.of<PosProvider>(context, listen: false);
+    final authProv = Provider.of<AuthProvider>(context, listen: false);
 
     showDialog(
       context: context,
@@ -388,7 +389,7 @@ class _PosScreenState extends State<PosScreen> {
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (val) async {
-                        await orderProv.fetchCustomers(search: val);
+                        await orderProv.fetchCustomers(search: val, routeId: authProv.userProfile?.routeId);
                         setDialogState(() {});
                       },
                     ),

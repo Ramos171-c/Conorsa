@@ -36,6 +36,7 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
         string? searchTerm,
         Guid? categoryId,
         CustomerStatus? status,
+        Guid? routeId = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.Customers
@@ -52,6 +53,11 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
         if (status.HasValue)
         {
             query = query.Where(c => c.Status == status.Value);
+        }
+
+        if (routeId.HasValue)
+        {
+            query = query.Where(c => c.RouteId == routeId.Value || c.RouteId == null);
         }
 
         if (!string.IsNullOrWhiteSpace(searchTerm))

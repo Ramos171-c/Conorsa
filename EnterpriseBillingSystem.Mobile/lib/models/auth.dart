@@ -7,6 +7,7 @@ class UserProfile {
   final String defaultBranchId;
   final String role;
   final List<String> permissions;
+  final String? routeId;
 
   UserProfile({
     required this.id,
@@ -17,6 +18,7 @@ class UserProfile {
     required this.defaultBranchId,
     required this.role,
     required this.permissions,
+    this.routeId,
   });
 
   String get fullName => '$firstName $lastName'.trim().isNotEmpty 
@@ -36,6 +38,7 @@ class UserProfile {
               ?.map((e) => e.toString())
               .toList() ?? 
           [],
+      routeId: json['routeId'] as String?,
     );
   }
 
@@ -49,6 +52,7 @@ class UserProfile {
       'defaultBranchId': defaultBranchId,
       'role': role,
       'permissions': permissions,
+      'routeId': routeId,
     };
   }
 }
