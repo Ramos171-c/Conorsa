@@ -5,6 +5,7 @@ import '../models/product.dart';
 import '../models/customer.dart';
 import '../models/cash_session.dart';
 import '../models/order.dart';
+import '../services/offline_service.dart';
 
 class CartItem {
   final Product product;
@@ -333,14 +334,14 @@ class PosProvider extends ChangeNotifier {
     _successMessage = null;
     notifyListeners();
 
+    final customerId = _selectedCustomer?.id ?? '00000000-0000-0000-0000-000000000000';
+
     try {
       // Validations
       if (_cart.isEmpty) {
         _errorMessage = 'El carrito está vacío.';
         return false;
       }
-
-      final customerId = _selectedCustomer?.id ?? '00000000-0000-0000-0000-000000000000';
       if (customerId == '00000000-0000-0000-0000-000000000000') {
         _errorMessage = 'Debe seleccionar un cliente para procesar el pedido.';
         return false;
@@ -419,8 +420,39 @@ class PosProvider extends ChangeNotifier {
       _successMessage = 'Pedido registrado con éxito.';
       return true;
     } catch (e) {
-      _errorMessage = 'Error al registrar pedido: $e';
-      return false;
+      if (_editingOrderId == null) {
+        // Fallback to offline order creation
+        try {
+          final offlineService = OfflineService();
+          final offlineOrder = {
+            'tempId': 'temp_order_${DateTime.now().millisecondsSinceEpoch}',
+            'CustomerId': customerId,
+            'OrderDate': DateTime.now().toUtc().toIso8601String(),
+            'Notes': notes ?? 'Pedido desde POS Móvil (Vendedor)',
+            'Details': _cart.map((item) {
+              return {
+                'ProductId': item.product.id,
+                'UnitOfMeasureId': item.presentation.unitOfMeasureId,
+                'Quantity': item.quantity,
+                'UnitPrice': item.unitPriceDisplayed,
+                'DiscountPercentage': 0.0,
+                'TaxPercentage': item.presentation.taxPercentage,
+              };
+            }).toList(),
+          };
+
+          await offlineService.saveOfflineOrder(offlineOrder);
+          clearCart();
+          _successMessage = 'Guardado localmente. Pedido creado de forma local por falta de conexión a internet.';
+          return true;
+        } catch (saveError) {
+          _errorMessage = 'Error de conexión y fallo al guardar localmente: $saveError';
+          return false;
+        }
+      } else {
+        _errorMessage = 'Error al modificar pedido: $e';
+        return false;
+      }
     } finally {
       _isBusy = false;
       notifyListeners();

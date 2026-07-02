@@ -601,8 +601,8 @@ class _PosScreenState extends State<PosScreen> {
                             if (!context.mounted) return;
                             Navigator.pop(context); // Close checkout
                             ScaffoldMessenger.of(context).showSnackBar(
-                              const SnackBar(
-                                content: Text('Pedido registrado con éxito.'),
+                              SnackBar(
+                                content: Text(posProv.successMessage ?? 'Pedido registrado con éxito.'),
                                 backgroundColor: Colors.green,
                               ),
                             );
