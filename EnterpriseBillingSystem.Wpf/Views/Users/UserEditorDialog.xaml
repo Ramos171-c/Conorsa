@@ -181,9 +181,20 @@
 
                 <!-- Contraseña (requerida para nuevo, opcional para editar) -->
                 <TextBox Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" 
-                         materialDesign:HintAssist.Hint="Contraseña (Dejar vacío para no modificar si edita)" 
-                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                         Margin="0,0,0,12" />
+                         Margin="0,0,0,12">
+                    <TextBox.Style>
+                        <Style TargetType="TextBox" BasedOn="{StaticResource MaterialDesignOutlinedTextBox}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsEditMode}" Value="True">
+                                    <Setter Property="materialDesign:HintAssist.Hint" Value="Nueva Contraseña (Opcional - Mín. 8 caracteres: A-Z, a-z, 0-9)" />
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsEditMode}" Value="False">
+                                    <Setter Property="materialDesign:HintAssist.Hint" Value="Contraseña * (Mín. 8 caracteres: A-Z, a-z, 0-9)" />
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBox.Style>
+                </TextBox>
 
                 <!-- Sección 5: Estados -->
                 <TextBlock Text="Estado" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,12,0,4" />

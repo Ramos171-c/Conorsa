@@ -164,6 +164,17 @@ public partial class UserEditorViewModel : ViewModelBase
             _notificationService.ShowWarning("La contraseña es requerida.");
             return;
         }
+        if (!string.IsNullOrWhiteSpace(Password))
+        {
+            if (Password.Length < 8 || 
+                !System.Text.RegularExpressions.Regex.IsMatch(Password, @"[A-Z]") || 
+                !System.Text.RegularExpressions.Regex.IsMatch(Password, @"[a-z]") || 
+                !System.Text.RegularExpressions.Regex.IsMatch(Password, @"[0-9]"))
+            {
+                _notificationService.ShowWarning("La contraseña debe tener al menos 8 caracteres, incluyendo al menos una mayúscula, una minúscula y un número.");
+                return;
+            }
+        }
         if (string.IsNullOrWhiteSpace(FirstName))
         {
             _notificationService.ShowWarning("El nombre es requerido.");

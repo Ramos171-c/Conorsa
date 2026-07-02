@@ -136,10 +136,11 @@ class _PosScreenState extends State<PosScreen> {
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: Text('Agregar ${product.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
                   const Text('Presentación:', style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF64748B))),
                   const SizedBox(height: 6),
                   DropdownButtonFormField<ProductPresentation>(
@@ -256,6 +257,7 @@ class _PosScreenState extends State<PosScreen> {
                   ),
                 ],
               ),
+            ),
               actions: [
                 TextButton(
                   onPressed: () => Navigator.pop(context),
@@ -299,10 +301,11 @@ class _PosScreenState extends State<PosScreen> {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
           title: Text('Ajustar ${item.product.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
               Text('Presentación: ${item.presentation.name}', style: const TextStyle(color: Color(0xFF64748B), fontSize: 13)),
               const SizedBox(height: 12),
               
@@ -333,6 +336,7 @@ class _PosScreenState extends State<PosScreen> {
               ),
             ],
           ),
+        ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),

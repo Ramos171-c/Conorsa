@@ -102,6 +102,13 @@ public class UpdateUserCommandValidator : AbstractValidator<UpdateUserCommand>
 
         RuleFor(x => x.EmergencyContactPhone)
             .MaximumLength(50).WithMessage("El teléfono de contacto de emergencia no puede exceder 50 caracteres.");
+
+        RuleFor(x => x.Password)
+            .MinimumLength(8).WithMessage("La contraseña debe tener al menos 8 caracteres.")
+            .Matches(@"[A-Z]").WithMessage("La contraseña debe contener al menos una letra mayúscula.")
+            .Matches(@"[a-z]").WithMessage("La contraseña debe contener al menos una letra minúscula.")
+            .Matches(@"[0-9]").WithMessage("La contraseña debe contener al menos un dígito.")
+            .When(x => !string.IsNullOrWhiteSpace(x.Password));
     }
 }
 

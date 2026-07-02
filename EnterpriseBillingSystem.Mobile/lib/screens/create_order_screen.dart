@@ -86,96 +86,98 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
 
             return AlertDialog(
               title: Text('Agregar ${product.name}'),
-              content: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  const Text('Presentación:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  DropdownButton<ProductPresentation>(
-                    value: selectedPresentation,
-                    isExpanded: true,
-                    items: product.presentations.map((p) {
-                      final pPrice = p.retailPrice > 0 ? p.retailPrice : product.defaultSalePrice;
-                      return DropdownMenuItem(
-                        value: p,
-                        child: Text('${p.name} - \$${pPrice.toStringAsFixed(2)}'),
-                      );
-                    }).toList(),
-                    onChanged: (val) {
-                      if (val != null) {
-                        setDialogState(() {
-                          selectedPresentation = val;
-                        });
-                      }
-                    },
-                  ),
-                  const SizedBox(height: 16),
-                  const Text('Cantidad:', style: TextStyle(fontWeight: FontWeight.bold)),
-                  const SizedBox(height: 8),
-                  Row(
-                    children: [
-                      IconButton(
-                        icon: const Icon(Icons.remove_circle_outline),
-                        onPressed: () {
-                          if (quantity > 1) {
-                            setDialogState(() {
-                              quantity -= 1.0;
-                              qtyController.text = quantity.toInt().toString();
-                            });
-                          }
-                        },
-                      ),
-                      Expanded(
-                        child: TextField(
-                          controller: qtyController,
-                          keyboardType: const TextInputType.numberWithOptions(decimal: true),
-                          textAlign: TextAlign.center,
-                          decoration: const InputDecoration(
-                            contentPadding: EdgeInsets.zero,
-                            border: OutlineInputBorder(),
-                          ),
-                          onChanged: (val) {
-                            final parsed = double.tryParse(val);
-                            if (parsed != null && parsed > 0) {
+              content: SingleChildScrollView(
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  crossAxisAlignment: CrossAxisAlignment.stretch,
+                  children: [
+                    const Text('Presentación:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    DropdownButton<ProductPresentation>(
+                      value: selectedPresentation,
+                      isExpanded: true,
+                      items: product.presentations.map((p) {
+                        final pPrice = p.retailPrice > 0 ? p.retailPrice : product.defaultSalePrice;
+                        return DropdownMenuItem(
+                          value: p,
+                          child: Text('${p.name} - \$${pPrice.toStringAsFixed(2)}'),
+                        );
+                      }).toList(),
+                      onChanged: (val) {
+                        if (val != null) {
+                          setDialogState(() {
+                            selectedPresentation = val;
+                          });
+                        }
+                      },
+                    ),
+                    const SizedBox(height: 16),
+                    const Text('Cantidad:', style: TextStyle(fontWeight: FontWeight.bold)),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.remove_circle_outline),
+                          onPressed: () {
+                            if (quantity > 1) {
                               setDialogState(() {
-                                quantity = parsed;
+                                quantity -= 1.0;
+                                qtyController.text = quantity.toInt().toString();
                               });
                             }
                           },
                         ),
-                      ),
-                      IconButton(
-                        icon: const Icon(Icons.add_circle_outline),
-                        onPressed: () {
-                          setDialogState(() {
-                            quantity += 1.0;
-                            qtyController.text = quantity.toInt().toString();
-                          });
-                        },
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 20),
-                  const Divider(),
-                  const SizedBox(height: 8),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      const Text(
-                        'Total Estimado:',
-                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-                      ),
-                      Text(
-                        '\$${subtotal.toStringAsFixed(2)}',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.bold, 
-                          fontSize: 18, 
-                          color: Color(0xFF1E3A8A),
+                        Expanded(
+                          child: TextField(
+                            controller: qtyController,
+                            keyboardType: const TextInputType.numberWithOptions(decimal: true),
+                            textAlign: TextAlign.center,
+                            decoration: const InputDecoration(
+                              contentPadding: EdgeInsets.zero,
+                              border: OutlineInputBorder(),
+                            ),
+                            onChanged: (val) {
+                              final parsed = double.tryParse(val);
+                              if (parsed != null && parsed > 0) {
+                                setDialogState(() {
+                                  quantity = parsed;
+                                });
+                              }
+                            },
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
-                ],
+                        IconButton(
+                          icon: const Icon(Icons.add_circle_outline),
+                          onPressed: () {
+                            setDialogState(() {
+                              quantity += 1.0;
+                              qtyController.text = quantity.toInt().toString();
+                            });
+                          },
+                        ),
+                      ],
+                    ),
+                    const SizedBox(height: 20),
+                    const Divider(),
+                    const SizedBox(height: 8),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        const Text(
+                          'Total Estimado:',
+                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+                        ),
+                        Text(
+                          '\$${subtotal.toStringAsFixed(2)}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold, 
+                            fontSize: 18, 
+                            color: Color(0xFF1E3A8A),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
               ),
               actions: [
                 TextButton(
