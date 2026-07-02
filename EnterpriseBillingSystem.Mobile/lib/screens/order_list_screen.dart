@@ -490,27 +490,30 @@ class _OrderListScreenState extends State<OrderListScreen> {
                               ),
                               const SizedBox(height: 8),
                               const Divider(),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.end,
-                                children: [
-                                  TextButton.icon(
-                                    onPressed: () => _showOrderDetails(context, order.id),
-                                    icon: const Icon(Icons.info_outline, size: 18),
-                                    label: const Text('Ver Detalles'),
-                                  ),
-                                  if (canEdit)
+                              SingleChildScrollView(
+                                scrollDirection: Axis.horizontal,
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.end,
+                                  children: [
                                     TextButton.icon(
-                                      onPressed: () => _editOrder(context, order),
-                                      icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
-                                      label: const Text('Editar', style: TextStyle(color: Colors.blue)),
+                                      onPressed: () => _showOrderDetails(context, order.id),
+                                      icon: const Icon(Icons.info_outline, size: 18),
+                                      label: const Text('Ver Detalles'),
                                     ),
-                                  if (canCancel)
-                                    TextButton.icon(
-                                      onPressed: () => _cancelOrderDialog(context, order.id),
-                                      icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.red),
-                                      label: const Text('Sol. Anulación', style: TextStyle(color: Colors.red)),
-                                    ),
-                                ],
+                                    if (canEdit)
+                                      TextButton.icon(
+                                        onPressed: () => _editOrder(context, order),
+                                        icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
+                                        label: const Text('Editar', style: TextStyle(color: Colors.blue)),
+                                      ),
+                                    if (canCancel)
+                                      TextButton.icon(
+                                        onPressed: () => _cancelOrderDialog(context, order.id),
+                                        icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.red),
+                                        label: const Text('Sol. Anulación', style: TextStyle(color: Colors.red)),
+                                      ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),

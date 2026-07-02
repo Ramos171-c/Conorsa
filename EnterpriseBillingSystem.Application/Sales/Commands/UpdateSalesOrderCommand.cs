@@ -191,8 +191,26 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         order.LastModifiedBy = "System";
         order.LastModifiedOnUtc = DateTime.UtcNow;
 
-        _salesOrderRepository.Update(order);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException ex)
+        {
+            foreach (var entry in ex.Entries)
+            {
+                if (entry.Entity is SalesOrder)
+                {
+                    var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken);
+                    if (databaseValues == null)
+                    {
+                        throw new InvalidOperationException("El pedido de venta ya no existe en la base de datos.");
+                    }
+                    entry.OriginalValues.SetValues(databaseValues);
+                }
+            }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
 
         return Unit.Value;
     }
