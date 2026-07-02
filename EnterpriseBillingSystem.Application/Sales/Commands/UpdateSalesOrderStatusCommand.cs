@@ -62,7 +62,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 Id = Guid.NewGuid(),
                 BranchId = warehouse.BranchId,
                 MovementNumber = movementNumber,
-                MovementType = MovementType.Sale,
+                MovementType = MovementType.Exit,
                 FromBranchWarehouseId = warehouse.Id,
                 ToBranchWarehouseId = null,
                 ReferenceDocument = order.OrderNumber,
