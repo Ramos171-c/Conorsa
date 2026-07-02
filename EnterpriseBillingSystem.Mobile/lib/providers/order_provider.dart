@@ -579,10 +579,13 @@ class OrderProvider extends ChangeNotifier {
                 realId = data.toString().replaceAll('"', '');
               }
               tempIdToRealIdMap[cust['tempId']] = realId;
+              print('Sync: Customer synced successfully! RealId: $realId');
             } else {
+              print('Sync: Failed to sync customer. Status: ${response.statusCode}, Body: ${response.body}');
               remainingCustomers.add(cust);
             }
-          } catch (_) {
+          } catch (e) {
+            print('Sync: Customer exception: $e');
             remainingCustomers.add(cust);
           }
         }
@@ -602,6 +605,7 @@ class OrderProvider extends ChangeNotifier {
 
             // Skip syncing this order if it references a temporary customer that failed to sync
             if (customerId.startsWith('temp_')) {
+              print('Sync: Skipping order sync because customer registration failed.');
               remainingOrders.add(order);
               continue;
             }
@@ -615,11 +619,13 @@ class OrderProvider extends ChangeNotifier {
 
             final response = await apiService.post('/sales-orders', body);
             if (response.statusCode == 201 || response.statusCode == 200) {
-              // Synced successfully!
+              print('Sync: Order synced successfully!');
             } else {
+              print('Sync: Failed to sync order. Status: ${response.statusCode}, Body: ${response.body}');
               remainingOrders.add(order);
             }
-          } catch (_) {
+          } catch (e) {
+            print('Sync: Order exception: $e');
             remainingOrders.add(order);
           }
         }
@@ -668,7 +674,9 @@ class OrderProvider extends ChangeNotifier {
         final items = data['items'] as List<dynamic>? ?? [];
         _orders = items.map((e) => SalesOrderListItem.fromJson(e)).toList();
       }
-    } catch (_) {
+    } catch (e, stack) {
+      print('Sync: Outer sync exception: $e');
+      print('Sync: StackTrace: $stack');
       // Ignore network drops during background synchronization
     } finally {
       _isSyncing = false;
