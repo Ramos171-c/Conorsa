@@ -147,7 +147,8 @@ public record CreateCustomerCommandDto(
     List<CreateCustomerAddressInput> Addresses,
     List<CreateCustomerPhoneInput> Phones,
     List<CreateCustomerEmailInput> Emails,
-    List<CreateCustomerContactInput> Contacts
+    List<CreateCustomerContactInput> Contacts,
+    Guid? RouteId = null
 );
 
 // Input DTOs for Update
@@ -207,5 +208,6 @@ public record UpdateCustomerCommandDto(
     List<UpdateCustomerAddressInput> Addresses,
     List<UpdateCustomerPhoneInput> Phones,
     List<UpdateCustomerEmailInput> Emails,
-    List<UpdateCustomerContactInput> Contacts
+    List<UpdateCustomerContactInput> Contacts,
+    Guid? RouteId = null
 );

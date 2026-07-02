@@ -60,7 +60,8 @@ public record CreateCustomerCommand(
     List<CreateCustomerAddressInput> Addresses,
     List<CreateCustomerPhoneInput> Phones,
     List<CreateCustomerEmailInput> Emails,
-    List<CreateCustomerContactInput> Contacts
+    List<CreateCustomerContactInput> Contacts,
+    Guid? RouteId = null
 ) : IRequest<Guid>;
 
 public class CreateCustomerCommandValidator : AbstractValidator<CreateCustomerCommand>
@@ -170,7 +171,7 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
             IsTaxExempt = request.IsTaxExempt,
             DefaultDiscountPercentage = request.DefaultDiscountPercentage,
             Status = CustomerStatus.Active,
-            RouteId = sellerRouteId
+            RouteId = request.RouteId ?? sellerRouteId
         };
 
         // Agregar direcciones

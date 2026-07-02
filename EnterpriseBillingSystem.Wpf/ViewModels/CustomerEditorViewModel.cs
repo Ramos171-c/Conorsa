@@ -64,8 +64,12 @@ public partial class CustomerEditorViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isSaving;
 
+    [ObservableProperty]
+    private Guid? _selectedRouteId;
+
     public ObservableCollection<CustomerCategoryDto> Categories { get; } = new();
     public ObservableCollection<CustomerPricingProfileDto> PricingProfiles { get; } = new();
+    public ObservableCollection<RouteDto> Routes { get; } = new();
 
     public Array IdentificationTypes => Enum.GetValues(typeof(IdentificationType));
     public Array CustomerTypes => Enum.GetValues(typeof(CustomerType));
@@ -104,6 +108,7 @@ public partial class CustomerEditorViewModel : ViewModelBase
             IsTaxExempt = customerToEdit.IsTaxExempt;
             DefaultDiscountPercentage = customerToEdit.DefaultDiscountPercentage;
             SelectedStatus = customerToEdit.Status;
+            SelectedRouteId = customerToEdit.RouteId;
 
             // Load nested collections
             foreach (var a in customerToEdit.Addresses)
@@ -163,7 +168,7 @@ public partial class CustomerEditorViewModel : ViewModelBase
 
     public async Task InitializeAsync()
     {
-        await Task.WhenAll(LoadCategoriesAsync(), LoadPricingProfilesAsync());
+        await Task.WhenAll(LoadCategoriesAsync(), LoadPricingProfilesAsync(), LoadRoutesAsync());
     }
 
     private async Task LoadCategoriesAsync()
@@ -210,6 +215,26 @@ public partial class CustomerEditorViewModel : ViewModelBase
         catch (Exception ex)
         {
             _notificationService.ShowError($"Error al cargar perfiles de precios: {ex.Message}");
+        }
+    }
+
+    private async Task LoadRoutesAsync()
+    {
+        try
+        {
+            var list = await _customerApiClient.GetRoutesAsync();
+            Routes.Clear();
+            foreach (var r in list)
+            {
+                if (r.IsActive)
+                {
+                    Routes.Add(r);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al cargar rutas: {ex.Message}");
         }
     }
 
@@ -355,7 +380,8 @@ public partial class CustomerEditorViewModel : ViewModelBase
                         Email: c.Email,
                         Notes: c.Notes,
                         IsDefault: c.IsDefault
-                    )).ToList()
+                    )).ToList(),
+                    RouteId: SelectedRouteId
                 );
 
                 var success = await _customerApiClient.UpdateCustomerAsync(_customerToEdit.Id, command);
@@ -412,7 +438,8 @@ public partial class CustomerEditorViewModel : ViewModelBase
                         Email: c.Email,
                         Notes: c.Notes,
                         IsDefault: c.IsDefault
-                    )).ToList()
+                    )).ToList(),
+                    RouteId: SelectedRouteId
                 );
 
                 var id = await _customerApiClient.CreateCustomerAsync(command);

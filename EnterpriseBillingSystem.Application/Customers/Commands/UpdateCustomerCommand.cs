@@ -66,7 +66,8 @@ public record UpdateCustomerCommand(
     List<UpdateCustomerAddressInput> Addresses,
     List<UpdateCustomerPhoneInput> Phones,
     List<UpdateCustomerEmailInput> Emails,
-    List<UpdateCustomerContactInput> Contacts
+    List<UpdateCustomerContactInput> Contacts,
+    Guid? RouteId = null
 ) : IRequest<bool>;
 
 public class UpdateCustomerCommandValidator : AbstractValidator<UpdateCustomerCommand>
@@ -160,6 +161,7 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
         customer.IsTaxExempt = request.IsTaxExempt;
         customer.DefaultDiscountPercentage = request.DefaultDiscountPercentage;
         customer.Status = request.Status;
+        customer.RouteId = request.RouteId;
 
         // 1. Sincronizar Direcciones
         var inputAddrIds = request.Addresses.Where(a => a.Id != Guid.Empty).Select(a => a.Id).ToList();

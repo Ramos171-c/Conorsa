@@ -89,4 +89,10 @@ public class CustomerApiClient
         var response = await _httpClient.GetFromJsonAsync<PagedResult<CustomerCategoryDto>>("customercategories?pageNumber=1&pageSize=100");
         return response?.Items?.ToList() ?? new List<CustomerCategoryDto>();
     }
+
+    public async Task<List<RouteDto>> GetRoutesAsync()
+    {
+        var response = await _httpClient.GetFromJsonAsync<List<RouteDto>>("routes");
+        return response ?? new List<RouteDto>();
+    }
 }
