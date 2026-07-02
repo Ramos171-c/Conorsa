@@ -935,12 +935,10 @@ class _PosScreenState extends State<PosScreen> {
     }
 
     if (query.isNotEmpty) {
-      if (_showOnlyTopProducts || _selectedProductCategoryId != null) {
-        displayedProducts = displayedProducts.where((p) =>
-            p.name.toLowerCase().contains(query) ||
-            p.internalCode.toLowerCase().contains(query)
-        ).toList();
-      }
+      displayedProducts = displayedProducts.where((p) =>
+          p.name.toLowerCase().contains(query) ||
+          p.internalCode.toLowerCase().contains(query)
+      ).toList();
     }
 
     return Padding(
