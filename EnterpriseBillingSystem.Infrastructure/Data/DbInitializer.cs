@@ -213,8 +213,8 @@ public class DbInitializer : IDbInitializer
             }
         }
 
-        // 7. Sembrar Datos del Catálogo Real de Productos (si falta GA001)
-        bool catalogNeedsReset = !await _context.Products.IgnoreQueryFilters().AnyAsync(p => p.InternalCode == "GA001");
+        // 7. Sembrar Datos del Catálogo Real de Productos (si falta TO011)
+        bool catalogNeedsReset = !await _context.Products.IgnoreQueryFilters().AnyAsync(p => p.InternalCode == "TO011");
         if (catalogNeedsReset)
         {
             await ResetAndSeedNewCatalogAsync(casaMatriz.Id);
@@ -1404,37 +1404,41 @@ public class DbInitializer : IDbInitializer
         // 7. Lista de productos
         var productsData = new List<TempProductData>
         {
-            // Galletas (30)
-            new("GA001", "GALLETAS WAFFER AMORIS CHOCOLATE", "Galletas", 30, 16.80m, 504.00m, 18.00m, 540.00m, 14.32m, 429.55m),
-            new("GA002", "GALLETAS WAFFER AMORIS FRESA", "Galletas", 30, 16.80m, 504.00m, 18.00m, 540.00m, 14.32m, 429.55m),
-            new("GA003", "GALLETAS WAFFER AMORIS ESCURETO", "Galletas", 30, 16.80m, 504.00m, 18.00m, 540.00m, 14.32m, 429.55m),
-            new("GA004", "GALLETAS TRIO 4 CANDY CHOCOLATE", "Galletas", 24, 66.00m, 1584.00m, 70.71m, 1697.14m, 14.32m, 343.64m),
-            new("GA005", "GALLETAS TRIO 4 CANDY FRESA", "Galletas", 24, 66.00m, 1584.00m, 70.71m, 1697.14m, 56.25m, 1350.00m),
-            new("GA006", "GALLETAS TRIO 4 CANDY LIMON", "Galletas", 24, 66.00m, 1584.00m, 70.71m, 1697.14m, 56.25m, 1350.00m),
-            new("GA007", "TWINNIES FRESA", "Galletas", 24, 54.00m, 1296.00m, 57.86m, 1388.57m, 46.02m, 1104.55m),
-            new("GA008", "TWINNIES CHOCO VAINILLA", "Galletas", 24, 54.00m, 1296.00m, 57.86m, 1388.57m, 46.02m, 1104.55m),
-            new("GA009", "TWINNIES LIMON", "Galletas", 24, 54.00m, 1296.00m, 57.86m, 1388.57m, 46.02m, 1104.55m),
-            new("GA010", "TWINNIES VAINILLA", "Galletas", 24, 54.00m, 1296.00m, 57.86m, 1388.57m, 46.02m, 1104.55m),
-            new("GA011", "TWINNIES CHOCO CHOCO", "Galletas", 24, 54.00m, 1296.00m, 57.86m, 1388.57m, 46.02m, 1104.55m),
-            new("GA012", "DISPENSADOR CHOCO GALLETIN CRISPY", "Galletas", 24, 74.40m, 1785.60m, 79.71m, 1913.14m, 46.02m, 1104.55m),
-            new("GA013", "GALLETA CANDY GLUCOSA CREMELO FRESA", "Galletas", 24, 50.40m, 1209.60m, 54.00m, 1296.00m, 42.95m, 1030.91m),
-            new("GA014", "GALLETA CANDY GLUCOSA CREMELO COCO", "Galletas", 24, 50.40m, 1209.60m, 54.00m, 1296.00m, 42.95m, 1030.91m),
-            new("GA015", "GALLETA CANDY GLUCOSA CREMELO LECHE", "Galletas", 24, 50.40m, 1209.60m, 54.00m, 1296.00m, 42.95m, 1030.91m),
-            new("GA016", "GALLETA AMORIS REDONDA 125GR. FRESA", "Galletas", 36, 21.20m, 763.20m, 22.71m, 817.71m, 42.95m, 1546.36m),
-            new("GA017", "GALLETA AMORIS REDONDA 125GR. CHOCOLATE", "Galletas", 36, 21.20m, 763.20m, 22.71m, 817.71m, 18.07m, 650.45m),
-            new("GA018", "GALLETA AMORIS REDONDA 125GR. ESCURETO", "Galletas", 36, 21.20m, 763.20m, 22.71m, 817.71m, 18.07m, 650.45m),
-            new("GA019", "TARROS MD SUPER KRUNCH ORANGE", "Galletas", 6, 384.00m, 2304.00m, 411.43m, 2468.57m, 327.27m, 1963.64m),
-            new("GA020", "GALLETA JUMBO FRESA", "Galletas", 10, 97.92m, 979.20m, 104.91m, 1049.14m, 327.27m, 3272.73m),
-            new("GA021", "GALLETA JUMBO VAINILLA", "Galletas", 10, 97.92m, 979.20m, 104.91m, 1049.14m, 83.45m, 834.55m),
-            new("GA022", "GALLETA JUMBO CHOCOLATE", "Galletas", 10, 97.92m, 979.20m, 104.91m, 1049.14m, 83.45m, 834.55m),
-            new("GA023", "GALLETA KIDMAX FRESA", "Galletas", 24, 46.20m, 1108.80m, 49.50m, 1188.00m, 39.38m, 945.00m),
-            new("GA024", "GALLETA KIDMAX VAINILLA", "Galletas", 24, 46.20m, 1108.80m, 49.50m, 1188.00m, 39.38m, 945.00m),
-            new("GA025", "GALLETA KIDMAX CHOCOLATE", "Galletas", 24, 46.20m, 1108.80m, 49.50m, 1188.00m, 39.38m, 945.00m),
-            new("GA026", "TORTITAS ZOO ANIMADOS FRESA", "Galletas", 6, 96.00m, 576.00m, 102.86m, 617.14m, 39.38m, 236.25m),
+            // Galletas (34)
+            new("GA001", "GALLETAS WAFFER AMORIS CHOCOLATE", "Galletas", 30, 16.80m, 504.00m, 16.80m, 504.00m, 14.32m, 429.55m),
+            new("GA002", "GALLETAS WAFFER AMORIS FRESA", "Galletas", 30, 16.80m, 504.00m, 16.80m, 504.00m, 14.32m, 429.55m),
+            new("GA003", "GALLETAS WAFFER AMORIS ESCURETO", "Galletas", 30, 16.80m, 504.00m, 16.80m, 504.00m, 14.32m, 429.55m),
+            new("GA004", "GALLETAS TRIO 4 CANDY CHOCOLATE", "Galletas", 24, 66.00m, 1584.00m, 58.24m, 1397.65m, 56.25m, 1350.00m),
+            new("GA005", "GALLETAS TRIO 4 CANDY FRESA", "Galletas", 24, 66.00m, 1584.00m, 58.24m, 1397.65m, 56.25m, 1350.00m),
+            new("GA006", "GALLETAS TRIO 4 CANDY LIMON", "Galletas", 24, 66.00m, 1584.00m, 58.24m, 1397.65m, 56.25m, 1350.00m),
+            new("GA007", "TWINNIES FRESA", "Galletas", 24, 54.00m, 1296.00m, 49.39m, 1185.37m, 46.02m, 1104.55m),
+            new("GA008", "TWINNIES CHOCO VAINILLA", "Galletas", 24, 54.00m, 1296.00m, 49.39m, 1185.37m, 46.02m, 1104.55m),
+            new("GA009", "TWINNIES LIMON", "Galletas", 24, 54.00m, 1296.00m, 49.39m, 1185.37m, 46.02m, 1104.55m),
+            new("GA010", "TWINNIES VAINILLA", "Galletas", 24, 54.00m, 1296.00m, 49.39m, 1185.37m, 46.02m, 1104.55m),
+            new("GA011", "TWINNIES CHOCO CHOCO", "Galletas", 24, 54.00m, 1296.00m, 49.39m, 1185.37m, 46.02m, 1104.55m),
+            new("GA012", "DISPENSADOR CHOCO GALLETIN CRISPY", "Galletas", 24, 74.40m, 1785.60m, 74.40m, 1785.60m, 63.41m, 1521.82m),
+            new("GA013", "GALLETA CANDY GLUCOSA CREMELO FRESA", "Galletas", 24, 50.40m, 1209.60m, 47.85m, 1148.35m, 42.95m, 1030.91m),
+            new("GA014", "GALLETA CANDY GLUCOSA CREMELO COCO", "Galletas", 24, 50.40m, 1209.60m, 47.85m, 1148.35m, 42.95m, 1030.91m),
+            new("GA015", "GALLETA CANDY GLUCOSA CREMELO LECHE", "Galletas", 24, 50.40m, 1209.60m, 47.85m, 1148.35m, 42.95m, 1030.91m),
+            new("GA016", "GALLETA AMORIS REDONDA 125GR. FRESA", "Galletas", 36, 21.20m, 763.20m, 21.20m, 763.20m, 18.07m, 650.45m),
+            new("GA017", "GALLETA AMORIS REDONDA 125GR. CHOCOLATE", "Galletas", 36, 21.20m, 763.20m, 21.20m, 763.20m, 18.07m, 650.45m),
+            new("GA018", "GALLETA AMORIS REDONDA 125GR. ESCURETO", "Galletas", 36, 21.20m, 763.20m, 21.20m, 763.20m, 18.07m, 650.45m),
+            new("GA019", "TARROS MD SUPER KRUNCH ORANGE", "Galletas", 6, 384.00m, 2304.00m, 360.00m, 2160.00m, 327.27m, 1963.64m),
+            new("GA020", "GALLETA JUMBO FRESA", "Galletas", 10, 97.92m, 979.20m, 97.92m, 979.20m, 83.45m, 834.55m),
+            new("GA021", "GALLETA JUMBO VAINILLA", "Galletas", 10, 97.92m, 979.20m, 97.92m, 979.20m, 83.45m, 834.55m),
+            new("GA022", "GALLETA JUMBO CHOCOLATE", "Galletas", 10, 97.92m, 979.20m, 97.92m, 979.20m, 83.45m, 834.55m),
+            new("GA023", "GALLETA KIDMAX FRESA", "Galletas", 24, 46.20m, 1108.80m, 48.13m, 1155.00m, 39.38m, 945.00m),
+            new("GA024", "GALLETA KIDMAX VAINILLA", "Galletas", 24, 46.20m, 1108.80m, 48.13m, 1155.00m, 39.38m, 945.00m),
+            new("GA025", "GALLETA KIDMAX CHOCOLATE", "Galletas", 24, 46.20m, 1108.80m, 48.13m, 1155.00m, 39.38m, 945.00m),
+            new("GA026", "TORTITAS ZOO ANIMADOS FRESA", "Galletas", 6, 96.00m, 576.00m, 102.86m, 617.14m, 81.82m, 490.91m),
             new("GA027", "TORTITAS ZOO ANIMADOS VAINILLA", "Galletas", 6, 96.00m, 576.00m, 102.86m, 617.14m, 81.82m, 490.91m),
             new("GA028", "TORTITAS ZOO ANIMADOS CHOCOLATE", "Galletas", 6, 96.00m, 576.00m, 102.86m, 617.14m, 81.82m, 490.91m),
             new("GA029", "GALLETAS WAFFER ZOO ANIMADOS FRESA", "Galletas", 2, 144.00m, 288.00m, 154.29m, 308.57m, 122.73m, 245.45m),
             new("GA030", "GALLETAS WAFFER ZOO ANIMADOS CHOCOLATE", "Galletas", 2, 144.00m, 288.00m, 154.29m, 308.57m, 122.73m, 245.45m),
+            new("GA031", "GALLETAS WAFFER AMORIS CODIGO SURTIDO", "Galletas", 30, 16.80m, 504.00m, 16.80m, 504.00m, 14.32m, 429.55m),
+            new("GA032", "GALLETA AMORIS REDONDA 125GR. CODIGO SURTIDO", "Galletas", 36, 21.20m, 763.20m, 21.20m, 763.20m, 18.07m, 650.45m),
+            new("GA033", "GALLETA TWINNIES CODIGO SURTIDO", "Galletas", 24, 54.00m, 1296.00m, 49.39m, 1185.37m, 46.02m, 1104.55m),
+            new("GA034", "GALLETA JUMBO CODIGO SURTIDO", "Galletas", 10, 97.92m, 979.20m, 97.92m, 979.20m, 83.45m, 834.55m),
 
             // Caramelos (33)
             new("CA001", "DISPENSADOR CANDY CHISQUETAZO", "Caramelos", 12, 144.00m, 1728.00m, 154.29m, 1851.43m, 122.73m, 1472.73m),
@@ -1481,17 +1485,18 @@ public class DbInitializer : IDbInitializer
             new("MA007", "BOLSA MALVAVISCO 3D", "Malvaviscos", 16, 97.20m, 1555.20m, 104.14m, 1666.29m, 82.84m, 1325.45m),
             new("MA008", "DISPENSADOR MALVAVISCO MALVA POP", "Malvaviscos", 12, 192.00m, 2304.00m, 205.71m, 2468.57m, 163.64m, 1963.64m),
 
-            // Toallas y Otros (10)
-            new("TO001", "TOALLAS HUMEDAS FAMILYS ROBELLY CELESTE 96 HOJAS", "Toallas y Otros", 12, 72.00m, 864.00m, 77.14m, 925.71m, 61.36m, 736.36m),
-            new("TO002", "TOALLAS HUMEDAS MIDDY BEAR 80 HOJAS", "Toallas y Otros", 12, 78.00m, 936.00m, 83.57m, 1002.86m, 66.48m, 797.73m),
-            new("TO003", "PAQUETE DE TOALLITA HUMEDA MIDDY BEAR 120 HOJAS", "Toallas y Otros", 12, 81.60m, 979.20m, 87.43m, 1049.14m, 69.55m, 834.55m),
-            new("TO004", "UNIDAD JN203 TOALLITA COMPRIMIDA MIDDY BEAR", "Toallas y Otros", 30, 74.40m, 2232.00m, 79.71m, 2391.43m, 63.41m, 1902.27m),
-            new("TO005", "TOALLA HUMEDA SIPPACK MIDDY BEAR", "Toallas y Otros", 20, 54.00m, 1080.00m, 57.86m, 1157.14m, 46.02m, 920.45m),
-            new("TO006", "PAPEL HIGIENICO ROBELLY 1620 HOJAS", "Toallas y Otros", 24, 27.00m, 648.00m, 28.93m, 694.29m, 23.01m, 552.27m),
-            new("TO007", "BOLSON DE PAÑALES CALSON OSITO M 60 PZ", "Toallas y Otros", 4, 114.00m, 456.00m, 122.14m, 488.57m, 97.16m, 388.64m),
-            new("TO008", "BOLSON DE PAÑALES PEGA PEGA OSITO L 56 PZ", "Toallas y Otros", 4, 114.00m, 456.00m, 122.14m, 488.57m, 97.16m, 388.64m),
-            new("TO009", "PAQUETE DE PAÑAL ADULTO MOMMY BEAR L 10 PZ", "Toallas y Otros", 8, 324.00m, 2592.00m, 347.14m, 2777.14m, 276.14m, 2209.09m),
-            new("TO010", "TALCO SURTIDO MIDDY BEAR 635GR.", "Toallas y Otros", 12, 72.00m, 864.00m, 77.14m, 925.71m, 61.36m, 736.36m)
+            // Toallas y Otros (11)
+            new("TA001", "TOALLAS HUMEDAS FAMILYS ROBELLY CELESTE 96 HOJAS", "Toallas y Otros", 12, 72.00m, 864.00m, 77.14m, 925.71m, 61.36m, 736.36m),
+            new("TA002", "TOALLAS HUMEDAS MIDDY BEAR 80 HOJAS", "Toallas y Otros", 12, 78.00m, 936.00m, 83.57m, 1002.86m, 66.48m, 797.73m),
+            new("TA003", "PAQUETE DE TOALLITA HUMEDA MIDDY BEAR 120 HOJAS", "Toallas y Otros", 12, 81.60m, 979.20m, 87.43m, 1049.14m, 69.55m, 834.55m),
+            new("TA004", "UNIDAD JN203 TOALLITA COMPRIMIDA MIDDY BEAR", "Toallas y Otros", 30, 74.40m, 2232.00m, 79.71m, 2391.43m, 63.41m, 1902.27m),
+            new("TA005", "TOALLA HUMEDA SIPPACK MIDDY BEAR", "Toallas y Otros", 20, 54.00m, 1080.00m, 57.86m, 1157.14m, 46.02m, 920.45m),
+            new("TA006", "PAPEL HIGIENICO ROBELLY 1620 HOJAS", "Toallas y Otros", 24, 27.00m, 648.00m, 28.93m, 694.29m, 23.01m, 552.27m),
+            new("TA007", "BOLSON DE PAÑALES CALSON OSITO -TALLAS; S,M,L,XL,XXL,3XL Y 4XL.", "Toallas y Otros", 4, 117.00m, 468.00m, 125.36m, 501.43m, 99.72m, 398.86m),
+            new("TA008", "BOLSON DE PAÑALES PEGA PEGA OSITO -TALLAS; S,M,L,XL,XXL Y XXXL.", "Toallas y Otros", 4, 117.00m, 468.00m, 125.36m, 501.43m, 99.72m, 398.86m),
+            new("TA009", "PAQUETE DE PAÑAL ADULTO MOMMY BEAR -TALLAS; M,L,XL.", "Toallas y Otros", 8, 324.00m, 2592.00m, 347.14m, 2777.14m, 276.14m, 2209.09m),
+            new("TA010", "TALCO SURTIDO MIDDY BEAR 635GR.", "Toallas y Otros", 12, 72.00m, 864.00m, 77.14m, 925.71m, 61.36m, 736.36m),
+            new("TO011", "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6X", "Toallas y Otros", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m)
         };
 
         foreach (var data in productsData)
