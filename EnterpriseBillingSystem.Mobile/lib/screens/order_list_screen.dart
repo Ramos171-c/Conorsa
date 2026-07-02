@@ -142,8 +142,16 @@ class _OrderListScreenState extends State<OrderListScreen> {
       final orderProv = Provider.of<OrderProvider>(context, listen: false);
       final posProv = Provider.of<PosProvider>(context, listen: false);
       
-      final detail = await orderProv.fetchOrderDetail(orderItem.id);
-      Navigator.pop(context); // Close loading dialog
+      // Cargar detalles, productos y clientes concurrentemente para tener el catálogo listo
+      final detailFuture = orderProv.fetchOrderDetail(orderItem.id);
+      final productsFuture = orderProv.products.isEmpty ? orderProv.fetchProducts() : Future.value();
+      final customersFuture = orderProv.customers.isEmpty ? orderProv.fetchCustomers() : Future.value();
+
+      await Future.wait([detailFuture, productsFuture, customersFuture]);
+      final detail = await detailFuture;
+
+      if (!context.mounted) return;
+      Navigator.pop(context); // Cerrar dialogo de carga
 
       if (detail != null) {
         posProv.loadOrderToCart(detail, orderProv.customers, orderProv.products);
@@ -158,10 +166,12 @@ class _OrderListScreenState extends State<OrderListScreen> {
         );
       }
     } catch (e) {
-      Navigator.pop(context); // Close loading dialog if open
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Error al editar: $e')),
-      );
+      if (context.mounted) {
+        Navigator.pop(context); // Cerrar dialogo de carga si ocurre un error
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Error al editar: $e')),
+        );
+      }
     }
   }
 

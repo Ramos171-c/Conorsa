@@ -112,10 +112,12 @@ class OfflineService {
     // Add temporary customer entry to cache list
     cachedList.insert(0, {
       'id': customer['tempId'],
+      'customerCode': 'TEMP-${customer['tempId'].toString().substring(0, 5).toUpperCase()}',
       'code': 'TEMP-${customer['tempId'].toString().substring(0, 5).toUpperCase()}',
+      'name': customer['firstName'],
       'firstName': customer['firstName'],
-      'lastName': customer['lastName'],
-      'fullName': '${customer['firstName']} ${customer['lastName']}',
+      'lastName': customer['lastName'] ?? '',
+      'fullName': '${customer['firstName']} ${customer['lastName'] ?? ""}'.trim(),
       'customerType': customer['customerType'] ?? 'Natural',
       'email': customer['email'],
       'phoneNumber': customer['phoneNumber'],
@@ -123,6 +125,14 @@ class OfflineService {
       'municipality': customer['municipality'],
       'city': customer['city'],
       'routeName': 'Ruta Temporal (Offline)',
+      'isTaxExempt': customer['isTaxExempt'] ?? false,
+      'defaultDiscountPercentage': customer['defaultDiscountPercentage'] ?? 0.0,
+      'status': 1,
+      'canUseCredit': customer['canUseCredit'] ?? false,
+      'creditLimit': customer['creditLimit'] ?? 0.0,
+      'creditDays': customer['creditDays'] ?? 0,
+      'customerPricingProfileType': 0,
+      'currentDebt': 0.0,
     });
     await prefs.setString(_keyCachedCustomers, jsonEncode(cachedList));
   }

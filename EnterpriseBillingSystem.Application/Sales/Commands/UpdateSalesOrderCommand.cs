@@ -110,12 +110,21 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         if (customer.Status == CustomerStatus.Blocked || customer.Status == CustomerStatus.Inactive)
             throw new InvalidOperationException($"El cliente '{customer.Name}' no está disponible para transacciones (Estado: {customer.Status}).");
 
-        // 3. Calcular totales y construir detalles
+        // 3. Sincronizar detalles (Agregar, Actualizar o Eliminar)
         decimal subTotal = 0;
         decimal totalDiscount = 0;
         decimal totalTax = 0;
-        var details = new List<SalesOrderDetail>();
 
+        // 3.1 Eliminar detalles que ya no vienen en la solicitud
+        var requestedProductIds = request.Details.Select(d => d.ProductId).ToList();
+        var detailsToRemove = order.Details.Where(d => !requestedProductIds.Contains(d.ProductId)).ToList();
+        foreach (var detail in detailsToRemove)
+        {
+            _salesOrderDetailRepository.Remove(detail);
+            order.Details.Remove(detail);
+        }
+
+        // 3.2 Agregar o actualizar detalles
         foreach (var req in request.Details)
         {
             var product = await _productRepository.GetByIdWithDetailsAsync(req.ProductId, cancellationToken);
@@ -136,20 +145,35 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
             totalDiscount += discountAmount;
             totalTax += taxAmount;
 
-            details.Add(new SalesOrderDetail
+            var existingDetail = order.Details.FirstOrDefault(d => d.ProductId == req.ProductId);
+            if (existingDetail != null)
             {
-                Id = Guid.NewGuid(),
-                SalesOrderId = order.Id,
-                ProductId = req.ProductId,
-                UnitOfMeasureId = req.UnitOfMeasureId,
-                Quantity = req.Quantity,
-                UnitPrice = req.UnitPrice,
-                DiscountPercentage = req.DiscountPercentage,
-                DiscountAmount = discountAmount,
-                TaxPercentage = effectiveTaxPct,
-                TaxAmount = taxAmount,
-                NetAmount = netAmount
-            });
+                existingDetail.UnitOfMeasureId = req.UnitOfMeasureId;
+                existingDetail.Quantity = req.Quantity;
+                existingDetail.UnitPrice = req.UnitPrice;
+                existingDetail.DiscountPercentage = req.DiscountPercentage;
+                existingDetail.DiscountAmount = discountAmount;
+                existingDetail.TaxPercentage = effectiveTaxPct;
+                existingDetail.TaxAmount = taxAmount;
+                existingDetail.NetAmount = netAmount;
+            }
+            else
+            {
+                order.Details.Add(new SalesOrderDetail
+                {
+                    Id = Guid.NewGuid(),
+                    SalesOrderId = order.Id,
+                    ProductId = req.ProductId,
+                    UnitOfMeasureId = req.UnitOfMeasureId,
+                    Quantity = req.Quantity,
+                    UnitPrice = req.UnitPrice,
+                    DiscountPercentage = req.DiscountPercentage,
+                    DiscountAmount = discountAmount,
+                    TaxPercentage = effectiveTaxPct,
+                    TaxAmount = taxAmount,
+                    NetAmount = netAmount
+                });
+            }
         }
 
         // Validar compra mínima dinámica
@@ -174,19 +198,6 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         order.TaxAmount = totalTax;
         order.TotalAmount = totalAmount;
         order.Notes = request.Notes;
-
-        // Limpiar detalles antiguos usando el repositorio
-        foreach (var detail in order.Details.ToList())
-        {
-            _salesOrderDetailRepository.Remove(detail);
-        }
-        order.Details.Clear();
-
-        // Agregar nuevos detalles
-        foreach (var detail in details)
-        {
-            order.Details.Add(detail);
-        }
 
         order.LastModifiedBy = "System";
         order.LastModifiedOnUtc = DateTime.UtcNow;
