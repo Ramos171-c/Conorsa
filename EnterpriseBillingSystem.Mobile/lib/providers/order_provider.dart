@@ -547,17 +547,51 @@ class OrderProvider extends ChangeNotifier {
       final Map<String, String> tempIdToRealIdMap = {};
 
       if (offlineCustomers.isNotEmpty) {
+        // Fetch current active categories and profiles from server to self-heal invalid IDs
+        List<dynamic> currentCategories = [];
+        try {
+          final response = await apiService.get('/customercategories?pageNumber=1&pageSize=100');
+          if (response.statusCode == 200) {
+            final data = jsonDecode(response.body);
+            currentCategories = data['items'] as List<dynamic>? ?? [];
+          }
+        } catch (_) {}
+
+        List<dynamic> currentProfiles = [];
+        try {
+          final response = await apiService.get('/customers/pricing-profiles');
+          if (response.statusCode == 200) {
+            currentProfiles = jsonDecode(response.body) as List<dynamic>? ?? [];
+          }
+        } catch (_) {}
+
         final List<Map<String, dynamic>> remainingCustomers = [];
         for (var cust in offlineCustomers) {
           try {
+            var categoryId = cust['customerCategoryId'];
+            if (currentCategories.isNotEmpty) {
+              final exists = currentCategories.any((c) => c['id'] == categoryId);
+              if (!exists) {
+                categoryId = currentCategories[0]['id'];
+              }
+            }
+
+            var pricingProfileId = cust['customerPricingProfileId'];
+            if (currentProfiles.isNotEmpty) {
+              final exists = currentProfiles.any((p) => p['id'] == pricingProfileId);
+              if (!exists) {
+                pricingProfileId = currentProfiles[0]['id'];
+              }
+            }
+
             final body = {
               'IdentificationNumber': cust['identificationNumber'],
               'IdentificationType': cust['identificationType'],
               'CustomerType': cust['customerType'],
               'Name': cust['firstName'], // backend expects 'Name'
               'LegalName': cust['legalName'],
-              'CustomerCategoryId': cust['customerCategoryId'],
-              'CustomerPricingProfileId': cust['customerPricingProfileId'],
+              'CustomerCategoryId': categoryId,
+              'CustomerPricingProfileId': pricingProfileId,
               'CreditLimit': cust['creditLimit'],
               'CreditDays': cust['creditDays'],
               'CanUseCredit': cust['canUseCredit'],
