@@ -199,13 +199,15 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         {
             foreach (var entry in ex.Entries)
             {
-                if (entry.Entity is SalesOrder)
+                var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken);
+                if (databaseValues == null)
                 {
-                    var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken);
-                    if (databaseValues == null)
-                    {
-                        throw new InvalidOperationException("El pedido de venta ya no existe en la base de datos.");
-                    }
+                    // La fila ya fue eliminada de la base de datos (por ejemplo, por borrado en cascada),
+                    // por lo que la desvinculamos del contexto para que EF Core no falle intentando borrarla de nuevo.
+                    entry.State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+                }
+                else
+                {
                     entry.OriginalValues.SetValues(databaseValues);
                 }
             }
