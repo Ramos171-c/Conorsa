@@ -383,7 +383,7 @@ class OfflineSyncBanner extends StatelessWidget {
                       Text(
                         orderProvider.isSyncing
                             ? 'Subiendo pedidos y clientes registrados sin internet...'
-                            : 'Tienes datos guardados localmente. Conéctate a internet para sincronizarlos.',
+                            : 'Tienes datos guardados localmente. Presiona el botón para sincronizarlos con el servidor.',
                         style: TextStyle(
                           fontSize: 12,
                           color: orderProvider.isSyncing ? const Color(0xFF3B82F6) : const Color(0xFF9A3412),

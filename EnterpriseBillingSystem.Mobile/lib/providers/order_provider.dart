@@ -572,7 +572,12 @@ class OrderProvider extends ChangeNotifier {
             final response = await apiService.post('/customers', body);
             if (response.statusCode == 201 || response.statusCode == 200) {
               final data = jsonDecode(response.body);
-              final String realId = data['id'];
+              String realId;
+              if (data is Map) {
+                realId = (data['id'] ?? data['Id'] ?? response.body).toString().replaceAll('"', '');
+              } else {
+                realId = data.toString().replaceAll('"', '');
+              }
               tempIdToRealIdMap[cust['tempId']] = realId;
             } else {
               remainingCustomers.add(cust);
