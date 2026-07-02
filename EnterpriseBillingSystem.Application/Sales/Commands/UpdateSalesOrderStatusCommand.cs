@@ -60,6 +60,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
             var movement = new InventoryMovement
             {
                 Id = Guid.NewGuid(),
+                BranchId = warehouse.BranchId,
                 MovementNumber = movementNumber,
                 MovementType = MovementType.Sale,
                 FromBranchWarehouseId = warehouse.Id,
@@ -97,10 +98,6 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
                 if (inventory == null)
                 {
-                    if (!warehouse.AllowNegativeInventory)
-                    {
-                        throw new InvalidOperationException($"Stock insuficiente para el producto '{product.Name}' en la bodega de despacho. Disponible: 0, Requerido: {quantityInBaseUnit} (en unidad base).");
-                    }
                     inventory = new Domain.Entities.Inventory
                     {
                         Id = Guid.NewGuid(),
@@ -114,12 +111,8 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                     };
                     await _inventoryRepository.AddAsync(inventory);
                 }
-                else if (!warehouse.AllowNegativeInventory && inventory.AvailableStock < quantityInBaseUnit)
-                {
-                    throw new InvalidOperationException($"Stock insuficiente para el producto '{product.Name}' en la bodega de despacho. Disponible: {inventory.AvailableStock}, Requerido: {quantityInBaseUnit} (en unidad base).");
-                }
 
-                // Deduct from physical stock
+                // Deduct from physical stock (always allow going negative for dispatches)
                 inventory.PhysicalStock -= quantityInBaseUnit;
                 _inventoryRepository.Update(inventory);
 
@@ -127,6 +120,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 movement.Details.Add(new InventoryMovementDetail
                 {
                     Id = Guid.NewGuid(),
+                    BranchId = warehouse.BranchId,
                     ProductId = detail.ProductId,
                     Quantity = detail.Quantity,
                     UnitOfMeasureId = detail.UnitOfMeasureId,
@@ -172,7 +166,16 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         order.LastModifiedOnUtc = DateTime.UtcNow;
 
         _salesOrderRepository.Update(order);
-        await _unitOfWork.SaveChangesAsync(cancellationToken);
+
+        try
+        {
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx)
+        {
+            var innerMessage = dbEx.InnerException?.Message ?? dbEx.Message;
+            throw new InvalidOperationException($"Error de persistencia en la base de datos: {innerMessage}", dbEx);
+        }
 
         return Unit.Value;
     }

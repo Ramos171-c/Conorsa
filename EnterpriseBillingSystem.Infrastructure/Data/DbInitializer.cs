@@ -220,7 +220,6 @@ public class DbInitializer : IDbInitializer
             await ResetAndSeedNewCatalogAsync(casaMatriz.Id);
         }
 
-        // 8. Sembrar Bodegas y Existencias Iniciales
         if (!await _context.Warehouses.AnyAsync())
         {
             var generalWh = new Warehouse
@@ -234,18 +233,7 @@ public class DbInitializer : IDbInitializer
                 CreatedOnUtc = DateTime.UtcNow
             };
 
-            var exhibicionWh = new Warehouse
-            {
-                Id = Guid.NewGuid(),
-                Code = "BE01",
-                Name = "Bodega de Exhibición",
-                Description = "Bodega del área de ventas y exhibición",
-                IsActive = true,
-                CreatedBy = "System",
-                CreatedOnUtc = DateTime.UtcNow
-            };
-
-            await _context.Warehouses.AddRangeAsync(generalWh, exhibicionWh);
+            await _context.Warehouses.AddAsync(generalWh);
             await _context.SaveChangesAsync();
 
             // Asociar a la Casa Matriz
@@ -262,18 +250,7 @@ public class DbInitializer : IDbInitializer
                     CreatedOnUtc = DateTime.UtcNow
                 };
 
-                var beCM = new BranchWarehouse
-                {
-                    Id = Guid.NewGuid(),
-                    BranchId = casaMatriz.Id,
-                    WarehouseId = exhibicionWh.Id,
-                    IsDefault = false,
-                    IsActive = true,
-                    CreatedBy = "System",
-                    CreatedOnUtc = DateTime.UtcNow
-                };
-
-                await _context.BranchWarehouses.AddRangeAsync(bgCM, beCM);
+                await _context.BranchWarehouses.AddAsync(bgCM);
                 await _context.SaveChangesAsync();
 
                 // Existencias iniciales se manejan dentro de ResetAndSeedNewCatalogAsync
