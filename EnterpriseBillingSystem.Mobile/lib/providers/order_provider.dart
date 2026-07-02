@@ -6,6 +6,7 @@ import '../models/customer.dart';
 import '../models/product.dart';
 import '../models/order.dart';
 import 'package:http/http.dart' as http;
+import 'package:shared_preferences/shared_preferences.dart';
 
 class OrderProvider extends ChangeNotifier {
   final ApiService apiService;
@@ -47,9 +48,10 @@ class OrderProvider extends ChangeNotifier {
     final offlineService = OfflineService();
 
     try {
+      final pageSize = (search == null || search.isEmpty) ? 1000 : 50;
       final searchParam = search != null && search.isNotEmpty ? '&searchTerm=$search' : '';
       final routeParam = routeId != null && routeId.isNotEmpty ? '&routeId=$routeId' : '';
-      final response = await apiService.get('/customers?pageNumber=1&pageSize=50$searchParam$routeParam');
+      final response = await apiService.get('/customers?pageNumber=1&pageSize=$pageSize$searchParam$routeParam');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -103,8 +105,9 @@ class OrderProvider extends ChangeNotifier {
       http.Response response;
 
       if (hasSession) {
+        final pageSize = (search == null || search.isEmpty) ? 2000 : 50;
         final searchParam = search != null && search.isNotEmpty ? '&searchTerm=$search' : '';
-        response = await apiService.get('/products?pageNumber=1&pageSize=50$searchParam');
+        response = await apiService.get('/products?pageNumber=1&pageSize=$pageSize$searchParam');
       } else {
         response = await apiService.get('/catalog/products');
       }
@@ -618,8 +621,20 @@ class OrderProvider extends ChangeNotifier {
         await offlineService.saveOfflineOrders(remainingOrders);
       }
 
+      // Retrieve the routeId from cached user profile for background sync
+      String? routeId;
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        final cachedData = prefs.getString('cached_user_profile');
+        if (cachedData != null) {
+          final profileMap = jsonDecode(cachedData);
+          routeId = profileMap['routeId'] as String?;
+        }
+      } catch (_) {}
+
+      final routeParam = routeId != null && routeId.isNotEmpty ? '&routeId=$routeId' : '';
       // Refresh listings and cache once sync is complete
-      final responseCust = await apiService.get('/customers?pageNumber=1&pageSize=50');
+      final responseCust = await apiService.get('/customers?pageNumber=1&pageSize=1000$routeParam');
       if (responseCust.statusCode == 200) {
         final data = jsonDecode(responseCust.body);
         final items = data['items'] as List<dynamic>? ?? [];
@@ -627,7 +642,7 @@ class OrderProvider extends ChangeNotifier {
         await offlineService.cacheCustomers(items);
       }
 
-      final responseProd = await apiService.get('/products?pageNumber=1&pageSize=50');
+      final responseProd = await apiService.get('/products?pageNumber=1&pageSize=2000');
       if (responseProd.statusCode == 200) {
         final data = jsonDecode(responseProd.body);
         final List<dynamic> items = data['items'] as List<dynamic>? ?? [];
