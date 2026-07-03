@@ -6,6 +6,7 @@ import '../providers/order_provider.dart';
 import '../providers/pos_provider.dart';
 import '../models/product.dart';
 import '../models/customer.dart';
+import '../widgets/cached_product_image.dart';
 
 class PosScreen extends StatefulWidget {
   const PosScreen({super.key});
@@ -1113,18 +1114,14 @@ class _PosScreenState extends State<PosScreen> {
                                   children: [
                                     // Image / Icon
                                     Expanded(
-                                      child: Container(
-                                        width: double.infinity,
-                                        decoration: BoxDecoration(
-                                          color: const Color(0xFFF8FAFC),
-                                          borderRadius: BorderRadius.circular(8),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(8),
+                                        child: CachedProductImage(
+                                          imageUrl: p.imageUrl,
+                                          width: double.infinity,
+                                          fit: BoxFit.cover,
+                                          iconSize: 40,
                                         ),
-                                        child: hasImage
-                                            ? ClipRRect(
-                                                borderRadius: BorderRadius.circular(8),
-                                                child: Image.network(p.imageUrl!, fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.image, color: Colors.grey)),
-                                              )
-                                            : const Icon(Icons.inventory_2_outlined, color: Colors.grey, size: 40),
                                       ),
                                     ),
                                     const SizedBox(height: 8),

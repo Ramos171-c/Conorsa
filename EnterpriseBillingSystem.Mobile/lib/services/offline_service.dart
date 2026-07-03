@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'image_cache_service.dart';
 
 class OfflineService {
   static const String _keyCachedProducts = 'cached_products';
@@ -15,6 +16,15 @@ class OfflineService {
   Future<void> cacheProducts(List<dynamic> products) async {
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyCachedProducts, jsonEncode(products));
+
+    // Pre-cache product images in the background
+    try {
+      final urls = products
+          .map((p) => (p['imageUrl'] as String? ?? p['imagePath'] as String?) ?? '')
+          .where((url) => url.isNotEmpty)
+          .toList();
+      ImageCacheService.cacheImages(urls);
+    } catch (_) {}
   }
 
   Future<List<dynamic>> getCachedProducts() async {
