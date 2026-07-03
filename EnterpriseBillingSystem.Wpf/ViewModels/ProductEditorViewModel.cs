@@ -578,22 +578,26 @@ public partial class ProductEditorViewModel : ViewModelBase
         IsLoading = true;
         try
         {
-            var presentationsPayload = Presentations.Select(p => new ProductPresentationInputDto(
-                p.Id,
-                p.UnitOfMeasureId,
-                p.Name,
-                p.ConversionFactor,
-                p.Barcode,
-                p.Cost,
-                p.RetailPrice,
-                p.SemiWholesalePrice,
-                p.WholesalePrice,
-                p.IsBaseUnit,
-                p.IsDefaultSalePresentation,
-                p.AllowPurchase,
-                p.AllowSale,
-                p.IsActive
-            )).ToList();
+            // Sort presentations: base unit MUST be first (backend validator requirement)
+            var presentationsPayload = Presentations
+                .OrderByDescending(p => p.IsBaseUnit)
+                .ThenBy(p => p.ConversionFactor)
+                .Select(p => new ProductPresentationInputDto(
+                    p.Id,
+                    p.UnitOfMeasureId,
+                    p.Name,
+                    p.ConversionFactor,
+                    p.Barcode,
+                    p.Cost,
+                    p.RetailPrice,
+                    p.SemiWholesalePrice,
+                    p.WholesalePrice,
+                    p.IsBaseUnit,
+                    p.IsDefaultSalePresentation,
+                    p.AllowPurchase,
+                    p.AllowSale,
+                    p.IsActive
+                )).ToList();
 
             if (IsEditMode && _originalProduct != null)
             {
@@ -704,7 +708,36 @@ public partial class ProductEditorViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            _notificationService.ShowError($"Error al guardar: {ex.Message}");
+            // Try to extract readable validation messages from the raw JSON error
+            var msg = ex.Message;
+            try
+            {
+                if (msg.Contains("\"errors\"") || msg.Contains("\"detail\""))
+                {
+                    var json = System.Text.Json.JsonDocument.Parse(msg.Substring(msg.IndexOf('{')));
+                    if (json.RootElement.TryGetProperty("detail", out var detail))
+                    {
+                        msg = detail.GetString() ?? msg;
+                    }
+                    if (json.RootElement.TryGetProperty("errors", out var errors))
+                    {
+                        var errorMessages = new System.Collections.Generic.List<string>();
+                        foreach (var prop in errors.EnumerateObject())
+                        {
+                            foreach (var err in prop.Value.EnumerateArray())
+                            {
+                                errorMessages.Add(err.GetString() ?? "");
+                            }
+                        }
+                        if (errorMessages.Any())
+                        {
+                            msg = string.Join("\n", errorMessages);
+                        }
+                    }
+                }
+            }
+            catch { /* Use original message if parsing fails */ }
+            _notificationService.ShowError($"Error al guardar: {msg}");
         }
         finally
         {
