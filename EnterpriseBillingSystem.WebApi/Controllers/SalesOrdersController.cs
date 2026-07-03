@@ -5,6 +5,7 @@ using EnterpriseBillingSystem.WebApi.Authorization;
 using EnterpriseBillingSystem.Application.Sales.Commands;
 using EnterpriseBillingSystem.Application.Sales.Queries;
 using EnterpriseBillingSystem.Application.Common.Models;
+using Serilog;
 
 namespace EnterpriseBillingSystem.WebApi.Controllers;
 
@@ -66,7 +67,8 @@ public class SalesOrdersController : ApiControllerBase
                               ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
         }
 
-        Console.WriteLine($"[DEBUG-ORDERS] User: '{User.Identity?.Name}', RoleClaim: '{roleClaim}', IsAdmin: {isAdmin}, Filter: '{createdByFilter}'");
+        Log.Information("[DEBUG-ORDERS] User: '{User}', RoleClaim: '{RoleClaim}', IsAdmin: {IsAdmin}, Filter: '{Filter}'", 
+            User.Identity?.Name, roleClaim, isAdmin, createdByFilter);
 
         var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize, createdByFilter));
         return Ok(result);
