@@ -172,12 +172,12 @@
                                    Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                                    Margin="0,0,6,0" />
 
-                        <TextBox Grid.Column="1" Text="{Binding CurrentCost, UpdateSourceTrigger=PropertyChanged}" 
+                        <TextBox Grid.Column="1" Text="{Binding CurrentCost}" 
                                  materialDesign:HintAssist.Hint="Costo Base" 
                                  Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                                  Margin="6,0,6,0" />
 
-                        <TextBox Grid.Column="2" Text="{Binding MinimumStock, UpdateSourceTrigger=PropertyChanged}" 
+                        <TextBox Grid.Column="2" Text="{Binding MinimumStock}" 
                                  materialDesign:HintAssist.Hint="Stock Mínimo" 
                                  Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                                  Margin="6,0,0,0" />
@@ -190,12 +190,12 @@
                             <ColumnDefinition Width="*" />
                         </Grid.ColumnDefinitions>
 
-                        <TextBox Grid.Column="0" Text="{Binding DisplayOrder, UpdateSourceTrigger=PropertyChanged}" 
+                        <TextBox Grid.Column="0" Text="{Binding DisplayOrder}" 
                                  materialDesign:HintAssist.Hint="Orden Visual Catálogo" 
                                  Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                                  Margin="0,0,8,0" />
 
-                        <TextBox Grid.Column="1" Text="{Binding FavoriteOrder, UpdateSourceTrigger=PropertyChanged}" 
+                        <TextBox Grid.Column="1" Text="{Binding FavoriteOrder}" 
                                  materialDesign:HintAssist.Hint="Orden Favoritos POS" 
                                  Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                                  Margin="8,0,0,0" />

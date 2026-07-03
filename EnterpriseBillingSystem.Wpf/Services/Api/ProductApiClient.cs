@@ -39,7 +39,11 @@ public class ProductApiClient
     public async Task<Guid> CreateProductAsync(object command)
     {
         var response = await _httpClient.PostAsJsonAsync("products", command);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var body = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Error {(int)response.StatusCode}: {(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body)}");
+        }
         return await response.Content.ReadFromJsonAsync<Guid>();
     }
 

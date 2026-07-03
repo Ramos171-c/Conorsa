@@ -66,6 +66,10 @@ public partial class DashboardViewModel : ViewModelBase
             var productsResult = await _productApiClient.GetProductsPagedAsync(1, 1000);
             var productCosts = productsResult?.Items?.ToDictionary(p => p.Id, p => p.CurrentCost) ?? new Dictionary<Guid, decimal>();
 
+            // Create a map of User ID (guid string) to Username
+            var userMap = usersResult?.Items?.ToDictionary(u => u.Id.ToString(), u => u.Username, StringComparer.OrdinalIgnoreCase) 
+                ?? new Dictionary<string, string>();
+
             // 3. Fetch all active order details in parallel for top product & profit calculation
             var activeOrders = ordersResult?.Items?
                 .Where(o => !o.Status.Equals("Anulado", StringComparison.OrdinalIgnoreCase))
@@ -87,7 +91,12 @@ public partial class DashboardViewModel : ViewModelBase
                                        user.Role.Equals("SUPER_ADMIN", StringComparison.OrdinalIgnoreCase) ||
                                        user.Role.Equals("ADMINISTRADOR", StringComparison.OrdinalIgnoreCase);
 
-                    bool hasOrders = activeOrders.Any(o => (o.CreatedBy ?? "vendedor").Equals(user.Username, StringComparison.OrdinalIgnoreCase));
+                    bool hasOrders = activeOrders.Any(o => 
+                    {
+                        var createdBy = o.CreatedBy ?? "";
+                        var creatorUsername = userMap.TryGetValue(createdBy, out var uname) ? uname : createdBy;
+                        return creatorUsername.Equals(user.Username, StringComparison.OrdinalIgnoreCase);
+                    });
 
                     if (isSellerRole || hasOrders)
                     {
@@ -128,7 +137,12 @@ public partial class DashboardViewModel : ViewModelBase
             {
                 // Find all active orders created by this seller
                 var sellerOrders = activeOrders
-                    .Where(o => (o.CreatedBy ?? "vendedor").Equals(seller.Username, StringComparison.OrdinalIgnoreCase))
+                    .Where(o => 
+                    {
+                        var createdBy = o.CreatedBy ?? "";
+                        var creatorUsername = userMap.TryGetValue(createdBy, out var uname) ? uname : createdBy;
+                        return creatorUsername.Equals(seller.Username, StringComparison.OrdinalIgnoreCase);
+                    })
                     .ToList();
 
                 seller.TotalOrders = sellerOrders.Count;

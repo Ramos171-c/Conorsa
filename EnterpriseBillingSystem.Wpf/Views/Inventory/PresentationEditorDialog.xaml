@@ -67,12 +67,12 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="0" Text="{Binding ConversionFactor, UpdateSourceTrigger=PropertyChanged}" 
+                    <TextBox Grid.Column="0" Text="{Binding ConversionFactor}" 
                              materialDesign:HintAssist.Hint="Factor de Conversión a Unidad Base" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="0,0,6,0" />
 
-                    <TextBox Grid.Column="1" Text="{Binding Cost, UpdateSourceTrigger=PropertyChanged}" 
+                    <TextBox Grid.Column="1" Text="{Binding Cost}" 
                              materialDesign:HintAssist.Hint="Costo de Presentación" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="6,0,0,0" />
@@ -87,17 +87,17 @@
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <TextBox Grid.Column="0" Text="{Binding RetailPrice, UpdateSourceTrigger=PropertyChanged}" 
+                    <TextBox Grid.Column="0" Text="{Binding RetailPrice}" 
                              materialDesign:HintAssist.Hint="Precio Minorista (Retail)" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="0,0,6,0" />
 
-                    <TextBox Grid.Column="1" Text="{Binding SemiWholesalePrice, UpdateSourceTrigger=PropertyChanged}" 
+                    <TextBox Grid.Column="1" Text="{Binding SemiWholesalePrice}" 
                              materialDesign:HintAssist.Hint="Precio Semi Mayorista" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="6,0,6,0" />
 
-                    <TextBox Grid.Column="2" Text="{Binding WholesalePrice, UpdateSourceTrigger=PropertyChanged}" 
+                    <TextBox Grid.Column="2" Text="{Binding WholesalePrice}" 
                              materialDesign:HintAssist.Hint="Precio Mayorista" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="6,0,0,0" />
