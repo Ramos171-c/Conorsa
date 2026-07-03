@@ -212,15 +212,24 @@ public class UpdateProductCommandValidator : AbstractValidator<UpdateProductComm
                     if (string.IsNullOrWhiteSpace(barcode)) return true;
                     var clean = barcode.Trim();
                     return clean.Length >= 3 && !clean.Contains(" ");
-                }).WithMessage("El código de barras si se define debe tener mínimo 3 caracteres y no contener espacios.")
-                .MustAsync(async (command, barcode, cancellation) =>
-                {
-                    if (string.IsNullOrWhiteSpace(barcode)) return true;
-                    var clean = barcode.Trim();
-                    var existing = await _productRepository.ExistsBarcodeAsync(clean, command.Id, cancellation);
-                    return !existing;
-                }).WithMessage("El código de barras ya está registrado en otro producto.");
+                }).WithMessage("El código de barras si se define debe tener mínimo 3 caracteres y no contener espacios.");
         });
+
+        // Barcode uniqueness check - must be outside ChildRules to access the parent command's Product Id
+        RuleFor(x => x.Presentations)
+            .MustAsync(async (command, presentations, cancellation) =>
+            {
+                if (presentations == null) return true;
+                foreach (var pres in presentations)
+                {
+                    if (string.IsNullOrWhiteSpace(pres.Barcode)) continue;
+                    var clean = pres.Barcode.Trim();
+                    // Use command.Id (Product Id) to exclude the current product from uniqueness check
+                    var existing = await _productRepository.ExistsBarcodeAsync(clean, command.Id, cancellation);
+                    if (existing) return false;
+                }
+                return true;
+            }).WithMessage("El código de barras ya está registrado en otro producto.");
 
         RuleFor(x => x)
             .Must(x => x.ProductType != ProductType.Service || (!x.TrackInventory && !x.RequiresSerialNumber && !x.RequiresBatchControl))
