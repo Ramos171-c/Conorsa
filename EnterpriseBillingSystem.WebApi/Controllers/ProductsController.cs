@@ -56,7 +56,7 @@ public class ProductsController : ApiControllerBase
         var product = await Mediator.Send(new GetProductByIdQuery(id));
         if (product == null) return NotFound();
 
-        return Ok(product with { ImagePath = GetAbsoluteUrl(product.ImagePath) });
+        return Ok(product with { ImagePath = GetAbsoluteUrl(product.ImagePath), ImageUrl = GetAbsoluteUrl(product.ImageUrl) });
     }
 
     [HttpGet]
@@ -70,7 +70,7 @@ public class ProductsController : ApiControllerBase
         [FromQuery] bool? isForPos = null)
     {
         var result = await Mediator.Send(new GetProductsPagedQuery(pageNumber, pageSize, searchTerm, categoryId, brandId, isForPos));
-        var mappedItems = result.Items.Select(item => item with { ImagePath = GetAbsoluteUrl(item.ImagePath) }).ToList();
+        var mappedItems = result.Items.Select(item => item with { ImagePath = GetAbsoluteUrl(item.ImagePath), ImageUrl = GetAbsoluteUrl(item.ImageUrl) }).ToList();
         return Ok(new PagedResult<ProductDto>(mappedItems, result.TotalCount, result.PageNumber, result.PageSize));
     }
 
