@@ -89,18 +89,24 @@ public class ProductApiClient
     {
         using var content = new MultipartFormDataContent();
         var fileContent = new ByteArrayContent(fileBytes);
-        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/jpeg"); // Fallback
+        
+        var contentType = "image/jpeg";
         if (fileName.EndsWith(".png", StringComparison.OrdinalIgnoreCase))
-            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/png");
+            contentType = "image/png";
         else if (fileName.EndsWith(".gif", StringComparison.OrdinalIgnoreCase))
-            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/gif");
+            contentType = "image/gif";
         else if (fileName.EndsWith(".webp", StringComparison.OrdinalIgnoreCase))
-            fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("image/webp");
+            contentType = "image/webp";
 
+        fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse(contentType);
         content.Add(fileContent, "file", fileName);
 
         var response = await _httpClient.PostAsync($"products/{id}/image", content);
-        response.EnsureSuccessStatusCode();
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Error del servidor al subir imagen ({response.StatusCode}): {errorContent}");
+        }
 
         var result = await response.Content.ReadFromJsonAsync<ImageUploadResult>();
         return result?.ImageUrl ?? string.Empty;
