@@ -66,6 +66,8 @@ public class SalesOrdersController : ApiControllerBase
                               ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
         }
 
+        Console.WriteLine($"[DEBUG-ORDERS] User: '{User.Identity?.Name}', RoleClaim: '{roleClaim}', IsAdmin: {isAdmin}, Filter: '{createdByFilter}'");
+
         var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize, createdByFilter));
         return Ok(result);
     }

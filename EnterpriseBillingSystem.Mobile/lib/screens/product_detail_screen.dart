@@ -180,12 +180,15 @@ class ProductDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // 1. Large Visual Product Image Banner
-             CachedProductImage(
-              imageUrl: product.imageUrl,
-              height: 260,
-              width: double.infinity,
-              fit: BoxFit.cover,
-              iconSize: 100,
+            GestureDetector(
+              onTap: () => _showFullImageDialog(context, product.imageUrl, product.name),
+              child: CachedProductImage(
+                imageUrl: product.imageUrl,
+                height: 260,
+                width: double.infinity,
+                fit: BoxFit.cover,
+                iconSize: 100,
+              ),
             ),
             
             // 2. Info details
@@ -371,6 +374,65 @@ class ProductDetailScreen extends StatelessWidget {
               ),
             )
           : null,
+    );
+  }
+
+  void _showFullImageDialog(BuildContext context, String? imageUrl, String productName) {
+    showDialog(
+      context: context,
+      barrierDismissible: true,
+      builder: (context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: const EdgeInsets.all(16),
+          child: Stack(
+            alignment: Alignment.center,
+            children: [
+              Container(
+                decoration: BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                padding: const EdgeInsets.all(8),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: CachedProductImage(
+                        imageUrl: imageUrl,
+                        width: double.infinity,
+                        height: 350,
+                        fit: BoxFit.contain,
+                        iconSize: 100,
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      productName,
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF0F172A),
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                  ],
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: IconButton(
+                  icon: const Icon(Icons.close, color: Colors.grey),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }
