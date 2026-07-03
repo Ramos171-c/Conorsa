@@ -45,7 +45,7 @@
             </Grid>
 
             <!-- KPI Cards Grid -->
-            <UniformGrid Grid.Row="1" Columns="3" Margin="-8,0,-8,16">
+            <UniformGrid Grid.Row="1" Columns="4" Margin="-8,0,-8,16">
                 <!-- Ventas de Hoy -->
                 <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
                     <StackPanel>
@@ -100,6 +100,22 @@
                         </Grid>
                         
                         <ProgressBar Value="{Binding GlobalProgressPercentage}" Height="8" Foreground="#2E7D32" Background="#F1F5F9" />
+                    </StackPanel>
+                </materialDesign:Card>
+
+                <!-- Ganancia Bruta de Hoy -->
+                <materialDesign:Card Margin="8" Padding="24" UniformCornerRadius="12" materialDesign:ElevationAssist.Elevation="Dp2">
+                    <StackPanel>
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*" />
+                                <ColumnDefinition Width="Auto" />
+                            </Grid.ColumnDefinitions>
+                            <TextBlock Text="Ganancia Bruta de Hoy" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" Foreground="{DynamicResource MaterialDesignBodyLight}" />
+                            <materialDesign:PackIcon Grid.Column="1" Kind="CashMultiple" Width="28" Height="28" Foreground="Purple" />
+                        </Grid>
+                        <TextBlock Text="{Binding ProfitToday, StringFormat=C}" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Margin="0,16,0,8" />
+                        <TextBlock Text="{Binding ProfitMarginToday, StringFormat={}{0:N1}% de margen de utilidad}" Style="{StaticResource MaterialDesignCaptionTextBlock}" Foreground="Purple" />
                     </StackPanel>
                 </materialDesign:Card>
             </UniformGrid>
@@ -232,11 +248,10 @@
                                 </StackPanel>
 
                                 <!-- Row 3: Divider -->
-                                <Separator Grid.Row="3" Margin="0,0,0,12" Height="1" Background="#E2E8F0" />
-
-                                <!-- Row 4: Key statistics grid -->
+                                <Separator Grid.Row="3" Margin="0,0,0,12" Height="1" Background="#E2E8F0" />                                 <!-- Row 4: Key statistics grid -->
                                 <Grid Grid.Row="4">
                                     <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="*" />
@@ -264,8 +279,22 @@
                                         </StackPanel>
                                     </Border>
 
+                                    <!-- Ganancia Bruta (Margen) -->
+                                    <Border Grid.Column="2" BorderBrush="#F1F5F9" BorderThickness="0,0,1,0" Padding="0,0,8,0">
+                                        <StackPanel HorizontalAlignment="Center">
+                                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
+                                                <materialDesign:PackIcon Kind="TrendingUp" Width="16" Height="16" Foreground="Purple" VerticalAlignment="Center" Margin="0,0,2,0"/>
+                                                <TextBlock Text="{Binding GrossProfit, StringFormat={}{0:N2}}" FontWeight="Bold" FontSize="14" Foreground="#2E7D32" />
+                                                <TextBlock Text=" (" FontSize="11" FontWeight="Bold" Foreground="#2E7D32" />
+                                                <TextBlock Text="{Binding ProfitMargin, StringFormat={}{0:N0}%}" FontSize="11" FontWeight="Bold" Foreground="#2E7D32" />
+                                                <TextBlock Text=")" FontSize="11" FontWeight="Bold" Foreground="#2E7D32" />
+                                            </StackPanel>
+                                            <TextBlock Text="Ganancia (Margen)" FontSize="11" Foreground="#64748B" HorizontalAlignment="Center" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+
                                     <!-- Articulo Estrella -->
-                                    <StackPanel Grid.Column="2" HorizontalAlignment="Center">
+                                    <StackPanel Grid.Column="3" HorizontalAlignment="Center">
                                         <StackPanel Orientation="Horizontal" HorizontalAlignment="Center">
                                             <materialDesign:PackIcon Kind="StarOutline" Width="16" Height="16" Foreground="#64748B" VerticalAlignment="Center" Margin="0,0,4,0"/>
                                             <TextBlock Text="{Binding TopProduct}" FontWeight="Bold" FontSize="12" Foreground="#0F172A" TextTrimming="CharacterEllipsis" MaxWidth="100" />

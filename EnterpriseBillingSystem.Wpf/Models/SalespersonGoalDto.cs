@@ -22,4 +22,7 @@ public class SalespersonGoalDto
     // Non-persistent base values for dynamic calculation
     public decimal BaseSales { get; set; }
     public int BaseOrders { get; set; }
+
+    public decimal GrossProfit { get; set; }
+    public double ProfitMargin { get; set; }
 }

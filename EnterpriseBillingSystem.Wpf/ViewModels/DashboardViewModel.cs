@@ -15,12 +15,19 @@ public partial class DashboardViewModel : ViewModelBase
     private readonly SalesApiClient _salesApiClient;
     private readonly CustomerApiClient _customerApiClient;
     private readonly UserApiClient _userApiClient;
+    private readonly ProductApiClient _productApiClient;
 
     [ObservableProperty]
     private decimal _salesToday;
 
     [ObservableProperty]
     private int _ordersToday;
+
+    [ObservableProperty]
+    private decimal _profitToday;
+
+    [ObservableProperty]
+    private double _profitMarginToday;
 
     [ObservableProperty]
     private decimal _globalGoal = 100000m;
@@ -33,11 +40,12 @@ public partial class DashboardViewModel : ViewModelBase
 
     public ObservableCollection<SalespersonGoalDto> SalespersonGoals { get; } = new();
 
-    public DashboardViewModel(SalesApiClient salesApiClient, CustomerApiClient customerApiClient, UserApiClient userApiClient)
+    public DashboardViewModel(SalesApiClient salesApiClient, CustomerApiClient customerApiClient, UserApiClient userApiClient, ProductApiClient productApiClient)
     {
         _salesApiClient = salesApiClient;
         _customerApiClient = customerApiClient;
         _userApiClient = userApiClient;
+        _productApiClient = productApiClient;
 
         _ = LoadDashboardDataAsync();
     }
@@ -54,7 +62,11 @@ public partial class DashboardViewModel : ViewModelBase
             // 2. Fetch all system users (vendedores/trabajadores)
             var usersResult = await _userApiClient.GetUsersPagedAsync(1, 100);
 
-            // 3. Fetch all active order details in parallel for top product calculation
+            // 2b. Fetch products to get cost prices
+            var productsResult = await _productApiClient.GetProductsPagedAsync(1, 1000);
+            var productCosts = productsResult?.Items?.ToDictionary(p => p.Id, p => p.CurrentCost) ?? new Dictionary<Guid, decimal>();
+
+            // 3. Fetch all active order details in parallel for top product & profit calculation
             var activeOrders = ordersResult?.Items?
                 .Where(o => !o.Status.Equals("Anulado", StringComparison.OrdinalIgnoreCase))
                 .ToList() ?? new List<SalesOrderListItemDto>();
@@ -88,7 +100,9 @@ public partial class DashboardViewModel : ViewModelBase
                             TopProduct = "Ninguno",
                             Sales = 0m,
                             TotalOrders = 0,
-                            CustomersRegistered = 0
+                            CustomersRegistered = 0,
+                            GrossProfit = 0m,
+                            ProfitMargin = 0
                         });
                     }
                 }
@@ -103,11 +117,13 @@ public partial class DashboardViewModel : ViewModelBase
                     Username = "vendedor",
                     Goal = 20000m,
                     CustomerGoal = 5,
-                    TopProduct = "Ninguno"
+                    TopProduct = "Ninguno",
+                    GrossProfit = 0m,
+                    ProfitMargin = 0
                 });
             }
 
-            // 5. Aggregate order metrics & calculate Top Product
+            // 5. Aggregate order metrics, calculate Top Product & individual seller profit
             foreach (var seller in sellers)
             {
                 // Find all active orders created by this seller
@@ -121,7 +137,7 @@ public partial class DashboardViewModel : ViewModelBase
                 // Track active customer portfolio size
                 seller.CustomersRegistered = sellerOrders.Select(o => o.CustomerId).Distinct().Count();
 
-                // Find all details for these orders to calculate the star product
+                // Find all details for these orders to calculate the star product & cost
                 var sellerOrderDetails = validDetails
                     .Where(d => d.Details != null && sellerOrders.Any(so => so.OrderNumber == d.OrderNumber))
                     .SelectMany(d => d.Details)
@@ -139,6 +155,11 @@ public partial class DashboardViewModel : ViewModelBase
                     {
                         seller.TopProduct = topProdGroup.ProductName;
                     }
+
+                    // Calculate seller cost and profit
+                    decimal sellerCost = sellerOrderDetails.Sum(d => productCosts.TryGetValue(d.ProductId, out var cost) ? cost * d.Quantity : 0m);
+                    seller.GrossProfit = seller.Sales - sellerCost;
+                    seller.ProfitMargin = seller.Sales > 0 ? (double)(seller.GrossProfit / seller.Sales) * 100 : 0;
                 }
             }
 
@@ -156,8 +177,19 @@ public partial class DashboardViewModel : ViewModelBase
                 }
             }
 
+            // Get details of orders made today
+            var todayOrderDetails = validDetails
+                .Where(d => d.OrderDate.Date == todayDate)
+                .SelectMany(d => d.Details)
+                .ToList();
+
+            decimal computedCostToday = todayOrderDetails.Sum(d => productCosts.TryGetValue(d.ProductId, out var cost) ? cost * d.Quantity : 0m);
+            decimal computedProfitToday = computedSalesToday - computedCostToday;
+
             SalesToday = computedSalesToday;
             OrdersToday = computedOrdersToday;
+            ProfitToday = computedProfitToday;
+            ProfitMarginToday = computedSalesToday > 0 ? (double)(computedProfitToday / computedSalesToday) * 100 : 0;
             GlobalProgressPercentage = GlobalGoal > 0 ? (double)(SalesToday / GlobalGoal) * 100 : 0;
 
             // 7. Recalculate percentages & assign status colors
@@ -196,10 +228,15 @@ public partial class DashboardViewModel : ViewModelBase
             // Fallback to offline/mock list if API is unreachable
             var sellers = new List<SalespersonGoalDto>
             {
-                new() { Rank = 1, Name = "Ana Rodríguez", Username = "ana", Goal = 30000m, Sales = 22100m, ProgressPercentage = 73.6, SalesStatusColor = "#1976D2", CustomerGoal = 8, CustomersRegistered = 6, CustomerProgressPercentage = 75.0, CustomerStatusColor = "#008080", TotalOrders = 14, AverageTicket = 1578.57m, TopProduct = "Azúcar Sulca 1kg" },
-                new() { Rank = 2, Name = "María López", Username = "maria", Goal = 25000m, Sales = 18400m, ProgressPercentage = 73.6, SalesStatusColor = "#1976D2", CustomerGoal = 6, CustomersRegistered = 5, CustomerProgressPercentage = 83.3, CustomerStatusColor = "#008080", TotalOrders = 11, AverageTicket = 1672.72m, TopProduct = "Aceite Trébol 1L" },
-                new() { Rank = 3, Name = "Carlos Pérez", Username = "vendedor", Goal = 20000m, Sales = 12500m, ProgressPercentage = 62.5, SalesStatusColor = "#E65100", CustomerGoal = 5, CustomersRegistered = 3, CustomerProgressPercentage = 60.0, CustomerStatusColor = "#E65100", TotalOrders = 8, AverageTicket = 1562.50m, TopProduct = "Harina Maseca 1kg" }
+                new() { Rank = 1, Name = "Ana Rodríguez", Username = "ana", Goal = 30000m, Sales = 22100m, ProgressPercentage = 73.6, SalesStatusColor = "#1976D2", CustomerGoal = 8, CustomersRegistered = 6, CustomerProgressPercentage = 75.0, CustomerStatusColor = "#008080", TotalOrders = 14, AverageTicket = 1578.57m, TopProduct = "Azúcar Sulca 1kg", GrossProfit = 6630m, ProfitMargin = 30.0 },
+                new() { Rank = 2, Name = "María López", Username = "maria", Goal = 25000m, Sales = 18400m, ProgressPercentage = 73.6, SalesStatusColor = "#1976D2", CustomerGoal = 6, CustomersRegistered = 5, CustomerProgressPercentage = 83.3, CustomerStatusColor = "#008080", TotalOrders = 11, AverageTicket = 1672.72m, TopProduct = "Aceite Trébol 1L", GrossProfit = 5152m, ProfitMargin = 28.0 },
+                new() { Rank = 3, Name = "Carlos Pérez", Username = "vendedor", Goal = 20000m, Sales = 12500m, ProgressPercentage = 62.5, SalesStatusColor = "#E65100", CustomerGoal = 5, CustomersRegistered = 3, CustomerProgressPercentage = 60.0, CustomerStatusColor = "#E65100", TotalOrders = 8, AverageTicket = 1562.50m, TopProduct = "Harina Maseca 1kg", GrossProfit = 3125m, ProfitMargin = 25.0 }
             };
+
+            SalesToday = 5200m;
+            OrdersToday = 4;
+            ProfitToday = 1450m;
+            ProfitMarginToday = 27.88;
 
             SalespersonGoals.Clear();
             foreach (var s in sellers)
