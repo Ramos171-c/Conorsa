@@ -19,9 +19,14 @@ class OfflineService {
 
     // Pre-cache product images in the background
     try {
+      final apiUrl = prefs.getString('api_base_url') ?? 'http://167.99.13.177:8080/api/v1';
+      final uri = Uri.parse(apiUrl);
+      final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ":${uri.port}" : ""}';
+
       final urls = products
           .map((p) => (p['imageUrl'] as String? ?? p['imagePath'] as String?) ?? '')
           .where((url) => url.isNotEmpty)
+          .map((url) => url.startsWith('http') ? url : '$base${url.startsWith('/') ? "" : "/"}$url')
           .toList();
       ImageCacheService.cacheImages(urls);
     } catch (_) {}

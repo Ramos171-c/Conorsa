@@ -1,5 +1,7 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import '../providers/config_provider.dart';
 import '../services/image_cache_service.dart';
 
 class CachedProductImage extends StatefulWidget {
@@ -45,7 +47,7 @@ class _CachedProductImageState extends State<CachedProductImage> {
       _isLoading = true;
     });
 
-    final url = widget.imageUrl ?? '';
+    var url = widget.imageUrl ?? '';
     if (url.isEmpty || url.contains('default-product.png')) {
       if (mounted) {
         setState(() {
@@ -54,6 +56,16 @@ class _CachedProductImageState extends State<CachedProductImage> {
         });
       }
       return;
+    }
+
+    // Convert relative path to absolute URL if necessary
+    if (!url.startsWith('http')) {
+      try {
+        final config = Provider.of<ConfigProvider>(context, listen: false);
+        final uri = Uri.parse(config.apiUrl);
+        final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ":${uri.port}" : ""}';
+        url = '$base${url.startsWith('/') ? "" : "/"}$url';
+      } catch (_) {}
     }
 
     // 1. Check local cache first
