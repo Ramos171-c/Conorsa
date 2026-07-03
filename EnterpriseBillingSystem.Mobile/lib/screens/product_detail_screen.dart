@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../models/product.dart';
 import '../providers/auth_provider.dart';
 import '../providers/order_provider.dart';
+import '../widgets/cached_product_image.dart';
 
 class ProductDetailScreen extends StatelessWidget {
   final Product product;
