@@ -47,11 +47,23 @@ public class SalesOrdersController : ApiControllerBase
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20)
     {
+        // Extract role claim using multiple possible claim types (standard and raw JWT)
+        var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value 
+                        ?? User.FindFirst("role")?.Value 
+                        ?? User.FindFirst("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+
+        var isAdmin = string.Equals(roleClaim, "SUPER_ADMIN", StringComparison.OrdinalIgnoreCase) || 
+                      string.Equals(roleClaim, "ADMINISTRADOR", StringComparison.OrdinalIgnoreCase) ||
+                      User.IsInRole("SUPER_ADMIN") || 
+                      User.IsInRole("ADMINISTRADOR");
+
         string? createdByFilter = null;
-        var isAdmin = User.IsInRole("SUPER_ADMIN") || User.IsInRole("ADMINISTRADOR");
         if (!isAdmin)
         {
-            createdByFilter = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+            // Extract user ID using multiple possible claim types
+            createdByFilter = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                              ?? User.FindFirst("sub")?.Value
+                              ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
         }
 
         var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize, createdByFilter));
