@@ -249,8 +249,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       ),
           ),
         ],
-      ),
     );
+  }
+
   void _showFullImageDialog(BuildContext context, String? imageUrl, String productName) {
     showDialog(
       context: context,
