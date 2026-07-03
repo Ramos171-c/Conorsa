@@ -147,7 +147,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
       // Cargar detalles, productos y clientes concurrentemente para tener el catálogo listo
       final detailFuture = orderProv.fetchOrderDetail(orderItem.id);
       final productsFuture = orderProv.products.isEmpty ? orderProv.fetchProducts() : Future.value();
-      final customersFuture = orderProv.customers.isEmpty ? orderProv.fetchCustomers(routeId: authProv.userProfile?.routeId) : Future.value();
+      final customersFuture = orderProv.customers.isEmpty ? orderProv.fetchCustomers(routeId: authProv.userProfile?.effectiveRouteId) : Future.value();
 
       await Future.wait([detailFuture, productsFuture, customersFuture]);
       final detail = await detailFuture;

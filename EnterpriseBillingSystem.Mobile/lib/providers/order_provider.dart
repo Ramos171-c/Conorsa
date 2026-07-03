@@ -667,13 +667,16 @@ class OrderProvider extends ChangeNotifier {
       }
 
       // Retrieve the routeId from cached user profile for background sync
+      // Admins (SUPER_ADMIN, ADMINISTRADOR) get null so they sync ALL customers
       String? routeId;
       try {
         final prefs = await SharedPreferences.getInstance();
         final cachedData = prefs.getString('cached_user_profile');
         if (cachedData != null) {
           final profileMap = jsonDecode(cachedData);
-          routeId = profileMap['routeId'] as String?;
+          final role = profileMap['role'] as String? ?? '';
+          final isAdmin = role == 'SUPER_ADMIN' || role == 'ADMINISTRADOR';
+          routeId = isAdmin ? null : profileMap['routeId'] as String?;
         }
       } catch (_) {}
 

@@ -27,7 +27,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
       final provider = Provider.of<OrderProvider>(context, listen: false);
       final authProv = Provider.of<AuthProvider>(context, listen: false);
       provider.clearDraft();
-      provider.fetchCustomers(routeId: authProv.userProfile?.routeId);
+      provider.fetchCustomers(routeId: authProv.userProfile?.effectiveRouteId);
       provider.fetchProducts();
     });
 
@@ -48,7 +48,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
   void _onCustomerSearchChanged() {
     final search = _customerSearchController.text.trim();
     final authProv = Provider.of<AuthProvider>(context, listen: false);
-    Provider.of<OrderProvider>(context, listen: false).fetchCustomers(search: search, routeId: authProv.userProfile?.routeId);
+    Provider.of<OrderProvider>(context, listen: false).fetchCustomers(search: search, routeId: authProv.userProfile?.effectiveRouteId);
   }
 
   void _onProductSearchChanged() {

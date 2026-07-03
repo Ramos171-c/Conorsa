@@ -25,6 +25,12 @@ class UserProfile {
       ? '$firstName $lastName' 
       : username;
 
+  /// Administrators (SUPER_ADMIN, ADMINISTRADOR) can access all routes
+  bool get isAdmin => role == 'SUPER_ADMIN' || role == 'ADMINISTRADOR';
+
+  /// Returns null for admins so they see all customers from every route
+  String? get effectiveRouteId => isAdmin ? null : routeId;
+
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
       id: json['id'] as String? ?? '',

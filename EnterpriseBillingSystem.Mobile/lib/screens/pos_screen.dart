@@ -389,7 +389,7 @@ class _PosScreenState extends State<PosScreen> {
                         border: OutlineInputBorder(),
                       ),
                       onChanged: (val) async {
-                        await orderProv.fetchCustomers(search: val, routeId: authProv.userProfile?.routeId);
+                        await orderProv.fetchCustomers(search: val, routeId: authProv.userProfile?.effectiveRouteId);
                         setDialogState(() {});
                       },
                     ),
