@@ -163,19 +163,64 @@ class _CatalogScreenState extends State<CatalogScreen> {
                                         children: [
                                           // Product Image
                                           Expanded(
-                                            child: Container(
-                                              decoration: const BoxDecoration(
-                                                color: Color(0xFFF8FAFC),
-                                                borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
-                                              ),
-                                              child: const Center(
-                                                child: Icon(
-                                                  Icons.restaurant_menu_rounded, 
-                                                  size: 50, 
-                                                  color: Color(0xFF94A3B8),
-                                                ),
-                                              ),
-                                            ),
+                                            child: product.imageUrl != null &&
+                                                    product.imageUrl!.isNotEmpty &&
+                                                    !product.imageUrl!.contains('default-product.png')
+                                                ? ClipRRect(
+                                                    borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+                                                    child: Image.network(
+                                                      product.imageUrl!,
+                                                      fit: BoxFit.cover,
+                                                      width: double.infinity,
+                                                      loadingBuilder: (context, child, loadingProgress) {
+                                                        if (loadingProgress == null) return child;
+                                                        return Container(
+                                                          decoration: const BoxDecoration(
+                                                            color: Color(0xFFF8FAFC),
+                                                            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                                          ),
+                                                          child: const Center(
+                                                            child: SizedBox(
+                                                              width: 24,
+                                                              height: 24,
+                                                              child: CircularProgressIndicator(
+                                                                strokeWidth: 2,
+                                                                color: Color(0xFF94A3B8),
+                                                              ),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                      errorBuilder: (context, error, stackTrace) {
+                                                        return Container(
+                                                          decoration: const BoxDecoration(
+                                                            color: Color(0xFFF8FAFC),
+                                                            borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                                          ),
+                                                          child: const Center(
+                                                            child: Icon(
+                                                              Icons.restaurant_menu_rounded,
+                                                              size: 50,
+                                                              color: Color(0xFF94A3B8),
+                                                            ),
+                                                          ),
+                                                        );
+                                                      },
+                                                    ),
+                                                  )
+                                                : Container(
+                                                    decoration: const BoxDecoration(
+                                                      color: Color(0xFFF8FAFC),
+                                                      borderRadius: BorderRadius.vertical(top: Radius.circular(16)),
+                                                    ),
+                                                    child: const Center(
+                                                      child: Icon(
+                                                        Icons.restaurant_menu_rounded,
+                                                        size: 50,
+                                                        color: Color(0xFF94A3B8),
+                                                      ),
+                                                    ),
+                                                  ),
                                           ),
                                           Padding(
                                             padding: const EdgeInsets.all(12.0),

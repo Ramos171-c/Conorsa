@@ -29,10 +29,14 @@ services:
       - JwtSettings__Issuer=EnterpriseBillingSystem.WebApi
       - JwtSettings__Audience=WpfAndFlutterClients
       - JwtSettings__ExpiryMinutes=60
+    volumes:
+      - uploads-data:/app/wwwroot/uploads
     depends_on:
       - db
     restart: always
 
 volumes:
   mssql-data:
+    driver: local
+  uploads-data:
     driver: local

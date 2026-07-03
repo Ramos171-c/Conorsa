@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+y<Project Sdk="Microsoft.NET.Sdk">
 
   <ItemGroup>
     <ProjectReference Include="..\EnterpriseBillingSystem.Domain\EnterpriseBillingSystem.Domain.csproj" />

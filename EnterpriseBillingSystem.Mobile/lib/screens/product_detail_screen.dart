@@ -179,16 +179,33 @@ class ProductDetailScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
             // 1. Large Visual Product Image Banner
-            Container(
+             Container(
               height: 260,
               color: const Color(0xFFF8FAFC),
-              child: const Center(
-                child: Icon(
-                  Icons.restaurant_menu_rounded, 
-                  size: 100, 
-                  color: Color(0xFFCBD5E1),
-                ),
-              ),
+              width: double.infinity,
+              child: product.imageUrl != null &&
+                      product.imageUrl!.isNotEmpty &&
+                      !product.imageUrl!.contains('default-product.png')
+                  ? Image.network(
+                      product.imageUrl!,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return const Center(
+                          child: Icon(
+                            Icons.restaurant_menu_rounded,
+                            size: 100,
+                            color: Color(0xFFCBD5E1),
+                          ),
+                        );
+                      },
+                    )
+                  : const Center(
+                      child: Icon(
+                        Icons.restaurant_menu_rounded,
+                        size: 100,
+                        color: Color(0xFFCBD5E1),
+                      ),
+                    ),
             ),
             
             // 2. Info details
