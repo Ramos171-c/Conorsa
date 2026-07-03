@@ -50,3 +50,6 @@ docker-compose.override.yml
 appsettings.Development.json
 appsettings.Local.json
 *.usersecrets
+
+# Publish output
+publish/

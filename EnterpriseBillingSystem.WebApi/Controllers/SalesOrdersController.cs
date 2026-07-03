@@ -47,7 +47,14 @@ public class SalesOrdersController : ApiControllerBase
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20)
     {
-        var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize));
+        string? createdByFilter = null;
+        var isAdmin = User.IsInRole("SUPER_ADMIN") || User.IsInRole("ADMINISTRADOR");
+        if (!isAdmin)
+        {
+            createdByFilter = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        }
+
+        var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize, createdByFilter));
         return Ok(result);
     }
 

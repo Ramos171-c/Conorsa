@@ -21,6 +21,7 @@ public interface ISalesOrderRepository : IRepository<SalesOrder>
         DateTime? toDate,
         int pageNumber,
         int pageSize,
+        string? createdBy = null,
         CancellationToken cancellationToken = default);
 
     Task<IEnumerable<SalesOrder>> GetFilteredWithDetailsAsync(

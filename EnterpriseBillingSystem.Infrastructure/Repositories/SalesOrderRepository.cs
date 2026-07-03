@@ -66,6 +66,7 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
         DateTime? toDate,
         int pageNumber,
         int pageSize,
+        string? createdBy = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.SalesOrders
@@ -74,6 +75,9 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
 
         if (customerId.HasValue)
             query = query.Where(so => so.CustomerId == customerId.Value);
+
+        if (!string.IsNullOrWhiteSpace(createdBy))
+            query = query.Where(so => so.CreatedBy == createdBy);
 
         if (!string.IsNullOrWhiteSpace(status))
         {
