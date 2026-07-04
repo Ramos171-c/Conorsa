@@ -213,12 +213,8 @@ public class DbInitializer : IDbInitializer
             }
         }
 
-        // 7. Sembrar Datos del Catálogo Real de Productos (si falta GA037)
-        bool catalogNeedsReset = !await _context.Products.IgnoreQueryFilters().AnyAsync(p => p.InternalCode == "GA037");
-        if (catalogNeedsReset)
-        {
-            await ResetAndSeedNewCatalogAsync(casaMatriz.Id);
-        }
+        // 7. Sembrar/Actualizar Datos del Catálogo Real de Productos (Sincronización de Precios)
+        await ResetAndSeedNewCatalogAsync(casaMatriz.Id);
 
         if (!await _context.Warehouses.AnyAsync())
         {
@@ -1299,6 +1295,7 @@ public class DbInitializer : IDbInitializer
 
     private async Task ResetAndSeedNewCatalogAsync(Guid branchId)
     {
+        System.Console.WriteLine("Iniciando actualización/siembra de catálogo de productos...");
         // 1. Obtener o crear categorías
         var catGalletas = await _context.Categories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Name == "Galletas") 
             ?? new Category { Id = Guid.NewGuid(), Name = "Galletas", Description = "Galletas y Waffers", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
@@ -1592,5 +1589,6 @@ public class DbInitializer : IDbInitializer
         }
 
         await _context.SaveChangesAsync();
+        System.Console.WriteLine($"Catálogo de productos actualizado/sembrado con éxito. Total productos procesados: {productsData.Count}");
     }
 }
