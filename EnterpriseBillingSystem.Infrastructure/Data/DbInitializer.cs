@@ -213,8 +213,8 @@ public class DbInitializer : IDbInitializer
             }
         }
 
-        // 7. Sembrar Datos del Catálogo Real de Productos (si falta TO011)
-        bool catalogNeedsReset = !await _context.Products.IgnoreQueryFilters().AnyAsync(p => p.InternalCode == "TO011");
+        // 7. Sembrar Datos del Catálogo Real de Productos (si falta GA037)
+        bool catalogNeedsReset = !await _context.Products.IgnoreQueryFilters().AnyAsync(p => p.InternalCode == "GA037");
         if (catalogNeedsReset)
         {
             await ResetAndSeedNewCatalogAsync(casaMatriz.Id);
