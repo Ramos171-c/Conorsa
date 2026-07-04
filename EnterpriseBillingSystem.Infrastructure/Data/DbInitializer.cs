@@ -1299,83 +1299,43 @@ public class DbInitializer : IDbInitializer
 
     private async Task ResetAndSeedNewCatalogAsync(Guid branchId)
     {
-        // 1. Eliminar datos transaccionales existentes (Deshabilitando restricciones temporalmente)
-        await _context.Database.ExecuteSqlRawAsync("EXEC sp_MSforeachtable \"ALTER TABLE ? NOCHECK CONSTRAINT all\"");
+        // 1. Obtener o crear categorías
+        var catGalletas = await _context.Categories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Name == "Galletas") 
+            ?? new Category { Id = Guid.NewGuid(), Name = "Galletas", Description = "Galletas y Waffers", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
+        var catCaramelos = await _context.Categories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Name == "Caramelos") 
+            ?? new Category { Id = Guid.NewGuid(), Name = "Caramelos", Description = "Caramelos y Dulces", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
+        var catMalvaviscos = await _context.Categories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Name == "Malvaviscos") 
+            ?? new Category { Id = Guid.NewGuid(), Name = "Malvaviscos", Description = "Malvaviscos y Masmelos", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
+        var catToallas = await _context.Categories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Name == "Toallas y Otros") 
+            ?? new Category { Id = Guid.NewGuid(), Name = "Toallas y Otros", Description = "Toallas húmedas y aseo personal", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
 
-        try
-        {
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [AccountsReceivablePayments]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [AccountsReceivables]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [AccountsPayablePayments]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [AccountsPayables]");
+        if (_context.Entry(catGalletas).State == EntityState.Detached) await _context.Categories.AddAsync(catGalletas);
+        if (_context.Entry(catCaramelos).State == EntityState.Detached) await _context.Categories.AddAsync(catCaramelos);
+        if (_context.Entry(catMalvaviscos).State == EntityState.Detached) await _context.Categories.AddAsync(catMalvaviscos);
+        if (_context.Entry(catToallas).State == EntityState.Detached) await _context.Categories.AddAsync(catToallas);
 
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [SalesInvoiceDetails]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [SalesInvoices]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [SalesOrderDetails]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [SalesOrders]");
+        // 2. Obtener o crear marca genérica
+        var brandGenerica = await _context.Brands.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Name == "Genérica") 
+            ?? new Brand { Id = Guid.NewGuid(), Name = "Genérica", Description = "Marca Genérica", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
+        if (_context.Entry(brandGenerica).State == EntityState.Detached) await _context.Brands.AddAsync(brandGenerica);
 
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [PurchaseReceiptDetails]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [PurchaseReceipts]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [PurchaseInvoiceDetails]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [PurchaseInvoices]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [PurchaseOrderDetails]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [PurchaseOrders]");
+        // 3. Obtener o crear Unidades de Medida
+        var uomUnd = await _context.UnitsOfMeasure.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Code == "UND") 
+            ?? new UnitOfMeasure { Id = Guid.NewGuid(), Code = "UND", Name = "Unidad", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
+        if (_context.Entry(uomUnd).State == EntityState.Detached) await _context.UnitsOfMeasure.AddAsync(uomUnd);
 
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [InventoryMovementDetails]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [InventoryMovements]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [InventoryReservations]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [Inventory]");
-            
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [BranchProducts]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [ProductPriceHistories]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [ProductPresentations]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [Products]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [Categories]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [Brands]");
-            await _context.Database.ExecuteSqlRawAsync("DELETE FROM [SalesGoals]");
-        }
-        finally
-        {
-            await _context.Database.ExecuteSqlRawAsync("EXEC sp_MSforeachtable \"ALTER TABLE ? WITH CHECK CHECK CONSTRAINT all\"");
-        }
+        var uomCaja = await _context.UnitsOfMeasure.IgnoreQueryFilters().FirstOrDefaultAsync(u => u.Code == "CAJA") 
+            ?? new UnitOfMeasure { Id = Guid.NewGuid(), Code = "CAJA", Name = "Caja", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
+        if (_context.Entry(uomCaja).State == EntityState.Detached) await _context.UnitsOfMeasure.AddAsync(uomCaja);
 
-        // 2. Crear las nuevas categorías
-        var catGalletas = new Category { Id = Guid.NewGuid(), Name = "Galletas", Description = "Galletas y Waffers", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-        var catCaramelos = new Category { Id = Guid.NewGuid(), Name = "Caramelos", Description = "Caramelos y Dulces", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-        var catMalvaviscos = new Category { Id = Guid.NewGuid(), Name = "Malvaviscos", Description = "Malvaviscos y Masmelos", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-        var catToallas = new Category { Id = Guid.NewGuid(), Name = "Toallas y Otros", Description = "Toallas húmedas y aseo personal", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-
-        await _context.Categories.AddRangeAsync(catGalletas, catCaramelos, catMalvaviscos, catToallas);
-
-        // 3. Crear marca genérica
-        var brandGenerica = new Brand { Id = Guid.NewGuid(), Name = "Genérica", Description = "Marca Genérica", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-        await _context.Brands.AddAsync(brandGenerica);
-
-        // 4. Crear Unidades de Medida
-        var uomUnd = await _context.UnitsOfMeasure.FirstOrDefaultAsync(u => u.Code == "UND");
-        if (uomUnd == null)
-        {
-            uomUnd = new UnitOfMeasure { Id = Guid.NewGuid(), Code = "UND", Name = "Unidad", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-            await _context.UnitsOfMeasure.AddAsync(uomUnd);
-        }
-        var uomCaja = await _context.UnitsOfMeasure.FirstOrDefaultAsync(u => u.Code == "CAJA");
-        if (uomCaja == null)
-        {
-            uomCaja = new UnitOfMeasure { Id = Guid.NewGuid(), Code = "CAJA", Name = "Caja", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-            await _context.UnitsOfMeasure.AddAsync(uomCaja);
-        }
-
-        // 5. Impuesto Exento
-        var taxExento = await _context.Taxes.FirstOrDefaultAsync(t => t.Rate == 0);
-        if (taxExento == null)
-        {
-            taxExento = new Tax { Id = Guid.NewGuid(), Name = "Exento", Rate = 0.00m, CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-            await _context.Taxes.AddAsync(taxExento);
-        }
+        // 4. Impuesto Exento
+        var taxExento = await _context.Taxes.IgnoreQueryFilters().FirstOrDefaultAsync(t => t.Rate == 0) 
+            ?? new Tax { Id = Guid.NewGuid(), Name = "Exento", Rate = 0.00m, CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
+        if (_context.Entry(taxExento).State == EntityState.Detached) await _context.Taxes.AddAsync(taxExento);
 
         await _context.SaveChangesAsync();
 
-        // 6. Obtener los IDs de las bodegas para Casa Matriz
+        // 5. Obtener los IDs de las bodegas para Casa Matriz
         var branchWarehouses = await _context.BranchWarehouses.Include(bw => bw.Warehouse).Where(bw => bw.BranchId == branchId).ToListAsync();
         var bgCM = branchWarehouses.FirstOrDefault(bw => bw.Warehouse.Name.Contains("General")) ?? branchWarehouses.FirstOrDefault();
 
@@ -1482,113 +1442,152 @@ public class DbInitializer : IDbInitializer
 
         foreach (var data in productsData)
         {
-            var cat = await _context.Categories.FirstAsync(c => c.Name == data.CategoryName);
-            
-            var product = new Product
+            var cat = data.CategoryName switch
             {
-                Id = Guid.NewGuid(),
-                InternalCode = data.Code,
-                Name = data.Name,
-                Description = $"{data.Name} (U/E: {data.Ue})",
-                ProductType = ProductType.Physical,
-                ProductStatus = ProductStatus.Active,
-                TrackInventory = true,
-                RequiresSerialNumber = false,
-                RequiresBatchControl = false,
-                CategoryId = cat.Id,
-                BrandId = brandGenerica.Id,
-                DefaultUnitOfMeasureId = uomUnd.Id,
-                CurrentCost = data.WholesaleUnit * 0.85m,
-                CreatedBy = "System",
-                CreatedOnUtc = DateTime.UtcNow,
-                TaxId = taxExento.Id,
-                IsCatalogVisible = true,
-                IsActive = true
+                "Galletas" => catGalletas,
+                "Caramelos" => catCaramelos,
+                "Malvaviscos" => catMalvaviscos,
+                _ => catToallas
             };
 
-            var presentationUnit = new ProductPresentation
-            {
-                Id = Guid.NewGuid(),
-                ProductId = product.Id,
-                UnitOfMeasureId = uomUnd.Id,
-                Name = "Unidad",
-                ConversionFactor = 1.0000m,
-                Barcode = data.Code + "U",
-                Cost = data.WholesaleUnit * 0.85m,
-                RetailPrice = data.RetailUnit,
-                SemiWholesalePrice = data.SemiUnit,
-                WholesalePrice = data.WholesaleUnit,
-                IsBaseUnit = true,
-                IsDefaultSalePresentation = true,
-                IsActive = true
-            };
-            product.Presentations.Add(presentationUnit);
+            var existingProduct = await _context.Products
+                .Include(p => p.Presentations)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.InternalCode == data.Code);
 
-            var presentationBox = new ProductPresentation
+            if (existingProduct != null)
             {
-                Id = Guid.NewGuid(),
-                ProductId = product.Id,
-                UnitOfMeasureId = uomCaja.Id,
-                Name = "Caja",
-                ConversionFactor = (decimal)data.BoxFactor,
-                Barcode = data.Code + "C",
-                Cost = data.WholesaleBox * 0.85m,
-                RetailPrice = data.RetailBox,
-                SemiWholesalePrice = data.SemiBox,
-                WholesalePrice = data.WholesaleBox,
-                IsBaseUnit = false,
-                IsDefaultSalePresentation = false,
-                IsActive = true
-            };
-            product.Presentations.Add(presentationBox);
+                existingProduct.Name = data.Name;
+                existingProduct.Description = $"{data.Name} (U/E: {data.Ue})";
+                existingProduct.CategoryId = cat.Id;
+                existingProduct.BrandId = brandGenerica.Id;
+                existingProduct.IsActive = true;
 
-            await _context.Products.AddAsync(product);
-
-            // Existencias Iniciales (100 Cajas de cada producto = 100 * BoxFactor Unidades)
-            if (bgCM != null)
+                foreach (var presentation in existingProduct.Presentations)
+                {
+                    if (presentation.ConversionFactor == 1.0000m)
+                    {
+                        presentation.RetailPrice = data.RetailUnit;
+                        presentation.SemiWholesalePrice = data.SemiUnit;
+                        presentation.WholesalePrice = data.WholesaleUnit;
+                    }
+                    else if (presentation.ConversionFactor == (decimal)data.BoxFactor)
+                    {
+                        presentation.RetailPrice = data.RetailBox;
+                        presentation.SemiWholesalePrice = data.SemiBox;
+                        presentation.WholesalePrice = data.WholesaleBox;
+                    }
+                }
+                _context.Products.Update(existingProduct);
+            }
+            else
             {
-                decimal initialStock = 100m * data.BoxFactor;
-                var inventory = new Inventory
+                var product = new Product
                 {
                     Id = Guid.NewGuid(),
-                    BranchWarehouseId = bgCM.Id,
-                    ProductId = product.Id,
-                    PhysicalStock = initialStock,
-                    ReservedStock = 0.0000m,
-                    CommittedStock = 0.0000m,
+                    InternalCode = data.Code,
+                    Name = data.Name,
+                    Description = $"{data.Name} (U/E: {data.Ue})",
+                    ProductType = ProductType.Physical,
+                    ProductStatus = ProductStatus.Active,
+                    TrackInventory = true,
+                    RequiresSerialNumber = false,
+                    RequiresBatchControl = false,
+                    CategoryId = cat.Id,
+                    BrandId = brandGenerica.Id,
+                    DefaultUnitOfMeasureId = uomUnd.Id,
+                    CurrentCost = data.WholesaleUnit * 0.85m,
                     CreatedBy = "System",
-                    CreatedOnUtc = DateTime.UtcNow
-                };
-                await _context.Inventories.AddAsync(inventory);
-
-                // Movimiento inicial de inventario
-                var movement = new InventoryMovement
-                {
-                    Id = Guid.NewGuid(),
-                    MovementNumber = $"MOV-INIT-{data.Code}",
-                    MovementType = MovementType.Entry,
-                    ToBranchWarehouseId = bgCM.Id,
-                    ReferenceDocument = "CARGA-INICIAL-CATALOGO",
-                    Notes = $"Carga de existencias iniciales para {data.Name}",
-                    MovementDate = DateTime.UtcNow,
-                    CreatedBy = "System",
-                    CreatedOnUtc = DateTime.UtcNow
+                    CreatedOnUtc = DateTime.UtcNow,
+                    TaxId = taxExento.Id,
+                    IsCatalogVisible = true,
+                    IsActive = true
                 };
 
-                movement.Details.Add(new InventoryMovementDetail
+                var presentationUnit = new ProductPresentation
                 {
                     Id = Guid.NewGuid(),
                     ProductId = product.Id,
-                    Quantity = 100m,
+                    UnitOfMeasureId = uomUnd.Id,
+                    Name = "Unidad",
+                    ConversionFactor = 1.0000m,
+                    Barcode = data.Code + "U",
+                    Cost = data.WholesaleUnit * 0.85m,
+                    RetailPrice = data.RetailUnit,
+                    SemiWholesalePrice = data.SemiUnit,
+                    WholesalePrice = data.WholesaleUnit,
+                    IsBaseUnit = true,
+                    IsDefaultSalePresentation = true,
+                    IsActive = true
+                };
+                product.Presentations.Add(presentationUnit);
+
+                var presentationBox = new ProductPresentation
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = product.Id,
                     UnitOfMeasureId = uomCaja.Id,
-                    ProductPresentationId = presentationBox.Id,
+                    Name = "Caja",
                     ConversionFactor = (decimal)data.BoxFactor,
-                    QuantityInBaseUnit = initialStock,
-                    CreatedBy = "System",
-                    CreatedOnUtc = DateTime.UtcNow
-                });
+                    Barcode = data.Code + "C",
+                    Cost = data.WholesaleBox * 0.85m,
+                    RetailPrice = data.RetailBox,
+                    SemiWholesalePrice = data.SemiBox,
+                    WholesalePrice = data.WholesaleBox,
+                    IsBaseUnit = false,
+                    IsDefaultSalePresentation = false,
+                    IsActive = true
+                };
+                product.Presentations.Add(presentationBox);
 
-                await _context.InventoryMovements.AddAsync(movement);
+                await _context.Products.AddAsync(product);
+
+                // Existencias Iniciales (100 Cajas de cada producto = 100 * BoxFactor Unidades)
+                if (bgCM != null)
+                {
+                    decimal initialStock = 100m * data.BoxFactor;
+                    var inventory = new Inventory
+                    {
+                        Id = Guid.NewGuid(),
+                        BranchWarehouseId = bgCM.Id,
+                        ProductId = product.Id,
+                        PhysicalStock = initialStock,
+                        ReservedStock = 0.0000m,
+                        CommittedStock = 0.0000m,
+                        CreatedBy = "System",
+                        CreatedOnUtc = DateTime.UtcNow
+                    };
+                    await _context.Inventories.AddAsync(inventory);
+
+                    // Movimiento inicial de inventario
+                    var movement = new InventoryMovement
+                    {
+                        Id = Guid.NewGuid(),
+                        MovementNumber = $"MOV-INIT-{data.Code}",
+                        MovementType = MovementType.Entry,
+                        ToBranchWarehouseId = bgCM.Id,
+                        ReferenceDocument = "CARGA-INICIAL-CATALOGO",
+                        Notes = $"Carga de existencias iniciales para {data.Name}",
+                        MovementDate = DateTime.UtcNow,
+                        CreatedBy = "System",
+                        CreatedOnUtc = DateTime.UtcNow
+                    };
+
+                    movement.Details.Add(new InventoryMovementDetail
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = product.Id,
+                        Quantity = 100m,
+                        UnitOfMeasureId = uomCaja.Id,
+                        ProductPresentationId = presentationBox.Id,
+                        ConversionFactor = (decimal)data.BoxFactor,
+                        QuantityInBaseUnit = initialStock,
+                        CreatedBy = "System",
+                        CreatedOnUtc = DateTime.UtcNow
+                    });
+
+                    await _context.InventoryMovements.AddAsync(movement);
+                }
             }
         }
 
