@@ -77,13 +77,13 @@ class _LoginScreenState extends State<LoginScreen> {
                 children: [
                   // App Icon / Logo placeholder
                   const Icon(
-                    Icons.storefront_rounded,
+                    Icons.domain,
                     size: 80,
                     color: Color(0xFF38BDF8), // Light Blue Accent
                   ),
                   const SizedBox(height: 16),
                   const Text(
-                    'Dulces y Caramelos a Todo',
+                    'CONORZA',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 28,

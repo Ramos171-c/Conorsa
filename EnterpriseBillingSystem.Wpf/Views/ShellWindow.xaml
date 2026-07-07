@@ -8,7 +8,7 @@
         xmlns:vm="clr-namespace:EnterpriseBillingSystem.Wpf.ViewModels"
         xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
         mc:Ignorable="d"
-        Title="Dulces y Caramelos a Todo — Escritorio Corporativo" 
+        Title="CONORZA — Escritorio Corporativo" 
         Height="768" Width="1280"
         WindowStartupLocation="CenterScreen"
         Background="{DynamicResource MaterialDesignPaper}"
@@ -37,7 +37,7 @@
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
                     <materialDesign:PackIcon Kind="Domain" Width="24" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" />
-                    <TextBlock Text="Dulces y Caramelos a Todo — Corporativo" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" />
+                    <TextBlock Text="CONORZA — Corporativo" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">

@@ -76,9 +76,9 @@ try
     {
         options.SwaggerDoc("v1", new OpenApiInfo 
         { 
-            Title = "Dulces y Caramelos a Todo API", 
+            Title = "CONORZA API", 
             Version = "v1",
-            Description = "Base del API del Sistema de Facturación de Dulces y Caramelos a Todo (.NET 8 Clean Architecture / DDD)"
+            Description = "Base del API del Sistema de Facturación de CONORZA (.NET 8 Clean Architecture / DDD)"
         });
 
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -131,7 +131,7 @@ try
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "Dulces y Caramelos a Todo API v1");
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "CONORZA API v1");
         });
     }
 

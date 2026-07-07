@@ -6,7 +6,7 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
         mc:Ignorable="d"
-        Title="Dulces y Caramelos a Todo — Iniciar Sesión" 
+        Title="CONORZA — Iniciar Sesión" 
         Height="550" Width="420"
         WindowStartupLocation="CenterScreen"
         ResizeMode="NoResize"
@@ -36,7 +36,7 @@
             <!-- Logo / Brand Header -->
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,8,0,24">
                 <materialDesign:PackIcon Kind="Domain" Width="64" Height="64" Foreground="{DynamicResource PrimaryHueMidBrush}" HorizontalAlignment="Center" Margin="0,0,0,12" />
-                <TextBlock Text="Dulces y Caramelos a Todo" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" HorizontalAlignment="Center" />
+                <TextBlock Text="CONORZA" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" HorizontalAlignment="Center" />
                 <TextBlock Text="Cliente de Escritorio Corporativo" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" HorizontalAlignment="Center" Margin="0,4,0,0" />
             </StackPanel>
 
@@ -83,7 +83,7 @@
                         materialDesign:ButtonAssist.CornerRadius="8"
                         IsEnabled="{Binding IsBusy, Converter={StaticResource InverseBoolToVis}}" />
 
-                <TextBlock Text="Desarrollado para Dulces y Caramelos a Todo © 2026" FontSize="10.5" Foreground="{DynamicResource MaterialDesignBodyLight}" HorizontalAlignment="Center" Margin="0,20,0,0" Opacity="0.7" />
+                <TextBlock Text="Desarrollado para CONORZA © 2026" FontSize="10.5" Foreground="{DynamicResource MaterialDesignBodyLight}" HorizontalAlignment="Center" Margin="0,20,0,0" Opacity="0.7" />
             </StackPanel>
         </Grid>
     </Border>
