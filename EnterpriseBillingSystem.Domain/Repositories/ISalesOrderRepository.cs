@@ -22,6 +22,7 @@ public interface ISalesOrderRepository : IRepository<SalesOrder>
         int pageNumber,
         int pageSize,
         string? createdBy = null,
+        Guid? routeId = null,
         CancellationToken cancellationToken = default);
 
     Task<IEnumerable<SalesOrder>> GetFilteredWithDetailsAsync(
@@ -29,5 +30,6 @@ public interface ISalesOrderRepository : IRepository<SalesOrder>
         string? status,
         DateTime? fromDate,
         DateTime? toDate,
+        Guid? routeId = null,
         CancellationToken cancellationToken = default);
 }

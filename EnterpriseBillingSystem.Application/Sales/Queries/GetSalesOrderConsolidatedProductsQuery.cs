@@ -21,7 +21,8 @@ public record GetSalesOrderConsolidatedProductsQuery(
     Guid? CustomerId,
     string? Status,
     DateTime? FromDate,
-    DateTime? ToDate
+    DateTime? ToDate,
+    Guid? RouteId = null
 ) : IRequest<IEnumerable<ConsolidatedProductDto>>;
 
 public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<GetSalesOrderConsolidatedProductsQuery, IEnumerable<ConsolidatedProductDto>>
@@ -36,7 +37,7 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
     public async Task<IEnumerable<ConsolidatedProductDto>> Handle(GetSalesOrderConsolidatedProductsQuery request, CancellationToken cancellationToken)
     {
         var orders = await _repository.GetFilteredWithDetailsAsync(
-            request.CustomerId, request.Status, request.FromDate, request.ToDate, cancellationToken);
+            request.CustomerId, request.Status, request.FromDate, request.ToDate, request.RouteId, cancellationToken);
 
         var consolidated = orders
             .SelectMany(o => o.Details)

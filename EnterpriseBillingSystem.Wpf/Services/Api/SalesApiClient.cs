@@ -22,7 +22,8 @@ public class SalesApiClient
         Guid? customerId = null, 
         string? status = null,
         DateTime? fromDate = null,
-        DateTime? toDate = null)
+        DateTime? toDate = null,
+        Guid? routeId = null)
     {
         var url = $"sales-orders?pageNumber={page}&pageSize={pageSize}";
         if (customerId.HasValue)
@@ -40,6 +41,10 @@ public class SalesApiClient
         if (toDate.HasValue)
         {
             url += $"&toDate={toDate.Value:yyyy-MM-ddTHH:mm:ss}";
+        }
+        if (routeId.HasValue)
+        {
+            url += $"&routeId={routeId.Value}";
         }
         return await _httpClient.GetFromJsonAsync<PagedResult<SalesOrderListItemDto>>(url);
     }
@@ -66,7 +71,8 @@ public class SalesApiClient
         Guid? customerId = null, 
         string? status = null,
         DateTime? fromDate = null,
-        DateTime? toDate = null)
+        DateTime? toDate = null,
+        Guid? routeId = null)
     {
         var url = "sales-orders/consolidated-products?";
         if (customerId.HasValue)
@@ -84,6 +90,10 @@ public class SalesApiClient
         if (toDate.HasValue)
         {
             url += $"toDate={toDate.Value:yyyy-MM-ddTHH:mm:ss}&";
+        }
+        if (routeId.HasValue)
+        {
+            url += $"routeId={routeId.Value}&";
         }
         url = url.TrimEnd('&', '?');
 

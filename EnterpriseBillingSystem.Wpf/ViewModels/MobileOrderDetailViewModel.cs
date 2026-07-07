@@ -1,5 +1,6 @@
 using System;
 using System.Collections.ObjectModel;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
@@ -13,11 +14,15 @@ namespace EnterpriseBillingSystem.Wpf.ViewModels;
 public partial class MobileOrderDetailViewModel : ViewModelBase
 {
     private readonly SalesApiClient _salesApiClient;
+    private readonly CustomerApiClient _customerApiClient;
     private readonly INotificationService _notificationService;
     private readonly SalesOrderDetailDto _order;
 
     public event Action? RequestClose;
     public event Action? OrderActionTaken;
+
+    [ObservableProperty]
+    private string? _dispatcherNotes;
 
     [ObservableProperty]
     private string _orderNumber = string.Empty;
@@ -90,9 +95,10 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                                          !Status.Equals("SolicitudAnulacion", StringComparison.OrdinalIgnoreCase);
 
 
-    public MobileOrderDetailViewModel(SalesApiClient salesApiClient, INotificationService notificationService, SalesOrderDetailDto order)
+    public MobileOrderDetailViewModel(SalesApiClient salesApiClient, CustomerApiClient customerApiClient, INotificationService notificationService, SalesOrderDetailDto order)
     {
         _salesApiClient = salesApiClient;
+        _customerApiClient = customerApiClient;
         _notificationService = notificationService;
         _order = order;
 
@@ -436,6 +442,143 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
         catch (Exception ex)
         {
             _notificationService.ShowError($"Error al rechazar solicitud: {ex.Message}");
+        }
+        finally
+        {
+            IsProcessing = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task PrintDeliveryTicketAsync()
+    {
+        IsProcessing = true;
+        try
+        {
+            // 1. Fetch full customer details to get Address and Route
+            CustomerDto? customer = null;
+            try
+            {
+                customer = await _customerApiClient.GetCustomerByIdAsync(_order.CustomerId);
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error fetching customer details: {ex.Message}");
+            }
+
+            // 2. Build the FlowDocument dynamically
+            var doc = new System.Windows.Documents.FlowDocument
+            {
+                PagePadding = new Thickness(30),
+                ColumnWidth = double.PositiveInfinity,
+                FontFamily = new System.Windows.Media.FontFamily("Courier New"),
+                FontSize = 12
+            };
+
+            var sec = new System.Windows.Documents.Section();
+
+            // Header - CONORZA
+            var headerPara = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("         CONORZA\n"))
+            {
+                FontSize = 18,
+                FontWeight = FontWeights.Bold,
+                TextAlignment = TextAlignment.Center
+            };
+            headerPara.Inlines.Add(new System.Windows.Documents.Run("   TICKET DE DESPACHO Y ENTREGA\n"));
+            headerPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
+            sec.Blocks.Add(headerPara);
+
+            // Customer Details
+            var custPara = new System.Windows.Documents.Paragraph();
+            custPara.Inlines.Add(new System.Windows.Documents.Run($"Pedido No:   {OrderNumber}\n"));
+            custPara.Inlines.Add(new System.Windows.Documents.Run($"Fecha:       {OrderDate:dd/MM/yyyy HH:mm}\n"));
+            custPara.Inlines.Add(new System.Windows.Documents.Run($"Cliente:     {CustomerName} ({CustomerCode})\n"));
+            
+            if (customer != null)
+            {
+                custPara.Inlines.Add(new System.Windows.Documents.Run($"Ruta:        {customer.RouteName ?? "No asignada"}\n"));
+                
+                // Get default address
+                var address = customer.Addresses?.FirstOrDefault(a => a.IsDefault) ?? customer.Addresses?.FirstOrDefault();
+                if (address != null)
+                {
+                    custPara.Inlines.Add(new System.Windows.Documents.Run($"Dirección:   {address.AddressLine1}, {address.City}\n"));
+                }
+                
+                // Get default phone
+                var phone = customer.Phones?.FirstOrDefault()?.PhoneNumber;
+                if (!string.IsNullOrEmpty(phone))
+                {
+                    custPara.Inlines.Add(new System.Windows.Documents.Run($"Teléfono:    {phone}\n"));
+                }
+            }
+            custPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
+            sec.Blocks.Add(custPara);
+
+            // Order Lines
+            var itemsPara = new System.Windows.Documents.Paragraph();
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("PRODUCTO                  CANT   NETO\n"));
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("----------------------------------\n"));
+            
+            foreach (var item in Details)
+            {
+                // Format: Product Name (truncated to 24 chars), Qty (aligned), NetAmount
+                string name = item.ProductName.Length > 24 ? item.ProductName.Substring(0, 24) : item.ProductName.PadRight(24);
+                string qty = item.Quantity.ToString("N2").PadLeft(6);
+                string net = item.NetAmount.ToString("C2").PadLeft(10);
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run($"{name} {qty} {net}\n"));
+            }
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("----------------------------------\n"));
+            sec.Blocks.Add(itemsPara);
+
+            // Totals
+            var totalsPara = new System.Windows.Documents.Paragraph
+            {
+                TextAlignment = TextAlignment.Right
+            };
+            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Subtotal:     {SubTotal:C2}\n"));
+            if (DiscountAmount > 0)
+            {
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Descuento:   -{DiscountAmount:C2}\n"));
+            }
+            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"IVA:          {TaxAmount:C2}\n"));
+            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL:        {TotalAmount:C2}\n"));
+            totalsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
+            sec.Blocks.Add(totalsPara);
+
+            // Observations
+            var obsPara = new System.Windows.Documents.Paragraph();
+            obsPara.Inlines.Add(new System.Windows.Documents.Run("OBSERVACIONES:\n"));
+            obsPara.Inlines.Add(new System.Windows.Documents.Run($"- Vendedor:  {(!string.IsNullOrWhiteSpace(Notes) ? Notes : "Ninguna")}\n"));
+            obsPara.Inlines.Add(new System.Windows.Documents.Run($"- Despacho:  {(!string.IsNullOrWhiteSpace(DispatcherNotes) ? DispatcherNotes : "Ninguna")}\n"));
+            obsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
+            sec.Blocks.Add(obsPara);
+
+            // Footer / Signatures
+            var footerPara = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("\n\n\n_____________________      _____________________\n  Entregado Por (Firma)      Recibido Por (Firma)\n"))
+            {
+                TextAlignment = TextAlignment.Center
+            };
+            sec.Blocks.Add(footerPara);
+
+            doc.Blocks.Add(sec);
+
+            // 3. Print
+            var printDialog = new System.Windows.Controls.PrintDialog();
+            if (printDialog.ShowDialog() == true)
+            {
+                doc.PageWidth = printDialog.PrintableAreaWidth;
+                doc.PageHeight = printDialog.PrintableAreaHeight;
+                
+                var documentPaginator = ((System.Windows.Documents.IDocumentPaginatorSource)doc).DocumentPaginator;
+                printDialog.PrintDocument(documentPaginator, $"Ticket_Despacho_{OrderNumber}");
+                
+                _notificationService.ShowSuccess("Ticket de entrega enviado a la impresora.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al imprimir el ticket de entrega: {ex.Message}");
         }
         finally
         {

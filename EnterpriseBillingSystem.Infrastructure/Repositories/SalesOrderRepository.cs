@@ -67,6 +67,7 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
         int pageNumber,
         int pageSize,
         string? createdBy = null,
+        Guid? routeId = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.SalesOrders
@@ -75,6 +76,9 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
 
         if (customerId.HasValue)
             query = query.Where(so => so.CustomerId == customerId.Value);
+
+        if (routeId.HasValue)
+            query = query.Where(so => so.Customer.RouteId == routeId.Value);
 
         if (!string.IsNullOrWhiteSpace(createdBy))
             query = query.Where(so => so.CreatedBy == createdBy);
@@ -113,9 +117,11 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
         string? status,
         DateTime? fromDate,
         DateTime? toDate,
+        Guid? routeId = null,
         CancellationToken cancellationToken = default)
     {
         var query = _context.SalesOrders
+            .Include(so => so.Customer)
             .Include(so => so.Details)
                 .ThenInclude(d => d.Product)
             .Include(so => so.Details)
@@ -124,6 +130,9 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
 
         if (customerId.HasValue)
             query = query.Where(so => so.CustomerId == customerId.Value);
+
+        if (routeId.HasValue)
+            query = query.Where(so => so.Customer.RouteId == routeId.Value);
 
         if (!string.IsNullOrWhiteSpace(status))
         {

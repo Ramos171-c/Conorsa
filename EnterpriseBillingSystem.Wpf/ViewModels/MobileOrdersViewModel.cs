@@ -15,6 +15,7 @@ namespace EnterpriseBillingSystem.Wpf.ViewModels;
 public partial class MobileOrdersViewModel : ViewModelBase
 {
     private readonly SalesApiClient _salesApiClient;
+    private readonly CustomerApiClient _customerApiClient;
     private readonly INotificationService _notificationService;
 
     [ObservableProperty]
@@ -43,6 +44,10 @@ public partial class MobileOrdersViewModel : ViewModelBase
 
     public ObservableCollection<SalesOrderListItemDto> Orders { get; } = new();
     public ObservableCollection<string> Statuses { get; } = new() { "-- Todos --", "Recibido", "EnProceso", "EnCamino", "Completado", "Anulado", "SolicitudAnulacion" };
+    public ObservableCollection<RouteDto> Routes { get; } = new();
+
+    [ObservableProperty]
+    private RouteDto? _selectedRoute;
 
     // Consolidated verification list
     public ObservableCollection<VerifiableProduct> ConsolidatedProducts { get; } = new();
@@ -52,16 +57,37 @@ public partial class MobileOrdersViewModel : ViewModelBase
 
     public bool CanDispatchConsolidated => SelectedStatus == "Recibido" && ConsolidatedProducts.Count > 0;
 
-    public MobileOrdersViewModel(SalesApiClient salesApiClient, INotificationService notificationService)
+    public MobileOrdersViewModel(SalesApiClient salesApiClient, CustomerApiClient customerApiClient, INotificationService notificationService)
     {
         _salesApiClient = salesApiClient;
+        _customerApiClient = customerApiClient;
         _notificationService = notificationService;
         SelectedStatus = "Recibido"; // Default to Recibido so they see pending orders to validate
     }
 
     public async Task InitializeAsync()
     {
+        await LoadRoutesAsync();
         await LoadOrdersAsync();
+    }
+
+    private async Task LoadRoutesAsync()
+    {
+        try
+        {
+            var routes = await _customerApiClient.GetRoutesAsync();
+            Routes.Clear();
+            Routes.Add(new RouteDto(Guid.Empty, "ALL", "-- Todas --", true));
+            foreach (var r in routes.Where(x => x.IsActive))
+            {
+                Routes.Add(r);
+            }
+            SelectedRoute = Routes[0];
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error al cargar rutas: {ex.Message}");
+        }
     }
 
     private async Task<T> RetryOnConnectionErrorAsync<T>(Func<Task<T>> action, int maxRetries = 3, int delayMilliseconds = 1000)
@@ -91,9 +117,10 @@ public partial class MobileOrdersViewModel : ViewModelBase
         try
         {
             string? statusFilter = SelectedStatus == "-- Todos --" ? null : SelectedStatus;
+            Guid? routeFilter = (SelectedRoute == null || SelectedRoute.Id == Guid.Empty) ? null : SelectedRoute.Id;
             
             // 1. Load paginated list of individual orders with retry policy
-            var result = await RetryOnConnectionErrorAsync(() => _salesApiClient.GetSalesOrdersPagedAsync(PageNumber, PageSize, null, statusFilter));
+            var result = await RetryOnConnectionErrorAsync(() => _salesApiClient.GetSalesOrdersPagedAsync(PageNumber, PageSize, null, statusFilter, null, null, routeFilter));
             
             Orders.Clear();
             if (result?.Items != null)
@@ -110,7 +137,7 @@ public partial class MobileOrdersViewModel : ViewModelBase
             }
 
             // 2. Load consolidated products with retry policy
-            var consolidated = await RetryOnConnectionErrorAsync(() => _salesApiClient.GetConsolidatedProductsAsync(null, statusFilter));
+            var consolidated = await RetryOnConnectionErrorAsync(() => _salesApiClient.GetConsolidatedProductsAsync(null, statusFilter, null, null, routeFilter));
             ConsolidatedProducts.Clear();
             foreach (var item in consolidated)
             {
@@ -271,7 +298,7 @@ public partial class MobileOrdersViewModel : ViewModelBase
                 return;
             }
 
-            var detailViewModel = new MobileOrderDetailViewModel(_salesApiClient, _notificationService, fullOrder);
+            var detailViewModel = new MobileOrderDetailViewModel(_salesApiClient, _customerApiClient, _notificationService, fullOrder);
             var detailDialog = new Views.MobileOrders.MobileOrderDetailDialog
             {
                 DataContext = detailViewModel,
@@ -522,6 +549,12 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     partial void OnSelectedStatusChanged(string? value)
+    {
+        PageNumber = 1;
+        _ = LoadOrdersAsync();
+    }
+
+    partial void OnSelectedRouteChanged(RouteDto? value)
     {
         PageNumber = 1;
         _ = LoadOrdersAsync();

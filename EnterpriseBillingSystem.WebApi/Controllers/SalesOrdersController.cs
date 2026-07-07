@@ -46,7 +46,8 @@ public class SalesOrdersController : ApiControllerBase
         [FromQuery] DateTime? fromDate = null,
         [FromQuery] DateTime? toDate = null,
         [FromQuery] int pageNumber = 1,
-        [FromQuery] int pageSize = 20)
+        [FromQuery] int pageSize = 20,
+        [FromQuery] Guid? routeId = null)
     {
         // Extract role claim using multiple possible claim types (standard and raw JWT)
         var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value 
@@ -67,10 +68,10 @@ public class SalesOrdersController : ApiControllerBase
                               ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
         }
 
-        Log.Information("[DEBUG-ORDERS] User: '{User}', RoleClaim: '{RoleClaim}', IsAdmin: {IsAdmin}, Filter: '{Filter}'", 
-            User.Identity?.Name, roleClaim, isAdmin, createdByFilter);
+        Log.Information("[DEBUG-ORDERS] User: '{User}', RoleClaim: '{RoleClaim}', IsAdmin: {IsAdmin}, Filter: '{Filter}', RouteId: '{RouteId}'", 
+            User.Identity?.Name, roleClaim, isAdmin, createdByFilter, routeId);
 
-        var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize, createdByFilter));
+        var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize, createdByFilter, routeId));
         return Ok(result);
     }
 
@@ -161,9 +162,10 @@ public class SalesOrdersController : ApiControllerBase
         [FromQuery] Guid? customerId = null,
         [FromQuery] string? status = null,
         [FromQuery] DateTime? fromDate = null,
-        [FromQuery] DateTime? toDate = null)
+        [FromQuery] DateTime? toDate = null,
+        [FromQuery] Guid? routeId = null)
     {
-        var result = await Mediator.Send(new GetSalesOrderConsolidatedProductsQuery(customerId, status, fromDate, toDate));
+        var result = await Mediator.Send(new GetSalesOrderConsolidatedProductsQuery(customerId, status, fromDate, toDate, routeId));
         return Ok(result);
     }
 }

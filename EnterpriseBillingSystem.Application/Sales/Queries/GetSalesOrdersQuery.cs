@@ -67,7 +67,8 @@ public record GetSalesOrdersQuery(
     DateTime? ToDate,
     int PageNumber = 1,
     int PageSize = 20,
-    string? CreatedBy = null
+    string? CreatedBy = null,
+    Guid? RouteId = null
 ) : IRequest<PagedResult<SalesOrderListItemDto>>;
 
 public record GetSalesOrderByIdQuery(Guid SalesOrderId) : IRequest<SalesOrderDetailDto?>;
@@ -87,7 +88,7 @@ public class GetSalesOrdersQueryHandler : IRequestHandler<GetSalesOrdersQuery, P
     {
         var (items, totalCount) = await _repository.GetPagedAsync(
             request.CustomerId, request.Status, request.FromDate, request.ToDate,
-            request.PageNumber, request.PageSize, request.CreatedBy, cancellationToken);
+            request.PageNumber, request.PageSize, request.CreatedBy, request.RouteId, cancellationToken);
 
         var dtos = items.Select(so => new SalesOrderListItemDto(
             so.Id,
