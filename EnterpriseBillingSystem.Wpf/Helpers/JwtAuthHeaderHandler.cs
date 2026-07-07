@@ -5,16 +5,20 @@ using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using EnterpriseBillingSystem.Wpf.Services.Authentication;
+using EnterpriseBillingSystem.Wpf.Services.Storage;
+using CommunityToolkit.Mvvm.Messaging;
 
 namespace EnterpriseBillingSystem.Wpf.Helpers;
 
 public class JwtAuthHeaderHandler : DelegatingHandler
 {
     private readonly CurrentUserService _currentUserService;
+    private readonly ILocalStorageService _localStorageService;
 
-    public JwtAuthHeaderHandler(CurrentUserService currentUserService)
+    public JwtAuthHeaderHandler(CurrentUserService currentUserService, ILocalStorageService localStorageService)
     {
         _currentUserService = currentUserService;
+        _localStorageService = localStorageService;
     }
 
     protected override async Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
@@ -25,6 +29,24 @@ public class JwtAuthHeaderHandler : DelegatingHandler
         }
 
         var response = await base.SendAsync(request, cancellationToken);
+
+        // Si recibimos 401 (No autorizado/Token expirado), forzamos el cierre de sesión y redirección
+        if (response.StatusCode == HttpStatusCode.Unauthorized && !string.IsNullOrEmpty(_currentUserService.Token))
+        {
+            var isLoginRequest = request.RequestUri?.AbsolutePath.Contains("auth/login", System.StringComparison.OrdinalIgnoreCase) ?? false;
+            if (!isLoginRequest)
+            {
+                _currentUserService.Token = null;
+                _currentUserService.CurrentUser = null;
+                _currentUserService.Permissions.Clear();
+                _currentUserService.BranchId = null;
+
+                await _localStorageService.ClearAsync("token");
+
+                // Redirigir a la ventana de Login
+                CommunityToolkit.Mvvm.Messaging.WeakReferenceMessenger.Default.Send(new LogoutMessage());
+            }
+        }
 
         // Si recibimos 403, intentamos refrescar los permisos desde /me automáticamente
         // Esto evita que el usuario tenga que cerrar sesión cuando cambian los permisos en el servidor.
