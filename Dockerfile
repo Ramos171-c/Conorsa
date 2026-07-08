@@ -4,6 +4,12 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
+# Install native dependencies for SkiaSharp / ShapeCrawler
+RUN apt-get update && apt-get install -y \
+    libfontconfig1 \
+    && rm -rf /var/lib/apt/lists/*
+
+
 # SDK image for building the application
 FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
 WORKDIR /src
