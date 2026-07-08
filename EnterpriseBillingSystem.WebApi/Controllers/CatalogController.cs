@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using EnterpriseBillingSystem.Application.Products.Queries;
 using EnterpriseBillingSystem.Application.Products.DTOs;
+using EnterpriseBillingSystem.Application.Categories.Queries;
+using EnterpriseBillingSystem.Application.Categories.DTOs;
+using EnterpriseBillingSystem.Application.Common.Models;
 using ShapeCrawler;
 
 namespace EnterpriseBillingSystem.WebApi.Controllers;
@@ -29,6 +32,13 @@ public class CatalogController : ApiControllerBase
         }).ToList();
 
         return Ok(mapped);
+    }
+
+    [HttpGet("categories")]
+    public async Task<ActionResult<PagedResult<CategoryDto>>> GetCatalogCategories()
+    {
+        var result = await Mediator.Send(new GetCategoriesPagedQuery(1, 100, null));
+        return Ok(result);
     }
 
     [HttpGet("export/pptx")]
@@ -113,15 +123,22 @@ public class CatalogController : ApiControllerBase
                     pricesShape.SetFontColor("1E293B"); // Slate 800
 
                     // 4. Image
-                    if (!string.IsNullOrWhiteSpace(product.ImagePath))
+                    if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
                     {
                         var rootPath = env.WebRootPath;
                         // Strip base URL to get relative path if absolute URL is present
                         var relativePath = product.ImagePath;
                         if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                         {
-                            var uri = new Uri(relativePath);
-                            relativePath = uri.AbsolutePath;
+                            try
+                            {
+                                var uri = new Uri(relativePath);
+                                relativePath = uri.AbsolutePath;
+                            }
+                            catch
+                            {
+                                // Ignore malformed URIs
+                            }
                         }
                         
                         var localImagePath = Path.Combine(rootPath, relativePath.TrimStart('/'));
@@ -161,6 +178,3 @@ public class CatalogController : ApiControllerBase
         }
     }
 }
-
-
-

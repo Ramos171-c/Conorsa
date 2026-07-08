@@ -438,7 +438,7 @@ class OrderProvider extends ChangeNotifier {
     final offlineService = OfflineService();
 
     try {
-      final response = await apiService.get('/categories?pageNumber=1&pageSize=100');
+      final response = await apiService.get('/catalog/categories');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -698,7 +698,7 @@ class OrderProvider extends ChangeNotifier {
         await offlineService.cacheProducts(items);
       }
 
-      final responseCat = await apiService.get('/categories?pageNumber=1&pageSize=100');
+      final responseCat = await apiService.get('/catalog/categories');
       if (responseCat.statusCode == 200) {
         final data = jsonDecode(responseCat.body);
         _productCategories = data['items'] as List<dynamic>? ?? [];
