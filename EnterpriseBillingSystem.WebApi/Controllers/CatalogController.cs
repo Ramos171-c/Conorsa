@@ -93,17 +93,17 @@ public class CatalogController : ApiControllerBase
                                 var categoryGroup = categories[catIdx];
                                 var categoryName = categoryGroup.Key ?? "Otros";
                                 
-                                // A) Category Divider Page (Centered horizontally and vertically)
-                                column.Item().Background("#0F172A").Height(650).AlignCenter().AlignMiddle().Column(catCol =>
+                                // A) Category Divider Page (Safe height: 500)
+                                column.Item().Background("#0F172A").Height(500).AlignCenter().AlignMiddle().Column(catCol =>
                                 {
                                     catCol.Item().Text(categoryName.ToUpper())
                                         .Bold()
-                                        .FontSize(42)
+                                        .FontSize(36)
                                         .FontColor("#FFFFFF")
                                         .AlignCenter();
                                         
                                     catCol.Item().PaddingTop(10).Text("CATÁLOGO DE PRODUCTOS")
-                                        .FontSize(16)
+                                        .FontSize(14)
                                         .FontColor("#CBD5E1")
                                         .AlignCenter();
                                 });
@@ -118,12 +118,12 @@ public class CatalogController : ApiControllerBase
                                     
                                     column.Item().Column(prodCol =>
                                     {
-                                        prodCol.Spacing(15);
+                                        prodCol.Spacing(10);
                                         
                                         // 1. Product Name (Centered)
                                         prodCol.Item().AlignCenter().Text(product.Name.ToUpper())
                                             .Bold()
-                                            .FontSize(24)
+                                            .FontSize(20)
                                             .FontColor("#1E3A8A");
                                             
                                         // 2. Product Details (Centered)
@@ -143,7 +143,7 @@ public class CatalogController : ApiControllerBase
 
                                         prodCol.Item().LineHorizontal(1f).LineColor("#CBD5E1");
 
-                                        // 3. Image (Centered)
+                                        // 3. Image (Centered, safe MaxHeight)
                                         var imgPlaced = false;
                                         if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
                                         {
@@ -162,10 +162,8 @@ public class CatalogController : ApiControllerBase
                                             if (System.IO.File.Exists(localImagePath))
                                             {
                                                 prodCol.Item()
-                                                    .Height(380)
-                                                    .Border(1f)
-                                                    .BorderColor("#E2E8F0")
-                                                    .Background("#F8FAFC")
+                                                    .AlignCenter()
+                                                    .MaxHeight(300)
                                                     .Image(localImagePath);
                                                     
                                                 imgPlaced = true;
@@ -175,12 +173,8 @@ public class CatalogController : ApiControllerBase
                                         if (!imgPlaced)
                                         {
                                             prodCol.Item()
-                                                .Height(380)
-                                                .Border(1f)
-                                                .BorderColor("#E2E8F0")
-                                                .Background("#F8FAFC")
                                                 .AlignCenter()
-                                                .AlignMiddle()
+                                                .Height(100)
                                                 .Text("Sin Imagen")
                                                 .FontColor("#94A3B8")
                                                 .Italic();
@@ -189,8 +183,8 @@ public class CatalogController : ApiControllerBase
                                         // 4. Description (Centered)
                                         if (!string.IsNullOrWhiteSpace(product.Description))
                                         {
-                                            prodCol.Item().PaddingTop(10).AlignCenter().Text(product.Description)
-                                                .FontSize(11)
+                                            prodCol.Item().PaddingTop(5).AlignCenter().Text(product.Description)
+                                                .FontSize(10)
                                                 .FontColor("#475569");
                                         }
                                     });
