@@ -68,8 +68,8 @@ public class CatalogController : ApiControllerBase
         {
             container.Page(page =>
             {
-                page.Size(PageSizes.A4.Landscape());
-                page.Margin(40); // ~1.5cm in points
+                page.Size(PageSizes.A4); // Portrait A4
+                page.Margin(40);
                 page.PageColor("#FFFFFF");
                 page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(11).FontColor("#0F172A"));
 
@@ -91,8 +91,8 @@ public class CatalogController : ApiControllerBase
                             var categoryGroup = categories[catIdx];
                             var categoryName = categoryGroup.Key ?? "Otros";
                             
-                            // A) Category Divider Page
-                            column.Item().Background("#0F172A").Height(400).AlignCenter().AlignMiddle().Column(catCol =>
+                            // A) Category Divider Page (Centered horizontally and vertically)
+                            column.Item().Background("#0F172A").Height(650).AlignCenter().AlignMiddle().Column(catCol =>
                             {
                                 catCol.Item().Text(categoryName.ToUpper())
                                     .Bold()
@@ -114,85 +114,34 @@ public class CatalogController : ApiControllerBase
                             {
                                 var product = prodArray[prodIdx];
                                 
-                                column.Item().Row(row =>
+                                column.Item().Column(prodCol =>
                                 {
-                                    // Left side: Info
-                                    row.RelativeItem(1.2f).Column(infoCol =>
-                                    {
-                                        infoCol.Spacing(10);
+                                    prodCol.Spacing(15);
+                                    
+                                    // 1. Product Name (Centered)
+                                    prodCol.Item().AlignCenter().Text(product.Name.ToUpper())
+                                        .Bold()
+                                        .FontSize(24)
+                                        .FontColor("#1E3A8A");
                                         
-                                        infoCol.Item().Text(product.Name.ToUpper())
-                                            .Bold()
-                                            .FontSize(20)
-                                            .FontColor("#1E3A8A");
-                                            
-                                        var ueText = product.Description?.Contains("U/E: ") == true
-                                            ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
-                                            : "N/A";
-                                            
-                                        infoCol.Item().Text(x =>
-                                        {
-                                            x.Span("CÓDIGO SKU: ").Bold().FontColor("#334155");
-                                            x.Span($"{product.InternalCode}   |   ").FontColor("#475569");
-                                            x.Span("MEDIDA: ").Bold().FontColor("#334155");
-                                            x.Span($"{product.DefaultUnitOfMeasureCode}   |   ").FontColor("#475569");
-                                            x.Span("U/E: ").Bold().FontColor("#334155");
-                                            x.Span($"{ueText}").FontColor("#475569");
-                                        });
-
-                                        infoCol.Item().LineHorizontal(1f).LineColor("#CBD5E1");
-
-                                        infoCol.Item().Text("LISTA DE PRECIOS").Bold().FontSize(12).FontColor("#1E293B");
-
-                                        infoCol.Item().Table(table =>
-                                        {
-                                            table.ColumnsDefinition(columns =>
-                                            {
-                                                columns.RelativeColumn(2); // Tipo
-                                                columns.RelativeColumn(1.5f); // Unidad
-                                                columns.RelativeColumn(1.5f); // Caja
-                                            });
-
-                                            table.Header(header =>
-                                            {
-                                                header.Cell().Background("#E2E8F0").Padding(5).Text("TIPO PRECIO").Bold().FontSize(9);
-                                                header.Cell().Background("#E2E8F0").Padding(5).Text("UNIDAD").Bold().FontSize(9);
-                                                header.Cell().Background("#E2E8F0").Padding(5).Text("CAJA").Bold().FontSize(9);
-                                            });
-
-                                            var unitPres = product.Presentations.FirstOrDefault(pr => pr.IsBaseUnit || pr.ConversionFactor == 1.0000m);
-                                            var boxPres = product.Presentations.FirstOrDefault(pr => !pr.IsBaseUnit && pr.ConversionFactor > 1.0000m);
-                                            var boxFactor = boxPres?.ConversionFactor.ToString("0") ?? "0";
-
-                                            // Mayorista
-                                            table.Cell().Padding(5).Text("Mayorista").FontSize(10);
-                                            table.Cell().Padding(5).Text($"C${unitPres?.WholesalePrice.ToString("F2") ?? "0.00"}").FontSize(10);
-                                            table.Cell().Padding(5).Text($"C${boxPres?.WholesalePrice.ToString("F2") ?? "0.00"} ({boxFactor} uds)").FontSize(10);
-
-                                            // Semimayorista
-                                            table.Cell().Padding(5).Text("Semimayorista").FontSize(10);
-                                            table.Cell().Padding(5).Text($"C${unitPres?.SemiWholesalePrice.ToString("F2") ?? "0.00"}").FontSize(10);
-                                            table.Cell().Padding(5).Text($"C${boxPres?.SemiWholesalePrice.ToString("F2") ?? "0.00"} ({boxFactor} uds)").FontSize(10);
-
-                                            // Detalle
-                                            table.Cell().Padding(5).Text("Detalle").FontSize(10);
-                                            table.Cell().Padding(5).Text($"C${unitPres?.RetailPrice.ToString("F2") ?? "0.00"}").FontSize(10);
-                                            table.Cell().Padding(5).Text($"C${boxPres?.RetailPrice.ToString("F2") ?? "0.00"} ({boxFactor} uds)").FontSize(10);
-                                        });
-
-                                        if (!string.IsNullOrWhiteSpace(product.Description))
-                                        {
-                                            infoCol.Item().PaddingTop(10).Column(descCol =>
-                                            {
-                                                descCol.Item().Text("DESCRIPCIÓN ADICIONAL:").Bold().FontSize(9).FontColor("#334155");
-                                                descCol.Item().Text(product.Description).FontSize(10).FontColor("#475569");
-                                            });
-                                        }
+                                    // 2. Product Details (Centered)
+                                    var ueText = product.Description?.Contains("U/E: ") == true
+                                        ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
+                                        : "N/A";
+                                        
+                                    prodCol.Item().AlignCenter().Text(x =>
+                                    {
+                                        x.Span("CÓDIGO SKU: ").Bold().FontColor("#334155");
+                                        x.Span($"{product.InternalCode}   •   ").FontColor("#475569");
+                                        x.Span("MEDIDA: ").Bold().FontColor("#334155");
+                                        x.Span($"{product.DefaultUnitOfMeasureCode}   •   ").FontColor("#475569");
+                                        x.Span("U/E: ").Bold().FontColor("#334155");
+                                        x.Span($"{ueText}").FontColor("#475569");
                                     });
 
-                                    row.ConstantItem(30); // Spacing
+                                    prodCol.Item().LineHorizontal(1f).LineColor("#CBD5E1");
 
-                                    // Right side: Image
+                                    // 3. Image (Centered)
                                     var imgPlaced = false;
                                     if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
                                     {
@@ -210,15 +159,12 @@ public class CatalogController : ApiControllerBase
                                         var localImagePath = Path.Combine(env.WebRootPath, relativePath.TrimStart('/'));
                                         if (System.IO.File.Exists(localImagePath))
                                         {
-                                            row.RelativeItem(0.8f)
-                                                .Height(350)
+                                            prodCol.Item()
+                                                .Height(380)
                                                 .Border(1f)
                                                 .BorderColor("#E2E8F0")
                                                 .Background("#F8FAFC")
-                                                .AlignCenter()
-                                                .AlignMiddle()
-                                                .Image(localImagePath)
-                                                .FitArea();
+                                                .Image(localImagePath);
                                                 
                                             imgPlaced = true;
                                         }
@@ -226,8 +172,8 @@ public class CatalogController : ApiControllerBase
 
                                     if (!imgPlaced)
                                     {
-                                        row.RelativeItem(0.8f)
-                                            .Height(350)
+                                        prodCol.Item()
+                                            .Height(380)
                                             .Border(1f)
                                             .BorderColor("#E2E8F0")
                                             .Background("#F8FAFC")
@@ -236,6 +182,14 @@ public class CatalogController : ApiControllerBase
                                             .Text("Sin Imagen")
                                             .FontColor("#94A3B8")
                                             .Italic();
+                                    }
+
+                                    // 4. Description (Centered)
+                                    if (!string.IsNullOrWhiteSpace(product.Description))
+                                    {
+                                        prodCol.Item().PaddingTop(10).AlignCenter().Text(product.Description)
+                                            .FontSize(11)
+                                            .FontColor("#475569");
                                     }
                                 });
 

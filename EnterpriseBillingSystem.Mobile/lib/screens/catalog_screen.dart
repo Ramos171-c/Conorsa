@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:url_launcher/url_launcher.dart';
+
 import '../providers/auth_provider.dart';
 import '../providers/order_provider.dart';
 import '../widgets/cached_product_image.dart';
@@ -40,40 +40,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
     Provider.of<OrderProvider>(context, listen: false).fetchProducts(search: search);
   }
 
-  void _exportToPdf() async {
-    final provider = Provider.of<OrderProvider>(context, listen: false);
-    final apiUrl = provider.apiService.configProvider.apiUrl;
-    
-    String urlStr = '$apiUrl/catalog/export/pdf';
-    if (_selectedCategoryId != null) {
-      urlStr += '?categoryId=$_selectedCategoryId';
-    }
-    
-    final uri = Uri.parse(urlStr);
-    
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Generando y descargando catálogo en PDF...'),
-        duration: Duration(seconds: 3),
-      ),
-    );
 
-    try {
-      if (await canLaunchUrl(uri)) {
-        await launchUrl(uri, mode: LaunchMode.externalApplication);
-      } else {
-        throw 'No se pudo abrir el navegador externo para $urlStr';
-      }
-    } catch (e) {
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Error al exportar catálogo: $e'),
-          backgroundColor: Colors.red,
-        ),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -96,11 +63,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
         actions: [
-          IconButton(
-            icon: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFF38BDF8)),
-            tooltip: 'Exportar catálogo a PDF',
-            onPressed: _exportToPdf,
-          ),
+
           if (auth.isLoggedIn) ...[
             // Cart shortcut button for quick checkout access when seller logged in
             IconButton(
