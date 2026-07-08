@@ -48,8 +48,9 @@ public class CatalogController : ApiControllerBase
     {
         try
         {
-            // Set QuestPDF Community License
+            // Set QuestPDF Community License & Enable Debugging
             QuestPDF.Settings.License = LicenseType.Community;
+            QuestPDF.Settings.EnableDebugging = true;
 
             var productsList = await Mediator.Send(new GetCatalogProductsQuery());
             var products = productsList.AsEnumerable();
@@ -93,8 +94,8 @@ public class CatalogController : ApiControllerBase
                                 var categoryGroup = categories[catIdx];
                                 var categoryName = categoryGroup.Key ?? "Otros";
                                 
-                                // A) Category Divider Page (Safe height: 500)
-                                column.Item().Background("#0F172A").Height(500).AlignCenter().AlignMiddle().Column(catCol =>
+                                // A) Category Divider Page (Safe height: 200)
+                                column.Item().Background("#0F172A").Height(200).AlignCenter().AlignMiddle().Column(catCol =>
                                 {
                                     catCol.Item().Text(categoryName.ToUpper())
                                         .Bold()
@@ -110,7 +111,7 @@ public class CatalogController : ApiControllerBase
                                 
                                 column.Item().PageBreak();
 
-                                // B) Products List (Directly in main column)
+                                // B) Products List
                                 var prodArray = categoryGroup.ToArray();
                                 for (int prodIdx = 0; prodIdx < prodArray.Length; prodIdx++)
                                 {
@@ -139,7 +140,7 @@ public class CatalogController : ApiControllerBase
 
                                     column.Item().PaddingVertical(5).LineHorizontal(1f).LineColor("#CBD5E1");
 
-                                    // 3. Image (Centered, safe MaxHeight)
+                                    // 3. Image (Centered, FitArea scaling)
                                     var imgPlaced = false;
                                     if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
                                     {
@@ -160,7 +161,7 @@ public class CatalogController : ApiControllerBase
                                             column.Item()
                                                 .AlignCenter()
                                                 .MaxHeight(250)
-                                                .Image(localImagePath);
+                                                .Image(localImagePath, ImageScaling.FitArea);
                                                 
                                             imgPlaced = true;
                                         }
