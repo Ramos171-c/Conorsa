@@ -40,11 +40,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
     Provider.of<OrderProvider>(context, listen: false).fetchProducts(search: search);
   }
 
-  void _exportToPowerPoint() async {
+  void _exportToPdf() async {
     final provider = Provider.of<OrderProvider>(context, listen: false);
     final apiUrl = provider.apiService.configProvider.apiUrl;
     
-    String urlStr = '$apiUrl/catalog/export/pptx';
+    String urlStr = '$apiUrl/catalog/export/pdf';
     if (_selectedCategoryId != null) {
       urlStr += '?categoryId=$_selectedCategoryId';
     }
@@ -53,7 +53,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
     
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
-        content: Text('Generando y descargando catálogo en PowerPoint...'),
+        content: Text('Generando y descargando catálogo en PDF...'),
         duration: Duration(seconds: 3),
       ),
     );
@@ -97,9 +97,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
         foregroundColor: Colors.white,
         actions: [
           IconButton(
-            icon: const Icon(Icons.file_download_rounded, color: Color(0xFF38BDF8)),
-            tooltip: 'Exportar catálogo a PowerPoint',
-            onPressed: _exportToPowerPoint,
+            icon: const Icon(Icons.picture_as_pdf_rounded, color: Color(0xFF38BDF8)),
+            tooltip: 'Exportar catálogo a PDF',
+            onPressed: _exportToPdf,
           ),
           if (auth.isLoggedIn) ...[
             // Cart shortcut button for quick checkout access when seller logged in
