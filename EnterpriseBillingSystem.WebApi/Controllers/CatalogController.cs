@@ -94,17 +94,17 @@ public class CatalogController : ApiControllerBase
                                 var categoryGroup = categories[catIdx];
                                 var categoryName = categoryGroup.Key ?? "Otros";
                                 
-                                // A) Category Divider Page (Safe height: 200)
-                                column.Item().Background("#0F172A").Height(200).AlignCenter().AlignMiddle().Column(catCol =>
+                                // A) Category Divider Page (Safe height: 600)
+                                column.Item().Background("#0F172A").Height(600).AlignCenter().AlignMiddle().Column(catCol =>
                                 {
                                     catCol.Item().Text(categoryName.ToUpper())
                                         .Bold()
-                                        .FontSize(36)
+                                        .FontSize(42)
                                         .FontColor("#FFFFFF")
                                         .AlignCenter();
                                         
                                     catCol.Item().PaddingTop(10).Text("CATÁLOGO DE PRODUCTOS")
-                                        .FontSize(14)
+                                        .FontSize(16)
                                         .FontColor("#CBD5E1")
                                         .AlignCenter();
                                 });
@@ -140,7 +140,7 @@ public class CatalogController : ApiControllerBase
 
                                     column.Item().PaddingVertical(5).LineHorizontal(1f).LineColor("#CBD5E1");
 
-                                    // 3. Image (Centered, FitArea scaling)
+                                    // 3. Image (Centered, MaxHeight 450)
                                     var imgPlaced = false;
                                     if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
                                     {
@@ -160,7 +160,9 @@ public class CatalogController : ApiControllerBase
                                         {
                                             column.Item()
                                                 .AlignCenter()
-                                                .MaxHeight(250)
+                                                .MaxHeight(450)
+                                                .Border(0.5f)
+                                                .BorderColor("#E2E8F0")
                                                 .Image(localImagePath, ImageScaling.FitArea);
                                                 
                                             imgPlaced = true;
@@ -171,7 +173,11 @@ public class CatalogController : ApiControllerBase
                                     {
                                         column.Item()
                                             .AlignCenter()
-                                            .Height(60)
+                                            .Height(120)
+                                            .Border(0.5f)
+                                            .BorderColor("#E2E8F0")
+                                            .Background("#F8FAFC")
+                                            .AlignMiddle()
                                             .Text("Sin Imagen")
                                             .FontColor("#94A3B8")
                                             .Italic();
