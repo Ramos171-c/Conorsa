@@ -46,170 +46,182 @@ public class CatalogController : ApiControllerBase
     [HttpGet("export/pdf")]
     public async Task<IActionResult> ExportToPdf([FromQuery] Guid? categoryId, [FromServices] IWebHostEnvironment env)
     {
-        // Set QuestPDF Community License
-        QuestPDF.Settings.License = LicenseType.Community;
-
-        var productsList = await Mediator.Send(new GetCatalogProductsQuery());
-        var products = productsList.AsEnumerable();
-        if (categoryId.HasValue)
+        try
         {
-            products = products.Where(p => p.CategoryId == categoryId.Value);
-        }
+            // Set QuestPDF Community License
+            QuestPDF.Settings.License = LicenseType.Community;
 
-        var productsArray = products.ToArray();
-        if (productsArray.Length == 0)
-        {
-            return BadRequest(new { Message = "No hay productos en esta categoría para exportar." });
-        }
-
-        var pdfStream = new MemoryStream();
-        
-        var document = Document.Create(container =>
-        {
-            container.Page(page =>
+            var productsList = await Mediator.Send(new GetCatalogProductsQuery());
+            var products = productsList.AsEnumerable();
+            if (categoryId.HasValue)
             {
-                page.Size(PageSizes.A4); // Portrait A4
-                page.Margin(40);
-                page.PageColor("#FFFFFF");
-                page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(11).FontColor("#0F172A"));
+                products = products.Where(p => p.CategoryId == categoryId.Value);
+            }
 
-                page.Footer()
-                    .AlignCenter()
-                    .Text(x =>
-                    {
-                        x.Span("Página ").FontSize(9).FontColor("#64748B");
-                        x.CurrentPageNumber().FontSize(9).FontColor("#64748B");
-                    });
+            var productsArray = products.ToArray();
+            if (productsArray.Length == 0)
+            {
+                return BadRequest(new { Message = "No hay productos en esta categoría para exportar." });
+            }
 
-                page.Content()
-                    .Column(column =>
-                    {
-                        var categories = productsArray.GroupBy(p => p.CategoryName).ToArray();
-                        
-                        for (int catIdx = 0; catIdx < categories.Length; catIdx++)
+            var pdfStream = new MemoryStream();
+            
+            var document = Document.Create(container =>
+            {
+                container.Page(page =>
+                {
+                    page.Size(PageSizes.A4); // Portrait A4
+                    page.Margin(40);
+                    page.PageColor("#FFFFFF");
+                    page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(11).FontColor("#0F172A"));
+
+                    page.Footer()
+                        .AlignCenter()
+                        .Text(x =>
                         {
-                            var categoryGroup = categories[catIdx];
-                            var categoryName = categoryGroup.Key ?? "Otros";
-                            
-                            // A) Category Divider Page (Centered horizontally and vertically)
-                            column.Item().Background("#0F172A").Height(650).AlignCenter().AlignMiddle().Column(catCol =>
-                            {
-                                catCol.Item().Text(categoryName.ToUpper())
-                                    .Bold()
-                                    .FontSize(42)
-                                    .FontColor("#FFFFFF")
-                                    .AlignCenter();
-                                    
-                                catCol.Item().PaddingTop(10).Text("CATÁLOGO DE PRODUCTOS")
-                                    .FontSize(16)
-                                    .FontColor("#CBD5E1")
-                                    .AlignCenter();
-                            });
-                            
-                            column.Item().PageBreak();
+                            x.Span("Página ").FontSize(9).FontColor("#64748B");
+                            x.CurrentPageNumber().FontSize(9).FontColor("#64748B");
+                        });
 
-                            // B) Products Page
-                            var prodArray = categoryGroup.ToArray();
-                            for (int prodIdx = 0; prodIdx < prodArray.Length; prodIdx++)
+                    page.Content()
+                        .Column(column =>
+                        {
+                            var categories = productsArray.GroupBy(p => p.CategoryName).ToArray();
+                            
+                            for (int catIdx = 0; catIdx < categories.Length; catIdx++)
                             {
-                                var product = prodArray[prodIdx];
+                                var categoryGroup = categories[catIdx];
+                                var categoryName = categoryGroup.Key ?? "Otros";
                                 
-                                column.Item().Column(prodCol =>
+                                // A) Category Divider Page (Centered horizontally and vertically)
+                                column.Item().Background("#0F172A").Height(650).AlignCenter().AlignMiddle().Column(catCol =>
                                 {
-                                    prodCol.Spacing(15);
-                                    
-                                    // 1. Product Name (Centered)
-                                    prodCol.Item().AlignCenter().Text(product.Name.ToUpper())
+                                    catCol.Item().Text(categoryName.ToUpper())
                                         .Bold()
-                                        .FontSize(24)
-                                        .FontColor("#1E3A8A");
+                                        .FontSize(42)
+                                        .FontColor("#FFFFFF")
+                                        .AlignCenter();
                                         
-                                    // 2. Product Details (Centered)
-                                    var ueText = product.Description?.Contains("U/E: ") == true
-                                        ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
-                                        : "N/A";
+                                    catCol.Item().PaddingTop(10).Text("CATÁLOGO DE PRODUCTOS")
+                                        .FontSize(16)
+                                        .FontColor("#CBD5E1")
+                                        .AlignCenter();
+                                });
+                                
+                                column.Item().PageBreak();
+
+                                // B) Products Page
+                                var prodArray = categoryGroup.ToArray();
+                                for (int prodIdx = 0; prodIdx < prodArray.Length; prodIdx++)
+                                {
+                                    var product = prodArray[prodIdx];
+                                    
+                                    column.Item().Column(prodCol =>
+                                    {
+                                        prodCol.Spacing(15);
                                         
-                                    prodCol.Item().AlignCenter().Text(x =>
-                                    {
-                                        x.Span("CÓDIGO SKU: ").Bold().FontColor("#334155");
-                                        x.Span($"{product.InternalCode}   •   ").FontColor("#475569");
-                                        x.Span("MEDIDA: ").Bold().FontColor("#334155");
-                                        x.Span($"{product.DefaultUnitOfMeasureCode}   •   ").FontColor("#475569");
-                                        x.Span("U/E: ").Bold().FontColor("#334155");
-                                        x.Span($"{ueText}").FontColor("#475569");
-                                    });
-
-                                    prodCol.Item().LineHorizontal(1f).LineColor("#CBD5E1");
-
-                                    // 3. Image (Centered)
-                                    var imgPlaced = false;
-                                    if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
-                                    {
-                                        var relativePath = product.ImagePath;
-                                        if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                                        // 1. Product Name (Centered)
+                                        prodCol.Item().AlignCenter().Text(product.Name.ToUpper())
+                                            .Bold()
+                                            .FontSize(24)
+                                            .FontColor("#1E3A8A");
+                                            
+                                        // 2. Product Details (Centered)
+                                        var ueText = product.Description?.Contains("U/E: ") == true
+                                            ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
+                                            : "N/A";
+                                            
+                                        prodCol.Item().AlignCenter().Text(x =>
                                         {
-                                            try
+                                            x.Span("CÓDIGO SKU: ").Bold().FontColor("#334155");
+                                            x.Span($"{product.InternalCode}   •   ").FontColor("#475569");
+                                            x.Span("MEDIDA: ").Bold().FontColor("#334155");
+                                            x.Span($"{product.DefaultUnitOfMeasureCode}   •   ").FontColor("#475569");
+                                            x.Span("U/E: ").Bold().FontColor("#334155");
+                                            x.Span($"{ueText}").FontColor("#475569");
+                                        });
+
+                                        prodCol.Item().LineHorizontal(1f).LineColor("#CBD5E1");
+
+                                        // 3. Image (Centered)
+                                        var imgPlaced = false;
+                                        if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
+                                        {
+                                            var relativePath = product.ImagePath;
+                                            if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                                             {
-                                                var uri = new Uri(relativePath);
-                                                relativePath = uri.AbsolutePath;
+                                                try
+                                                {
+                                                    var uri = new Uri(relativePath);
+                                                    relativePath = uri.AbsolutePath;
+                                                }
+                                                catch { }
                                             }
-                                            catch { }
+                                            
+                                            var localImagePath = Path.Combine(env.WebRootPath, relativePath.TrimStart('/'));
+                                            if (System.IO.File.Exists(localImagePath))
+                                            {
+                                                prodCol.Item()
+                                                    .Height(380)
+                                                    .Border(1f)
+                                                    .BorderColor("#E2E8F0")
+                                                    .Background("#F8FAFC")
+                                                    .Image(localImagePath);
+                                                    
+                                                imgPlaced = true;
+                                            }
                                         }
-                                        
-                                        var localImagePath = Path.Combine(env.WebRootPath, relativePath.TrimStart('/'));
-                                        if (System.IO.File.Exists(localImagePath))
+
+                                        if (!imgPlaced)
                                         {
                                             prodCol.Item()
                                                 .Height(380)
                                                 .Border(1f)
                                                 .BorderColor("#E2E8F0")
                                                 .Background("#F8FAFC")
-                                                .Image(localImagePath);
-                                                
-                                            imgPlaced = true;
+                                                .AlignCenter()
+                                                .AlignMiddle()
+                                                .Text("Sin Imagen")
+                                                .FontColor("#94A3B8")
+                                                .Italic();
                                         }
-                                    }
 
-                                    if (!imgPlaced)
+                                        // 4. Description (Centered)
+                                        if (!string.IsNullOrWhiteSpace(product.Description))
+                                        {
+                                            prodCol.Item().PaddingTop(10).AlignCenter().Text(product.Description)
+                                                .FontSize(11)
+                                                .FontColor("#475569");
+                                        }
+                                    });
+
+                                    if (prodIdx < prodArray.Length - 1 || catIdx < categories.Length - 1)
                                     {
-                                        prodCol.Item()
-                                            .Height(380)
-                                            .Border(1f)
-                                            .BorderColor("#E2E8F0")
-                                            .Background("#F8FAFC")
-                                            .AlignCenter()
-                                            .AlignMiddle()
-                                            .Text("Sin Imagen")
-                                            .FontColor("#94A3B8")
-                                            .Italic();
+                                        column.Item().PageBreak();
                                     }
-
-                                    // 4. Description (Centered)
-                                    if (!string.IsNullOrWhiteSpace(product.Description))
-                                    {
-                                        prodCol.Item().PaddingTop(10).AlignCenter().Text(product.Description)
-                                            .FontSize(11)
-                                            .FontColor("#475569");
-                                    }
-                                });
-
-                                if (prodIdx < prodArray.Length - 1 || catIdx < categories.Length - 1)
-                                {
-                                    column.Item().PageBreak();
                                 }
                             }
-                        }
-                    });
+                        });
+                });
             });
-        });
 
-        document.GeneratePdf(pdfStream);
-        pdfStream.Position = 0;
-        
-        var categoryNameHeader = categoryId.HasValue && productsArray.Length > 0 ? productsArray[0].CategoryName : "Todos";
-        var safeCategoryName = string.Join("_", categoryNameHeader.Split(Path.GetInvalidFileNameChars()));
-        var fileName = $"catalogo_{safeCategoryName.ToLower().Replace(" ", "_")}.pdf";
-        
-        return File(pdfStream.ToArray(), "application/pdf", fileName);
+            document.GeneratePdf(pdfStream);
+            pdfStream.Position = 0;
+            
+            var categoryNameHeader = categoryId.HasValue && productsArray.Length > 0 ? productsArray[0].CategoryName : "Todos";
+            var safeCategoryName = string.Join("_", categoryNameHeader.Split(Path.GetInvalidFileNameChars()));
+            var fileName = $"catalogo_{safeCategoryName.ToLower().Replace(" ", "_")}.pdf";
+            
+            return File(pdfStream.ToArray(), "application/pdf", fileName);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new 
+            { 
+                Error = ex.ToString(), 
+                Message = ex.Message, 
+                InnerError = ex.InnerException?.ToString() 
+            });
+        }
     }
 }
