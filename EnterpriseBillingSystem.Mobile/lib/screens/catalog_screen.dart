@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 import '../providers/auth_provider.dart';
 import '../providers/order_provider.dart';
 import '../widgets/cached_product_image.dart';
@@ -16,12 +17,14 @@ class CatalogScreen extends StatefulWidget {
 
 class _CatalogScreenState extends State<CatalogScreen> {
   final _searchController = TextEditingController();
+  String? _selectedCategoryId;
 
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       Provider.of<OrderProvider>(context, listen: false).fetchProducts();
+      Provider.of<OrderProvider>(context, listen: false).fetchProductCategories();
     });
     _searchController.addListener(_onSearchChanged);
   }
@@ -37,6 +40,41 @@ class _CatalogScreenState extends State<CatalogScreen> {
     Provider.of<OrderProvider>(context, listen: false).fetchProducts(search: search);
   }
 
+  void _exportToPowerPoint() async {
+    final provider = Provider.of<OrderProvider>(context, listen: false);
+    final apiUrl = provider.apiService.configProvider.apiUrl;
+    
+    String urlStr = '$apiUrl/catalog/export/pptx';
+    if (_selectedCategoryId != null) {
+      urlStr += '?categoryId=$_selectedCategoryId';
+    }
+    
+    final uri = Uri.parse(urlStr);
+    
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text('Generando y descargando catálogo en PowerPoint...'),
+        duration: Duration(seconds: 3),
+      ),
+    );
+
+    try {
+      if (await canLaunchUrl(uri)) {
+        await launchUrl(uri, mode: LaunchMode.externalApplication);
+      } else {
+        throw 'No se pudo abrir el navegador externo para $urlStr';
+      }
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Error al exportar catálogo: $e'),
+          backgroundColor: Colors.red,
+        ),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<OrderProvider>(context);
@@ -46,6 +84,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
     // Responsive Column count: 3 on tablets (width > 600), 2 on phones
     final columns = width > 600 ? 3 : 2;
 
+    // Filter products locally by selected category
+    final filteredProducts = _selectedCategoryId == null
+        ? provider.products
+        : provider.products.where((p) => p.categoryId == _selectedCategoryId).toList();
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
@@ -53,6 +96,11 @@ class _CatalogScreenState extends State<CatalogScreen> {
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
         actions: [
+          IconButton(
+            icon: const Icon(Icons.file_download_rounded, color: Color(0xFF38BDF8)),
+            tooltip: 'Exportar catálogo a PowerPoint',
+            onPressed: _exportToPowerPoint,
+          ),
           if (auth.isLoggedIn) ...[
             // Cart shortcut button for quick checkout access when seller logged in
             IconButton(
@@ -95,7 +143,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
           // Public Search Banner
           Container(
             color: const Color(0xFF0F172A),
-            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 20, top: 4),
+            padding: const EdgeInsets.only(left: 16, right: 16, bottom: 8, top: 4),
             child: TextField(
               controller: _searchController,
               style: const TextStyle(color: Colors.white),
@@ -114,12 +162,90 @@ class _CatalogScreenState extends State<CatalogScreen> {
             ),
           ),
 
+          // Category Selector Horizontal Chips
+          if (provider.productCategories.isNotEmpty)
+            Container(
+              height: 52,
+              color: const Color(0xFF0F172A),
+              padding: const EdgeInsets.only(bottom: 12),
+              child: ListView.builder(
+                scrollDirection: Axis.horizontal,
+                padding: const EdgeInsets.symmetric(horizontal: 16),
+                itemCount: provider.productCategories.length + 1,
+                itemBuilder: (context, index) {
+                  if (index == 0) {
+                    final isSelected = _selectedCategoryId == null;
+                    return Padding(
+                      padding: const EdgeInsets.only(right: 8.0),
+                      child: FilterChip(
+                        selected: isSelected,
+                        label: const Text('Todas'),
+                        labelStyle: TextStyle(
+                          color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                          fontWeight: FontWeight.bold,
+                          fontSize: 12,
+                        ),
+                        selectedColor: const Color(0xFF38BDF8),
+                        backgroundColor: const Color(0xFF1E293B),
+                        checkmarkColor: Colors.white,
+                        showCheckmark: false,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(20),
+                          side: BorderSide(
+                            color: isSelected ? const Color(0xFF38BDF8) : const Color(0xFF334155),
+                          ),
+                        ),
+                        onSelected: (selected) {
+                          setState(() {
+                            _selectedCategoryId = null;
+                          });
+                        },
+                      ),
+                    );
+                  }
+
+                  final category = provider.productCategories[index - 1];
+                  final catId = category['id'] as String;
+                  final catName = category['name'] as String;
+                  final isSelected = _selectedCategoryId == catId;
+
+                  return Padding(
+                    padding: const EdgeInsets.only(right: 8.0),
+                    child: FilterChip(
+                      selected: isSelected,
+                      label: Text(catName),
+                      labelStyle: TextStyle(
+                        color: isSelected ? Colors.white : const Color(0xFF94A3B8),
+                        fontWeight: FontWeight.bold,
+                        fontSize: 12,
+                      ),
+                      selectedColor: const Color(0xFF38BDF8),
+                      backgroundColor: const Color(0xFF1E293B),
+                      checkmarkColor: Colors.white,
+                      showCheckmark: false,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(20),
+                        side: BorderSide(
+                          color: isSelected ? const Color(0xFF38BDF8) : const Color(0xFF334155),
+                        ),
+                      ),
+                      onSelected: (selected) {
+                        setState(() {
+                          _selectedCategoryId = selected ? catId : null;
+                        });
+                      },
+                    ),
+                  );
+                },
+              ),
+            ),
+
           // Responsive Grid View
           Expanded(
             child: provider.isLoading && provider.products.isEmpty
                 ? const Center(child: CircularProgressIndicator())
-                : provider.products.isEmpty
-                    ? const Center(child: Text('No hay productos disponibles.'))
+                : filteredProducts.isEmpty
+                    ? const Center(child: Text('No hay productos disponibles en esta categoría.'))
                     : RefreshIndicator(
                         onRefresh: () => provider.fetchProducts(),
                         child: GridView.builder(
@@ -130,9 +256,9 @@ class _CatalogScreenState extends State<CatalogScreen> {
                             mainAxisSpacing: 16,
                             childAspectRatio: 0.72, // Tighter ratio for cards
                           ),
-                          itemCount: provider.products.length,
+                          itemCount: filteredProducts.length,
                           itemBuilder: (context, index) {
-                            final product = provider.products[index];
+                            final product = filteredProducts[index];
                             final isSoldOut = product.isSoldOut;
 
                             return Card(
