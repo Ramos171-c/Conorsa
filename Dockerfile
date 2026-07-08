@@ -4,9 +4,11 @@ WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
 
-# Install native dependencies for SkiaSharp / ShapeCrawler
+# Install native dependencies for SkiaSharp / QuestPDF and standard system fonts
 RUN apt-get update && apt-get install -y \
     libfontconfig1 \
+    fonts-liberation \
+    fonts-dejavu-core \
     && rm -rf /var/lib/apt/lists/*
 
 
