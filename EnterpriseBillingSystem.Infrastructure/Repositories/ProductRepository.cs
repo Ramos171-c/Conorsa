@@ -76,7 +76,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
         int totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
-            .OrderBy(p => p.Name)
+            .OrderBy(p => p.InternalCode)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(cancellationToken);
@@ -107,7 +107,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
             .Include(p => p.BranchProducts)
                 .ThenInclude(bp => bp.Branch)
             .Where(p => p.IsCatalogVisible && p.IsActive)
-            .OrderBy(p => p.Name)
+            .OrderBy(p => p.InternalCode)
             .ToListAsync(cancellationToken);
     }
 

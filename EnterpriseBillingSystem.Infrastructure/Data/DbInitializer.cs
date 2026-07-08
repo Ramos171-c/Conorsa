@@ -1339,7 +1339,7 @@ public class DbInitializer : IDbInitializer
         // 7. Lista de productos
         var productsData = new List<TempProductData>
         {
-            // Galletas (37)
+            // Galletas (38)
             new("GA001", "GALLETAS WAFFER AMORIS CHOCOLATE", "Galletas", "1/30", 30, 15.75m, 472.50m, 16.80m, 504.00m, 14.32m, 429.55m),
             new("GA002", "GALLETAS WAFFER AMORIS FRESA", "Galletas", "1/30", 30, 15.75m, 472.50m, 16.80m, 504.00m, 14.32m, 429.55m),
             new("GA003", "GALLETAS WAFFER AMORIS ESCURETO", "Galletas", "1/30", 30, 15.75m, 472.50m, 16.80m, 504.00m, 14.32m, 429.55m),
@@ -1370,15 +1370,16 @@ public class DbInitializer : IDbInitializer
             new("GA028", "TORTITAS ZOO ANIMADOS CHOCOLATE", "Galletas", "1*6*12", 6, 102.86m, 617.14m, 102.86m, 617.14m, 81.82m, 490.91m),
             new("GA029", "GALLETAS WAFFER ZOO ANIMADOS FRESA", "Galletas", "1*2*20", 2, 154.29m, 308.57m, 154.29m, 308.57m, 122.73m, 245.45m),
             new("GA030", "GALLETAS WAFFER ZOO ANIMADOS CHOCOLATE", "Galletas", "1*2*20", 2, 154.29m, 308.57m, 154.29m, 308.57m, 122.73m, 245.45m),
-            new("GA031", "GALLETA AMORIS REDONDA 125GR. CODIGO SURTIDO", "Galletas", "1/36", 36, 20.38m, 733.85m, 21.20m, 763.20m, 18.07m, 650.45m),
-            new("GA032", "GALLETA TWINNIES CODIGO SURTIDO", "Galletas", "1*24*12", 24, 47.65m, 1143.53m, 49.39m, 1185.37m, 46.02m, 1104.55m),
-            new("GA033", "GALLETA JUMBO CODIGO SURTIDO", "Galletas", "1*10*12", 10, 97.92m, 979.20m, 97.92m, 979.20m, 83.45m, 834.55m),
-            new("GA034", "GALLETA KIDMAX SURTIDO", "Galletas", "1*24*12", 24, 48.13m, 1155.00m, 48.13m, 1155.00m, 39.38m, 945.00m),
-            new("GA035", "TORTITAS ZOO ANIMADOS SURTIDO", "Galletas", "1*6*12", 6, 102.86m, 617.14m, 102.86m, 617.14m, 81.82m, 490.91m),
-            new("GA036", "GALLETAS WAFFER ZOO ANIMADOS SURTIDO", "Galletas", "1*2*20", 2, 154.29m, 308.57m, 154.29m, 308.57m, 122.73m, 245.45m),
-            new("GA037", "GALLETAS TRIO 4 CANDY SURTIDO", "Galletas", "1*24*12", 24, 58.24m, 1397.65m, 58.24m, 1397.65m, 56.25m, 1350.00m),
+            new("GA031", "GALLETAS WAFFER AMORIS CODIGO SURTIDO", "Galletas", "1/30", 30, 15.75m, 472.50m, 16.80m, 504.00m, 14.32m, 429.55m),
+            new("GA032", "GALLETA AMORIS REDONDA 125GR. CODIGO SURTIDO", "Galletas", "1/36", 36, 20.38m, 733.85m, 21.20m, 763.20m, 18.07m, 650.45m),
+            new("GA033", "GALLETA TWINNIES CODIGO SURTIDO", "Galletas", "1*24*12", 24, 47.65m, 1143.53m, 49.39m, 1185.37m, 46.02m, 1104.55m),
+            new("GA034", "GALLETA JUMBO CODIGO SURTIDO", "Galletas", "1*10*12", 10, 97.92m, 979.20m, 97.92m, 979.20m, 83.45m, 834.55m),
+            new("GA035", "GALLETA KIDMAX SURTIDO", "Galletas", "1*24*12", 24, 48.13m, 1155.00m, 48.13m, 1155.00m, 39.38m, 945.00m),
+            new("GA036", "TORTITAS ZOO ANIMADOS SURTIDO", "Galletas", "1*6*12", 6, 102.86m, 617.14m, 102.86m, 617.14m, 81.82m, 490.91m),
+            new("GA037", "GALLETAS WAFFER ZOO ANIMADOS SURTIDO", "Galletas", "1*2*20", 2, 154.29m, 308.57m, 154.29m, 308.57m, 122.73m, 245.45m),
+            new("GA038", "GALLETAS TRIO 4 CANDY SURTIDO", "Galletas", "1*24*12", 24, 56.25m, 1350.00m, 58.24m, 1397.65m, 56.25m, 1350.00m),
 
-            // Caramelos (33)
+            // Caramelos (40)
             new("CA001", "DISPENSADOR CANDY CHISQUETAZO", "Caramelos", "1*12*24", 12, 144.00m, 1728.00m, 154.29m, 1851.43m, 122.73m, 1472.73m),
             new("CA002", "DISPENSADOR CANDY SUPLAY CANDY BRUSH", "Caramelos", "1*12*24", 12, 180.00m, 2160.00m, 192.86m, 2314.29m, 153.41m, 1840.91m),
             new("CA003", "DISPENSADOR YUGL GOMITA GUITARRA", "Caramelos", "1*12*24", 12, 207.60m, 2491.20m, 222.43m, 2669.14m, 176.93m, 2123.18m),
@@ -1408,10 +1409,17 @@ public class DbInitializer : IDbInitializer
             new("CA027", "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO LECHE CAJA AZUL", "Caramelos", "1*20*30", 20, 144.00m, 2880.00m, 154.29m, 3085.71m, 122.73m, 2454.55m),
             new("CA028", "UNIDADES CANDY MINI BOLO SURTIDO NIÑA", "Caramelos", "1*100", 100, 47.52m, 4752.00m, 50.91m, 5091.43m, 40.50m, 4050.00m),
             new("CA029", "UNIDADES CANDY MINI BOLO SURTIDO NIÑO", "Caramelos", "1*100", 100, 47.52m, 4752.00m, 50.91m, 5091.43m, 40.50m, 4050.00m),
-            new("CA030", "UNIDADES MD NR 168 CHOCOLATE MILKSTAR PANA", "Caramelos", "1*6*40", 6, 372.00m, 2232.00m, 398.57m, 2391.43m, 317.05m, 1902.27m),
+            new("CA030", "UNIDADES MD NR 168 CHOCOLATE MILKSTAR PANA", "Caramelos", "1*12*40", 6, 372.00m, 2232.00m, 398.57m, 2391.43m, 317.05m, 1902.27m),
             new("CA031", "UNIDADES MD NR 168 CHOCOLATE MIL STAR PANA", "Caramelos", "1*6*40", 6, 372.00m, 2232.00m, 398.57m, 2391.43m, 317.05m, 1902.27m),
             new("CA032", "MD 423 SOUR CANDY SUPER STIMULANTE EXTREMO ACIDO", "Caramelos", "1*20*30", 20, 148.32m, 2966.40m, 158.91m, 3178.29m, 126.41m, 2528.18m),
             new("CA033", "TARRO MD NTC-321 OJO EN TARRO CON TRONADOR", "Caramelos", "1*8*60", 8, 297.00m, 2376.00m, 318.21m, 2545.71m, 253.13m, 2025.00m),
+            new("CA034", "TARRO FRESH OLIVE BALL BUBBLEGUM", "Caramelos", "1*12*150", 8, 297.18m, 2377.44m, 187.71m, 1501.71m, 223.98m, 1791.82m),
+            new("CA035", "TARRO RUGBY BALL BUBBLE GUM", "Caramelos", "1*24*220", 8, 297.36m, 2378.88m, 90.00m, 720.00m, 214.77m, 1718.18m),
+            new("CA036", "TARRO SUPER TARZAN BUBBLE GUM", "Caramelos", "1*12*250", 8, 297.54m, 2380.32m, 102.86m, 822.86m, 122.73m, 981.82m),
+            new("CA037", "KOBA TARRO FRESH OLIVE BALL BUBBLEGUM", "Caramelos", "1*24*100", 8, 297.72m, 2381.76m, 73.93m, 591.43m, 176.42m, 1411.36m),
+            new("CA038", "CARAMELO CRYSTAL", "Caramelos", "1*8*200", 8, 297.90m, 2383.20m, 144.64m, 1157.14m, 115.06m, 920.45m),
+            new("CA039", "BOLSA JUICE BURST", "Caramelos", "1*12*150", 8, 298.08m, 2384.64m, 154.29m, 1234.29m, 184.09m, 1472.73m),
+            new("CA040", "YOHAN BALL BUBBLEGUM", "Caramelos", "1*12*250", 8, 298.26m, 2386.08m, 205.71m, 1645.71m, 245.45m, 1963.64m),
 
             // Malvaviscos (8)
             new("MA001", "BOLSA CANDY SUPLAY MALVAVISCO SUPER MINI MINO", "Malvaviscos", "1*8*70", 8, 252.00m, 2016.00m, 270.00m, 2160.00m, 214.77m, 1718.18m),
@@ -1423,18 +1431,19 @@ public class DbInitializer : IDbInitializer
             new("MA007", "BOLSA MALVAVISCO 3D", "Malvaviscos", "1*16*30", 16, 97.20m, 1555.20m, 104.14m, 1666.29m, 82.84m, 1325.45m),
             new("MA008", "DISPENSADOR MALVAVISCO MALVA POP", "Malvaviscos", "1*12*30", 12, 192.00m, 2304.00m, 205.71m, 2468.57m, 163.64m, 1963.64m),
 
-            // Toallas y Otros (11)
+            // Toallas y Otros (12)
             new("TA001", "TOALLAS HUMEDAS FAMILYS ROBELLY CELESTE 96 HOJAS", "Toallas y Otros", "1*12", 12, 63.53m, 762.35m, 63.53m, 762.35m, 61.36m, 736.36m),
             new("TA002", "TOALLAS HUMEDAS MIDDY BEAR 80 HOJAS", "Toallas y Otros", "1*12", 12, 68.82m, 825.88m, 73.13m, 877.50m, 66.48m, 797.73m),
             new("TA003", "PAQUETE DE TOALLITA HUMEDA MIDDY BEAR 120 HOJAS", "Toallas y Otros", "1*12", 12, 72.00m, 864.00m, 76.50m, 918.00m, 69.55m, 834.55m),
             new("TA004", "UNIDAD JN203 TOALLITA COMPRIMIDA MIDDY BEAR", "Toallas y Otros", "1*30*10", 30, 79.71m, 2391.43m, 79.71m, 2391.43m, 63.41m, 1902.27m),
             new("TA005", "TOALLA HUMEDA SIPPACK MIDDY BEAR", "Toallas y Otros", "1*20*8", 20, 57.86m, 1157.14m, 57.86m, 1157.14m, 46.02m, 920.45m),
             new("TA006", "PAPEL HIGIENICO ROBELLY 1620 HOJAS", "Toallas y Otros", "1/24", 24, 23.82m, 571.76m, 23.82m, 571.76m, 23.01m, 552.27m),
-            new("TA007", "BOLSON DE PAÑALES CALSON OSITO -TALLAS; S,M,L,XL,XXL,3XL Y 4XL.", "Toallas y Otros", "1/4", 4, 642.07m, 2568.29m, 658.13m, 2632.50m, 585.00m, 2340.00m),
-            new("TA008", "BOLSON DE PAÑALES PEGA PEGA OSITO -TALLAS; S,M,L,XL,XXL Y XXXL.", "Toallas y Otros", "1/4", 4, 642.07m, 2568.29m, 658.13m, 2632.50m, 585.00m, 2340.00m),
-            new("TA009", "PAQUETE DE PAÑAL ADULTO MOMMY BEAR -TALLAS; M,L,XL.", "Toallas y Otros", "1*8*10", 8, 347.14m, 2777.14m, 347.14m, 2777.14m, 276.14m, 2209.09m),
+            new("TA007", "BOLSON DE PAÑALES CALSON OSITO -TALLAS; S,M,L,XL,XXL,3XL Y 4XL.", "Toallas y Otros", "1/4", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m),
+            new("TA008", "BOLSON DE PAÑALES PEGA PEGA OSITO -TALLAS; S,M,L,XL,XXL Y XXXL.", "Toallas y Otros", "1/4", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m),
+            new("TA009", "PAQUETE DE PAÑAL ADULTO MOMMY BEAR -TALLAS; M,L,XL.", "Toallas y Otros", "1*8*10", 8, 321.43m, 2571.43m, 321.43m, 2571.43m, 255.68m, 2045.45m),
             new("TA010", "TALCO SURTIDO MIDDY BEAR 635GR.", "Toallas y Otros", "1*12", 12, 77.14m, 925.71m, 77.14m, 925.71m, 61.36m, 736.36m),
-            new("TO011", "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6X", "Toallas y Otros", "1*4*50", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m)
+            new("TO011", "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6XL", "Toallas y Otros", "1*4*50", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m),
+            new("TO012", "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL", "Toallas y Otros", "1*4*50", 4, 304.88m, 1219.51m, 312.50m, 1250.00m, 277.78m, 1111.11m)
         };
 
         foreach (var data in productsData)
@@ -1462,14 +1471,15 @@ public class DbInitializer : IDbInitializer
 
                 foreach (var presentation in existingProduct.Presentations)
                 {
-                    if (presentation.ConversionFactor == 1.0000m)
+                    if (presentation.IsBaseUnit || presentation.ConversionFactor == 1.0000m)
                     {
                         presentation.RetailPrice = data.RetailUnit;
                         presentation.SemiWholesalePrice = data.SemiUnit;
                         presentation.WholesalePrice = data.WholesaleUnit;
                     }
-                    else if (presentation.ConversionFactor == (decimal)data.BoxFactor)
+                    else
                     {
+                        presentation.ConversionFactor = (decimal)data.BoxFactor;
                         presentation.RetailPrice = data.RetailBox;
                         presentation.SemiWholesalePrice = data.SemiBox;
                         presentation.WholesalePrice = data.WholesaleBox;
