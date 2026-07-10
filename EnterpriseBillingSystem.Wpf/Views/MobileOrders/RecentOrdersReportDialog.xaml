@@ -78,7 +78,7 @@
                         <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Cant. Total" Binding="{Binding TotalQuantity, StringFormat={}{0:N2}}" Width="130" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Total Estimado" Binding="{Binding TotalNetAmount, StringFormat={}{0:C2}}" Width="150" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Total Estimado" Binding="{Binding TotalCost, StringFormat={}{0:C2}}" Width="150" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
                     </DataGrid.Columns>
                 </DataGrid>
                 

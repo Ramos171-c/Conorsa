@@ -73,5 +73,6 @@ public record ConsolidatedProductDto(
     string ProductName,
     string UnitOfMeasure,
     decimal TotalQuantity,
-    decimal TotalNetAmount
+    decimal TotalNetAmount,
+    decimal TotalCost
 );

@@ -124,6 +124,7 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
             .Include(so => so.Customer)
             .Include(so => so.Details)
                 .ThenInclude(d => d.Product)
+                    .ThenInclude(p => p.Presentations)
             .Include(so => so.Details)
                 .ThenInclude(d => d.UnitOfMeasure)
             .AsNoTracking();

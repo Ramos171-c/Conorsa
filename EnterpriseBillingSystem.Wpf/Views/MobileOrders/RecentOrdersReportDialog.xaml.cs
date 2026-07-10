@@ -36,7 +36,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         public bool ShowEmptyMessage => !IsLoading && ConsolidatedProducts.Count == 0;
 
         public decimal TotalItems => ConsolidatedProducts.Sum(p => p.TotalQuantity);
-        public decimal TotalEstimatedCost => ConsolidatedProducts.Sum(p => p.TotalNetAmount);
+        public decimal TotalEstimatedCost => ConsolidatedProducts.Sum(p => p.TotalCost);
 
         public ObservableCollection<ConsolidatedProductDto> ConsolidatedProducts { get; } = new();
 
@@ -169,7 +169,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                             var name = EscapeCsv(item.ProductName);
                             var uom = EscapeCsv(item.UnitOfMeasure);
                             var qty = item.TotalQuantity.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
-                            var amount = item.TotalNetAmount.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
+                            var amount = item.TotalCost.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
 
                             writer.WriteLine($"{code};{name};{uom};{qty};{amount}");
                         }
