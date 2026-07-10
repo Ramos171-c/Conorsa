@@ -161,6 +161,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 {
                     using (var writer = new System.IO.StreamWriter(saveFileDialog.FileName, false, System.Text.Encoding.UTF8))
                     {
+                        writer.WriteLine("sep=;");
                         writer.WriteLine("Codigo;Producto;U.M.;Cantidad Total;Total Estimado");
                         foreach (var item in ConsolidatedProducts)
                         {
@@ -185,7 +186,8 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         private string EscapeCsv(string val)
         {
             if (string.IsNullOrEmpty(val)) return string.Empty;
-            if (val.Contains(";") || val.Contains("\"") || val.Contains("\n") || val.Contains("\r"))
+            val = val.Replace(";", ",");
+            if (val.Contains("\"") || val.Contains("\n") || val.Contains("\r"))
             {
                 return "\"" + val.Replace("\"", "\"\"") + "\"";
             }
