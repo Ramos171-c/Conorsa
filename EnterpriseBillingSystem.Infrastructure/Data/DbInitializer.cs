@@ -1290,7 +1290,9 @@ public class DbInitializer : IDbInitializer
         decimal RetailUnit,
         decimal RetailBox,
         decimal WholesaleUnit,
-        decimal WholesaleBox
+        decimal WholesaleBox,
+        decimal? CostUnit = null,
+        decimal? CostBox = null
     );
 
     private async Task ResetAndSeedNewCatalogAsync(Guid branchId)
@@ -1401,17 +1403,17 @@ public class DbInitializer : IDbInitializer
             new("CA019", "TARRO MD MINI KRIZZY HUEVO CELESTE", "Caramelos", "1*12*60", 12, 300.00m, 3600.00m, 321.43m, 3857.14m, 255.68m, 3068.18m),
             new("CA020", "TARRO MD MINI KRIZZY HUEVO ROJO", "Caramelos", "1*12*60", 12, 300.00m, 3600.00m, 321.43m, 3857.14m, 255.68m, 3068.18m),
             new("CA021", "DISPENSADOR PECCIN CHICLE BLONG NAPOLITANO", "Caramelos", "1*24*40", 24, 72.00m, 1728.00m, 77.14m, 1851.43m, 61.36m, 1472.73m),
-            new("CA022", "BOLSA MD NR 47 CARAMELO MIX 3 LIBRAS", "Caramelos", "1*6", 6, 235.20m, 1411.20m, 252.00m, 1512.00m, 200.45m, 1202.73m),
+            new("CA022", "BOLSA MD NR 47 CARAMELO MIX 3 LIBRAS", "Caramelos", "1*6", 6, 235.20m, 1411.20m, 252.00m, 1512.00m, 200.45m, 1202.73m, 166.67m, 1000.00m),
             new("CA023", "BOLSA MD NR 47 CARAMELO MIX 5 LIBRAS", "Caramelos", "1*6", 6, 384.00m, 2304.00m, 411.43m, 2468.57m, 327.27m, 1963.64m),
-            new("CA024", "BOLSA MD NR 47 CARAMELO MIX 10 LIBRAS", "Caramelos", "1*4", 4, 720.00m, 2880.00m, 771.43m, 3085.71m, 613.64m, 2454.55m),
+            new("CA024", "BOLSA MD NR 47 CARAMELO MIX 10 LIBRAS", "Caramelos", "1*4", 4, 720.00m, 2880.00m, 771.43m, 3085.71m, 613.64m, 2454.55m, 625.00m, 2500.00m),
             new("CA025", "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO CHOCOLATE CAJA ANARANJADA", "Caramelos", "1*20*30", 20, 144.00m, 2880.00m, 154.29m, 3085.71m, 122.73m, 2454.55m),
             new("CA026", "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO FRESA CAJA ROSADA", "Caramelos", "1*20*30", 20, 144.00m, 2880.00m, 154.29m, 3085.71m, 122.73m, 2454.55m),
             new("CA027", "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO LECHE CAJA AZUL", "Caramelos", "1*20*30", 20, 144.00m, 2880.00m, 154.29m, 3085.71m, 122.73m, 2454.55m),
             new("CA028", "UNIDADES CANDY MINI BOLO SURTIDO NIÑA", "Caramelos", "1*100", 100, 47.52m, 4752.00m, 50.91m, 5091.43m, 40.50m, 4050.00m),
             new("CA029", "UNIDADES CANDY MINI BOLO SURTIDO NIÑO", "Caramelos", "1*100", 100, 47.52m, 4752.00m, 50.91m, 5091.43m, 40.50m, 4050.00m),
-            new("CA030", "UNIDADES MD NR 168 CHOCOLATE MILKSTAR PANA", "Caramelos", "1*12*40", 6, 372.00m, 2232.00m, 398.57m, 2391.43m, 317.05m, 1902.27m),
+            new("CA030", "UNIDADES MD NR 168 CHOCOLATE MILKSTAR PANA", "Caramelos", "1*12*40", 6, 372.00m, 2232.00m, 398.57m, 2391.43m, 317.05m, 1902.27m, 258.33m, 1550.00m),
             new("CA031", "UNIDADES MD NR 168 CHOCOLATE MIL STAR PANA", "Caramelos", "1*6*40", 6, 372.00m, 2232.00m, 398.57m, 2391.43m, 317.05m, 1902.27m),
-            new("CA032", "MD 423 SOUR CANDY SUPER STIMULANTE EXTREMO ACIDO", "Caramelos", "1*20*30", 20, 148.32m, 2966.40m, 158.91m, 3178.29m, 126.41m, 2528.18m),
+            new("CA032", "MD 423 SOUR CANDY SUPER STIMULANTE EXTREMO ACIDO", "Caramelos", "1*20*30", 20, 148.32m, 2966.40m, 158.91m, 3178.29m, 126.41m, 2528.18m, 82.50m, 1650.00m),
             new("CA033", "TARRO MD NTC-321 OJO EN TARRO CON TRONADOR", "Caramelos", "1*8*60", 8, 297.00m, 2376.00m, 318.21m, 2545.71m, 253.13m, 2025.00m),
             new("CA034", "TARRO FRESH OLIVE BALL BUBBLEGUM", "Caramelos", "1*12*150", 8, 297.18m, 2377.44m, 187.71m, 1501.71m, 223.98m, 1791.82m),
             new("CA035", "TARRO RUGBY BALL BUBBLE GUM", "Caramelos", "1*24*220", 8, 297.36m, 2378.88m, 90.00m, 720.00m, 214.77m, 1718.18m),
@@ -1420,6 +1422,7 @@ public class DbInitializer : IDbInitializer
             new("CA038", "CARAMELO CRYSTAL", "Caramelos", "1*8*200", 8, 297.90m, 2383.20m, 144.64m, 1157.14m, 115.06m, 920.45m),
             new("CA039", "BOLSA JUICE BURST", "Caramelos", "1*12*150", 8, 298.08m, 2384.64m, 154.29m, 1234.29m, 184.09m, 1472.73m),
             new("CA040", "YOHAN BALL BUBBLEGUM", "Caramelos", "1*12*250", 8, 298.26m, 2386.08m, 205.71m, 1645.71m, 245.45m, 1963.64m),
+            new("CA041", "BOLSA FRUTZUCOS", "Caramelos", "1*30*20", 30, 63.36m, 1900.80m, 67.89m, 2036.57m, 54.00m, 1620.00m, 54.00m, 1620.00m),
 
             // Malvaviscos (8)
             new("MA001", "BOLSA CANDY SUPLAY MALVAVISCO SUPER MINI MINO", "Malvaviscos", "1*8*70", 8, 252.00m, 2016.00m, 270.00m, 2160.00m, 214.77m, 1718.18m),
@@ -1430,6 +1433,10 @@ public class DbInitializer : IDbInitializer
             new("MA006", "BOLSA MALVAVISCO RELLENO TRI PACK", "Malvaviscos", "1*15*24*3 UNIDADES", 15, 117.12m, 1756.80m, 125.49m, 1882.29m, 99.82m, 1497.27m),
             new("MA007", "BOLSA MALVAVISCO 3D", "Malvaviscos", "1*16*30", 16, 97.20m, 1555.20m, 104.14m, 1666.29m, 82.84m, 1325.45m),
             new("MA008", "DISPENSADOR MALVAVISCO MALVA POP", "Malvaviscos", "1*12*30", 12, 192.00m, 2304.00m, 205.71m, 2468.57m, 163.64m, 1963.64m),
+            new("MA009", "MALVAVISCO DIPA", "Malvaviscos", "1*20*30", 20, 180.00m, 3600.00m, 192.86m, 3857.14m, 153.41m, 3068.18m, 125.00m, 2500.00m),
+            new("MA010", "COTTOM CANDY COLORFULL ROLLS", "Malvaviscos", "1*20*30", 20, 158.40m, 3168.00m, 169.71m, 3394.29m, 135.00m, 2700.00m, 110.00m, 2200.00m),
+            new("MA011", "RAINBOW LONG MARSHMALLOW", "Malvaviscos", "1*8*65", 8, 289.80m, 2318.40m, 310.50m, 2484.00m, 246.99m, 1975.91m, 201.25m, 1610.00m),
+            new("MA012", "TWINST MARSHMALLOW", "Malvaviscos", "1*8*180", 8, 198.00m, 1584.00m, 212.14m, 1697.14m, 168.75m, 1350.00m, 137.50m, 1100.00m),
 
             // Toallas y Otros (12)
             new("TA001", "TOALLAS HUMEDAS FAMILYS ROBELLY CELESTE 96 HOJAS", "Toallas y Otros", "1*12", 12, 63.53m, 762.35m, 63.53m, 762.35m, 61.36m, 736.36m),
@@ -1438,12 +1445,12 @@ public class DbInitializer : IDbInitializer
             new("TA004", "UNIDAD JN203 TOALLITA COMPRIMIDA MIDDY BEAR", "Toallas y Otros", "1*30*10", 30, 79.71m, 2391.43m, 79.71m, 2391.43m, 63.41m, 1902.27m),
             new("TA005", "TOALLA HUMEDA SIPPACK MIDDY BEAR", "Toallas y Otros", "1*20*8", 20, 57.86m, 1157.14m, 57.86m, 1157.14m, 46.02m, 920.45m),
             new("TA006", "PAPEL HIGIENICO ROBELLY 1620 HOJAS", "Toallas y Otros", "1/24", 24, 23.82m, 571.76m, 23.82m, 571.76m, 23.01m, 552.27m),
-            new("TA007", "BOLSON DE PAÑALES CALSON OSITO -TALLAS; S,M,L,XL,XXL,3XL Y 4XL.", "Toallas y Otros", "1/4", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m),
-            new("TA008", "BOLSON DE PAÑALES PEGA PEGA OSITO -TALLAS; S,M,L,XL,XXL Y XXXL.", "Toallas y Otros", "1/4", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m),
-            new("TA009", "PAQUETE DE PAÑAL ADULTO MOMMY BEAR -TALLAS; M,L,XL.", "Toallas y Otros", "1*8*10", 8, 321.43m, 2571.43m, 321.43m, 2571.43m, 255.68m, 2045.45m),
+            new("TA007", "BOLSON DE PAÑALES CALSON OSITO -TALLAS; S,M,L,XL,XXL,3XL Y 4XL.", "Toallas y Otros", "1/4", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m, 487.50m, 1950.00m),
+            new("TA008", "BOLSON DE PAÑALES PEGA PEGA OSITO -TALLAS; S,M,L,XL,XXL Y XXXL.", "Toallas y Otros", "1/4", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m, 487.50m, 1950.00m),
+            new("TA009", "PAQUETE DE PAÑAL ADULTO MOMMY BEAR -TALLAS; M,L,XL.", "Toallas y Otros", "1*8*10", 8, 321.43m, 2571.43m, 321.43m, 2571.43m, 255.68m, 2045.45m, 225.00m, 1800.00m),
             new("TA010", "TALCO SURTIDO MIDDY BEAR 635GR.", "Toallas y Otros", "1*12", 12, 77.14m, 925.71m, 77.14m, 925.71m, 61.36m, 736.36m),
-            new("TO011", "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6XL", "Toallas y Otros", "1*4*50", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m),
-            new("TO012", "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL", "Toallas y Otros", "1*4*50", 4, 304.88m, 1219.51m, 312.50m, 1250.00m, 277.78m, 1111.11m)
+            new("TO011", "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6XL", "Toallas y Otros", "1*4*50", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m, 487.50m, 1950.00m),
+            new("TO012", "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL", "Toallas y Otros", "1*4*50", 4, 304.88m, 1219.51m, 312.50m, 1250.00m, 277.78m, 1111.11m, 250.00m, 1000.00m)
         };
 
         foreach (var data in productsData)
@@ -1468,6 +1475,7 @@ public class DbInitializer : IDbInitializer
                 existingProduct.CategoryId = cat.Id;
                 existingProduct.BrandId = brandGenerica.Id;
                 existingProduct.IsActive = true;
+                existingProduct.CurrentCost = data.CostUnit ?? (data.WholesaleUnit * 0.85m);
 
                 foreach (var presentation in existingProduct.Presentations)
                 {
@@ -1476,6 +1484,7 @@ public class DbInitializer : IDbInitializer
                         presentation.RetailPrice = data.RetailUnit;
                         presentation.SemiWholesalePrice = data.SemiUnit;
                         presentation.WholesalePrice = data.WholesaleUnit;
+                        presentation.Cost = data.CostUnit ?? (data.WholesaleUnit * 0.85m);
                     }
                     else
                     {
@@ -1483,6 +1492,7 @@ public class DbInitializer : IDbInitializer
                         presentation.RetailPrice = data.RetailBox;
                         presentation.SemiWholesalePrice = data.SemiBox;
                         presentation.WholesalePrice = data.WholesaleBox;
+                        presentation.Cost = data.CostBox ?? (data.WholesaleBox * 0.85m);
                     }
                 }
                 _context.Products.Update(existingProduct);
@@ -1503,7 +1513,7 @@ public class DbInitializer : IDbInitializer
                     CategoryId = cat.Id,
                     BrandId = brandGenerica.Id,
                     DefaultUnitOfMeasureId = uomUnd.Id,
-                    CurrentCost = data.WholesaleUnit * 0.85m,
+                    CurrentCost = data.CostUnit ?? (data.WholesaleUnit * 0.85m),
                     CreatedBy = "System",
                     CreatedOnUtc = DateTime.UtcNow,
                     TaxId = taxExento.Id,
@@ -1519,7 +1529,7 @@ public class DbInitializer : IDbInitializer
                     Name = "Unidad",
                     ConversionFactor = 1.0000m,
                     Barcode = data.Code + "U",
-                    Cost = data.WholesaleUnit * 0.85m,
+                    Cost = data.CostUnit ?? (data.WholesaleUnit * 0.85m),
                     RetailPrice = data.RetailUnit,
                     SemiWholesalePrice = data.SemiUnit,
                     WholesalePrice = data.WholesaleUnit,
@@ -1537,7 +1547,7 @@ public class DbInitializer : IDbInitializer
                     Name = "Caja",
                     ConversionFactor = (decimal)data.BoxFactor,
                     Barcode = data.Code + "C",
-                    Cost = data.WholesaleBox * 0.85m,
+                    Cost = data.CostBox ?? (data.WholesaleBox * 0.85m),
                     RetailPrice = data.RetailBox,
                     SemiWholesalePrice = data.SemiBox,
                     WholesalePrice = data.WholesaleBox,
