@@ -1,43 +1,29 @@
 version: '3.8'
 
 services:
-  db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
-    container_name: enterprise-billing-db
-    environment:
-      - ACCEPT_EULA=Y
-      - MSSQL_SA_PASSWORD=Perros..1
-    ports:
-      - "1433:1433" # Optional: expose port 1433 if you need to run migrations or access the database from outside
-    volumes:
-      - mssql-data:/var/opt/mssql
-    restart: always
-
   webapi:
-    image: enterprise-billing-api:latest
+    image: launion-billing-api:latest
     build:
       context: .
       dockerfile: Dockerfile
-    container_name: enterprise-billing-api
+    container_name: launion-billing-api
     user: "root"
     ports:
-      - "8080:8080" # Maps port 8080 on the host to 8080 inside the container
+      - "8081:8080" # Maps port 8081 on the host to 8080 inside the container for La Union
+    extra_hosts:
+      - "host.docker.internal:host-gateway" # Resolves the host IP to access the shared SQL Server database
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:8080
-      - ConnectionStrings__DefaultConnection=Server=db;Database=EnterpriseBillingSystemDb;User Id=sa;Password=Perros..1;TrustServerCertificate=True;MultipleActiveResultSets=true
-      - JwtSettings__Secret=FredermanSuperSecretKeyBillingSystem2026EnterpriseSolutions
+      - ConnectionStrings__DefaultConnection=Server=host.docker.internal;Database=EnterpriseBillingSystemDb_LaUnion;User Id=sa;Password=Perros..1;TrustServerCertificate=True;MultipleActiveResultSets=true
+      - JwtSettings__Secret=LaUnionSuperSecretKeyBillingSystem2026EnterpriseSolutions
       - JwtSettings__Issuer=EnterpriseBillingSystem.WebApi
       - JwtSettings__Audience=WpfAndFlutterClients
       - JwtSettings__ExpiryMinutes=60
     volumes:
-      - uploads-data:/app/wwwroot/uploads
-    depends_on:
-      - db
+      - launion-uploads-data:/app/wwwroot/uploads
     restart: always
 
 volumes:
-  mssql-data:
-    driver: local
-  uploads-data:
+  launion-uploads-data:
     driver: local
