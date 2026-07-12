@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using EnterpriseBillingSystem.Domain.Entities;
 using EnterpriseBillingSystem.Domain.Enums;
 using EnterpriseBillingSystem.Application.Common.Interfaces;
@@ -15,15 +16,18 @@ public class DbInitializer : IDbInitializer
     private readonly ApplicationDbContext _context;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly RoleManager<ApplicationRole> _roleManager;
+    private readonly IConfiguration _configuration;
 
     public DbInitializer(
         ApplicationDbContext context,
         UserManager<ApplicationUser> userManager,
-        RoleManager<ApplicationRole> roleManager)
+        RoleManager<ApplicationRole> roleManager,
+        IConfiguration configuration)
     {
         _context = context;
         _userManager = userManager;
         _roleManager = roleManager;
+        _configuration = configuration;
     }
 
     public async Task InitializeAsync()
@@ -49,16 +53,21 @@ public class DbInitializer : IDbInitializer
         }
 
         // 2. Sembrar Sucursal (Branch)
-        var casaMatriz = await _context.Branches.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Code == "CM01");
+        var branchCode = _configuration["DatabaseSeeding:DefaultBranch:Code"] ?? "CM01";
+        var branchName = _configuration["DatabaseSeeding:DefaultBranch:Name"] ?? "CASA MATRIZ";
+        var branchAddress = _configuration["DatabaseSeeding:DefaultBranch:Address"] ?? "Avenida Central #100, Capital";
+        var branchPhone = _configuration["DatabaseSeeding:DefaultBranch:Phone"] ?? "2222-0000";
+
+        var casaMatriz = await _context.Branches.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Code == branchCode);
         if (casaMatriz == null)
         {
             casaMatriz = new Branch
             {
                 Id = Guid.NewGuid(),
-                Code = "CM01",
-                Name = "CASA MATRIZ",
-                Address = "Avenida Central #100, Capital",
-                Phone = "2222-0000",
+                Code = branchCode,
+                Name = branchName,
+                Address = branchAddress,
+                Phone = branchPhone,
                 IsActive = true,
                 CreatedBy = "System",
                 CreatedOnUtc = DateTime.UtcNow
@@ -175,16 +184,20 @@ public class DbInitializer : IDbInitializer
         }
 
         // 6. Sembrar Usuario Administrador Inicial
-        var adminUser = await _userManager.FindByNameAsync("admin");
+        var adminUserName = _configuration["DatabaseSeeding:InitialAdmin:UserName"] ?? "admin";
+        var adminEmail = _configuration["DatabaseSeeding:InitialAdmin:Email"] ?? "admin@localhost";
+        var adminPassword = _configuration["DatabaseSeeding:InitialAdmin:Password"] ?? "Admin@2026#Initial";
+
+        var adminUser = await _userManager.FindByNameAsync(adminUserName);
         if (adminUser == null)
         {
             adminUser = new ApplicationUser
             {
                 Id = Guid.NewGuid(),
-                UserName = "admin",
-                NormalizedUserName = "ADMIN",
-                Email = "admin@localhost",
-                NormalizedEmail = "ADMIN@LOCALHOST",
+                UserName = adminUserName,
+                NormalizedUserName = adminUserName.ToUpper(),
+                Email = adminEmail,
+                NormalizedEmail = adminEmail.ToUpper(),
                 EmailConfirmed = true,
                 FirstName = "Super",
                 LastName = "Admin",
@@ -195,7 +208,7 @@ public class DbInitializer : IDbInitializer
                 CreatedOnUtc = DateTime.UtcNow
             };
 
-            var createResult = await _userManager.CreateAsync(adminUser, "Admin@2026#Initial");
+            var createResult = await _userManager.CreateAsync(adminUser, adminPassword);
             if (createResult.Succeeded)
             {
                 // Asignar Rol
@@ -214,7 +227,11 @@ public class DbInitializer : IDbInitializer
         }
 
         // 7. Sembrar/Actualizar Datos del Catálogo Real de Productos (Sincronización de Precios)
-        await ResetAndSeedNewCatalogAsync(casaMatriz.Id);
+        bool seedCatalog = _configuration.GetValue<bool>("DatabaseSeeding:SeedCatalog", true);
+        if (seedCatalog)
+        {
+            await ResetAndSeedNewCatalogAsync(casaMatriz.Id);
+        }
 
         if (!await _context.Warehouses.AnyAsync())
         {
@@ -255,7 +272,10 @@ public class DbInitializer : IDbInitializer
         }
 
         // 9. Sembrar Categorías y Clientes de Ejemplo
-        if (!await _context.CustomerCategories.AnyAsync())
+        bool seedDemoData = _configuration.GetValue<bool>("DatabaseSeeding:SeedDemoData", false);
+        if (seedDemoData)
+        {
+            if (!await _context.CustomerCategories.AnyAsync())
         {
             var profileRetail = await _context.CustomerPricingProfiles.FirstOrDefaultAsync(p => p.Type == CustomerPricingType.Retail);
             if (profileRetail == null)
@@ -860,6 +880,7 @@ public class DbInitializer : IDbInitializer
                 await _context.SaveChangesAsync();
             }
         }
+        } // Fin de seedDemoData
 
         // 15. Sembrar Plan de Cuentas base
         if (!await _context.Accounts.AnyAsync())
@@ -1298,21 +1319,7 @@ public class DbInitializer : IDbInitializer
     private async Task ResetAndSeedNewCatalogAsync(Guid branchId)
     {
         System.Console.WriteLine("Iniciando actualización/siembra de catálogo de productos...");
-        // 1. Obtener o crear categorías
-        var catGalletas = await _context.Categories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Name == "Galletas") 
-            ?? new Category { Id = Guid.NewGuid(), Name = "Galletas", Description = "Galletas y Waffers", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-        var catCaramelos = await _context.Categories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Name == "Caramelos") 
-            ?? new Category { Id = Guid.NewGuid(), Name = "Caramelos", Description = "Caramelos y Dulces", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-        var catMalvaviscos = await _context.Categories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Name == "Malvaviscos") 
-            ?? new Category { Id = Guid.NewGuid(), Name = "Malvaviscos", Description = "Malvaviscos y Masmelos", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-        var catToallas = await _context.Categories.IgnoreQueryFilters().FirstOrDefaultAsync(c => c.Name == "Toallas y Otros") 
-            ?? new Category { Id = Guid.NewGuid(), Name = "Toallas y Otros", Description = "Toallas húmedas y aseo personal", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-
-        if (_context.Entry(catGalletas).State == EntityState.Detached) await _context.Categories.AddAsync(catGalletas);
-        if (_context.Entry(catCaramelos).State == EntityState.Detached) await _context.Categories.AddAsync(catCaramelos);
-        if (_context.Entry(catMalvaviscos).State == EntityState.Detached) await _context.Categories.AddAsync(catMalvaviscos);
-        if (_context.Entry(catToallas).State == EntityState.Detached) await _context.Categories.AddAsync(catToallas);
-
+        
         // 2. Obtener o crear marca genérica
         var brandGenerica = await _context.Brands.IgnoreQueryFilters().FirstOrDefaultAsync(b => b.Name == "Genérica") 
             ?? new Brand { Id = Guid.NewGuid(), Name = "Genérica", Description = "Marca Genérica", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
@@ -1338,8 +1345,222 @@ public class DbInitializer : IDbInitializer
         var branchWarehouses = await _context.BranchWarehouses.Include(bw => bw.Warehouse).Where(bw => bw.BranchId == branchId).ToListAsync();
         var bgCM = branchWarehouses.FirstOrDefault(bw => bw.Warehouse.Name.Contains("General")) ?? branchWarehouses.FirstOrDefault();
 
-        // 7. Lista de productos
-        var productsData = new List<TempProductData>
+        // 6. Decidir la fuente del catálogo
+        var catalogSource = _configuration["DatabaseSeeding:CatalogSource"] ?? "Embedded";
+        List<TempProductData>? productsData = null;
+
+        if (catalogSource.Equals("External", StringComparison.OrdinalIgnoreCase))
+        {
+            var catalogPath = System.IO.Path.Combine(System.AppDomain.CurrentDomain.BaseDirectory, "catalog.json");
+            if (!System.IO.File.Exists(catalogPath))
+            {
+                catalogPath = System.IO.Path.Combine(System.IO.Directory.GetCurrentDirectory(), "catalog.json");
+            }
+
+            if (System.IO.File.Exists(catalogPath))
+            {
+                try
+                {
+                    System.Console.WriteLine($"Cargando catálogo externo desde: {catalogPath}");
+                    var jsonContent = await System.IO.File.ReadAllTextAsync(catalogPath);
+                    var options = new System.Text.Json.JsonSerializerOptions
+                    {
+                        PropertyNameCaseInsensitive = true
+                    };
+                    productsData = System.Text.Json.JsonSerializer.Deserialize<List<TempProductData>>(jsonContent, options);
+                }
+                catch (Exception ex)
+                {
+                    System.Console.WriteLine($"Error al leer o deserializar el catálogo externo: {ex.Message}");
+                }
+            }
+            else
+            {
+                System.Console.WriteLine($"No se encontró el archivo catalog.json en {catalogPath}. Se usará el catálogo embebido.");
+            }
+        }
+
+        if (productsData == null)
+        {
+            System.Console.WriteLine("Cargando catálogo de productos embebido...");
+            productsData = GetEmbeddedCatalog();
+        }
+
+        // Obtener o crear caché de categorías para importación dinámica
+        var existingCategories = await _context.Categories.IgnoreQueryFilters().ToListAsync();
+        var categoriesCache = existingCategories.ToDictionary(c => c.Name, c => c, StringComparer.OrdinalIgnoreCase);
+
+        foreach (var data in productsData)
+        {
+            var categoryName = string.IsNullOrWhiteSpace(data.CategoryName) ? "General" : data.CategoryName.Trim();
+            if (!categoriesCache.TryGetValue(categoryName, out var cat))
+            {
+                cat = new Category
+                {
+                    Id = Guid.NewGuid(),
+                    Name = categoryName,
+                    Description = $"{categoryName} (Categoría de Catálogo)",
+                    CreatedBy = "System",
+                    CreatedOnUtc = DateTime.UtcNow
+                };
+                await _context.Categories.AddAsync(cat);
+                await _context.SaveChangesAsync();
+                categoriesCache[categoryName] = cat;
+            }
+
+            var existingProduct = await _context.Products
+                .Include(p => p.Presentations)
+                .IgnoreQueryFilters()
+                .FirstOrDefaultAsync(p => p.InternalCode == data.Code);
+
+            if (existingProduct != null)
+            {
+                existingProduct.Name = data.Name;
+                existingProduct.Description = $"{data.Name} (U/E: {data.Ue})";
+                existingProduct.CategoryId = cat.Id;
+                existingProduct.BrandId = brandGenerica.Id;
+                existingProduct.IsActive = true;
+                existingProduct.CurrentCost = data.CostUnit ?? (data.WholesaleUnit * 0.85m);
+
+                foreach (var presentation in existingProduct.Presentations)
+                {
+                    if (presentation.IsBaseUnit || presentation.ConversionFactor == 1.0000m)
+                    {
+                        presentation.RetailPrice = data.RetailUnit;
+                        presentation.SemiWholesalePrice = data.SemiUnit;
+                        presentation.WholesalePrice = data.WholesaleUnit;
+                        presentation.Cost = data.CostUnit ?? (data.WholesaleUnit * 0.85m);
+                    }
+                    else
+                    {
+                        presentation.ConversionFactor = (decimal)data.BoxFactor;
+                        presentation.RetailPrice = data.RetailBox;
+                        presentation.SemiWholesalePrice = data.SemiBox;
+                        presentation.WholesalePrice = data.WholesaleBox;
+                        presentation.Cost = data.CostBox ?? (data.WholesaleBox * 0.85m);
+                    }
+                }
+                _context.Products.Update(existingProduct);
+            }
+            else
+            {
+                var product = new Product
+                {
+                    Id = Guid.NewGuid(),
+                    InternalCode = data.Code,
+                    Name = data.Name,
+                    Description = $"{data.Name} (U/E: {data.Ue})",
+                    ProductType = ProductType.Physical,
+                    ProductStatus = ProductStatus.Active,
+                    TrackInventory = true,
+                    RequiresSerialNumber = false,
+                    RequiresBatchControl = false,
+                    CategoryId = cat.Id,
+                    BrandId = brandGenerica.Id,
+                    DefaultUnitOfMeasureId = uomUnd.Id,
+                    CurrentCost = data.CostUnit ?? (data.WholesaleUnit * 0.85m),
+                    CreatedBy = "System",
+                    CreatedOnUtc = DateTime.UtcNow,
+                    TaxId = taxExento.Id,
+                    IsCatalogVisible = true,
+                    IsActive = true
+                };
+
+                var presentationUnit = new ProductPresentation
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = product.Id,
+                    UnitOfMeasureId = uomUnd.Id,
+                    Name = "Unidad",
+                    ConversionFactor = 1.0000m,
+                    Barcode = data.Code + "U",
+                    Cost = data.CostUnit ?? (data.WholesaleUnit * 0.85m),
+                    RetailPrice = data.RetailUnit,
+                    SemiWholesalePrice = data.SemiUnit,
+                    WholesalePrice = data.WholesaleUnit,
+                    IsBaseUnit = true,
+                    IsDefaultSalePresentation = true,
+                    IsActive = true
+                };
+                product.Presentations.Add(presentationUnit);
+
+                var presentationBox = new ProductPresentation
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = product.Id,
+                    UnitOfMeasureId = uomCaja.Id,
+                    Name = "Caja",
+                    ConversionFactor = (decimal)data.BoxFactor,
+                    Barcode = data.Code + "C",
+                    Cost = data.CostBox ?? (data.WholesaleBox * 0.85m),
+                    RetailPrice = data.RetailBox,
+                    SemiWholesalePrice = data.SemiBox,
+                    WholesalePrice = data.WholesaleBox,
+                    IsBaseUnit = false,
+                    IsDefaultSalePresentation = false,
+                    IsActive = true
+                };
+                product.Presentations.Add(presentationBox);
+
+                await _context.Products.AddAsync(product);
+
+                // Existencias Iniciales (solo si SeedDemoData es true)
+                bool seedDemoData = _configuration.GetValue<bool>("DatabaseSeeding:SeedDemoData", false);
+                if (seedDemoData && bgCM != null)
+                {
+                    decimal initialStock = 100m * data.BoxFactor;
+                    var inventory = new Inventory
+                    {
+                        Id = Guid.NewGuid(),
+                        BranchWarehouseId = bgCM.Id,
+                        ProductId = product.Id,
+                        PhysicalStock = initialStock,
+                        ReservedStock = 0.0000m,
+                        CommittedStock = 0.0000m,
+                        CreatedBy = "System",
+                        CreatedOnUtc = DateTime.UtcNow
+                    };
+                    await _context.Inventories.AddAsync(inventory);
+
+                    // Movimiento inicial de inventario
+                    var movement = new InventoryMovement
+                    {
+                        Id = Guid.NewGuid(),
+                        MovementNumber = $"MOV-INIT-{data.Code}",
+                        MovementType = MovementType.Entry,
+                        ToBranchWarehouseId = bgCM.Id,
+                        ReferenceDocument = "CARGA-INICIAL-CATALOGO",
+                        Notes = $"Carga de existencias iniciales para {data.Name}",
+                        MovementDate = DateTime.UtcNow,
+                        CreatedBy = "System",
+                        CreatedOnUtc = DateTime.UtcNow
+                    };
+
+                    movement.Details.Add(new InventoryMovementDetail
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = product.Id,
+                        Quantity = 100m,
+                        UnitOfMeasureId = uomCaja.Id,
+                        ProductPresentationId = presentationBox.Id,
+                        ConversionFactor = (decimal)data.BoxFactor,
+                        QuantityInBaseUnit = initialStock,
+                        CreatedBy = "System",
+                        CreatedOnUtc = DateTime.UtcNow
+                    });
+
+                    await _context.InventoryMovements.AddAsync(movement);
+                }
+            }
+        }
+
+        await _context.SaveChangesAsync();
+        System.Console.WriteLine($"Catálogo de productos actualizado/sembrado con éxito. Total productos procesados: {productsData.Count}");
+    }
+
+    private List<TempProductData> GetEmbeddedCatalog()
+    {
+        return new List<TempProductData>
         {
             // Galletas (38)
             new("GA001", "GALLETAS WAFFER AMORIS CHOCOLATE", "Galletas", "1/30", 30, 15.75m, 472.50m, 16.80m, 504.00m, 14.32m, 429.55m, 11.67m, 350.00m),
@@ -1450,165 +1671,7 @@ public class DbInitializer : IDbInitializer
             new("TA009", "PAQUETE DE PAÑAL ADULTO MOMMY BEAR -TALLAS; M,L,XL.", "Toallas y Otros", "1*8*10", 8, 321.43m, 2571.43m, 321.43m, 2571.43m, 255.68m, 2045.45m, 225.00m, 1800.00m),
             new("TA010", "TALCO SURTIDO MIDDY BEAR 635GR.", "Toallas y Otros", "1*12", 12, 77.14m, 925.71m, 77.14m, 925.71m, 61.36m, 736.36m, 50.00m, 600.00m),
             new("TO011", "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6XL", "Toallas y Otros", "1*4*50", 4, 594.51m, 2378.05m, 609.38m, 2437.50m, 541.67m, 2166.67m, 487.50m, 1950.00m),
-            new("TO012", "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL", "Toallas y Otros", "1*4*50", 4, 304.88m, 1219.51m, 312.50m, 1250.00m, 277.78m, 1111.11m, 250.00m, 1000.00m),
+            new("TO012", "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL", "Toallas y Otros", "1*4*50", 4, 304.88m, 1219.51m, 312.50m, 1250.00m, 277.78m, 1111.11m, 250.00m, 1000.00m)
         };
-
-        foreach (var data in productsData)
-        {
-            var cat = data.CategoryName switch
-            {
-                "Galletas" => catGalletas,
-                "Caramelos" => catCaramelos,
-                "Malvaviscos" => catMalvaviscos,
-                _ => catToallas
-            };
-
-            var existingProduct = await _context.Products
-                .Include(p => p.Presentations)
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(p => p.InternalCode == data.Code);
-
-            if (existingProduct != null)
-            {
-                existingProduct.Name = data.Name;
-                existingProduct.Description = $"{data.Name} (U/E: {data.Ue})";
-                existingProduct.CategoryId = cat.Id;
-                existingProduct.BrandId = brandGenerica.Id;
-                existingProduct.IsActive = true;
-                existingProduct.CurrentCost = data.CostUnit ?? (data.WholesaleUnit * 0.85m);
-
-                foreach (var presentation in existingProduct.Presentations)
-                {
-                    if (presentation.IsBaseUnit || presentation.ConversionFactor == 1.0000m)
-                    {
-                        presentation.RetailPrice = data.RetailUnit;
-                        presentation.SemiWholesalePrice = data.SemiUnit;
-                        presentation.WholesalePrice = data.WholesaleUnit;
-                        presentation.Cost = data.CostUnit ?? (data.WholesaleUnit * 0.85m);
-                    }
-                    else
-                    {
-                        presentation.ConversionFactor = (decimal)data.BoxFactor;
-                        presentation.RetailPrice = data.RetailBox;
-                        presentation.SemiWholesalePrice = data.SemiBox;
-                        presentation.WholesalePrice = data.WholesaleBox;
-                        presentation.Cost = data.CostBox ?? (data.WholesaleBox * 0.85m);
-                    }
-                }
-                _context.Products.Update(existingProduct);
-            }
-            else
-            {
-                var product = new Product
-                {
-                    Id = Guid.NewGuid(),
-                    InternalCode = data.Code,
-                    Name = data.Name,
-                    Description = $"{data.Name} (U/E: {data.Ue})",
-                    ProductType = ProductType.Physical,
-                    ProductStatus = ProductStatus.Active,
-                    TrackInventory = true,
-                    RequiresSerialNumber = false,
-                    RequiresBatchControl = false,
-                    CategoryId = cat.Id,
-                    BrandId = brandGenerica.Id,
-                    DefaultUnitOfMeasureId = uomUnd.Id,
-                    CurrentCost = data.CostUnit ?? (data.WholesaleUnit * 0.85m),
-                    CreatedBy = "System",
-                    CreatedOnUtc = DateTime.UtcNow,
-                    TaxId = taxExento.Id,
-                    IsCatalogVisible = true,
-                    IsActive = true
-                };
-
-                var presentationUnit = new ProductPresentation
-                {
-                    Id = Guid.NewGuid(),
-                    ProductId = product.Id,
-                    UnitOfMeasureId = uomUnd.Id,
-                    Name = "Unidad",
-                    ConversionFactor = 1.0000m,
-                    Barcode = data.Code + "U",
-                    Cost = data.CostUnit ?? (data.WholesaleUnit * 0.85m),
-                    RetailPrice = data.RetailUnit,
-                    SemiWholesalePrice = data.SemiUnit,
-                    WholesalePrice = data.WholesaleUnit,
-                    IsBaseUnit = true,
-                    IsDefaultSalePresentation = true,
-                    IsActive = true
-                };
-                product.Presentations.Add(presentationUnit);
-
-                var presentationBox = new ProductPresentation
-                {
-                    Id = Guid.NewGuid(),
-                    ProductId = product.Id,
-                    UnitOfMeasureId = uomCaja.Id,
-                    Name = "Caja",
-                    ConversionFactor = (decimal)data.BoxFactor,
-                    Barcode = data.Code + "C",
-                    Cost = data.CostBox ?? (data.WholesaleBox * 0.85m),
-                    RetailPrice = data.RetailBox,
-                    SemiWholesalePrice = data.SemiBox,
-                    WholesalePrice = data.WholesaleBox,
-                    IsBaseUnit = false,
-                    IsDefaultSalePresentation = false,
-                    IsActive = true
-                };
-                product.Presentations.Add(presentationBox);
-
-                await _context.Products.AddAsync(product);
-
-                // Existencias Iniciales (100 Cajas de cada producto = 100 * BoxFactor Unidades)
-                if (bgCM != null)
-                {
-                    decimal initialStock = 100m * data.BoxFactor;
-                    var inventory = new Inventory
-                    {
-                        Id = Guid.NewGuid(),
-                        BranchWarehouseId = bgCM.Id,
-                        ProductId = product.Id,
-                        PhysicalStock = initialStock,
-                        ReservedStock = 0.0000m,
-                        CommittedStock = 0.0000m,
-                        CreatedBy = "System",
-                        CreatedOnUtc = DateTime.UtcNow
-                    };
-                    await _context.Inventories.AddAsync(inventory);
-
-                    // Movimiento inicial de inventario
-                    var movement = new InventoryMovement
-                    {
-                        Id = Guid.NewGuid(),
-                        MovementNumber = $"MOV-INIT-{data.Code}",
-                        MovementType = MovementType.Entry,
-                        ToBranchWarehouseId = bgCM.Id,
-                        ReferenceDocument = "CARGA-INICIAL-CATALOGO",
-                        Notes = $"Carga de existencias iniciales para {data.Name}",
-                        MovementDate = DateTime.UtcNow,
-                        CreatedBy = "System",
-                        CreatedOnUtc = DateTime.UtcNow
-                    };
-
-                    movement.Details.Add(new InventoryMovementDetail
-                    {
-                        Id = Guid.NewGuid(),
-                        ProductId = product.Id,
-                        Quantity = 100m,
-                        UnitOfMeasureId = uomCaja.Id,
-                        ProductPresentationId = presentationBox.Id,
-                        ConversionFactor = (decimal)data.BoxFactor,
-                        QuantityInBaseUnit = initialStock,
-                        CreatedBy = "System",
-                        CreatedOnUtc = DateTime.UtcNow
-                    });
-
-                    await _context.InventoryMovements.AddAsync(movement);
-                }
-            }
-        }
-
-        await _context.SaveChangesAsync();
-        System.Console.WriteLine($"Catálogo de productos actualizado/sembrado con éxito. Total productos procesados: {productsData.Count}");
     }
 }
