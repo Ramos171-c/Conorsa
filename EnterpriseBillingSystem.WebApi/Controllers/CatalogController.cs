@@ -53,7 +53,9 @@ public class CatalogController : ApiControllerBase
             QuestPDF.Settings.EnableDebugging = true;
 
             var productsList = await Mediator.Send(new GetCatalogProductsQuery());
-            var products = productsList.AsEnumerable();
+            var products = productsList.AsEnumerable()
+                .Where(p => p.Name != null && !p.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase));
+                
             if (categoryId.HasValue)
             {
                 products = products.Where(p => p.CategoryId == categoryId.Value);
