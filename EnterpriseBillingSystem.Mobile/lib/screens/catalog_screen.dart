@@ -217,7 +217,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                             crossAxisCount: columns,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
-                            childAspectRatio: 0.72, // Tighter ratio for cards
+                            childAspectRatio: 0.78, // Tighter ratio for cards without price
                           ),
                           itemCount: filteredProducts.length,
                           itemBuilder: (context, index) {
@@ -287,15 +287,6 @@ class _CatalogScreenState extends State<CatalogScreen> {
                                                   style: const TextStyle(
                                                     color: Color(0xFF64748B), 
                                                     fontSize: 11,
-                                                  ),
-                                                ),
-                                                const SizedBox(height: 8),
-                                                Text(
-                                                  '\$${product.defaultSalePrice.toStringAsFixed(2)}',
-                                                  style: TextStyle(
-                                                    fontWeight: FontWeight.bold,
-                                                    fontSize: 16,
-                                                    color: isSoldOut ? const Color(0xFF64748B) : const Color(0xFF1E3A8A),
                                                   ),
                                                 ),
                                               ],

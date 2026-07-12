@@ -120,7 +120,7 @@ public class CatalogController : ApiControllerBase
                                     // 1. Product Name (Centered)
                                     column.Item().AlignCenter().Text(product.Name.ToUpper())
                                         .Bold()
-                                        .FontSize(20)
+                                        .FontSize(28)
                                         .FontColor("#1E3A8A");
                                         
                                     // 2. Product Details (Centered)
@@ -130,12 +130,12 @@ public class CatalogController : ApiControllerBase
                                         
                                     column.Item().AlignCenter().Text(x =>
                                     {
-                                        x.Span("CÓDIGO SKU: ").Bold().FontColor("#334155");
-                                        x.Span($"{product.InternalCode}   •   ").FontColor("#475569");
-                                        x.Span("MEDIDA: ").Bold().FontColor("#334155");
-                                        x.Span($"{product.DefaultUnitOfMeasureCode}   •   ").FontColor("#475569");
-                                        x.Span("U/E: ").Bold().FontColor("#334155");
-                                        x.Span($"{ueText}").FontColor("#475569");
+                                        x.Span("CÓDIGO SKU: ").Bold().FontSize(14).FontColor("#334155");
+                                        x.Span($"{product.InternalCode}   •   ").FontSize(14).FontColor("#475569");
+                                        x.Span("MEDIDA: ").Bold().FontSize(14).FontColor("#334155");
+                                        x.Span($"{product.DefaultUnitOfMeasureCode}   •   ").FontSize(14).FontColor("#475569");
+                                        x.Span("U/E: ").Bold().FontSize(14).FontColor("#334155");
+                                        x.Span($"{ueText}").FontSize(14).FontColor("#475569");
                                     });
 
                                     column.Item().PaddingVertical(5).LineHorizontal(1f).LineColor("#CBD5E1");
@@ -187,7 +187,7 @@ public class CatalogController : ApiControllerBase
                                     if (!string.IsNullOrWhiteSpace(product.Description))
                                     {
                                         column.Item().PaddingTop(5).AlignCenter().Text(product.Description)
-                                            .FontSize(10)
+                                            .FontSize(12)
                                             .FontColor("#475569");
                                     }
 
