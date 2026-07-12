@@ -271,69 +271,61 @@ public class DbInitializer : IDbInitializer
             }
         }
 
-        // 9. Sembrar Categorías y Clientes de Ejemplo
-        bool seedDemoData = _configuration.GetValue<bool>("DatabaseSeeding:SeedDemoData", false);
-        if (seedDemoData)
+        // 9. Sembrar Perfiles de Precio y Categorías Base de Clientes (Requerido)
+        var profileRetail = await _context.CustomerPricingProfiles.FirstOrDefaultAsync(p => p.Type == CustomerPricingType.Retail);
+        if (profileRetail == null)
         {
-            if (!await _context.CustomerCategories.AnyAsync())
+            profileRetail = new CustomerPricingProfile { Id = Guid.NewGuid(), Name = "Detalle", Type = CustomerPricingType.Retail, IsActive = true };
+            await _context.CustomerPricingProfiles.AddAsync(profileRetail);
+        }
+
+        var profileSemiWholesale = await _context.CustomerPricingProfiles.FirstOrDefaultAsync(p => p.Type == CustomerPricingType.SemiWholesale);
+        if (profileSemiWholesale == null)
         {
-            var profileRetail = await _context.CustomerPricingProfiles.FirstOrDefaultAsync(p => p.Type == CustomerPricingType.Retail);
-            if (profileRetail == null)
-            {
-                profileRetail = new CustomerPricingProfile
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Detalle",
-                    Type = CustomerPricingType.Retail,
-                    IsActive = true
-                };
-                await _context.CustomerPricingProfiles.AddAsync(profileRetail);
-            }
+            profileSemiWholesale = new CustomerPricingProfile { Id = Guid.NewGuid(), Name = "Semi Mayorista", Type = CustomerPricingType.SemiWholesale, IsActive = true };
+            await _context.CustomerPricingProfiles.AddAsync(profileSemiWholesale);
+        }
 
-            var profileSemiWholesale = await _context.CustomerPricingProfiles.FirstOrDefaultAsync(p => p.Type == CustomerPricingType.SemiWholesale);
-            if (profileSemiWholesale == null)
-            {
-                profileSemiWholesale = new CustomerPricingProfile
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Semi Mayorista",
-                    Type = CustomerPricingType.SemiWholesale,
-                    IsActive = true
-                };
-                await _context.CustomerPricingProfiles.AddAsync(profileSemiWholesale);
-            }
+        var profileWholesale = await _context.CustomerPricingProfiles.FirstOrDefaultAsync(p => p.Type == CustomerPricingType.Wholesale);
+        if (profileWholesale == null)
+        {
+            profileWholesale = new CustomerPricingProfile { Id = Guid.NewGuid(), Name = "Mayorista", Type = CustomerPricingType.Wholesale, IsActive = true };
+            await _context.CustomerPricingProfiles.AddAsync(profileWholesale);
+        }
+        await _context.SaveChangesAsync();
 
-            var profileWholesale = await _context.CustomerPricingProfiles.FirstOrDefaultAsync(p => p.Type == CustomerPricingType.Wholesale);
-            if (profileWholesale == null)
-            {
-                profileWholesale = new CustomerPricingProfile
-                {
-                    Id = Guid.NewGuid(),
-                    Name = "Mayorista",
-                    Type = CustomerPricingType.Wholesale,
-                    IsActive = true
-                };
-                await _context.CustomerPricingProfiles.AddAsync(profileWholesale);
-            }
+        CustomerCategory? catFinal = null;
+        CustomerCategory? catMayorista = null;
+        CustomerCategory? catVip = null;
 
-            await _context.SaveChangesAsync();
-
-            var catFinal = new CustomerCategory { Id = Guid.NewGuid(), Name = "Cliente Final", Description = "Clientes generales de contado", DefaultDiscountPercentage = 0.00m, CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-            var catMayorista = new CustomerCategory { Id = Guid.NewGuid(), Name = "Mayorista", Description = "Clientes distribuidores mayoristas", DefaultDiscountPercentage = 5.00m, CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
-            var catVip = new CustomerCategory { Id = Guid.NewGuid(), Name = "VIP", Description = "Clientes especiales VIP", DefaultDiscountPercentage = 10.00m, CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
+        if (!await _context.CustomerCategories.AnyAsync())
+        {
+            catFinal = new CustomerCategory { Id = Guid.NewGuid(), Name = "Cliente Final", Description = "Clientes generales de contado", DefaultDiscountPercentage = 0.00m, CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
+            catMayorista = new CustomerCategory { Id = Guid.NewGuid(), Name = "Mayorista", Description = "Clientes distribuidores mayoristas", DefaultDiscountPercentage = 5.00m, CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
+            catVip = new CustomerCategory { Id = Guid.NewGuid(), Name = "VIP", Description = "Clientes especiales VIP", DefaultDiscountPercentage = 10.00m, CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
             
             await _context.CustomerCategories.AddRangeAsync(catFinal, catMayorista, catVip);
             await _context.SaveChangesAsync();
+        }
+        else
+        {
+            catFinal = await _context.CustomerCategories.FirstOrDefaultAsync(c => c.Name == "Cliente Final");
+            catMayorista = await _context.CustomerCategories.FirstOrDefaultAsync(c => c.Name == "Mayorista");
+            catVip = await _context.CustomerCategories.FirstOrDefaultAsync(c => c.Name == "VIP");
+        }
 
-            var juan = new Customer
+        // Sembrar Cliente General por defecto (Siempre disponible)
+        if (!await _context.Customers.AnyAsync() && catFinal != null)
+        {
+            var clienteGeneral = new Customer
             {
                 Id = Guid.NewGuid(),
-                CustomerCode = "CUS-000001",
-                IdentificationNumber = "123-456789-0001A",
+                CustomerCode = "CUS-GENERAL",
+                IdentificationNumber = "000-000000-0000U",
                 IdentificationType = IdentificationType.Cedula,
                 CustomerType = CustomerType.Natural,
-                Name = "Juan Pérez",
-                LegalName = "Pérez",
+                Name = "CLIENTE GENERAL",
+                LegalName = "CLIENTE GENERAL",
                 CustomerCategoryId = catFinal.Id,
                 CustomerPricingProfileId = profileRetail.Id,
                 CreditLimit = 0.0000m,
@@ -345,152 +337,214 @@ public class DbInitializer : IDbInitializer
                 CreatedBy = "System",
                 CreatedOnUtc = DateTime.UtcNow
             };
-            juan.Addresses.Add(new CustomerAddress { Id = Guid.NewGuid(), AddressLine1 = "Avenida Central #100", City = "Managua", State = "Managua", ZipCode = "10000", Country = "Nicaragua", AddressType = "Principal", IsDefault = true });
-            juan.Phones.Add(new CustomerPhone { Id = Guid.NewGuid(), PhoneNumber = "8888-1111", PhoneType = "Celular", IsDefault = true });
-            juan.Emails.Add(new CustomerEmail { Id = Guid.NewGuid(), EmailAddress = "juan.perez@example.com", EmailType = "Personal", IsDefault = true });
+            clienteGeneral.Addresses.Add(new CustomerAddress { Id = Guid.NewGuid(), AddressLine1 = "Casa Matriz", City = "General", State = "General", ZipCode = "00000", Country = "Nicaragua", AddressType = "Principal", IsDefault = true });
+            clienteGeneral.Phones.Add(new CustomerPhone { Id = Guid.NewGuid(), PhoneNumber = "0000-0000", PhoneType = "Celular", IsDefault = true });
+            clienteGeneral.Emails.Add(new CustomerEmail { Id = Guid.NewGuid(), EmailAddress = "cliente@general.com", EmailType = "Personal", IsDefault = true });
 
-            var distribuidora = new Customer
-            {
-                Id = Guid.NewGuid(),
-                CustomerCode = "CUS-000002",
-                IdentificationNumber = "J0310000000001",
-                IdentificationType = IdentificationType.RUC,
-                CustomerType = CustomerType.LegalEntity,
-                Name = "Distribuidora Industrial S.A.",
-                LegalName = "Distribuidora Industrial S.A.",
-                CustomerCategoryId = catMayorista.Id,
-                CustomerPricingProfileId = profileWholesale.Id,
-                CreditLimit = 50000.0000m,
-                CreditDays = 30,
-                CanUseCredit = true,
-                IsTaxExempt = false,
-                DefaultDiscountPercentage = 5.00m,
-                Status = CustomerStatus.Active,
-                CreatedBy = "System",
-                CreatedOnUtc = DateTime.UtcNow
-            };
-            distribuidora.Addresses.Add(new CustomerAddress { Id = Guid.NewGuid(), AddressLine1 = "Km 10 Carretera Norte", City = "Managua", State = "Managua", ZipCode = "11000", Country = "Nicaragua", AddressType = "Principal", IsDefault = true });
-            distribuidora.Phones.Add(new CustomerPhone { Id = Guid.NewGuid(), PhoneNumber = "2244-1234", PhoneType = "Trabajo", IsDefault = true });
-            distribuidora.Emails.Add(new CustomerEmail { Id = Guid.NewGuid(), EmailAddress = "ventas@distindustrial.com", EmailType = "Facturación", IsDefault = true });
-            distribuidora.Contacts.Add(new CustomerContact { Id = Guid.NewGuid(), FirstName = "Carlos", LastName = "Mendoza", JobTitle = "Gerente de Compras", Phone = "8888-2222", Email = "carlos.mendoza@distindustrial.com", IsDefault = true });
-
-            var corporacion = new Customer
-            {
-                Id = Guid.NewGuid(),
-                CustomerCode = "CUS-000003",
-                IdentificationNumber = "J0310000000003",
-                IdentificationType = IdentificationType.RUC,
-                CustomerType = CustomerType.LegalEntity,
-                Name = "Corporación de Alimentos S.A.",
-                LegalName = "Corporación de Alimentos S.A.",
-                CustomerCategoryId = catMayorista.Id,
-                CustomerPricingProfileId = profileSemiWholesale.Id,
-                CreditLimit = 25000.0000m,
-                CreditDays = 15,
-                CanUseCredit = true,
-                IsTaxExempt = false,
-                DefaultDiscountPercentage = 5.00m,
-                Status = CustomerStatus.Active,
-                CreatedBy = "System",
-                CreatedOnUtc = DateTime.UtcNow
-            };
-            corporacion.Addresses.Add(new CustomerAddress { Id = Guid.NewGuid(), AddressLine1 = "Plaza El Sol 2c Sur", City = "Managua", State = "Managua", ZipCode = "12000", Country = "Nicaragua", AddressType = "Principal", IsDefault = true });
-            corporacion.Phones.Add(new CustomerPhone { Id = Guid.NewGuid(), PhoneNumber = "2255-6789", PhoneType = "Trabajo", IsDefault = true });
-            corporacion.Emails.Add(new CustomerEmail { Id = Guid.NewGuid(), EmailAddress = "compras@corpalimentos.com", EmailType = "Facturación", IsDefault = true });
-            corporacion.Contacts.Add(new CustomerContact { Id = Guid.NewGuid(), FirstName = "Ana", LastName = "Gómez", JobTitle = "Compradora Principal", Phone = "8888-3333", Email = "ana.gomez@corpalimentos.com", IsDefault = true });
-
-            var exento = new Customer
-            {
-                Id = Guid.NewGuid(),
-                CustomerCode = "CUS-000004",
-                IdentificationNumber = "J0310000000002",
-                IdentificationType = IdentificationType.RUC,
-                CustomerType = CustomerType.LegalEntity,
-                Name = "Organización de Ayuda Social",
-                LegalName = "Organización de Ayuda Social",
-                CustomerCategoryId = catVip.Id,
-                CustomerPricingProfileId = profileRetail.Id,
-                CreditLimit = 0.0000m,
-                CreditDays = 0,
-                CanUseCredit = false,
-                IsTaxExempt = true,
-                DefaultDiscountPercentage = 10.00m,
-                Status = CustomerStatus.Active,
-                CreatedBy = "System",
-                CreatedOnUtc = DateTime.UtcNow
-            };
-            exento.Addresses.Add(new CustomerAddress { Id = Guid.NewGuid(), AddressLine1 = "Costado Oeste de la Catedral", City = "León", State = "León", ZipCode = "20000", Country = "Nicaragua", AddressType = "Principal", IsDefault = true });
-            exento.Phones.Add(new CustomerPhone { Id = Guid.NewGuid(), PhoneNumber = "2311-4567", PhoneType = "Trabajo", IsDefault = true });
-            exento.Emails.Add(new CustomerEmail { Id = Guid.NewGuid(), EmailAddress = "info@ayudasocial.org", EmailType = "Personal", IsDefault = true });
-            exento.Contacts.Add(new CustomerContact { Id = Guid.NewGuid(), FirstName = "María", LastName = "López", JobTitle = "Directora", Phone = "8888-4444", Email = "maria.lopez@ayudasocial.org", IsDefault = true });
-
-            await _context.Customers.AddRangeAsync(juan, distribuidora, corporacion, exento);
+            await _context.Customers.AddAsync(clienteGeneral);
             await _context.SaveChangesAsync();
         }
 
-        // 9. Sembrar Datos de Ejemplo de Proveedores
+        bool seedDemoData = _configuration.GetValue<bool>("DatabaseSeeding:SeedDemoData", false);
+
+        // Clientes Demo (Opcional)
+        if (seedDemoData && catFinal != null && catMayorista != null && catVip != null)
+        {
+            // Validar que no se hayan sembrado ya para no duplicar
+            if (!await _context.Customers.AnyAsync(c => c.CustomerCode == "CUS-000001"))
+            {
+                var juan = new Customer
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerCode = "CUS-000001",
+                    IdentificationNumber = "123-456789-0001A",
+                    IdentificationType = IdentificationType.Cedula,
+                    CustomerType = CustomerType.Natural,
+                    Name = "Juan Pérez",
+                    LegalName = "Pérez",
+                    CustomerCategoryId = catFinal.Id,
+                    CustomerPricingProfileId = profileRetail.Id,
+                    CreditLimit = 0.0000m,
+                    CreditDays = 0,
+                    CanUseCredit = false,
+                    IsTaxExempt = false,
+                    DefaultDiscountPercentage = 0.00m,
+                    Status = CustomerStatus.Active,
+                    CreatedBy = "System",
+                    CreatedOnUtc = DateTime.UtcNow
+                };
+                juan.Addresses.Add(new CustomerAddress { Id = Guid.NewGuid(), AddressLine1 = "Avenida Central #100", City = "Managua", State = "Managua", ZipCode = "10000", Country = "Nicaragua", AddressType = "Principal", IsDefault = true });
+                juan.Phones.Add(new CustomerPhone { Id = Guid.NewGuid(), PhoneNumber = "8888-1111", PhoneType = "Celular", IsDefault = true });
+                juan.Emails.Add(new CustomerEmail { Id = Guid.NewGuid(), EmailAddress = "juan.perez@example.com", EmailType = "Personal", IsDefault = true });
+
+                var distribuidora = new Customer
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerCode = "CUS-000002",
+                    IdentificationNumber = "J0310000000001",
+                    IdentificationType = IdentificationType.RUC,
+                    CustomerType = CustomerType.LegalEntity,
+                    Name = "Distribuidora Industrial S.A.",
+                    LegalName = "Distribuidora Industrial S.A.",
+                    CustomerCategoryId = catMayorista.Id,
+                    CustomerPricingProfileId = profileWholesale.Id,
+                    CreditLimit = 50000.0000m,
+                    CreditDays = 30,
+                    CanUseCredit = true,
+                    IsTaxExempt = false,
+                    DefaultDiscountPercentage = 5.00m,
+                    Status = CustomerStatus.Active,
+                    CreatedBy = "System",
+                    CreatedOnUtc = DateTime.UtcNow
+                };
+                distribuidora.Addresses.Add(new CustomerAddress { Id = Guid.NewGuid(), AddressLine1 = "Km 10 Carretera Norte", City = "Managua", State = "Managua", ZipCode = "11000", Country = "Nicaragua", AddressType = "Principal", IsDefault = true });
+                distribuidora.Phones.Add(new CustomerPhone { Id = Guid.NewGuid(), PhoneNumber = "2244-1234", PhoneType = "Trabajo", IsDefault = true });
+                distribuidora.Emails.Add(new CustomerEmail { Id = Guid.NewGuid(), EmailAddress = "ventas@distindustrial.com", EmailType = "Facturación", IsDefault = true });
+                distribuidora.Contacts.Add(new CustomerContact { Id = Guid.NewGuid(), FirstName = "Carlos", LastName = "Mendoza", JobTitle = "Gerente de Compras", Phone = "8888-2222", Email = "carlos.mendoza@distindustrial.com", IsDefault = true });
+
+                var corporacion = new Customer
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerCode = "CUS-000003",
+                    IdentificationNumber = "J0310000000003",
+                    IdentificationType = IdentificationType.RUC,
+                    CustomerType = CustomerType.LegalEntity,
+                    Name = "Corporación de Alimentos S.A.",
+                    LegalName = "Corporación de Alimentos S.A.",
+                    CustomerCategoryId = catMayorista.Id,
+                    CustomerPricingProfileId = profileSemiWholesale.Id,
+                    CreditLimit = 25000.0000m,
+                    CreditDays = 15,
+                    CanUseCredit = true,
+                    IsTaxExempt = false,
+                    DefaultDiscountPercentage = 5.00m,
+                    Status = CustomerStatus.Active,
+                    CreatedBy = "System",
+                    CreatedOnUtc = DateTime.UtcNow
+                };
+                corporacion.Addresses.Add(new CustomerAddress { Id = Guid.NewGuid(), AddressLine1 = "Plaza El Sol 2c Sur", City = "Managua", State = "Managua", ZipCode = "12000", Country = "Nicaragua", AddressType = "Principal", IsDefault = true });
+                corporacion.Phones.Add(new CustomerPhone { Id = Guid.NewGuid(), PhoneNumber = "2255-6789", PhoneType = "Trabajo", IsDefault = true });
+                corporacion.Emails.Add(new CustomerEmail { Id = Guid.NewGuid(), EmailAddress = "compras@corpalimentos.com", EmailType = "Facturación", IsDefault = true });
+                corporacion.Contacts.Add(new CustomerContact { Id = Guid.NewGuid(), FirstName = "Ana", LastName = "Gómez", JobTitle = "Compradora Principal", Phone = "8888-3333", Email = "ana.gomez@corpalimentos.com", IsDefault = true });
+
+                var exento = new Customer
+                {
+                    Id = Guid.NewGuid(),
+                    CustomerCode = "CUS-000004",
+                    IdentificationNumber = "J0310000000002",
+                    IdentificationType = IdentificationType.RUC,
+                    CustomerType = CustomerType.LegalEntity,
+                    Name = "Organización de Ayuda Social",
+                    LegalName = "Organización de Ayuda Social",
+                    CustomerCategoryId = catVip.Id,
+                    CustomerPricingProfileId = profileRetail.Id,
+                    CreditLimit = 0.0000m,
+                    CreditDays = 0,
+                    CanUseCredit = false,
+                    IsTaxExempt = true,
+                    DefaultDiscountPercentage = 10.00m,
+                    Status = CustomerStatus.Active,
+                    CreatedBy = "System",
+                    CreatedOnUtc = DateTime.UtcNow
+                };
+                exento.Addresses.Add(new CustomerAddress { Id = Guid.NewGuid(), AddressLine1 = "Costado Oeste de la Catedral", City = "León", State = "León", ZipCode = "20000", Country = "Nicaragua", AddressType = "Principal", IsDefault = true });
+                exento.Phones.Add(new CustomerPhone { Id = Guid.NewGuid(), PhoneNumber = "2311-4567", PhoneType = "Trabajo", IsDefault = true });
+                exento.Emails.Add(new CustomerEmail { Id = Guid.NewGuid(), EmailAddress = "info@ayudasocial.org", EmailType = "Personal", IsDefault = true });
+                exento.Contacts.Add(new CustomerContact { Id = Guid.NewGuid(), FirstName = "María", LastName = "López", JobTitle = "Directora", Phone = "8888-4444", Email = "maria.lopez@ayudasocial.org", IsDefault = true });
+
+                await _context.Customers.AddRangeAsync(juan, distribuidora, corporacion, exento);
+                await _context.SaveChangesAsync();
+            }
+        }
+
+        // 9.5. Sembrar Categorías Base de Proveedores (Requerido)
+        SupplierCategory? catTech = null;
+        SupplierCategory? catInsumos = null;
+
         if (!await _context.SupplierCategories.AnyAsync())
         {
-            var catTech = new SupplierCategory
-            {
-                Id = Guid.NewGuid(),
-                Name = "Tecnología",
-                Description = "Proveedores de equipos y suministros tecnológicos",
-                CreatedBy = "System",
-                CreatedOnUtc = DateTime.UtcNow
-            };
-            var catInsumos = new SupplierCategory
-            {
-                Id = Guid.NewGuid(),
-                Name = "Insumos Generales",
-                Description = "Proveedores de insumos y materiales varios",
-                CreatedBy = "System",
-                CreatedOnUtc = DateTime.UtcNow
-            };
+            catTech = new SupplierCategory { Id = Guid.NewGuid(), Name = "Tecnología", Description = "Proveedores de equipos y suministros tecnológicos", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
+            catInsumos = new SupplierCategory { Id = Guid.NewGuid(), Name = "Insumos Generales", Description = "Proveedores de insumos y materiales varios", CreatedBy = "System", CreatedOnUtc = DateTime.UtcNow };
             await _context.SupplierCategories.AddRangeAsync(catTech, catInsumos);
             await _context.SaveChangesAsync();
+        }
+        else
+        {
+            catTech = await _context.SupplierCategories.FirstOrDefaultAsync(s => s.Name == "Tecnología");
+            catInsumos = await _context.SupplierCategories.FirstOrDefaultAsync(s => s.Name == "Insumos Generales");
+        }
 
-            // Proveedores de ejemplo
-            var supplier1 = new Supplier
+        // Sembrar Proveedor General por defecto (Siempre disponible)
+        if (!await _context.Suppliers.AnyAsync() && catInsumos != null)
+        {
+            var proveedorGeneral = new Supplier
             {
                 Id = Guid.NewGuid(),
-                SupplierCode = "SUP-000001",
-                IdentificationNumber = "J0310000001234",
+                SupplierCode = "SUP-GENERAL",
+                IdentificationNumber = "000-000000-0000P",
                 IdentificationType = IdentificationType.RUC,
-                Name = "Tech Distribuidores S.A.",
-                LegalName = "Tech Distribuidores Sociedad Anónima",
-                SupplierCategoryId = catTech.Id,
-                Phone = "2222-1111",
-                Email = "ventas@techdist.com",
-                Address = "Zona Industrial Norte, Managua",
-                ContactName = "Carlos Rodríguez",
-                Status = SupplierStatus.Active,
-                IsActive = true,
-                CreatedBy = "System",
-                CreatedOnUtc = DateTime.UtcNow
-            };
-
-            var supplier2 = new Supplier
-            {
-                Id = Guid.NewGuid(),
-                SupplierCode = "SUP-000002",
-                IdentificationNumber = "1234567890",
-                IdentificationType = IdentificationType.Cedula,
-                Name = "Insumos El Progreso",
-                LegalName = null,
+                Name = "PROVEEDOR GENERAL",
+                LegalName = "PROVEEDOR GENERAL",
                 SupplierCategoryId = catInsumos.Id,
-                Phone = "8888-5555",
-                Email = "insumos.progreso@gmail.com",
-                Address = "Mercado Oriental, Managua",
-                ContactName = "Pedro Martínez",
+                Phone = "0000-0000",
+                Email = "proveedor@general.com",
+                Address = "General",
+                ContactName = "Contacto General",
                 Status = SupplierStatus.Active,
                 IsActive = true,
                 CreatedBy = "System",
                 CreatedOnUtc = DateTime.UtcNow
             };
-
-            await _context.Suppliers.AddRangeAsync(supplier1, supplier2);
+            await _context.Suppliers.AddAsync(proveedorGeneral);
             await _context.SaveChangesAsync();
+        }
+
+        // Proveedores Demo (Opcional)
+        if (seedDemoData && catTech != null && catInsumos != null)
+        {
+            if (!await _context.Suppliers.AnyAsync(s => s.SupplierCode == "SUP-000001"))
+            {
+                var supplier1 = new Supplier
+                {
+                    Id = Guid.NewGuid(),
+                    SupplierCode = "SUP-000001",
+                    IdentificationNumber = "J0310000001234",
+                    IdentificationType = IdentificationType.RUC,
+                    Name = "Tech Distribuidores S.A.",
+                    LegalName = "Tech Distribuidores Sociedad Anónima",
+                    SupplierCategoryId = catTech.Id,
+                    Phone = "2222-1111",
+                    Email = "ventas@techdist.com",
+                    Address = "Zona Industrial Norte, Managua",
+                    ContactName = "Carlos Rodríguez",
+                    Status = SupplierStatus.Active,
+                    IsActive = true,
+                    CreatedBy = "System",
+                    CreatedOnUtc = DateTime.UtcNow
+                };
+
+                var supplier2 = new Supplier
+                {
+                    Id = Guid.NewGuid(),
+                    SupplierCode = "SUP-000002",
+                    IdentificationNumber = "1234567890",
+                    IdentificationType = IdentificationType.Cedula,
+                    Name = "Insumos El Progreso",
+                    LegalName = null,
+                    SupplierCategoryId = catInsumos.Id,
+                    Phone = "8888-5555",
+                    Email = "insumos.progreso@gmail.com",
+                    Address = "Mercado Oriental, Managua",
+                    ContactName = "Pedro Martínez",
+                    Status = SupplierStatus.Active,
+                    IsActive = true,
+                    CreatedBy = "System",
+                    CreatedOnUtc = DateTime.UtcNow
+                };
+
+                await _context.Suppliers.AddRangeAsync(supplier1, supplier2);
+                await _context.SaveChangesAsync();
+            }
         }
 
         // 10. Sembrar Pedido de Venta y Factura demo (Draft)
@@ -603,12 +657,12 @@ public class DbInitializer : IDbInitializer
         if (!await _context.CashRegisters.AnyAsync())
         {
             var branch = await _context.Branches.FirstOrDefaultAsync();
-            var cashAdminUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == "admin");
+            var cashAdminUser = await _context.Users.FirstOrDefaultAsync(u => u.UserName == adminUserName) ?? await _context.Users.FirstOrDefaultAsync();
             var cashMethod = await _context.PaymentMethods.FirstOrDefaultAsync(p => p.Code == "EFEC");
 
-            if (branch != null && cashAdminUser != null && cashMethod != null)
+            if (branch != null && cashMethod != null)
             {
-                // Caja Principal
+                // Caja Principal (Requerido siempre)
                 var register = new CashRegister
                 {
                     Id = Guid.NewGuid(),
@@ -623,39 +677,42 @@ public class DbInitializer : IDbInitializer
                 await _context.CashRegisters.AddAsync(register);
                 await _context.SaveChangesAsync();
 
-                // Sesión demo de apertura
-                var session = new CashSession
+                // Sesión de apertura demo (Solo si es demo)
+                if (seedDemoData && cashAdminUser != null)
                 {
-                    Id = Guid.NewGuid(),
-                    SessionNumber = "CS-20260616-00001",
-                    CashRegisterId = register.Id,
-                    OpenedByUserId = cashAdminUser.Id,
-                    OpeningAmount = 1000.0000m,
-                    OpenedAt = DateTime.UtcNow,
-                    Status = CashSessionStatus.Open,
-                    Notes = "Apertura inicial sembrada automáticamente",
-                    CreatedBy = "System",
-                    CreatedOnUtc = DateTime.UtcNow
-                };
+                    var session = new CashSession
+                    {
+                        Id = Guid.NewGuid(),
+                        SessionNumber = "CS-20260616-00001",
+                        CashRegisterId = register.Id,
+                        OpenedByUserId = cashAdminUser.Id,
+                        OpeningAmount = 1000.0000m,
+                        OpenedAt = DateTime.UtcNow,
+                        Status = CashSessionStatus.Open,
+                        Notes = "Apertura inicial sembrada automáticamente",
+                        CreatedBy = "System",
+                        CreatedOnUtc = DateTime.UtcNow
+                    };
 
-                session.CashMovements.Add(new CashMovement
-                {
-                    Id = Guid.NewGuid(),
-                    CashSessionId = session.Id,
-                    MovementType = CashMovementType.Opening,
-                    PaymentMethodId = cashMethod.Id,
-                    Amount = 1000.0000m,
-                    Notes = "Saldo inicial de apertura de sesión (semilla)",
-                    CreatedAt = DateTime.UtcNow
-                });
+                    session.CashMovements.Add(new CashMovement
+                    {
+                        Id = Guid.NewGuid(),
+                        CashSessionId = session.Id,
+                        MovementType = CashMovementType.Opening,
+                        PaymentMethodId = cashMethod.Id,
+                        Amount = 1000.0000m,
+                        Notes = "Saldo inicial de apertura de sesión (semilla)",
+                        CreatedAt = DateTime.UtcNow
+                    });
 
-                await _context.CashSessions.AddAsync(session);
-                await _context.SaveChangesAsync();
+                    await _context.CashSessions.AddAsync(session);
+                    await _context.SaveChangesAsync();
+                }
             }
         }
 
         // 13. Sembrar Cuenta por Cobrar Demo y Pago Parcial Demo
-        if (!await _context.AccountsReceivables.AnyAsync())
+        if (seedDemoData && !await _context.AccountsReceivables.AnyAsync())
         {
             var customer = await _context.Customers.FirstOrDefaultAsync(c => c.CustomerCode == "CUS-000002");
             var productDell = await _context.Products.FirstOrDefaultAsync(p => p.InternalCode == "PROD-DELL-01");
@@ -770,7 +827,7 @@ public class DbInitializer : IDbInitializer
         }
 
         // 14. Sembrar Factura de Compra, Cuenta por Pagar y Abono demo
-        if (!await _context.AccountsPayables.AnyAsync())
+        if (seedDemoData && !await _context.AccountsPayables.AnyAsync())
         {
             var supplier = await _context.Suppliers.FirstOrDefaultAsync(s => s.SupplierCode == "SUP-000001");
             var productDell = await _context.Products.FirstOrDefaultAsync(p => p.InternalCode == "PROD-DELL-01");
@@ -880,7 +937,6 @@ public class DbInitializer : IDbInitializer
                 await _context.SaveChangesAsync();
             }
         }
-        } // Fin de seedDemoData
 
         // 15. Sembrar Plan de Cuentas base
         if (!await _context.Accounts.AnyAsync())
