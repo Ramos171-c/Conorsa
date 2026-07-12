@@ -7,6 +7,7 @@ services:
     environment:
       - ACCEPT_EULA=Y
       - MSSQL_SA_PASSWORD=Perros..1
+      - memory.memorylimitmb=1200
     ports:
       - "1433:1433" # Optional: expose port 1433 if you need to run migrations or access the database from outside
     volumes:
