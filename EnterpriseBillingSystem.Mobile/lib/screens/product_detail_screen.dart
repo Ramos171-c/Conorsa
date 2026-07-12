@@ -49,9 +49,12 @@ class ProductDetailScreen extends StatelessWidget {
                     isExpanded: true,
                     items: product.presentations.map((p) {
                       final pPrice = p.retailPrice > 0 ? p.retailPrice : product.defaultSalePrice;
+                      final conversionText = p.conversionFactor > 1 
+                          ? ' (${p.conversionFactor.toInt()} ${p.unitOfMeasureCode})' 
+                          : ' (1 ${p.unitOfMeasureCode})';
                       return DropdownMenuItem(
                         value: p,
-                        child: Text('${p.name} - \$${pPrice.toStringAsFixed(2)}'),
+                        child: Text('${p.name}$conversionText - \$${pPrice.toStringAsFixed(2)}'),
                       );
                     }).toList(),
                     onChanged: (val) {

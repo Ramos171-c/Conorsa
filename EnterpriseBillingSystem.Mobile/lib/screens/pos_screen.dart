@@ -152,9 +152,12 @@ class _PosScreenState extends State<PosScreen> {
                       border: OutlineInputBorder(),
                     ),
                     items: product.presentations.map((p) {
+                      final conversionText = p.conversionFactor > 1 
+                          ? ' (${p.conversionFactor.toInt()} ${p.unitOfMeasureCode})' 
+                          : ' (1 ${p.unitOfMeasureCode})';
                       return DropdownMenuItem(
                         value: p,
-                        child: Text(p.name),
+                        child: Text('${p.name}$conversionText'),
                       );
                     }).toList(),
                     onChanged: (val) {
@@ -307,7 +310,10 @@ class _PosScreenState extends State<PosScreen> {
               mainAxisSize: MainAxisSize.min,
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-              Text('Presentación: ${item.presentation.name}', style: const TextStyle(color: Color(0xFF64748B), fontSize: 13)),
+              Text(
+                'Presentación: ${item.presentation.name} (${item.presentation.conversionFactor.toInt()} ${item.presentation.unitOfMeasureCode})', 
+                style: const TextStyle(color: Color(0xFF64748B), fontSize: 13)
+              ),
               const SizedBox(height: 12),
               
               // Quantity Input
