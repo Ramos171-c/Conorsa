@@ -75,8 +75,9 @@ public class CatalogController : ApiControllerBase
                 container.Page(page =>
                 {
                     page.Size(PageSizes.A4.Landscape()); // Orientación horizontal (apaisado)
-                    page.Margin(60); // Margen para el marco decorado
                     
+                    // IMPORTANTE: Definimos el margen en los contenidos, NO en la página entera,
+                    // para permitir que el fondo ocupe el 100% de la hoja (bleed edge-to-edge)
                     if (System.IO.File.Exists(bgImagePath))
                     {
                         page.Background().Image(bgImagePath);
@@ -89,6 +90,8 @@ public class CatalogController : ApiControllerBase
                     page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(11).FontColor("#0F172A"));
 
                     page.Footer()
+                        .PaddingHorizontal(60)
+                        .PaddingBottom(20)
                         .AlignCenter()
                         .Text(x =>
                         {
@@ -97,6 +100,7 @@ public class CatalogController : ApiControllerBase
                         });
 
                     page.Content()
+                        .Padding(60) // Margen de contenido para el marco
                         .Column(column =>
                         {
                             var categories = productsArray.GroupBy(p => p.CategoryName).ToArray();
@@ -132,28 +136,26 @@ public class CatalogController : ApiControllerBase
                                     
                                     column.Item().PaddingVertical(10).Row(row =>
                                     {
-                                        // Columna Izquierda: Información del Producto (55% del ancho)
-                                        row.RelativeItem(11).Column(infoCol =>
+                                        // Columna Izquierda: Información del Producto (55% del ancho, centrada verticalmente)
+                                        row.RelativeItem(11).AlignMiddle().Column(infoCol =>
                                         {
                                             infoCol.Item().Text(product.Name.ToUpper())
                                                 .Bold()
                                                 .FontSize(24)
-                                                .FontColor("#0F172A");
+                                                .FontColor("#0F172A")
+                                                .AlignCenter();
                                                 
                                             var ueText = product.Description?.Contains("U/E: ") == true
                                                 ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
                                                 : "N/A";
                                                 
-                                            infoCol.Item().PaddingTop(12).Text(x =>
+                                            infoCol.Item().AlignCenter().PaddingTop(12).Text(x =>
                                             {
-                                                x.Span("CÓDIGO SKU: ").Bold().FontSize(14).FontColor("#E11D48");
-                                                x.Span($"{product.InternalCode}\n\n").FontSize(14).FontColor("#334155");
+                                                x.Span("CÓDIGO SKU: ").Bold().FontSize(13).FontColor("#E11D48");
+                                                x.Span($"{product.InternalCode}     •     ").FontSize(13).FontColor("#334155");
                                                 
-                                                x.Span("MEDIDA: ").Bold().FontSize(14).FontColor("#E11D48");
-                                                x.Span($"{product.DefaultUnitOfMeasureCode}\n\n").FontSize(14).FontColor("#334155");
-                                                
-                                                x.Span("U/E: ").Bold().FontSize(14).FontColor("#E11D48");
-                                                x.Span($"{ueText}").FontSize(14).FontColor("#334155");
+                                                x.Span("U/E: ").Bold().FontSize(13).FontColor("#E11D48");
+                                                x.Span($"{ueText}").FontSize(13).FontColor("#334155");
                                             });
 
                                             infoCol.Item().PaddingVertical(10).LineHorizontal(1f).LineColor("#F1F5F9");
@@ -162,14 +164,15 @@ public class CatalogController : ApiControllerBase
                                             {
                                                 infoCol.Item().Text(product.Description)
                                                     .FontSize(13)
-                                                    .FontColor("#475569");
+                                                    .FontColor("#475569")
+                                                    .AlignCenter();
                                             }
                                         });
 
                                         // Espaciador entre columnas
                                         row.ConstantItem(30);
 
-                                        // Columna Derecha: Imagen del Producto (45% del ancho)
+                                        // Columna Derecha: Imagen del Producto (45% del ancho, centrada verticalmente)
                                         row.RelativeItem(9).AlignMiddle().AlignCenter().Column(imgCol =>
                                         {
                                             var imgPlaced = false;
