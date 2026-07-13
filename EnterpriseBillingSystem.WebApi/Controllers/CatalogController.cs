@@ -68,7 +68,8 @@ public class CatalogController : ApiControllerBase
             }
 
             var pdfStream = new MemoryStream();
-            var bgImagePath = Path.Combine(env.WebRootPath, "images", "catalog_background.png");
+            var webRootPath = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var bgImagePath = Path.Combine(webRootPath, "images", "catalog_background.png");
             
             var document = Document.Create(container =>
             {
@@ -80,7 +81,7 @@ public class CatalogController : ApiControllerBase
                     // para permitir que el fondo ocupe el 100% de la hoja (bleed edge-to-edge)
                     if (System.IO.File.Exists(bgImagePath))
                     {
-                        page.Background().Image(bgImagePath);
+                        page.Background().Image(bgImagePath, ImageScaling.Resize);
                     }
                     else
                     {
@@ -159,14 +160,6 @@ public class CatalogController : ApiControllerBase
                                             });
 
                                             infoCol.Item().PaddingVertical(10).LineHorizontal(1f).LineColor("#F1F5F9");
-
-                                            if (!string.IsNullOrWhiteSpace(product.Description))
-                                            {
-                                                infoCol.Item().Text(product.Description)
-                                                    .FontSize(13)
-                                                    .FontColor("#475569")
-                                                    .AlignCenter();
-                                            }
                                         });
 
                                         // Espaciador entre columnas
@@ -176,7 +169,7 @@ public class CatalogController : ApiControllerBase
                                         row.RelativeItem(9).AlignMiddle().AlignCenter().Column(imgCol =>
                                         {
                                             var imgPlaced = false;
-                                            if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
+                                            if (!string.IsNullOrWhiteSpace(product.ImagePath))
                                             {
                                                 var relativePath = product.ImagePath;
                                                 if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
@@ -189,7 +182,8 @@ public class CatalogController : ApiControllerBase
                                                     catch { }
                                                 }
                                                 
-                                                var localImagePath = Path.Combine(env.WebRootPath, relativePath.TrimStart('/'));
+                                                var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                                                var localImagePath = Path.Combine(webRoot, relativePath.TrimStart('/'));
                                                 if (System.IO.File.Exists(localImagePath))
                                                 {
                                                     imgCol.Item()
