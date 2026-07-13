@@ -87,7 +87,10 @@ public class ProductsController : ApiControllerBase
         await file.CopyToAsync(ms);
         var bytes = ms.ToArray();
 
-        var relativePath = await Mediator.Send(new UploadProductImageCommand(id, bytes, file.FileName));
+        // Optimizar y comprimir imagen antes de guardarla para acelerar carga en móviles
+        var compressedBytes = CompressImage(bytes, file.FileName);
+
+        var relativePath = await Mediator.Send(new UploadProductImageCommand(id, compressedBytes, file.FileName));
         var absoluteUrl = GetAbsoluteUrl(relativePath);
 
         return Ok(new { ImageUrl = absoluteUrl });
@@ -162,6 +165,57 @@ public class ProductsController : ApiControllerBase
         return Ok(result);
     }
 
+
+    private byte[] CompressImage(byte[] imageBytes, string fileName)
+    {
+        try
+        {
+            var ext = Path.GetExtension(fileName).ToLower();
+            if (ext == ".gif") return imageBytes; // Conservar GIFs animados intactos
+
+            using var ms = new MemoryStream(imageBytes);
+            using var codec = SkiaSharp.SKCodec.Create(ms);
+            if (codec == null) return imageBytes;
+
+            using var originalBitmap = SkiaSharp.SKBitmap.Decode(codec);
+            if (originalBitmap == null) return imageBytes;
+
+            int maxDimension = 800; // Resolución óptima para dispositivos móviles
+            int width = originalBitmap.Width;
+            int height = originalBitmap.Height;
+
+            if (width > maxDimension || height > maxDimension)
+            {
+                if (width > height)
+                {
+                    height = (int)(height * ((double)maxDimension / width));
+                    width = maxDimension;
+                }
+                else
+                {
+                    width = (int)(width * ((double)maxDimension / height));
+                    height = maxDimension;
+                }
+
+                using var resizedBitmap = originalBitmap.Resize(new SkiaSharp.SKImageInfo(width, height), new SkiaSharp.SKSamplingOptions(SkiaSharp.SKFilterMode.Linear));
+                if (resizedBitmap == null) return imageBytes;
+
+                using var image = SkiaSharp.SKImage.FromBitmap(resizedBitmap);
+                using var data = image.Encode(SkiaSharp.SKEncodedImageFormat.Jpeg, 75); // 75% calidad Jpeg (ideal balance peso/nitidez)
+                return data.ToArray();
+            }
+            else
+            {
+                using var image = SkiaSharp.SKImage.FromBitmap(originalBitmap);
+                using var data = image.Encode(SkiaSharp.SKEncodedImageFormat.Jpeg, 75);
+                return data.ToArray();
+            }
+        }
+        catch
+        {
+            return imageBytes; // Si ocurre algún error, salvaguardar la imagen original
+        }
+    }
 
     private string GetAbsoluteUrl(string? relativePath)
     {
