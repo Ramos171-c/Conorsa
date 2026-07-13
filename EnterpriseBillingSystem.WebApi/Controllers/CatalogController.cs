@@ -74,8 +74,8 @@ public class CatalogController : ApiControllerBase
             {
                 container.Page(page =>
                 {
-                    page.Size(PageSizes.A4); // Portrait A4
-                    page.Margin(60); // Margen generoso para que el contenido no tape el marco decorado
+                    page.Size(PageSizes.A4.Landscape()); // Orientación horizontal (apaisado)
+                    page.Margin(60); // Margen para el marco decorado
                     
                     if (System.IO.File.Exists(bgImagePath))
                     {
@@ -107,11 +107,11 @@ public class CatalogController : ApiControllerBase
                                 var categoryName = categoryGroup.Key ?? "Otros";
                                 
                                 // A) Categoría de Separación (Centrado sobre el fondo de dulces)
-                                column.Item().Height(500).AlignCenter().AlignMiddle().Column(catCol =>
+                                column.Item().Height(400).AlignCenter().AlignMiddle().Column(catCol =>
                                 {
                                     catCol.Item().Text(categoryName.ToUpper())
                                         .Bold()
-                                        .FontSize(38)
+                                        .FontSize(42)
                                         .FontColor("#E11D48") // Color rosa dulce
                                         .AlignCenter();
                                         
@@ -124,85 +124,95 @@ public class CatalogController : ApiControllerBase
                                 
                                 column.Item().PageBreak();
 
-                                // B) Lista de Productos
+                                // B) Lista de Productos en Fila Horizontal
                                 var prodArray = categoryGroup.ToArray();
                                 for (int prodIdx = 0; prodIdx < prodArray.Length; prodIdx++)
                                 {
                                     var product = prodArray[prodIdx];
                                     
-                                    // 1. Nombre del Producto (Centrado y Grande)
-                                    column.Item().AlignCenter().Text(product.Name.ToUpper())
-                                        .Bold()
-                                        .FontSize(32)
-                                        .FontColor("#0F172A")
-                                        .AlignCenter();
-                                        
-                                    // 2. Detalles del Producto (Centrado y Grande)
-                                    var ueText = product.Description?.Contains("U/E: ") == true
-                                        ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
-                                        : "N/A";
-                                        
-                                    column.Item().AlignCenter().PaddingTop(8).Text(x =>
+                                    column.Item().PaddingVertical(10).Row(row =>
                                     {
-                                        x.Span("CÓDIGO SKU: ").Bold().FontSize(15).FontColor("#E11D48");
-                                        x.Span($"{product.InternalCode}   •   ").FontSize(15).FontColor("#334155");
-                                        x.Span("MEDIDA: ").Bold().FontSize(15).FontColor("#E11D48");
-                                        x.Span($"{product.DefaultUnitOfMeasureCode}   •   ").FontSize(15).FontColor("#334155");
-                                        x.Span("U/E: ").Bold().FontSize(15).FontColor("#E11D48");
-                                        x.Span($"{ueText}").FontSize(15).FontColor("#334155");
-                                    });
-
-                                    column.Item().PaddingVertical(8).LineHorizontal(1f).LineColor("#F1F5F9");
-
-                                    // 3. Imagen del Producto (Centrada sin borde tosco)
-                                    var imgPlaced = false;
-                                    if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
-                                    {
-                                        var relativePath = product.ImagePath;
-                                        if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                                        // Columna Izquierda: Información del Producto (55% del ancho)
+                                        row.RelativeItem(11).Column(infoCol =>
                                         {
-                                            try
-                                            {
-                                                var uri = new Uri(relativePath);
-                                                relativePath = uri.AbsolutePath;
-                                            }
-                                            catch { }
-                                        }
-                                        
-                                        var localImagePath = Path.Combine(env.WebRootPath, relativePath.TrimStart('/'));
-                                        if (System.IO.File.Exists(localImagePath))
-                                        {
-                                            column.Item()
-                                                .AlignCenter()
-                                                .MaxHeight(360)
-                                                .Image(localImagePath, ImageScaling.FitArea);
+                                            infoCol.Item().Text(product.Name.ToUpper())
+                                                .Bold()
+                                                .FontSize(24)
+                                                .FontColor("#0F172A");
                                                 
-                                            imgPlaced = true;
-                                        }
-                                    }
+                                            var ueText = product.Description?.Contains("U/E: ") == true
+                                                ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
+                                                : "N/A";
+                                                
+                                            infoCol.Item().PaddingTop(12).Text(x =>
+                                            {
+                                                x.Span("CÓDIGO SKU: ").Bold().FontSize(14).FontColor("#E11D48");
+                                                x.Span($"{product.InternalCode}\n\n").FontSize(14).FontColor("#334155");
+                                                
+                                                x.Span("MEDIDA: ").Bold().FontSize(14).FontColor("#E11D48");
+                                                x.Span($"{product.DefaultUnitOfMeasureCode}\n\n").FontSize(14).FontColor("#334155");
+                                                
+                                                x.Span("U/E: ").Bold().FontSize(14).FontColor("#E11D48");
+                                                x.Span($"{ueText}").FontSize(14).FontColor("#334155");
+                                            });
 
-                                    if (!imgPlaced)
-                                    {
-                                        column.Item()
-                                            .AlignCenter()
-                                            .Height(120)
-                                            .Border(0.5f)
-                                            .BorderColor("#E2E8F0")
-                                            .Background("#F8FAFC")
-                                            .AlignMiddle()
-                                            .Text("Sin Imagen")
-                                            .FontColor("#94A3B8")
-                                            .Italic();
-                                    }
+                                            infoCol.Item().PaddingVertical(10).LineHorizontal(1f).LineColor("#F1F5F9");
 
-                                    // 4. Descripción del Producto (Centrada)
-                                    if (!string.IsNullOrWhiteSpace(product.Description))
-                                    {
-                                        column.Item().PaddingTop(10).Text(product.Description)
-                                            .FontSize(14)
-                                            .FontColor("#475569")
-                                            .AlignCenter();
-                                    }
+                                            if (!string.IsNullOrWhiteSpace(product.Description))
+                                            {
+                                                infoCol.Item().Text(product.Description)
+                                                    .FontSize(13)
+                                                    .FontColor("#475569");
+                                            }
+                                        });
+
+                                        // Espaciador entre columnas
+                                        row.ConstantItem(30);
+
+                                        // Columna Derecha: Imagen del Producto (45% del ancho)
+                                        row.RelativeItem(9).AlignMiddle().AlignCenter().Column(imgCol =>
+                                        {
+                                            var imgPlaced = false;
+                                            if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
+                                            {
+                                                var relativePath = product.ImagePath;
+                                                if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                                                {
+                                                    try
+                                                    {
+                                                        var uri = new Uri(relativePath);
+                                                        relativePath = uri.AbsolutePath;
+                                                    }
+                                                    catch { }
+                                                }
+                                                
+                                                var localImagePath = Path.Combine(env.WebRootPath, relativePath.TrimStart('/'));
+                                                if (System.IO.File.Exists(localImagePath))
+                                                {
+                                                    imgCol.Item()
+                                                        .AlignCenter()
+                                                        .MaxHeight(260)
+                                                        .Image(localImagePath, ImageScaling.FitArea);
+                                                        
+                                                    imgPlaced = true;
+                                                }
+                                            }
+
+                                            if (!imgPlaced)
+                                            {
+                                                imgCol.Item()
+                                                    .AlignCenter()
+                                                    .Height(120)
+                                                    .Border(0.5f)
+                                                    .BorderColor("#E2E8F0")
+                                                    .Background("#F8FAFC")
+                                                    .AlignMiddle()
+                                                    .Text("Sin Imagen")
+                                                    .FontColor("#94A3B8")
+                                                    .Italic();
+                                            }
+                                        });
+                                    });
 
                                     if (prodIdx < prodArray.Length - 1 || catIdx < categories.Length - 1)
                                     {
