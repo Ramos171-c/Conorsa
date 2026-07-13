@@ -28,7 +28,8 @@ class OfflineService {
           .where((url) => url.isNotEmpty)
           .map((url) => url.startsWith('http') ? url : '$base${url.startsWith('/') ? "" : "/"}$url')
           .toList();
-      ImageCacheService.cacheImages(urls);
+      // Desactivar precarga en segundo plano para permitir carga bajo demanda (Lazy Loading) y ahorrar datos
+      // ImageCacheService.cacheImages(urls);
     } catch (_) {}
   }
 

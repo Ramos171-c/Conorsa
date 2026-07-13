@@ -1610,5 +1610,51 @@ public class DbInitializer : IDbInitializer
 
         await _context.SaveChangesAsync();
         System.Console.WriteLine($"Catálogo de productos actualizado/sembrado con éxito. Total productos procesados: {productsData.Count}");
+
+        // Limpieza de imágenes huérfanas en el servidor
+        try
+        {
+            var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
+            if (Directory.Exists(uploadsFolder))
+            {
+                var dbImagePaths = await _context.Products
+                    .AsNoTracking()
+                    .Where(p => p.ImagePath != null && p.ImagePath != "")
+                    .Select(p => p.ImagePath)
+                    .ToListAsync();
+
+                var dbFileNames = dbImagePaths
+                    .Select(p => Path.GetFileName(p))
+                    .Where(f => !string.IsNullOrEmpty(f))
+                    .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+                var physicalFiles = Directory.GetFiles(uploadsFolder);
+                int deletedCount = 0;
+                foreach (var filePath in physicalFiles)
+                {
+                    var fileName = Path.GetFileName(filePath);
+                    if (fileName.Equals("default-product.png", StringComparison.OrdinalIgnoreCase))
+                        continue;
+
+                    if (!dbFileNames.Contains(fileName))
+                    {
+                        try
+                        {
+                            File.Delete(filePath);
+                            deletedCount++;
+                        }
+                        catch { }
+                    }
+                }
+                if (deletedCount > 0)
+                {
+                    System.Console.WriteLine($"[Limpieza] Se eliminaron {deletedCount} imágenes huérfanas del servidor.");
+                }
+            }
+        }
+        catch (System.Exception ex)
+        {
+            System.Console.WriteLine($"[Limpieza] Error al limpiar imágenes huérfanas: {ex.Message}");
+        }
     }
 }

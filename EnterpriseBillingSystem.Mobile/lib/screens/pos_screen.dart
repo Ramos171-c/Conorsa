@@ -1057,7 +1057,7 @@ class _PosScreenState extends State<PosScreen> {
 
           // Catalog Grid
           Expanded(
-            child: orderProv.isLoading
+            child: (orderProv.isLoading && orderProv.products.isEmpty)
                 ? const Center(child: CircularProgressIndicator())
                 : (orderProv.errorMessage != null && displayedProducts.isEmpty)
                     ? Center(
