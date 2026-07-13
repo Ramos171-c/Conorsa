@@ -68,14 +68,24 @@ public class CatalogController : ApiControllerBase
             }
 
             var pdfStream = new MemoryStream();
+            var bgImagePath = Path.Combine(env.WebRootPath, "images", "catalog_background.png");
             
             var document = Document.Create(container =>
             {
                 container.Page(page =>
                 {
                     page.Size(PageSizes.A4); // Portrait A4
-                    page.Margin(40);
-                    page.PageColor("#FFFFFF");
+                    page.Margin(60); // Margen generoso para que el contenido no tape el marco decorado
+                    
+                    if (System.IO.File.Exists(bgImagePath))
+                    {
+                        page.Background().Image(bgImagePath);
+                    }
+                    else
+                    {
+                        page.PageColor("#FFFFFF");
+                    }
+                    
                     page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(11).FontColor("#0F172A"));
 
                     page.Footer()
@@ -96,53 +106,55 @@ public class CatalogController : ApiControllerBase
                                 var categoryGroup = categories[catIdx];
                                 var categoryName = categoryGroup.Key ?? "Otros";
                                 
-                                // A) Category Divider Page (Safe height: 600)
-                                column.Item().Background("#0F172A").Height(600).AlignCenter().AlignMiddle().Column(catCol =>
+                                // A) Categoría de Separación (Centrado sobre el fondo de dulces)
+                                column.Item().Height(500).AlignCenter().AlignMiddle().Column(catCol =>
                                 {
                                     catCol.Item().Text(categoryName.ToUpper())
                                         .Bold()
-                                        .FontSize(42)
-                                        .FontColor("#FFFFFF")
+                                        .FontSize(38)
+                                        .FontColor("#E11D48") // Color rosa dulce
                                         .AlignCenter();
                                         
-                                    catCol.Item().PaddingTop(10).Text("CATÁLOGO DE PRODUCTOS")
-                                        .FontSize(16)
-                                        .FontColor("#CBD5E1")
+                                    catCol.Item().PaddingTop(15).Text("CATÁLOGO DE PRODUCTOS")
+                                        .Bold()
+                                        .FontSize(18)
+                                        .FontColor("#64748B")
                                         .AlignCenter();
                                 });
                                 
                                 column.Item().PageBreak();
 
-                                // B) Products List
+                                // B) Lista de Productos
                                 var prodArray = categoryGroup.ToArray();
                                 for (int prodIdx = 0; prodIdx < prodArray.Length; prodIdx++)
                                 {
                                     var product = prodArray[prodIdx];
                                     
-                                    // 1. Product Name (Centered)
+                                    // 1. Nombre del Producto (Centrado y Grande)
                                     column.Item().AlignCenter().Text(product.Name.ToUpper())
                                         .Bold()
-                                        .FontSize(28)
-                                        .FontColor("#1E3A8A");
+                                        .FontSize(32)
+                                        .FontColor("#0F172A")
+                                        .AlignCenter();
                                         
-                                    // 2. Product Details (Centered)
+                                    // 2. Detalles del Producto (Centrado y Grande)
                                     var ueText = product.Description?.Contains("U/E: ") == true
                                         ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
                                         : "N/A";
                                         
-                                    column.Item().AlignCenter().Text(x =>
+                                    column.Item().AlignCenter().PaddingTop(8).Text(x =>
                                     {
-                                        x.Span("CÓDIGO SKU: ").Bold().FontSize(14).FontColor("#334155");
-                                        x.Span($"{product.InternalCode}   •   ").FontSize(14).FontColor("#475569");
-                                        x.Span("MEDIDA: ").Bold().FontSize(14).FontColor("#334155");
-                                        x.Span($"{product.DefaultUnitOfMeasureCode}   •   ").FontSize(14).FontColor("#475569");
-                                        x.Span("U/E: ").Bold().FontSize(14).FontColor("#334155");
-                                        x.Span($"{ueText}").FontSize(14).FontColor("#475569");
+                                        x.Span("CÓDIGO SKU: ").Bold().FontSize(15).FontColor("#E11D48");
+                                        x.Span($"{product.InternalCode}   •   ").FontSize(15).FontColor("#334155");
+                                        x.Span("MEDIDA: ").Bold().FontSize(15).FontColor("#E11D48");
+                                        x.Span($"{product.DefaultUnitOfMeasureCode}   •   ").FontSize(15).FontColor("#334155");
+                                        x.Span("U/E: ").Bold().FontSize(15).FontColor("#E11D48");
+                                        x.Span($"{ueText}").FontSize(15).FontColor("#334155");
                                     });
 
-                                    column.Item().PaddingVertical(5).LineHorizontal(1f).LineColor("#CBD5E1");
+                                    column.Item().PaddingVertical(8).LineHorizontal(1f).LineColor("#F1F5F9");
 
-                                    // 3. Image (Centered, MaxHeight 450)
+                                    // 3. Imagen del Producto (Centrada sin borde tosco)
                                     var imgPlaced = false;
                                     if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
                                     {
@@ -162,9 +174,7 @@ public class CatalogController : ApiControllerBase
                                         {
                                             column.Item()
                                                 .AlignCenter()
-                                                .MaxHeight(450)
-                                                .Border(0.5f)
-                                                .BorderColor("#E2E8F0")
+                                                .MaxHeight(360)
                                                 .Image(localImagePath, ImageScaling.FitArea);
                                                 
                                             imgPlaced = true;
@@ -185,12 +195,13 @@ public class CatalogController : ApiControllerBase
                                             .Italic();
                                     }
 
-                                    // 4. Description (Centered)
+                                    // 4. Descripción del Producto (Centrada)
                                     if (!string.IsNullOrWhiteSpace(product.Description))
                                     {
-                                        column.Item().PaddingTop(5).AlignCenter().Text(product.Description)
-                                            .FontSize(12)
-                                            .FontColor("#475569");
+                                        column.Item().PaddingTop(10).Text(product.Description)
+                                            .FontSize(14)
+                                            .FontColor("#475569")
+                                            .AlignCenter();
                                     }
 
                                     if (prodIdx < prodArray.Length - 1 || catIdx < categories.Length - 1)
