@@ -1,11 +1,13 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
 import '../providers/config_provider.dart';
 import '../services/image_cache_service.dart';
 
 class CachedProductImage extends StatefulWidget {
   final String? imageUrl;
+  final String? productCode;
   final double? width;
   final double? height;
   final BoxFit fit;
@@ -14,6 +16,7 @@ class CachedProductImage extends StatefulWidget {
   const CachedProductImage({
     super.key,
     required this.imageUrl,
+    this.productCode,
     this.width,
     this.height,
     this.fit = BoxFit.cover,
@@ -27,6 +30,8 @@ class CachedProductImage extends StatefulWidget {
 class _CachedProductImageState extends State<CachedProductImage> {
   String? _filePath;
   bool _isLoading = true;
+  bool _isAsset = false;
+  String? _assetPath;
 
   @override
   void initState() {
@@ -37,15 +42,47 @@ class _CachedProductImageState extends State<CachedProductImage> {
   @override
   void didUpdateWidget(covariant CachedProductImage oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.imageUrl != widget.imageUrl) {
+    if (oldWidget.imageUrl != widget.imageUrl || oldWidget.productCode != widget.productCode) {
       _loadImage();
     }
   }
 
+  Future<bool> _checkAssetExists(String assetPath) async {
+    try {
+      await rootBundle.load(assetPath);
+      return true;
+    } catch (_) {
+      return false;
+    }
+  }
+
   Future<void> _loadImage() async {
-    setState(() {
-      _isLoading = true;
-    });
+    if (mounted) {
+      setState(() {
+        _isLoading = true;
+        _isAsset = false;
+        _assetPath = null;
+      });
+    }
+
+    // 1. Check local assets first to save network & avoid any loading lag
+    if (widget.productCode != null && widget.productCode!.isNotEmpty) {
+      final code = widget.productCode!.toUpperCase();
+      final formats = ['.png', '.jpg', '.jpeg', '.webp'];
+      for (final ext in formats) {
+        final path = 'assets/images/$code$ext';
+        if (await _checkAssetExists(path)) {
+          if (mounted) {
+            setState(() {
+              _isAsset = true;
+              _assetPath = path;
+              _isLoading = false;
+            });
+          }
+          return;
+        }
+      }
+    }
 
     var url = widget.imageUrl ?? '';
     if (url.isEmpty || url.contains('default-product.png')) {
@@ -68,7 +105,7 @@ class _CachedProductImageState extends State<CachedProductImage> {
       } catch (_) {}
     }
 
-    // 1. Check local cache first
+    // 2. Check local cache first
     final cachedPath = ImageCacheService.getCachedImagePath(url);
     if (cachedPath != null) {
       if (mounted) {
@@ -80,7 +117,7 @@ class _CachedProductImageState extends State<CachedProductImage> {
       return;
     }
 
-    // 2. Download and cache on-the-fly
+    // 3. Download and cache on-the-fly
     final downloadedPath = await ImageCacheService.downloadAndCacheOnTheFly(url);
     if (mounted) {
       setState(() {
@@ -107,6 +144,17 @@ class _CachedProductImageState extends State<CachedProductImage> {
             ),
           ),
         ),
+      );
+    }
+
+    // If loaded from pre-packaged APK assets, display immediately
+    if (_isAsset && _assetPath != null) {
+      return Image.asset(
+        _assetPath!,
+        width: widget.width,
+        height: widget.height,
+        fit: widget.fit,
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
       );
     }
 

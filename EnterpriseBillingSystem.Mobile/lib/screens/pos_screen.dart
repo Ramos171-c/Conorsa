@@ -1124,6 +1124,7 @@ class _PosScreenState extends State<PosScreen> {
                                         borderRadius: BorderRadius.circular(8),
                                         child: CachedProductImage(
                                           imageUrl: p.imageUrl,
+                                          productCode: p.internalCode,
                                           width: double.infinity,
                                           fit: BoxFit.cover,
                                           iconSize: 40,

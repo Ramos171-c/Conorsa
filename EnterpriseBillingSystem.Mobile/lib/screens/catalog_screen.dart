@@ -256,9 +256,10 @@ class _CatalogScreenState extends State<CatalogScreen> {
                                             child: ClipRRect(
                                               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                                               child: GestureDetector(
-                                                onTap: () => _showFullImageDialog(context, product.imageUrl, product.name),
+                                                onTap: () => _showFullImageDialog(context, product.imageUrl, product.name, product.internalCode),
                                                 child: CachedProductImage(
                                                   imageUrl: product.imageUrl,
+                                                  productCode: product.internalCode,
                                                   width: double.infinity,
                                                   fit: BoxFit.cover,
                                                   iconSize: 50,
@@ -333,7 +334,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  void _showFullImageDialog(BuildContext context, String? imageUrl, String productName) {
+  void _showFullImageDialog(BuildContext context, String? imageUrl, String productName, String? productCode) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -357,6 +358,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                       borderRadius: BorderRadius.circular(12),
                       child: CachedProductImage(
                         imageUrl: imageUrl,
+                        productCode: productCode,
                         width: double.infinity,
                         height: 350,
                         fit: BoxFit.contain,

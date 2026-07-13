@@ -184,9 +184,10 @@ class ProductDetailScreen extends StatelessWidget {
           children: [
             // 1. Large Visual Product Image Banner
             GestureDetector(
-              onTap: () => _showFullImageDialog(context, product.imageUrl, product.name),
+              onTap: () => _showFullImageDialog(context, product.imageUrl, product.name, product.internalCode),
               child: CachedProductImage(
                 imageUrl: product.imageUrl,
+                productCode: product.internalCode,
                 height: 260,
                 width: double.infinity,
                 fit: BoxFit.cover,
@@ -380,7 +381,7 @@ class ProductDetailScreen extends StatelessWidget {
     );
   }
 
-  void _showFullImageDialog(BuildContext context, String? imageUrl, String productName) {
+  void _showFullImageDialog(BuildContext context, String? imageUrl, String productName, String? productCode) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -404,6 +405,7 @@ class ProductDetailScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(12),
                       child: CachedProductImage(
                         imageUrl: imageUrl,
+                        productCode: productCode,
                         width: double.infinity,
                         height: 350,
                         fit: BoxFit.contain,
