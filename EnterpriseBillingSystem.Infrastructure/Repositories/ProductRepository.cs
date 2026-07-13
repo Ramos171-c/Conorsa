@@ -98,6 +98,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
     public async Task<IEnumerable<Product>> GetCatalogProductsAsync(CancellationToken cancellationToken = default)
     {
         return await _context.Products
+            .AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Include(p => p.DefaultUnitOfMeasure)
@@ -139,6 +140,7 @@ public class ProductRepository : Repository<Product>, IProductRepository
         }
 
         var products = await _context.Products
+            .AsNoTracking()
             .Include(p => p.Category)
             .Include(p => p.Brand)
             .Include(p => p.DefaultUnitOfMeasure)

@@ -73,6 +73,12 @@ try
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
 
+    // Habilitar servicios de compresión de respuestas para optimizar datos móviles
+    builder.Services.AddResponseCompression(options =>
+    {
+        options.EnableForHttps = true;
+    });
+
     // Configurar Swagger con Bearer Security
     builder.Services.AddSwaggerGen(options =>
     {
@@ -124,6 +130,9 @@ try
 
     // Middleware de excepciones global al principio de la cadena
     app.UseMiddleware<ExceptionMiddleware>();
+
+    // Habilitar compresión de respuestas (Brotli/GZip)
+    app.UseResponseCompression();
 
     // Usar Logging de peticiones Serilog
     app.UseSerilogRequestLogging();
