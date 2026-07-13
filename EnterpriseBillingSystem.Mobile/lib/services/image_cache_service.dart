@@ -1,33 +1,62 @@
-import 'dart:convert';
+import 'dart:io';
 import 'package:http/http.dart' as http;
-import 'package:shared_preferences/shared_preferences.dart';
 
 class ImageCacheService {
-  static const String _keyPrefix = 'cached_img_';
+  static const String _filePrefix = 'cached_img_';
 
-  /// Pre-cache a list of image URLs in the background
+  /// Get a safe local file path for caching an image URL
+  static String _getLocalFilePath(String imageUrl) {
+    // Generate a safe filename using a cleaned version of the URL
+    final clean = imageUrl.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_');
+    final filename = clean.length > 100 ? clean.substring(clean.length - 100) : clean;
+    return '${Directory.systemTemp.path}/$_filePrefix$filename';
+  }
+
+  /// Pre-cache a list of image URLs in the background with limited concurrency
   static Future<void> cacheImages(List<String> imageUrls) async {
+    const maxConcurrent = 3;
+    final List<String> urlsToCache = [];
+    
     for (final url in imageUrls) {
       if (url.isEmpty || url.contains('default-product.png')) continue;
-      // Skip if already cached
       if (await isCached(url)) continue;
-      
-      // Cache in background
-      _downloadAndCache(url);
+      urlsToCache.add(url);
     }
+    
+    if (urlsToCache.isEmpty) return;
+
+    int index = 0;
+    Future<void> worker() async {
+      while (index < urlsToCache.length) {
+        final currentUrl = urlsToCache[index++];
+        await _downloadAndCache(currentUrl);
+      }
+    }
+
+    final List<Future<void>> workers = List.generate(
+      urlsToCache.length < maxConcurrent ? urlsToCache.length : maxConcurrent,
+      (_) => worker(),
+    );
+
+    await Future.wait(workers);
   }
 
   /// Check if image is cached locally
   static Future<bool> isCached(String imageUrl) async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.containsKey('$_keyPrefix$imageUrl');
+    if (imageUrl.isEmpty) return false;
+    final filePath = _getLocalFilePath(imageUrl);
+    final file = File(filePath);
+    return file.existsSync();
   }
 
-  /// Get cached image bytes
-  static Future<String?> getCachedImageBase64(String imageUrl) async {
+  /// Get cached image file path
+  static String? getCachedImagePath(String imageUrl) {
     if (imageUrl.isEmpty) return null;
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('$_keyPrefix$imageUrl');
+    final filePath = _getLocalFilePath(imageUrl);
+    if (File(filePath).existsSync()) {
+      return filePath;
+    }
+    return null;
   }
 
   /// Download and cache single image
@@ -35,9 +64,9 @@ class ImageCacheService {
     try {
       final response = await http.get(Uri.parse(imageUrl)).timeout(const Duration(seconds: 15));
       if (response.statusCode == 200) {
-        final base64Image = base64Encode(response.bodyBytes);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('$_keyPrefix$imageUrl', base64Image);
+        final filePath = _getLocalFilePath(imageUrl);
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
       }
     } catch (_) {
       // Ignore background download errors
@@ -50,10 +79,10 @@ class ImageCacheService {
     try {
       final response = await http.get(Uri.parse(imageUrl)).timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {
-        final base64Image = base64Encode(response.bodyBytes);
-        final prefs = await SharedPreferences.getInstance();
-        await prefs.setString('$_keyPrefix$imageUrl', base64Image);
-        return base64Image;
+        final filePath = _getLocalFilePath(imageUrl);
+        final file = File(filePath);
+        await file.writeAsBytes(response.bodyBytes);
+        return filePath;
       }
     } catch (_) {}
     return null;

@@ -17,13 +17,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Configurar Serilog
 Log.Logger = new LoggerConfiguration()
     .WriteTo.Console()
+    .WriteTo.File("Logs/bootstrap-log.txt", rollingInterval: RollingInterval.Day)
     .CreateBootstrapLogger();
 
 builder.Host.UseSerilog((context, services, configuration) => configuration
     .ReadFrom.Configuration(context.Configuration)
     .ReadFrom.Services(services)
     .Enrich.FromLogContext()
-    .WriteTo.Console());
+    .WriteTo.Console()
+    .WriteTo.File("Logs/api-log.txt", rollingInterval: RollingInterval.Day));
 
 try
 {
@@ -142,7 +144,14 @@ try
 
     app.UseCors("AllowAll");
 
-    app.UseStaticFiles();
+    // Permitir la descarga de archivos .apk de Android
+    var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+    provider.Mappings[".apk"] = "application/vnd.android.package-archive";
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        ContentTypeProvider = provider
+    });
 
     app.UseAuthentication();
     app.UseAuthorization();
@@ -161,6 +170,12 @@ try
 catch (Exception ex)
 {
     Log.Fatal(ex, "El host terminó inesperadamente.");
+    try
+    {
+        string crashLogPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "api_fatal_crash.txt");
+        System.IO.File.WriteAllText(crashLogPath, $"{DateTime.Now}: El host terminó inesperadamente.\n\nError: {ex.Message}\n\nDetalles:\n{ex.ToString()}");
+    }
+    catch { }
 }
 finally
 {

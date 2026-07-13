@@ -23,17 +23,25 @@ public partial class App : Application
 
     public App()
     {
-        AppHost = Host.CreateDefaultBuilder()
-            .ConfigureAppConfiguration((context, config) =>
-            {
-                config.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
-                config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
-            })
-            .ConfigureServices((context, services) =>
-            {
-                ConfigureServices(context.Configuration, services);
-            })
-            .Build();
+        try
+        {
+            AppHost = Host.CreateDefaultBuilder()
+                .ConfigureAppConfiguration((context, config) =>
+                {
+                    config.SetBasePath(AppDomain.CurrentDomain.BaseDirectory);
+                    config.AddJsonFile("appsettings.json", optional: false, reloadOnChange: true);
+                })
+                .ConfigureServices((context, services) =>
+                {
+                    ConfigureServices(context.Configuration, services);
+                })
+                .Build();
+        }
+        catch (Exception ex)
+        {
+            MessageBox.Show($"Error crítico durante la inicialización del Host:\n{ex.Message}\n\nDetalles:\n{ex.StackTrace}", "Error de Inicialización", MessageBoxButton.OK, MessageBoxImage.Error);
+            Shutdown();
+        }
     }
 
     private void ConfigureServices(IConfiguration configuration, IServiceCollection services)
@@ -134,24 +142,64 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        await AppHost!.StartAsync();
 
-        // Check auto-login
-        var authService = AppHost.Services.GetRequiredService<IAuthenticationService>();
-        var autoLoginSuccess = await authService.AutoLoginAsync();
+        // Setup global unhandled exception handlers
+        AppDomain.CurrentDomain.UnhandledException += (s, args) => 
+            LogUnhandledException((Exception)args.ExceptionObject, "AppDomain.CurrentDomain");
+            
+        DispatcherUnhandledException += (s, args) => {
+            LogUnhandledException(args.Exception, "Dispatcher");
+            args.Handled = true;
+        };
 
-        if (autoLoginSuccess)
+        if (AppHost == null) return;
+
+        try
         {
-            var shellWindow = AppHost.Services.GetRequiredService<ShellWindow>();
-            MainWindow = shellWindow;
-            shellWindow.Show();
+            await AppHost.StartAsync();
+
+            // Check auto-login
+            var authService = AppHost.Services.GetRequiredService<IAuthenticationService>();
+            var autoLoginSuccess = await authService.AutoLoginAsync();
+
+            if (autoLoginSuccess)
+            {
+                var shellWindow = AppHost.Services.GetRequiredService<ShellWindow>();
+                MainWindow = shellWindow;
+                shellWindow.Show();
+            }
+            else
+            {
+                var loginWindow = AppHost.Services.GetRequiredService<LoginWindow>();
+                MainWindow = loginWindow;
+                loginWindow.Show();
+            }
         }
-        else
+        catch (Exception ex)
         {
-            var loginWindow = AppHost.Services.GetRequiredService<LoginWindow>();
-            MainWindow = loginWindow;
-            loginWindow.Show();
+            LogUnhandledException(ex, "OnStartup");
+            Shutdown();
         }
+    }
+
+    private void LogUnhandledException(Exception ex, string source)
+    {
+        string message = $"Ocurrió un error no controlado en el sistema ({source}):\n\n{ex.Message}";
+        if (ex.InnerException != null)
+        {
+            message += $"\n\nError interno: {ex.InnerException.Message}";
+        }
+        message += $"\n\nDetalles técnicos:\n{ex.StackTrace}";
+        
+        MessageBox.Show(message, "Error Crítico del Sistema", MessageBoxButton.OK, MessageBoxImage.Error);
+        
+        try
+        {
+            // Log to a file in the app directory
+            string logPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "wpf_crash_log.txt");
+            File.WriteAllText(logPath, $"{DateTime.Now}: [{source}] {ex.ToString()}");
+        }
+        catch { }
     }
 
     protected override async void OnExit(ExitEventArgs e)

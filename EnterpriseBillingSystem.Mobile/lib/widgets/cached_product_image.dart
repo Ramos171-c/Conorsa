@@ -1,4 +1,4 @@
-import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/config_provider.dart';
@@ -12,20 +12,20 @@ class CachedProductImage extends StatefulWidget {
   final double iconSize;
 
   const CachedProductImage({
-    Key? key,
+    super.key,
     required this.imageUrl,
     this.width,
     this.height,
     this.fit = BoxFit.cover,
     this.iconSize = 50,
-  }) : super(key: key);
+  });
 
   @override
   State<CachedProductImage> createState() => _CachedProductImageState();
 }
 
 class _CachedProductImageState extends State<CachedProductImage> {
-  String? _base64Data;
+  String? _filePath;
   bool _isLoading = true;
 
   @override
@@ -51,7 +51,7 @@ class _CachedProductImageState extends State<CachedProductImage> {
     if (url.isEmpty || url.contains('default-product.png')) {
       if (mounted) {
         setState(() {
-          _base64Data = null;
+          _filePath = null;
           _isLoading = false;
         });
       }
@@ -69,11 +69,11 @@ class _CachedProductImageState extends State<CachedProductImage> {
     }
 
     // 1. Check local cache first
-    final cached = await ImageCacheService.getCachedImageBase64(url);
-    if (cached != null) {
+    final cachedPath = ImageCacheService.getCachedImagePath(url);
+    if (cachedPath != null) {
       if (mounted) {
         setState(() {
-          _base64Data = cached;
+          _filePath = cachedPath;
           _isLoading = false;
         });
       }
@@ -81,10 +81,10 @@ class _CachedProductImageState extends State<CachedProductImage> {
     }
 
     // 2. Download and cache on-the-fly
-    final downloaded = await ImageCacheService.downloadAndCacheOnTheFly(url);
+    final downloadedPath = await ImageCacheService.downloadAndCacheOnTheFly(url);
     if (mounted) {
       setState(() {
-        _base64Data = downloaded;
+        _filePath = downloadedPath;
         _isLoading = false;
       });
     }
@@ -110,16 +110,18 @@ class _CachedProductImageState extends State<CachedProductImage> {
       );
     }
 
-    if (_base64Data != null && _base64Data!.isNotEmpty) {
+    if (_filePath != null && _filePath!.isNotEmpty) {
       try {
-        final bytes = base64Decode(_base64Data!);
-        return Image.memory(
-          bytes,
-          width: widget.width,
-          height: widget.height,
-          fit: widget.fit,
-          errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-        );
+        final file = File(_filePath!);
+        if (file.existsSync()) {
+          return Image.file(
+            file,
+            width: widget.width,
+            height: widget.height,
+            fit: widget.fit,
+            errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+          );
+        }
       } catch (_) {
         return _buildPlaceholder();
       }
