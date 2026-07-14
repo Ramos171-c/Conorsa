@@ -30,10 +30,19 @@ public partial class PresentationEditorViewModel : ViewModelBase
     private decimal _retailPrice;
 
     [ObservableProperty]
+    private decimal _retailMargin;
+
+    [ObservableProperty]
     private decimal _semiWholesalePrice;
 
     [ObservableProperty]
+    private decimal _semiWholesaleMargin;
+
+    [ObservableProperty]
     private decimal _wholesalePrice;
+
+    [ObservableProperty]
+    private decimal _wholesaleMargin;
 
     [ObservableProperty]
     private bool _isBaseUnit;
@@ -59,6 +68,8 @@ public partial class PresentationEditorViewModel : ViewModelBase
     public bool? DialogResult { get; set; }
     public event Action? RequestClose;
 
+    private bool _isUpdating;
+
     public PresentationEditorViewModel(List<UnitOfMeasureDto> unitsOfMeasure, ProductPresentationViewModel? presentation = null)
     {
         UnitsOfMeasure = new ObservableCollection<UnitOfMeasureDto>(unitsOfMeasure);
@@ -70,10 +81,16 @@ public partial class PresentationEditorViewModel : ViewModelBase
             UnitOfMeasureId = presentation.UnitOfMeasureId;
             ConversionFactor = presentation.ConversionFactor;
             Barcode = presentation.Barcode;
-            Cost = presentation.Cost;
-            RetailPrice = presentation.RetailPrice;
-            SemiWholesalePrice = presentation.SemiWholesalePrice;
-            WholesalePrice = presentation.WholesalePrice;
+            
+            // Set fields directly to prevent initial change handlers trigger
+            _cost = presentation.Cost;
+            _retailPrice = presentation.RetailPrice;
+            _retailMargin = CalculateMargin(presentation.Cost, presentation.RetailPrice);
+            _semiWholesalePrice = presentation.SemiWholesalePrice;
+            _semiWholesaleMargin = CalculateMargin(presentation.Cost, presentation.SemiWholesalePrice);
+            _wholesalePrice = presentation.WholesalePrice;
+            _wholesaleMargin = CalculateMargin(presentation.Cost, presentation.WholesalePrice);
+
             IsBaseUnit = presentation.IsBaseUnit;
             IsDefaultSalePresentation = presentation.IsDefaultSalePresentation;
             AllowPurchase = presentation.AllowPurchase;
@@ -83,6 +100,118 @@ public partial class PresentationEditorViewModel : ViewModelBase
         else if (unitsOfMeasure.Count > 0)
         {
             UnitOfMeasureId = unitsOfMeasure[0].Id;
+        }
+    }
+
+    private decimal CalculatePrice(decimal cost, decimal marginPercentage)
+    {
+        if (marginPercentage >= 100) return 0;
+        return Math.Round(cost / (1 - (marginPercentage / 100)), 2);
+    }
+
+    private decimal CalculateMargin(decimal cost, decimal price)
+    {
+        if (price <= 0) return 0;
+        return Math.Round(((price - cost) / price) * 100, 2);
+    }
+
+    partial void OnCostChanged(decimal value)
+    {
+        if (_isUpdating) return;
+        _isUpdating = true;
+        try
+        {
+            RetailPrice = CalculatePrice(value, RetailMargin);
+            SemiWholesalePrice = CalculatePrice(value, SemiWholesaleMargin);
+            WholesalePrice = CalculatePrice(value, WholesaleMargin);
+        }
+        finally
+        {
+            _isUpdating = false;
+        }
+    }
+
+    partial void OnRetailPriceChanged(decimal value)
+    {
+        if (_isUpdating) return;
+        _isUpdating = true;
+        try
+        {
+            RetailMargin = CalculateMargin(Cost, value);
+        }
+        finally
+        {
+            _isUpdating = false;
+        }
+    }
+
+    partial void OnRetailMarginChanged(decimal value)
+    {
+        if (_isUpdating) return;
+        _isUpdating = true;
+        try
+        {
+            RetailPrice = CalculatePrice(Cost, value);
+        }
+        finally
+        {
+            _isUpdating = false;
+        }
+    }
+
+    partial void OnSemiWholesalePriceChanged(decimal value)
+    {
+        if (_isUpdating) return;
+        _isUpdating = true;
+        try
+        {
+            SemiWholesaleMargin = CalculateMargin(Cost, value);
+        }
+        finally
+        {
+            _isUpdating = false;
+        }
+    }
+
+    partial void OnSemiWholesaleMarginChanged(decimal value)
+    {
+        if (_isUpdating) return;
+        _isUpdating = true;
+        try
+        {
+            SemiWholesalePrice = CalculatePrice(Cost, value);
+        }
+        finally
+        {
+            _isUpdating = false;
+        }
+    }
+
+    partial void OnWholesalePriceChanged(decimal value)
+    {
+        if (_isUpdating) return;
+        _isUpdating = true;
+        try
+        {
+            WholesaleMargin = CalculateMargin(Cost, value);
+        }
+        finally
+        {
+            _isUpdating = false;
+        }
+    }
+
+    partial void OnWholesaleMarginChanged(decimal value)
+    {
+        if (_isUpdating) return;
+        _isUpdating = true;
+        try
+        {
+            WholesalePrice = CalculatePrice(Cost, value);
+        }
+        finally
+        {
+            _isUpdating = false;
         }
     }
 
@@ -109,21 +238,9 @@ public partial class PresentationEditorViewModel : ViewModelBase
             return;
         }
 
-        if (RetailPrice < Cost)
+        if (RetailPrice < Cost || SemiWholesalePrice < Cost || WholesalePrice < Cost)
         {
-            ErrorMessage = "El precio minorista no puede ser menor que el costo.";
-            return;
-        }
-
-        if (SemiWholesalePrice < Cost)
-        {
-            ErrorMessage = "El precio semi-mayorista no puede ser menor que el costo.";
-            return;
-        }
-
-        if (WholesalePrice < Cost)
-        {
-            ErrorMessage = "El precio mayorista no puede ser menor que el costo.";
+            ErrorMessage = "Los precios de venta no pueden ser menores que el costo.";
             return;
         }
 
