@@ -1381,7 +1381,7 @@ public class DbInitializer : IDbInitializer
             new("GA037", "GALLETAS WAFFER ZOO ANIMADOS SURTIDO", "Galletas", "1*2*20", 2, 154.29m, 308.57m, 154.29m, 308.57m, 122.73m, 245.45m, 100.00m, 200.00m),
             new("GA038", "GALLETAS TRIO 4 CANDY SURTIDO", "Galletas", "1*24*12", 24, 56.25m, 1350.00m, 58.24m, 1397.65m, 56.25m, 1350.00m, 45.83m, 1100.00m),
 
-            // Caramelos (40)
+            // Caramelos (42)
             new("CA001", "DISPENSADOR CANDY CHISQUETAZO", "Caramelos", "1*12*24", 12, 144.00m, 1728.00m, 154.29m, 1851.43m, 122.73m, 1472.73m, 100.00m, 1200.00m),
             new("CA002", "DISPENSADOR CANDY SUPLAY CANDY BRUSH", "Caramelos", "1*12*24", 12, 180.00m, 2160.00m, 192.86m, 2314.29m, 153.41m, 1840.91m, 125.00m, 1500.00m),
             new("CA003", "DISPENSADOR YUGL GOMITA GUITARRA", "Caramelos", "1*12*24", 12, 207.60m, 2491.20m, 222.43m, 2669.14m, 176.93m, 2123.18m, 144.17m, 1730.00m),
@@ -1391,11 +1391,11 @@ public class DbInitializer : IDbInitializer
             new("CA007", "TARROS NR 112 MIX TERMO CARAMELO", "Caramelos", "1*6*800", 6, 528.00m, 3168.00m, 660.00m, 3960.00m, 450.00m, 2700.00m, 366.67m, 2200.00m),
             new("CA008", "DISPENSADOR SORPRESA DEL MUNDIAL 3D", "Caramelos", "1*20*30", 20, 151.20m, 3024.00m, 162.00m, 3240.00m, 128.86m, 2577.27m, 105.00m, 2100.00m),
             new("CA009", "HERMETICO MD 198C KING EGG CHOCOLATE HERMETICO", "Caramelos", "1*6*60", 6, 528.00m, 3168.00m, 565.71m, 3394.29m, 450.00m, 2700.00m, 366.67m, 2200.00m),
-            new("CA010", "CANDY MINI GELATINA BOLSA GRANDE 1.5 KG.", "Caramelos", "1*8*100", 8, 126.00m, 1008.00m, 135.00m, 1080.00m, 107.39m, 859.09m, 87.50m, 700.00m),
-            new("CA011", "BOLSA CANDY MINI GELATINA LAS DELICIA PEQUEÑA", "Caramelos", "1*40*20", 40, 25.20m, 1008.00m, 27.00m, 1080.00m, 21.48m, 859.09m, 17.50m, 700.00m),
+            new("CA010", "BOLSA CANDY MINI GELATINA BOLSA GRANDE 1.5 KG.", "Caramelos", "1*8*100", 8, 126.00m, 1008.00m, 135.00m, 1080.00m, 107.39m, 859.09m, 87.50m, 700.00m),
+            new("CA011", "BOLSA CANDY MINI GELATINA LAS DELICIA PEQUEÑA", "Caramelos", "1*40*20", 40, 25.20m, 1008.00m, 27.00m, 1080.00m, 21.00m, 840.00m, 17.50m, 700.00m),
             new("CA012", "DISPENSADOR CANDY SUPLAY CHUPON LUZ", "Caramelos", "1*12*24", 12, 156.00m, 1872.00m, 167.14m, 2005.71m, 132.95m, 1595.45m, 108.33m, 1300.00m),
             new("CA013", "DISPENSADOR CANDY SUPLAY PALETA LUZ ANILLO", "Caramelos", "1*12*24", 12, 156.00m, 1872.00m, 167.14m, 2005.71m, 132.95m, 1595.45m, 108.33m, 1300.00m),
-            new("CA014", "DISPENSADOR CANDY CHOCO CRUCH CONO", "Caramelos", "1*12*20", 12, 144.00m, 1728.00m, 154.29m, 1851.43m, 122.73m, 1472.73m, 108.33m, 1300.00m),
+            new("CA014", "DISPENSADOR CANDY CHOCO CRUCH CONO", "Caramelos", "1*12*20", 12, 144.00m, 1728.00m, 154.29m, 1851.43m, 122.73m, 1472.73m, 100.00m, 1200.00m),
             new("CA015", "DISPENSADOR MD 233 KING EGG HUEVO EN CHOCOLATE", "Caramelos", "1*12*24", 12, 240.00m, 2880.00m, 257.14m, 3085.71m, 204.55m, 2454.55m, 166.67m, 2000.00m),
             new("CA016", "TARRO CANDY SUPLAY MINI CHICLE TATOO", "Caramelos", "1*24*150", 24, 132.00m, 3168.00m, 123.75m, 2970.00m, 112.50m, 2700.00m, 91.67m, 2200.00m),
             new("CA017", "BOLSA CANDY SUPLAY MINI CHICLE TATOO", "Caramelos", "1*24*150", 24, 120.00m, 2880.00m, 112.50m, 2700.00m, 102.27m, 2454.55m, 83.33m, 2000.00m),
@@ -1406,23 +1406,24 @@ public class DbInitializer : IDbInitializer
             new("CA022", "BOLSA MD NR 47 CARAMELO MIX 3 LIBRAS", "Caramelos", "1*6", 6, 240.00m, 1440.00m, 257.14m, 1542.86m, 204.55m, 1227.27m, 166.67m, 1000.00m),
             new("CA023", "BOLSA MD NR 47 CARAMELO MIX 5 LIBRAS", "Caramelos", "1*6", 6, 384.00m, 2304.00m, 411.43m, 2468.57m, 327.27m, 1963.64m, 266.67m, 1600.00m),
             new("CA024", "BOLSA MD NR 47 CARAMELO MIX 10 LIBRAS", "Caramelos", "1*4", 4, 900.00m, 3600.00m, 964.29m, 3857.14m, 767.05m, 3068.18m, 625.00m, 2500.00m),
-            new("CA025", "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO CHOCOLATE CAJA ANARANJADA", "Caramelos", "1*20*30", 20, 144.00m, 2880.00m, 154.29m, 3085.71m, 122.73m, 2454.55m, 100.00m, 2000.00m),
+            new("CA025", "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO CAJA ANARANJADA", "Caramelos", "1*20*30", 20, 144.00m, 2880.00m, 154.29m, 3085.71m, 122.73m, 2454.55m, 100.00m, 2000.00m),
             new("CA026", "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO FRESA CAJA ROSADA", "Caramelos", "1*20*30", 20, 144.00m, 2880.00m, 154.29m, 3085.71m, 122.73m, 2454.55m, 100.00m, 2000.00m),
             new("CA027", "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO LECHE CAJA AZUL", "Caramelos", "1*20*30", 20, 144.00m, 2880.00m, 154.29m, 3085.71m, 122.73m, 2454.55m, 100.00m, 2000.00m),
             new("CA028", "UNIDADES CANDY MINI BOLO SURTIDO NIÑA", "Caramelos", "1*100", 100, 47.52m, 4752.00m, 50.91m, 5091.43m, 40.50m, 4050.00m, 33.00m, 3300.00m),
             new("CA029", "UNIDADES CANDY MINI BOLO SURTIDO NIÑO", "Caramelos", "1*100", 100, 47.52m, 4752.00m, 50.91m, 5091.43m, 40.50m, 4050.00m, 33.00m, 3300.00m),
             new("CA030", "UNIDADES MD NR 168 CHOCOLATE MILKSTAR PANA", "Caramelos", "1*12*40", 12, 372.00m, 4464.00m, 398.57m, 4782.86m, 317.05m, 3804.55m, 258.33m, 1550.00m),
             new("CA031", "UNIDADES MD NR 168 CHOCOLATE MIL STAR PANA", "Caramelos", "1*6*40", 6, 372.00m, 2232.00m, 398.57m, 2391.43m, 317.05m, 1902.27m, 258.33m, 1550.00m),
-            new("CA032", "MD 423 SOUR CANDY SUPER STIMULANTE EXTREMO ACIDO", "Caramelos", "1*20*30", 20, 148.32m, 2966.40m, 158.91m, 3178.29m, 126.41m, 2528.18m, 82.50m, 1650.00m),
-            new("CA033", "TARRO MD NTC-321 OJO EN TARRO CON TRONADOR", "Caramelos", "1*8*60", 8, 297.00m, 2376.00m, 318.21m, 2545.71m, 253.13m, 2025.00m, 182.50m, 1460.00m),
-            new("CA034", "TARRO FRESH OLIVE BALL BUBBLEGUM", "Caramelos", "1*12*150", 12, 175.20m, 2102.40m, 187.71m, 2252.57m, 149.32m, 1791.82m, 116.67m, 1400.00m),
-            new("CA035", "TARRO RUGBY BALL BUBBLE GUM", "Caramelos", "1*24*220", 24, 84.00m, 2016.00m, 90.00m, 2160.00m, 71.59m, 1718.18m, 33.33m, 800.00m),
-            new("CA036", "TARRO SUPER TARZAN BUBBLE GUM", "Caramelos", "1*12*250", 12, 96.00m, 1152.00m, 102.86m, 1234.29m, 81.82m, 981.82m, 95.83m, 1150.00m),
-            new("CA037", "KOBA TARRO FRESH OLIVE BALL BUBBLEGUM", "Caramelos", "1*24*100", 24, 69.00m, 1656.00m, 73.93m, 1774.29m, 58.81m, 1411.36m, 31.25m, 750.00m),
-            new("CA038", "CARAMELO CRYSTAL", "Caramelos", "1*8*200", 8, 135.00m, 1080.00m, 144.64m, 1157.14m, 115.06m, 920.45m, 150.00m, 1200.00m),
-            new("CA039", "BOLSA JUICE BURST", "Caramelos", "1*12*150", 12, 144.00m, 1728.00m, 154.29m, 1851.43m, 122.73m, 1472.73m, 133.33m, 1600.00m),
-            new("CA040", "YOHAN BALL BUBBLEGUM", "Caramelos", "1*12*250", 12, 192.00m, 2304.00m, 205.71m, 2468.57m, 163.64m, 1963.64m, 110.00m, 1320.00m),
-            new("CA041", "BOLSA FRUTZUCOS", "Caramelos", "1*30*20", 30, 63.36m, 1900.80m, 67.89m, 2036.57m, 54.00m, 1620.00m, 54.00m, 1620.00m),
+            new("CA032", "MD 423 SOUR CANDY SUPER ESTIMULANTE EXTREMO ACIDO", "Caramelos", "1*20*30", 20, 148.32m, 2966.40m, 158.91m, 3178.29m, 126.41m, 2528.18m, 103.00m, 2060.00m),
+            new("CA033", "TARRO MD NTC-321 OJO EN TARRO CON TRONADOR", "Caramelos", "1*8*60", 8, 297.00m, 2376.00m, 318.21m, 2545.71m, 253.13m, 2025.00m, 206.25m, 1650.00m),
+            new("CA034", "TARRO FRESH OLIVE BALL BUBBLEGUM", "Caramelos", "1*12*150", 12, 175.20m, 2102.40m, 187.71m, 2252.57m, 149.32m, 1791.82m, 121.67m, 1460.00m),
+            new("CA035", "TARRO RUGBY BALL BUBLE GUM", "Caramelos", "1*24*220", 24, 84.00m, 2016.00m, 90.00m, 2160.00m, 71.59m, 1718.18m, 58.33m, 1400.00m),
+            new("CA036", "TARRO SUPER TARZAN BUBBLE GUM", "Caramelos", "1*12*250", 12, 96.00m, 1152.00m, 102.86m, 1234.29m, 81.82m, 981.82m, 66.67m, 800.00m),
+            new("CA037", "KOBA TARRO FRESH OLIVE BALL BUBBLEGUM", "Caramelos", "1*24*100", 24, 69.00m, 1656.00m, 73.93m, 1774.29m, 58.81m, 1411.36m, 47.92m, 1150.00m),
+            new("CA038", "CARAMELO CRYSTAL", "Caramelos", "1*8*200", 8, 135.00m, 1080.00m, 144.64m, 1157.14m, 115.06m, 920.45m, 93.75m, 750.00m),
+            new("CA039", "BOLSA JUICE BURST", "Caramelos", "1*12*150", 12, 144.00m, 1728.00m, 154.29m, 1851.43m, 122.73m, 1472.73m, 100.00m, 1200.00m),
+            new("CA040", "YOHAN BALL BUBBLEGUM", "Caramelos", "1*12*250", 12, 192.00m, 2304.00m, 205.71m, 2468.57m, 163.64m, 1963.64m, 133.33m, 1600.00m),
+            new("CA041", "BOLSA FRUTZUCOS", "Caramelos", "1*30*20", 30, 63.36m, 1900.80m, 67.89m, 2036.57m, 54.00m, 1620.00m, 44.00m, 1320.00m),
+            new("CA042", "ROLLY TWIN", "Caramelos", "1*12*20", 12, 194.40m, 2332.80m, 208.29m, 2499.43m, 165.68m, 1988.18m, 135.00m, 1620.00m),
 
             // Malvaviscos (12)
             new("MA001", "BOLSA CANDY SUPLAY MALVAVISCO SUPER MINI MINO", "Malvaviscos", "1*8*70", 8, 252.00m, 2016.00m, 270.00m, 2160.00m, 214.77m, 1718.18m, 175.00m, 1400.00m),
@@ -1518,7 +1519,8 @@ public class DbInitializer : IDbInitializer
                     CreatedOnUtc = DateTime.UtcNow,
                     TaxId = taxExento.Id,
                     IsCatalogVisible = true,
-                    IsActive = true
+                    IsActive = true,
+                    ImagePath = $"/uploads/products/{data.Code}.png"
                 };
 
                 var presentationUnit = new ProductPresentation
@@ -1611,7 +1613,8 @@ public class DbInitializer : IDbInitializer
         await _context.SaveChangesAsync();
         System.Console.WriteLine($"Catálogo de productos actualizado/sembrado con éxito. Total productos procesados: {productsData.Count}");
 
-        // Limpieza de imágenes huérfanas en el servidor
+        // Limpieza de imágenes huérfanas en el servidor desactivada temporalmente por seguridad
+        /*
         try
         {
             var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
@@ -1656,5 +1659,6 @@ public class DbInitializer : IDbInitializer
         {
             System.Console.WriteLine($"[Limpieza] Error al limpiar imágenes huérfanas: {ex.Message}");
         }
+        */
     }
 }
