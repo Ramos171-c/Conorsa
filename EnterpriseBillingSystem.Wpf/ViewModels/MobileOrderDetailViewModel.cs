@@ -518,15 +518,18 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
 
             // Order Lines
             var itemsPara = new System.Windows.Documents.Paragraph();
-            itemsPara.Inlines.Add(new System.Windows.Documents.Run("PRODUCTO               CANT      NETO\n"));
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("DETALLE DEL PEDIDO\n"));
             itemsPara.Inlines.Add(new System.Windows.Documents.Run("------------------------------------\n"));
             
             foreach (var item in Details)
             {
-                string name = item.ProductName.Length > 20 ? item.ProductName.Substring(0, 20) : item.ProductName.PadRight(20);
-                string qty = item.Quantity.ToString("N2").PadLeft(6);
-                string net = $"C${item.NetAmount:N2}".PadLeft(11);
-                itemsPara.Inlines.Add(new System.Windows.Documents.Run($"{name} {qty} {net}\n"));
+                // Full product name (untruncated)
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run($"{item.ProductName}\n"));
+                
+                // Indented quantity with UOM aligned next to net price
+                string qtyUom = $"{item.Quantity:N2} {item.UnitOfMeasure}";
+                string net = $"C${item.NetAmount:N2}";
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   {qtyUom.PadRight(18)} {net.PadLeft(11)}\n"));
             }
             itemsPara.Inlines.Add(new System.Windows.Documents.Run("------------------------------------\n"));
             sec.Blocks.Add(itemsPara);
