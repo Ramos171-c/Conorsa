@@ -472,7 +472,8 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                 PagePadding = new Thickness(30),
                 ColumnWidth = double.PositiveInfinity,
                 FontFamily = new System.Windows.Media.FontFamily("Courier New"),
-                FontSize = 12
+                FontSize = 12,
+                TextAlignment = TextAlignment.Left
             };
 
             var sec = new System.Windows.Documents.Section();
@@ -517,18 +518,17 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
 
             // Order Lines
             var itemsPara = new System.Windows.Documents.Paragraph();
-            itemsPara.Inlines.Add(new System.Windows.Documents.Run("PRODUCTO                  CANT   NETO\n"));
-            itemsPara.Inlines.Add(new System.Windows.Documents.Run("----------------------------------\n"));
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("PRODUCTO               CANT      NETO\n"));
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("------------------------------------\n"));
             
             foreach (var item in Details)
             {
-                // Format: Product Name (truncated to 24 chars), Qty (aligned), NetAmount
-                string name = item.ProductName.Length > 24 ? item.ProductName.Substring(0, 24) : item.ProductName.PadRight(24);
+                string name = item.ProductName.Length > 20 ? item.ProductName.Substring(0, 20) : item.ProductName.PadRight(20);
                 string qty = item.Quantity.ToString("N2").PadLeft(6);
-                string net = item.NetAmount.ToString("C2").PadLeft(10);
+                string net = $"C${item.NetAmount:N2}".PadLeft(11);
                 itemsPara.Inlines.Add(new System.Windows.Documents.Run($"{name} {qty} {net}\n"));
             }
-            itemsPara.Inlines.Add(new System.Windows.Documents.Run("----------------------------------\n"));
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("------------------------------------\n"));
             sec.Blocks.Add(itemsPara);
 
             // Totals
@@ -536,13 +536,15 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             {
                 TextAlignment = TextAlignment.Right
             };
-            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Subtotal:     {SubTotal:C2}\n"));
+            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Subtotal:     C${SubTotal:N2}\n"));
             if (DiscountAmount > 0)
             {
-                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Descuento:   -{DiscountAmount:C2}\n"));
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Descuento:   -C${DiscountAmount:N2}\n"));
             }
-            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"IVA:          {TaxAmount:C2}\n"));
-            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL:        {TotalAmount:C2}\n"));
+            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL:        C${TotalAmount:N2}\n"));
+            
+            decimal totalUsd = TotalAmount / 36.5m;
+            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL USD:     ${totalUsd:N2}\n"));
             totalsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
             sec.Blocks.Add(totalsPara);
 
