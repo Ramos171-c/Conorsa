@@ -477,14 +477,14 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
 
             var sec = new System.Windows.Documents.Section();
 
-            // Header - CONORZA
-            var headerPara = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("         CONORZA\n"))
+            // Header - Dulce y caramelos
+            var headerPara = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("Dulce y caramelos\n"))
             {
                 FontSize = 18,
                 FontWeight = FontWeights.Bold,
                 TextAlignment = TextAlignment.Center
             };
-            headerPara.Inlines.Add(new System.Windows.Documents.Run("   TICKET DE DESPACHO Y ENTREGA\n"));
+            headerPara.Inlines.Add(new System.Windows.Documents.Run("TICKET DE ENTREGA\n"));
             headerPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
             sec.Blocks.Add(headerPara);
 
@@ -547,19 +547,29 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             sec.Blocks.Add(totalsPara);
 
             // Observations
-            var obsPara = new System.Windows.Documents.Paragraph();
-            obsPara.Inlines.Add(new System.Windows.Documents.Run("OBSERVACIONES:\n"));
-            obsPara.Inlines.Add(new System.Windows.Documents.Run($"- Vendedor:  {(!string.IsNullOrWhiteSpace(Notes) ? Notes : "Ninguna")}\n"));
-            obsPara.Inlines.Add(new System.Windows.Documents.Run($"- Despacho:  {(!string.IsNullOrWhiteSpace(DispatcherNotes) ? DispatcherNotes : "Ninguna")}\n"));
-            obsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
-            sec.Blocks.Add(obsPara);
-
-            // Footer / Signatures
-            var footerPara = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("\n\n\n_____________________      _____________________\n  Entregado Por (Firma)      Recibido Por (Firma)\n"))
+            bool showNotes = false;
+            string notesText = "";
+            if (!string.IsNullOrWhiteSpace(Notes))
             {
-                TextAlignment = TextAlignment.Center
-            };
-            sec.Blocks.Add(footerPara);
+                var cleanNotes = Notes.Trim();
+                bool isDefaultNote = string.Equals(cleanNotes, "Pedido desde POS movil (Vendedor)", StringComparison.OrdinalIgnoreCase) ||
+                                     string.Equals(cleanNotes, "Pedido desde POS Móvil (Vendedor)", StringComparison.OrdinalIgnoreCase);
+                                     
+                if (!isDefaultNote)
+                {
+                    showNotes = true;
+                    notesText = Notes;
+                }
+            }
+
+            if (showNotes)
+            {
+                var obsPara = new System.Windows.Documents.Paragraph();
+                obsPara.Inlines.Add(new System.Windows.Documents.Run("OBSERVACIONES:\n"));
+                obsPara.Inlines.Add(new System.Windows.Documents.Run($"- Vendedor:  {notesText}\n"));
+                obsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
+                sec.Blocks.Add(obsPara);
+            }
 
             doc.Blocks.Add(sec);
 
@@ -571,7 +581,7 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                 doc.PageHeight = printDialog.PrintableAreaHeight;
                 
                 var documentPaginator = ((System.Windows.Documents.IDocumentPaginatorSource)doc).DocumentPaginator;
-                printDialog.PrintDocument(documentPaginator, $"Ticket_Despacho_{OrderNumber}");
+                printDialog.PrintDocument(documentPaginator, $"Ticket_Entrega_{OrderNumber}");
                 
                 _notificationService.ShowSuccess("Ticket de entrega enviado a la impresora.");
             }
