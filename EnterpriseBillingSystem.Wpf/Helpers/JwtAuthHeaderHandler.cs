@@ -28,7 +28,53 @@ public class JwtAuthHeaderHandler : DelegatingHandler
             request.Headers.Authorization = new AuthenticationHeaderValue("Bearer", _currentUserService.Token);
         }
 
-        var response = await base.SendAsync(request, cancellationToken);
+        HttpResponseMessage? response = null;
+        System.Exception? lastException = null;
+        int maxRetries = 3;
+
+        for (int attempt = 1; attempt <= maxRetries; attempt++)
+        {
+            var reqToExecute = request;
+            if (attempt > 1)
+            {
+                reqToExecute = await CloneHttpRequestMessageAsync(request);
+            }
+
+            try
+            {
+                response = await base.SendAsync(reqToExecute, cancellationToken);
+
+                // If transient server status error, retry
+                if (response.StatusCode == HttpStatusCode.RequestTimeout ||
+                    response.StatusCode == HttpStatusCode.BadGateway ||
+                    response.StatusCode == HttpStatusCode.ServiceUnavailable ||
+                    response.StatusCode == HttpStatusCode.GatewayTimeout)
+                {
+                    if (attempt < maxRetries)
+                    {
+                        response.Dispose();
+                        await Task.Delay(1000 * attempt, cancellationToken);
+                        continue;
+                    }
+                }
+
+                break; // Stop retrying on success or non-transient status code
+            }
+            catch (System.Exception ex) when (attempt < maxRetries && IsTransientException(ex))
+            {
+                lastException = ex;
+                await Task.Delay(1000 * attempt, cancellationToken);
+            }
+        }
+
+        if (response == null)
+        {
+            if (lastException != null)
+            {
+                throw new HttpRequestException("Error de conexión con el servidor tras varios intentos.", lastException);
+            }
+            throw new HttpRequestException("Error de conexión con el servidor tras varios intentos.");
+        }
 
         // Si recibimos 401 (No autorizado/Token expirado), forzamos el cierre de sesión y redirección
         if (response.StatusCode == HttpStatusCode.Unauthorized && !string.IsNullOrEmpty(_currentUserService.Token))
@@ -56,6 +102,64 @@ public class JwtAuthHeaderHandler : DelegatingHandler
         }
 
         return response;
+    }
+
+    private static bool IsTransientException(System.Exception ex)
+    {
+        if (ex is HttpRequestException) return true;
+        if (ex is TaskCanceledException) return true; // Timeout
+        if (ex is System.IO.IOException) return true;
+        if (ex is System.Net.Sockets.SocketException) return true;
+
+        var inner = ex.InnerException;
+        while (inner != null)
+        {
+            if (inner is System.Net.Sockets.SocketException ||
+                inner is System.IO.IOException ||
+                inner is HttpRequestException)
+            {
+                return true;
+            }
+            inner = inner.InnerException;
+        }
+
+        return false;
+    }
+
+    private static async Task<HttpRequestMessage> CloneHttpRequestMessageAsync(HttpRequestMessage req)
+    {
+        var clone = new HttpRequestMessage(req.Method, req.RequestUri)
+        {
+            Version = req.Version
+        };
+
+        // Copy content
+        if (req.Content != null)
+        {
+            var ms = new System.IO.MemoryStream();
+            await req.Content.CopyToAsync(ms);
+            ms.Position = 0;
+            clone.Content = new StreamContent(ms);
+
+            foreach (var h in req.Content.Headers)
+            {
+                clone.Content.Headers.TryAddWithoutValidation(h.Key, h.Value);
+            }
+        }
+
+        // Copy request headers
+        foreach (var h in req.Headers)
+        {
+            clone.Headers.TryAddWithoutValidation(h.Key, h.Value);
+        }
+
+        // Copy options
+        foreach (var prop in req.Options)
+        {
+            clone.Options.Set(new HttpRequestOptionsKey<object?>(prop.Key), prop.Value);
+        }
+
+        return clone;
     }
 
     private async Task TryRefreshPermissionsAsync(string? requestPath, CancellationToken cancellationToken)

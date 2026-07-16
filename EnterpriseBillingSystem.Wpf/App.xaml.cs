@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -63,23 +64,28 @@ public partial class App : Application
         // Register typed HttpClients
         var baseUrl = configuration.GetValue<string>("ApiSettings:BaseUrl") ?? "https://localhost:7228/api/v1/";
 
-        services.AddHttpClient<AuthApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        
-        services.AddHttpClient<CustomerApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<SupplierApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<ProductApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<InventoryApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<SalesApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<PurchaseApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<CashApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<AccountsReceivableApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<AccountsPayableApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<AccountingApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<TreasuryApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<FixedAssetsApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<PosApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<UserApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<AdministrationApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        void ConfigureClient(HttpClient client)
+        {
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = TimeSpan.FromSeconds(15);
+        }
+
+        services.AddHttpClient<AuthApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<CustomerApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<SupplierApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<ProductApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<InventoryApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<SalesApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<PurchaseApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<CashApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<AccountsReceivableApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<AccountsPayableApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<AccountingApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<TreasuryApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<FixedAssetsApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<PosApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<UserApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<AdministrationApiClient>(ConfigureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
 
         // Register ViewModels
         services.AddSingleton<MainViewModel>();
