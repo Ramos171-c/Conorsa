@@ -74,6 +74,8 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
 
             bool requiresMovement = false;
 
+            var faltantesList = new List<string>();
+
             foreach (var detail in order.Details)
             {
                 var product = await _productRepository.GetByIdWithDetailsAsync(detail.ProductId, cancellationToken);
@@ -92,46 +94,76 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                     throw new InvalidOperationException($"El producto '{product.Name}' no tiene presentaciones configuradas.");
 
                 decimal conversionFactor = presentation.ConversionFactor;
-                decimal quantityInBaseUnit = detail.Quantity * conversionFactor;
-
-                // Get or create inventory record
+                
+                // Get inventory record
                 var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
-                if (inventory == null)
+                decimal availableStockInBaseUnit = inventory?.PhysicalStock ?? 0;
+                if (availableStockInBaseUnit < 0) availableStockInBaseUnit = 0;
+
+                decimal requestedInBaseUnit = detail.Quantity * conversionFactor;
+                decimal dispatchedInBaseUnit = requestedInBaseUnit;
+                decimal dispatchedQty = detail.Quantity;
+
+                if (availableStockInBaseUnit < requestedInBaseUnit)
                 {
-                    inventory = new Domain.Entities.Inventory
+                    dispatchedInBaseUnit = availableStockInBaseUnit;
+                    dispatchedQty = conversionFactor > 0 ? (dispatchedInBaseUnit / conversionFactor) : 0;
+                    decimal missingQty = detail.Quantity - dispatchedQty;
+
+                    if (missingQty > 0)
                     {
-                        Id = Guid.NewGuid(),
-                        BranchWarehouseId = warehouse.Id,
-                        ProductId = detail.ProductId,
-                        PhysicalStock = 0,
-                        ReservedStock = 0,
-                        CommittedStock = 0,
-                        CreatedBy = _currentUserService.UserId ?? "System",
-                        CreatedOnUtc = DateTime.UtcNow
-                    };
-                    await _inventoryRepository.AddAsync(inventory);
+                        string uomLabel = detail.UnitOfMeasure != null ? detail.UnitOfMeasure.Name : "U/E";
+                        faltantesList.Add($"- {product.Name}: Faltó {missingQty:N2} {uomLabel} (Solicitado: {detail.Quantity:N2}, Despachado: {dispatchedQty:N2})");
+                    }
+
+                    // Update order detail line quantities and amounts
+                    detail.Quantity = dispatchedQty;
+                    detail.DiscountAmount = (dispatchedQty * detail.UnitPrice) * (detail.DiscountPercentage / 100m);
+                    
+                    decimal lineSubtotal = (dispatchedQty * detail.UnitPrice) - detail.DiscountAmount;
+                    detail.TaxAmount = lineSubtotal * (detail.TaxPercentage / 100m);
+                    detail.NetAmount = lineSubtotal + detail.TaxAmount;
                 }
 
-                // Deduct from physical stock (always allow going negative for dispatches)
-                inventory.PhysicalStock -= quantityInBaseUnit;
-                _inventoryRepository.Update(inventory);
-
-                // Add Kardex movement detail
-                movement.Details.Add(new InventoryMovementDetail
+                if (dispatchedInBaseUnit > 0)
                 {
-                    Id = Guid.NewGuid(),
-                    BranchId = warehouse.BranchId,
-                    ProductId = detail.ProductId,
-                    Quantity = detail.Quantity,
-                    UnitOfMeasureId = detail.UnitOfMeasureId,
-                    ProductPresentationId = presentation.Id,
-                    ConversionFactor = conversionFactor,
-                    QuantityInBaseUnit = quantityInBaseUnit,
-                    CreatedBy = _currentUserService.UserId ?? "System",
-                    CreatedOnUtc = DateTime.UtcNow
-                });
+                    if (inventory == null)
+                    {
+                        inventory = new Domain.Entities.Inventory
+                        {
+                            Id = Guid.NewGuid(),
+                            BranchWarehouseId = warehouse.Id,
+                            ProductId = detail.ProductId,
+                            PhysicalStock = 0,
+                            ReservedStock = 0,
+                            CommittedStock = 0,
+                            CreatedBy = _currentUserService.UserId ?? "System",
+                            CreatedOnUtc = DateTime.UtcNow
+                        };
+                        await _inventoryRepository.AddAsync(inventory);
+                    }
 
-                requiresMovement = true;
+                    // Deduct from stock
+                    inventory.PhysicalStock -= dispatchedInBaseUnit;
+                    _inventoryRepository.Update(inventory);
+
+                    // Add Kardex movement detail
+                    movement.Details.Add(new InventoryMovementDetail
+                    {
+                        Id = Guid.NewGuid(),
+                        BranchId = warehouse.BranchId,
+                        ProductId = detail.ProductId,
+                        Quantity = dispatchedQty,
+                        UnitOfMeasureId = detail.UnitOfMeasureId,
+                        ProductPresentationId = presentation.Id,
+                        ConversionFactor = conversionFactor,
+                        QuantityInBaseUnit = dispatchedInBaseUnit,
+                        CreatedBy = _currentUserService.UserId ?? "System",
+                        CreatedOnUtc = DateTime.UtcNow
+                    });
+
+                    requiresMovement = true;
+                }
 
                 // AutoMarkSoldOut check
                 if (product.AutoMarkSoldOut)
@@ -158,6 +190,18 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
             if (requiresMovement)
             {
                 await _movementRepository.AddAsync(movement);
+            }
+
+            // If there were missing items, update totals and append notes
+            if (faltantesList.Any())
+            {
+                order.SubTotal = order.Details.Sum(d => d.Quantity * d.UnitPrice);
+                order.DiscountAmount = order.Details.Sum(d => d.DiscountAmount);
+                order.TaxAmount = order.Details.Sum(d => d.TaxAmount);
+                order.TotalAmount = order.Details.Sum(d => d.NetAmount);
+
+                var faltantesText = "\n[Faltantes]:\n" + string.Join("\n", faltantesList);
+                order.Notes = (order.Notes ?? "") + faltantesText;
             }
         }
 

@@ -523,6 +523,8 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             
             foreach (var item in Details)
             {
+                if (item.Quantity <= 0) continue; // Skip items that are not being delivered (partial dispatch)
+
                 // Full product name (untruncated)
                 itemsPara.Inlines.Add(new System.Windows.Documents.Run($"{item.ProductName}\n"));
                 
@@ -562,8 +564,18 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                                      
                 if (!isDefaultNote)
                 {
-                    showNotes = true;
-                    notesText = Notes;
+                    // Strip the [Faltantes] block from printed ticket observations
+                    int faltantesIndex = cleanNotes.IndexOf("[Faltantes]:", StringComparison.OrdinalIgnoreCase);
+                    if (faltantesIndex >= 0)
+                    {
+                        notesText = cleanNotes.Substring(0, faltantesIndex).Trim();
+                    }
+                    else
+                    {
+                        notesText = cleanNotes;
+                    }
+                    
+                    showNotes = !string.IsNullOrWhiteSpace(notesText);
                 }
             }
 
