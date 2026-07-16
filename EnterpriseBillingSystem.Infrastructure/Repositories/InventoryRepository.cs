@@ -19,6 +19,7 @@ public class InventoryRepository : Repository<Inventory>, IInventoryRepository
     public async Task<Inventory?> GetByWarehouseAndProductAsync(Guid branchWarehouseId, Guid productId, CancellationToken cancellationToken = default)
     {
         return await _context.Inventories
+            .IgnoreQueryFilters()
             .FirstOrDefaultAsync(i => i.BranchWarehouseId == branchWarehouseId && i.ProductId == productId, cancellationToken);
     }
 

@@ -264,6 +264,13 @@ public class RegisterPurchaseReceiptCommandHandler : IRequestHandler<RegisterPur
             }
             else
             {
+                if (inventory.IsDeleted)
+                {
+                    inventory.IsDeleted = false;
+                    inventory.PhysicalStock = 0;
+                    inventory.ReservedStock = 0;
+                    inventory.CommittedStock = 0;
+                }
                 inventory.PhysicalStock += quantityInBaseUnit;
                 _inventoryRepository.Update(inventory);
             }

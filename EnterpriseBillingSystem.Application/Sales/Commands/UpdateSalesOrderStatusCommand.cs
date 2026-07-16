@@ -97,6 +97,13 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 
                 // Get inventory record
                 var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
+                if (inventory != null && inventory.IsDeleted)
+                {
+                    inventory.IsDeleted = false;
+                    inventory.PhysicalStock = 0;
+                    inventory.ReservedStock = 0;
+                    inventory.CommittedStock = 0;
+                }
                 decimal availableStockInBaseUnit = inventory?.PhysicalStock ?? 0;
                 if (availableStockInBaseUnit < 0) availableStockInBaseUnit = 0;
 
