@@ -34,6 +34,17 @@ public class DbInitializer : IDbInitializer
             await _context.Database.MigrateAsync();
         }
 
+        // TEMPORARY WIPE - Reset inventory and empty Kardex on startup
+        try
+        {
+            await _context.Database.ExecuteSqlRawAsync("UPDATE Inventories SET PhysicalStock = 0, ReservedStock = 0, CommittedStock = 0; DELETE FROM InventoryMovementDetails; DELETE FROM InventoryMovements;");
+            System.Console.WriteLine("[TEMP WIPE] Inventario limpiado correctamente a 0.");
+        }
+        catch (System.Exception ex)
+        {
+            System.Console.WriteLine($"[TEMP WIPE] Error al limpiar inventario: {ex.Message}");
+        }
+
         // 1.5. Sembrar Rutas por Defecto
         if (!await _context.Routes.AnyAsync())
         {
