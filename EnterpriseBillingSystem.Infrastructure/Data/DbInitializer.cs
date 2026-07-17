@@ -1503,6 +1503,8 @@ public class DbInitializer : IDbInitializer
                 existingProduct.CategoryId = cat.Id;
                 existingProduct.BrandId = brandGenerica.Id;
                 existingProduct.IsActive = true;
+                existingProduct.IsSoldOut = false;
+                existingProduct.AutoMarkSoldOut = false;
                 existingProduct.CurrentCost = data.CostUnit ?? (data.WholesaleUnit * 0.85m);
 
                 foreach (var presentation in existingProduct.Presentations)
@@ -1547,6 +1549,8 @@ public class DbInitializer : IDbInitializer
                     TaxId = taxExento.Id,
                     IsCatalogVisible = true,
                     IsActive = true,
+                    IsSoldOut = false,
+                    AutoMarkSoldOut = false,
                     ImagePath = $"/uploads/products/{data.Code}.png"
                 };
 
