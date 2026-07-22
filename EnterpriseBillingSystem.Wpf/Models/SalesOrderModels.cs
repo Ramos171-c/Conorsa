@@ -17,7 +17,7 @@ public record SalesOrderListItemDto(
     string? CreatedBy
 );
 
-public class SalesOrderDetailItemDto
+public class SalesOrderDetailItemDto : CommunityToolkit.Mvvm.ComponentModel.ObservableObject
 {
     public Guid Id { get; set; }
     public Guid ProductId { get; set; }
@@ -33,6 +33,56 @@ public class SalesOrderDetailItemDto
     public decimal TaxAmount { get; set; }
     public decimal NetAmount { get; set; }
     public decimal ReturnedQuantity { get; set; } = 0;
+
+    private decimal? _deliveredQuantity;
+    public decimal DeliveredQuantity
+    {
+        get => _deliveredQuantity ?? Math.Max(0, Quantity - MissingQuantity - ReturnedQuantity);
+        set
+        {
+            if (SetProperty(ref _deliveredQuantity, value))
+            {
+                _missingQuantity = Math.Max(0, Quantity - value - ReturnedQuantity);
+                OnPropertyChanged(nameof(MissingQuantity));
+                OnPropertyChanged(nameof(EffectiveNetAmount));
+            }
+        }
+    }
+
+    private decimal _missingQuantity;
+    public decimal MissingQuantity
+    {
+        get => _missingQuantity;
+        set
+        {
+            if (SetProperty(ref _missingQuantity, value))
+            {
+                _deliveredQuantity = Math.Max(0, Quantity - value - ReturnedQuantity);
+                OnPropertyChanged(nameof(DeliveredQuantity));
+                OnPropertyChanged(nameof(EffectiveNetAmount));
+            }
+        }
+    }
+
+    private string _missingReason = string.Empty;
+    public string MissingReason
+    {
+        get => _missingReason;
+        set => SetProperty(ref _missingReason, value);
+    }
+
+    public decimal EffectiveNetAmount
+    {
+        get
+        {
+            decimal qtyToBill = Quantity - MissingQuantity - ReturnedQuantity;
+            if (qtyToBill < 0) qtyToBill = 0;
+            decimal baseAmount = qtyToBill * UnitPrice;
+            decimal disc = baseAmount * (DiscountPercentage / 100m);
+            decimal tax = (baseAmount - disc) * (TaxPercentage / 100m);
+            return baseAmount - disc + tax;
+        }
+    }
 }
 
 public record ReturnSalesOrderDetailItemDto(

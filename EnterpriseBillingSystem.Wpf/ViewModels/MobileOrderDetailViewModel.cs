@@ -118,7 +118,25 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
 
         foreach (var item in order.Details)
         {
+            item.PropertyChanged += (s, e) => RecalculateTotalsAndNotes();
             Details.Add(item);
+        }
+        RecalculateTotalsAndNotes();
+    }
+
+    public decimal EffectiveTotalAmount => Details.Sum(d => d.EffectiveNetAmount);
+    public decimal TotalMissingQuantity => Details.Sum(d => d.MissingQuantity);
+
+    public void RecalculateTotalsAndNotes()
+    {
+        OnPropertyChanged(nameof(EffectiveTotalAmount));
+        OnPropertyChanged(nameof(TotalMissingQuantity));
+
+        var missingItems = Details.Where(d => d.MissingQuantity > 0).ToList();
+        if (missingItems.Any())
+        {
+            var summary = string.Join("; ", missingItems.Select(m => $"{m.ProductName}: faltan {m.MissingQuantity:N2} pzas{(string.IsNullOrWhiteSpace(m.MissingReason) ? "" : $" [{m.MissingReason}]")}"));
+            DispatcherNotes = $"[PRODUCTOS FALTANTES REGISTRADOS]: {summary}";
         }
     }
 

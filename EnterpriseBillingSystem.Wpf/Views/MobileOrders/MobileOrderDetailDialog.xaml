@@ -151,30 +151,48 @@
 
                     <DataGrid ItemsSource="{Binding Details}" AutoGenerateColumns="False" IsReadOnly="False" HeadersVisibility="Column">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="110" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" IsReadOnly="True" />
                             <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="80" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Cantidad" Binding="{Binding Quantity, StringFormat={}{0:N2}}" Width="95" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Precio Unit." Binding="{Binding UnitPrice, StringFormat={}{0:C2}}" Width="115" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Descto. %" Binding="{Binding DiscountPercentage, StringFormat={}{0:N1}}" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="IVA %" Binding="{Binding TaxPercentage, StringFormat={}{0:N1}}" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Neto" Binding="{Binding NetAmount, StringFormat={}{0:C2}}" Width="130" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" IsReadOnly="True" />
-                            <DataGridTemplateColumn Header="Cant. Devolver" Width="120">
+                            <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="70" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
+                            
+                            <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding Quantity, StringFormat={}{0:N2}}" Width="95" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
+                            
+                            <!-- Cant. Real Entregada -->
+                            <DataGridTemplateColumn Header="Cant. Entregada" Width="110">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding ReturnedQuantity, StringFormat={}{0:N2}}" 
-                                                   Style="{StaticResource RightAlignedColumnStyle}" 
-                                                   VerticalAlignment="Center" Margin="8,0" />
+                                        <TextBox Text="{Binding DeliveredQuantity, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N2}}" 
+                                                 HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Margin="2,0" FontWeight="SemiBold" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
-                                <DataGridTemplateColumn.CellEditingTemplate>
-                                    <DataTemplate>
-                                        <TextBox Text="{Binding ReturnedQuantity, UpdateSourceTrigger=PropertyChanged}" 
-                                                 HorizontalContentAlignment="Right"
-                                                 VerticalContentAlignment="Center" Margin="4,0" />
-                                    </DataTemplate>
-                                </DataGridTemplateColumn.CellEditingTemplate>
                             </DataGridTemplateColumn>
+
+                            <!-- Cant. Faltante / No Vino (Destacado) -->
+                            <DataGridTemplateColumn Header="No Vino / Faltante" Width="120">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Border Background="#FEF2F2" CornerRadius="3" Padding="4,2">
+                                            <TextBox Text="{Binding MissingQuantity, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N2}}" 
+                                                     HorizontalContentAlignment="Right" VerticalContentAlignment="Center" 
+                                                     Foreground="#DC2626" FontWeight="Bold" />
+                                        </Border>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <!-- Motivo / Observación Faltante -->
+                            <DataGridTemplateColumn Header="Motivo Faltante" Width="160">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBox Text="{Binding MissingReason, UpdateSourceTrigger=PropertyChanged}" 
+                                                 materialDesign:HintAssist.Hint="Ej: Sin stock / Daño" 
+                                                 VerticalContentAlignment="Center" FontSize="12" />
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
+
+                            <DataGridTextColumn Header="Precio Unit." Binding="{Binding UnitPrice, StringFormat={}{0:C2}}" Width="105" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Neto Efectivo" Binding="{Binding EffectiveNetAmount, StringFormat={}{0:C2}}" Width="115" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" IsReadOnly="True" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -184,7 +202,7 @@
             <Grid Grid.Row="2">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="380" />
+                    <ColumnDefinition Width="400" />
                 </Grid.ColumnDefinitions>
 
                 <!-- Notes and Observations -->
@@ -198,16 +216,16 @@
                     <StackPanel Grid.Row="0" Margin="0,0,0,8">
                         <TextBlock Text="Notas / Observaciones del Vendedor" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" FontWeight="Bold" Margin="0,0,0,4" />
                         <TextBox Text="{Binding Notes}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" 
-                                 VerticalScrollBarVisibility="Auto" Height="45" 
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" VerticalContentAlignment="Top" />
+                                  VerticalScrollBarVisibility="Auto" Height="45" 
+                                  Style="{StaticResource MaterialDesignOutlinedTextBox}" VerticalContentAlignment="Top" />
                     </StackPanel>
 
                     <!-- Dispatcher Notes -->
                     <StackPanel Grid.Row="1">
-                        <TextBlock Text="Observaciones de Entrega / Despacho" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" FontWeight="Bold" Margin="0,0,0,4" />
+                        <TextBlock Text="Observaciones de Entrega / Despacho / Faltantes" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" FontWeight="Bold" Margin="0,0,0,4" />
                         <TextBox Text="{Binding DispatcherNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" 
-                                 VerticalScrollBarVisibility="Auto" Height="45" 
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" VerticalContentAlignment="Top" />
+                                  VerticalScrollBarVisibility="Auto" Height="45" 
+                                  Style="{StaticResource MaterialDesignOutlinedTextBox}" VerticalContentAlignment="Top" />
                     </StackPanel>
                 </Grid>
 
@@ -219,30 +237,31 @@
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
                             <RowDefinition Height="Auto" />
+                            <RowDefinition Height="Auto" />
                         </Grid.RowDefinitions>
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*" />
                             <ColumnDefinition Width="Auto" />
                         </Grid.ColumnDefinitions>
 
-                        <!-- Subtotal -->
-                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Subtotal:" VerticalAlignment="Center" Margin="0,3" />
-                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding SubTotal, StringFormat={}{0:C2}}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,3" />
+                        <!-- Total Solicitado Original -->
+                        <TextBlock Grid.Row="0" Grid.Column="0" Text="Total Pedido Original:" VerticalAlignment="Center" Margin="0,3" Opacity="0.7" />
+                        <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding TotalAmount, StringFormat={}{0:C2}}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,3" Opacity="0.7" />
 
-                        <!-- Descuento -->
-                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Descuento:" VerticalAlignment="Center" Margin="0,3" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding DiscountAmount, StringFormat={}-{0:C2}}" Foreground="#C62828" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,3" />
+                        <!-- Piezas Faltantes -->
+                        <TextBlock Grid.Row="1" Grid.Column="0" Text="Piezas Faltantes (No Vino):" Foreground="#DC2626" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,3" />
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TotalMissingQuantity, StringFormat={}{0:N2} pzas}" Foreground="#DC2626" FontWeight="Bold" VerticalAlignment="Center" Margin="0,3" />
 
                         <!-- Impuestos -->
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Impuestos (IVA):" VerticalAlignment="Center" Margin="0,3" />
                         <TextBlock Grid.Row="2" Grid.Column="1" Text="{Binding TaxAmount, StringFormat={}{0:C2}}" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,3" />
 
                         <!-- Divider -->
-                        <Separator Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,8,0,4" />
+                        <Separator Grid.Row="3" Grid.Column="0" Grid.ColumnSpan="2" Margin="0,6,0,4" />
 
-                        <!-- Total -->
-                        <TextBlock Grid.Row="3" Grid.Column="0" Text="TOTAL:" FontSize="18" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Center" Margin="0,8,0,0" />
-                        <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding TotalAmount, StringFormat={}{0:C2}}" FontSize="20" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Center" Margin="0,8,0,0" />
+                        <!-- Total Neto Efectivo a Cobrar -->
+                        <TextBlock Grid.Row="4" Grid.Column="0" Text="TOTAL NETO A COBRAR:" FontSize="16" FontWeight="Bold" Foreground="#15803D" VerticalAlignment="Center" Margin="0,4,0,0" />
+                        <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding EffectiveTotalAmount, StringFormat={}{0:C2}}" FontSize="18" FontWeight="Bold" Foreground="#15803D" VerticalAlignment="Center" Margin="0,4,0,0" />
                     </Grid>
                 </materialDesign:Card>
             </Grid>
