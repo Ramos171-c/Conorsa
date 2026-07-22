@@ -60,10 +60,11 @@
                     <TextBlock Text="Deducción exacta de existencias y margen proyectado" Opacity="0.7" FontSize="11" Margin="0,2,0,0"/>
                 </StackPanel>
 
-                <!-- KPI 1: Deducido de Inventario -->
+                <!-- KPI 1: Deducido de Inventario (Existencia) -->
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="STOCK DEDUCIDO" FontSize="10" Foreground="#166534" FontWeight="Bold" HorizontalAlignment="Right" />
+                    <TextBlock Text="CUBIERTO EN BODEGA" FontSize="10" Foreground="#166534" FontWeight="Bold" HorizontalAlignment="Right" />
                     <TextBlock Text="{Binding TotalDeducted, StringFormat={}{0:N2} pzas}" FontSize="15" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalInventoryDeductedPurchaseCost, StringFormat='Val. Compra: {0:C2}'}" FontSize="10" Foreground="#15803D" HorizontalAlignment="Right" />
                 </StackPanel>
 
                 <!-- KPI 2: Neto a Comprar al Proveedor -->

@@ -197,9 +197,9 @@ public static class ExcelExportService
         ws.Range(currentRow, 1, currentRow, 12).Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
         currentRow++;
 
-        // Fila Totales Deducidos de Inventario
+        // Fila Totales Deducidos de Inventario (Existencia en Bodega)
         ws.Range(currentRow, 1, currentRow, 5).Merge();
-        ws.Cell(currentRow, 1).Value = "TOTAL PIEZAS DEDUCIDAS DE INVENTARIO (DISPONIBLES EN BODEGA):";
+        ws.Cell(currentRow, 1).Value = "EXISTENCIA EN BODEGA APLICADA/DEDUCIDA (NO SE RE-PIDE):";
         ws.Cell(currentRow, 1).Style.Font.SetBold(true);
         ws.Cell(currentRow, 1).Style.Font.SetFontColor(XLColor.FromHtml("#15803D"));
         ws.Cell(currentRow, 1).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
@@ -209,12 +209,27 @@ public static class ExcelExportService
         ws.Cell(currentRow, 6).Style.Font.SetFontColor(XLColor.FromHtml("#15803D"));
         ws.Cell(currentRow, 6).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
         ws.Cell(currentRow, 6).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#DCFCE7"));
+        
+        // Valor de Costo y Venta cubierto por el inventario disponible
+        decimal invPurchaseVal = productList.Sum(p => p.InventoryDeductedPurchaseCost);
+        decimal invSalesVal = productList.Sum(p => p.InventoryDeductedSalesAmount);
+        ws.Cell(currentRow, 8).Value = invPurchaseVal;
+        ws.Cell(currentRow, 8).Style.NumberFormat.SetFormat("$#,##0.00");
+        ws.Cell(currentRow, 8).Style.Font.SetBold(true);
+        ws.Cell(currentRow, 8).Style.Font.SetFontColor(XLColor.FromHtml("#15803D"));
+        ws.Cell(currentRow, 8).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+
+        ws.Cell(currentRow, 10).Value = invSalesVal;
+        ws.Cell(currentRow, 10).Style.NumberFormat.SetFormat("$#,##0.00");
+        ws.Cell(currentRow, 10).Style.Font.SetBold(true);
+        ws.Cell(currentRow, 10).Style.Font.SetFontColor(XLColor.FromHtml("#15803D"));
+        ws.Cell(currentRow, 10).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
         ws.Range(currentRow, 1, currentRow, 12).Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
         currentRow++;
 
         // Fila NETO TOTAL A PEDIR AL PROVEEDOR
         ws.Range(currentRow, 1, currentRow, 5).Merge();
-        ws.Cell(currentRow, 1).Value = "NETO TOTAL DE PIEZAS A SOLICITAR A PROVEEDOR:";
+        ws.Cell(currentRow, 1).Value = "NETO REAL DE PIEZAS A SOLICITAR A PROVEEDOR:";
         ws.Cell(currentRow, 1).Style.Font.SetBold(true);
         ws.Cell(currentRow, 1).Style.Font.SetFontSize(12);
         ws.Cell(currentRow, 1).Style.Font.SetFontColor(XLColor.FromHtml("#B45309"));

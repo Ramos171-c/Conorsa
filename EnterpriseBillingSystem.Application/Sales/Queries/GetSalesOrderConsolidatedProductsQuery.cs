@@ -19,6 +19,10 @@ public record ConsolidatedProductDto(
     decimal NetQuantityToOrder,
     decimal UnitCost,
     decimal UnitPrice,
+    decimal GrossPurchaseCost,
+    decimal GrossSalesAmount,
+    decimal InventoryDeductedPurchaseCost,
+    decimal InventoryDeductedSalesAmount,
     decimal TotalPurchaseCost,
     decimal NetSalesAmount,
     decimal ProfitMarginAmount,
@@ -82,14 +86,19 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             var presentation = sampleDetail.Product?.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == sampleDetail.UnitOfMeasureId);
             var unitCost = presentation != null ? presentation.Cost : (sampleDetail.Product?.CurrentCost ?? 0m);
 
-            // Costo total de compra al proveedor (sobre lo neto a pedir)
-            var totalPurchaseCost = netToOrder * unitCost;
+            // 1. Totales Brutos Solicitados por Pedidos
+            var grossPurchaseCost = totalQuantity * unitCost;
 
-            // Venta total neta estimada al cliente (sobre lo neto a pedir)
+            // 2. Valores Cubiertos por Inventario Existente (para tener la información de inventario en el reporte)
+            var inventoryDeductedPurchaseCost = deducted * unitCost;
+            var inventoryDeductedSalesAmount = deducted * unitPrice;
+
+            // 3. Totales Netos a Pedir al Proveedor
+            var netPurchaseCost = netToOrder * unitCost;
             var netSalesAmount = netToOrder * unitPrice;
 
-            // Diferencia / Ganancia bruta estimada
-            var profitMarginAmount = netSalesAmount - totalPurchaseCost;
+            // 4. Diferencia / Ganancia bruta estimada (Neto Venta - Neto Compra)
+            var profitMarginAmount = netSalesAmount - netPurchaseCost;
             var profitMarginPercentage = netSalesAmount > 0 ? (profitMarginAmount / netSalesAmount) * 100m : 0m;
 
             string obs;
@@ -117,12 +126,16 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
                 NetQuantityToOrder: netToOrder,
                 UnitCost: unitCost,
                 UnitPrice: unitPrice,
-                TotalPurchaseCost: totalPurchaseCost,
+                GrossPurchaseCost: grossPurchaseCost,
+                GrossSalesAmount: grossSalesAmount,
+                InventoryDeductedPurchaseCost: inventoryDeductedPurchaseCost,
+                InventoryDeductedSalesAmount: inventoryDeductedSalesAmount,
+                TotalPurchaseCost: netPurchaseCost,
                 NetSalesAmount: netSalesAmount,
                 ProfitMarginAmount: profitMarginAmount,
                 ProfitMarginPercentage: profitMarginPercentage,
                 TotalNetAmount: grossSalesAmount,
-                TotalCost: totalPurchaseCost,
+                TotalCost: netPurchaseCost,
                 Observation: obs
             ));
         }

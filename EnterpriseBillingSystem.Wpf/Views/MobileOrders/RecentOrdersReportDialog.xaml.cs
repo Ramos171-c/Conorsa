@@ -51,7 +51,13 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         public bool ShowEmptyMessage => !IsLoading && ConsolidatedProducts.Count == 0;
 
         public decimal TotalItems => ConsolidatedProducts.Sum(p => p.TotalQuantity);
+        public decimal TotalGrossPurchaseCost => ConsolidatedProducts.Sum(p => p.GrossPurchaseCost);
+        public decimal TotalGrossSales => ConsolidatedProducts.Sum(p => p.GrossSalesAmount);
+
         public decimal TotalDeducted => ConsolidatedProducts.Sum(p => p.DeductedFromInventory);
+        public decimal TotalInventoryDeductedPurchaseCost => ConsolidatedProducts.Sum(p => p.InventoryDeductedPurchaseCost);
+        public decimal TotalInventoryDeductedSales => ConsolidatedProducts.Sum(p => p.InventoryDeductedSalesAmount);
+
         public decimal TotalNetToOrder => ConsolidatedProducts.Sum(p => p.NetQuantityToOrder);
         public decimal TotalEstimatedCost => ConsolidatedProducts.Sum(p => p.TotalPurchaseCost);
         public decimal TotalEstimatedSales => ConsolidatedProducts.Sum(p => p.NetSalesAmount);
