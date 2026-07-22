@@ -151,7 +151,7 @@
 
                     <DataGrid ItemsSource="{Binding Details}" AutoGenerateColumns="False" IsReadOnly="False" HeadersVisibility="Column">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
                             <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
                             <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="70" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
                             
@@ -192,7 +192,7 @@
                             </DataGridTemplateColumn>
 
                             <DataGridTextColumn Header="Precio Unit." Binding="{Binding UnitPrice, StringFormat={}{0:C2}}" Width="105" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Neto Efectivo" Binding="{Binding EffectiveNetAmount, StringFormat={}{0:C2}}" Width="115" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Neto Efectivo" Binding="{Binding EffectiveNetAmount, StringFormat={}{0:C2}}" Width="115" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
