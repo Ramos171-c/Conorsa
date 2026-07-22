@@ -38,8 +38,8 @@
 
             <StackPanel Grid.Column="0">
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                    <TextBlock Text="Pedido " Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
-                    <TextBlock Text="{Binding OrderNumber}" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                    <TextBlock Text="Pedido " FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                    <TextBlock Text="{Binding OrderNumber}" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
                 </StackPanel>
                 
                 <WrapPanel Orientation="Horizontal" Margin="0,2,0,0">
@@ -145,17 +145,24 @@
             <!-- Product Lines DataGrid -->
             <materialDesign:Card Grid.Row="1" Margin="0,0,0,16" materialDesign:ElevationAssist.Elevation="Dp1">
                 <Grid>
-                    <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}" IsIndeterminate="True" 
+                    <ProgressBar IsIndeterminate="True" 
                                  Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVis}}" 
-                                 VerticalAlignment="Top" Height="4" Panel.ZIndex="10" />
+                                 VerticalAlignment="Top" Height="4" Panel.ZIndex="10" Foreground="#4F46E5" />
 
                     <DataGrid ItemsSource="{Binding Details}" AutoGenerateColumns="False" IsReadOnly="False" HeadersVisibility="Column">
                         <DataGrid.Columns>
-                            <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="70" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="100" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" IsReadOnly="True" />
+                            <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="70" IsReadOnly="True" />
                             
-                            <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding Quantity, StringFormat={}{0:N2}}" Width="95" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding Quantity, StringFormat='{}{0:N2}'}" Width="95" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="Margin" Value="0,0,8,0" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                             
                             <!-- Cant. Real Entregada -->
                             <DataGridTemplateColumn Header="Cant. Entregada" Width="110">
@@ -191,8 +198,23 @@
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTextColumn Header="Precio Unit." Binding="{Binding UnitPrice, StringFormat={}{0:C2}}" Width="105" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
-                            <DataGridTextColumn Header="Neto Efectivo" Binding="{Binding EffectiveNetAmount, StringFormat={}{0:C2}}" Width="115" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
+                            <DataGridTextColumn Header="Precio Unit." Binding="{Binding UnitPrice, StringFormat='{}{0:C2}'}" Width="105" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="Margin" Value="0,0,8,0" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
+                            <DataGridTextColumn Header="Neto Efectivo" Binding="{Binding EffectiveNetAmount, StringFormat='{}{0:C2}'}" Width="115" IsReadOnly="True">
+                                <DataGridTextColumn.ElementStyle>
+                                    <Style TargetType="TextBlock">
+                                        <Setter Property="HorizontalAlignment" Value="Right" />
+                                        <Setter Property="FontWeight" Value="Bold" />
+                                        <Setter Property="Margin" Value="0,0,8,0" />
+                                    </Style>
+                                </DataGridTextColumn.ElementStyle>
+                            </DataGridTextColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -214,18 +236,22 @@
                     
                     <!-- Seller Notes -->
                     <StackPanel Grid.Row="0" Margin="0,0,0,8">
-                        <TextBlock Text="Notas / Observaciones del Vendedor" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" FontWeight="Bold" Margin="0,0,0,4" />
-                        <TextBox Text="{Binding Notes}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" 
-                                  VerticalScrollBarVisibility="Auto" Height="45" 
-                                  Style="{StaticResource MaterialDesignOutlinedTextBox}" VerticalContentAlignment="Top" />
+                        <TextBlock Text="Notas / Observaciones del Vendedor" FontSize="13" FontWeight="Bold" Margin="0,0,0,4" Foreground="#334155" />
+                        <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
+                            <TextBox Text="{Binding Notes}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" 
+                                      VerticalScrollBarVisibility="Auto" Height="45" 
+                                      BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
+                        </Border>
                     </StackPanel>
 
                     <!-- Dispatcher Notes -->
                     <StackPanel Grid.Row="1">
-                        <TextBlock Text="Observaciones de Entrega / Despacho / Faltantes" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" FontWeight="Bold" Margin="0,0,0,4" />
-                        <TextBox Text="{Binding DispatcherNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" 
-                                  VerticalScrollBarVisibility="Auto" Height="45" 
-                                  Style="{StaticResource MaterialDesignOutlinedTextBox}" VerticalContentAlignment="Top" />
+                        <TextBlock Text="Observaciones de Entrega / Despacho / Faltantes" FontSize="13" FontWeight="Bold" Margin="0,0,0,4" Foreground="#334155" />
+                        <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
+                            <TextBox Text="{Binding DispatcherNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" 
+                                      VerticalScrollBarVisibility="Auto" Height="45" 
+                                      BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
+                        </Border>
                     </StackPanel>
                 </Grid>
 
@@ -358,10 +384,9 @@
             <!-- Status Update Panel (visible for non-finalized states) -->
             <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" 
                         Visibility="{Binding IsStatusChangeVisible, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="Actualizar Estado: " VerticalAlignment="Center" Margin="0,0,8,0" Style="{StaticResource MaterialDesignBody2TextBlock}" />
+                <TextBlock Text="Actualizar Estado: " VerticalAlignment="Center" Margin="0,0,8,0" FontSize="14" />
                 <ComboBox ItemsSource="{Binding AvailableStatuses}" SelectedItem="{Binding SelectedNewStatus}" 
-                          Width="130" Margin="0,0,8,0" 
-                          Style="{StaticResource MaterialDesignFilledComboBox}" />
+                          Width="130" Margin="0,0,8,0" />
                 <Button Command="{Binding UpdateStatusCommand}" 
                         Style="{StaticResource MaterialDesignRaisedButton}" 
                         Content="Actualizar" />
