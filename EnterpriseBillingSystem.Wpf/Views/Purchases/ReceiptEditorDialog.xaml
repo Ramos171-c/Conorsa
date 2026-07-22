@@ -139,13 +139,61 @@
         <materialDesign:Card Grid.Row="3" materialDesign:ElevationAssist.Elevation="Dp1" Margin="0,0,0,12">
             <DataGrid ItemsSource="{Binding Details}" AutoGenerateColumns="False" IsReadOnly="False" CanUserAddRows="False" HeadersVisibility="Column">
                 <DataGrid.Columns>
-                    <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="2*" IsReadOnly="True" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                    <DataGridTextColumn Header="Presentación" Binding="{Binding PresentationName}" Width="1.2*" IsReadOnly="True" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                    <DataGridTextColumn Header="Cant. Solicitada" Binding="{Binding RequestedQuantity, StringFormat={}{0:N2}}" Width="120" IsReadOnly="True" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                    <DataGridTextColumn Header="Cant. Pendiente" Binding="{Binding PendingQuantity, StringFormat={}{0:N2}}" Width="120" IsReadOnly="True" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                    <DataGridTextColumn Header="Cantidad Recibida" Binding="{Binding Quantity, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N2}}" Width="130" IsReadOnly="False" EditingElementStyle="{StaticResource MaterialDesignDataGridTextColumnEditingStyle}" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                    <DataGridTextColumn Header="Costo Unitario" Binding="{Binding UnitPrice, StringFormat={}{0:C2}}" Width="120" IsReadOnly="True" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                    <DataGridTextColumn Header="Subtotal" Binding="{Binding SubTotal, StringFormat={}{0:C2}}" Width="120" IsReadOnly="True" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                    <DataGridTemplateColumn Header="Producto" Width="2*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ProductName}" VerticalAlignment="Center" Margin="6,0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Presentación" Width="1.2*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding PresentationName}" VerticalAlignment="Center" Margin="6,0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Cant. Solicitada" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding RequestedQuantity, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Cant. Pendiente" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding PendingQuantity, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Cantidad Recibida" Width="130">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:N2}'}" HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Margin="2,0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Costo Unitario" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding UnitPrice, StringFormat='{}{0:C2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+
+                    <DataGridTemplateColumn Header="Subtotal" Width="120">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding SubTotal, StringFormat='{}{0:C2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
                     
                     <!-- Actions -->
                     <DataGridTemplateColumn Header="Acción" Width="80" IsReadOnly="True">
