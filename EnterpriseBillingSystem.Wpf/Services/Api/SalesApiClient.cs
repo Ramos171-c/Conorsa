@@ -129,6 +129,25 @@ public class SalesApiClient
     public async Task<bool> ReturnSalesOrderAsync(Guid id, ReturnSalesOrderCommandDto command)
     {
         var response = await _httpClient.PostAsJsonAsync($"sales-orders/{id}/return", command);
-        return response.IsSuccessStatusCode;
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            string errorMessage = "Error en el servidor al procesar la devolución.";
+            try
+            {
+                using var jsonDoc = System.Text.Json.JsonDocument.Parse(errorContent);
+                if (jsonDoc.RootElement.TryGetProperty("detail", out var detailProp))
+                {
+                    errorMessage = detailProp.GetString() ?? errorMessage;
+                }
+                else if (jsonDoc.RootElement.TryGetProperty("message", out var msgProp))
+                {
+                    errorMessage = msgProp.GetString() ?? errorMessage;
+                }
+            }
+            catch {}
+            throw new Exception(errorMessage);
+        }
+        return true;
     }
 }

@@ -21,6 +21,7 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
     {
         return await _context.SalesOrders
             .Include(so => so.Customer)
+            .Include(so => so.SalesInvoices)
             .Include(so => so.Details)
                 .ThenInclude(d => d.Product)
             .Include(so => so.Details)

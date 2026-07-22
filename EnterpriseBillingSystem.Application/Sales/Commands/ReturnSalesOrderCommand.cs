@@ -53,7 +53,7 @@ public class ReturnSalesOrderCommandHandler : IRequestHandler<ReturnSalesOrderCo
             throw new InvalidOperationException("El pedido ya está anulado.");
 
         // Verificar que no tenga facturas confirmadas
-        bool hasPostedInvoices = order.SalesInvoices.Any(si => si.Status == SalesInvoiceStatus.Posted);
+        bool hasPostedInvoices = order.SalesInvoices != null && order.SalesInvoices.Any(si => si.Status == SalesInvoiceStatus.Posted);
         if (hasPostedInvoices)
             throw new InvalidOperationException("No se puede realizar una devolución en un pedido con facturas confirmadas asociadas.");
 
