@@ -1,18 +1,12 @@
 <Window x:Class="EnterpriseBillingSystem.Wpf.Views.MobileOrders.RecentOrdersReportDialog"
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-        xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        mc:Ignorable="d"
-        Title="Consolidación de Pedidos para Compra (Bodega Única)" Height="720" Width="1050"
+        Title="Consolidación de Pedidos para Compra" Height="650" Width="1000"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        ResizeMode="CanResizeWithGrip"
-        Background="#F8FAFC"
-        Foreground="#1E293B"
-        TextElement.FontWeight="Medium"
-        TextElement.FontSize="14"
+        Background="#F1F5F9"
+        Foreground="#0F172A"
+        FontSize="13"
         FontFamily="Segoe UI">
 
     <Grid Margin="16">
@@ -24,222 +18,160 @@
             <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
-        <!-- Header -->
-        <Grid Grid.Row="0" Margin="0,0,0,16">
-            <StackPanel>
-                <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                    <materialDesign:PackIcon Kind="ClipboardTextOutline" Width="28" Height="28" Foreground="#4F46E5" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="Consolidación de Pedidos para Compra (Bodega Única)" FontSize="20" FontWeight="Bold" Foreground="#4F46E5" VerticalAlignment="Center"/>
-                </StackPanel>
-                <TextBlock Text="Descuento automático de existencias de inventario para generar el neto real a pedir a proveedor." Opacity="0.7" FontSize="12"/>
-            </StackPanel>
-        </Grid>
+        <!-- 1. Título de la Ventana -->
+        <TextBlock Grid.Row="0" Text="Consolidación de Pedidos para Compra (Bodega Única)" 
+                   FontSize="18" FontWeight="Bold" Foreground="#1E293B" Margin="0,0,0,12" />
 
-        <!-- Summary Info Card (5 Financial KPIs) -->
-        <Border Grid.Row="1" Margin="0,0,0,16" Padding="12,14" Background="White" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1">
-            <Grid>
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="16" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="Consolidado Financiero de Compras y Ventas" FontWeight="Bold" FontSize="14" Foreground="#4F46E5" />
-                    <TextBlock Text="Deducción exacta de existencias y margen proyectado" Opacity="0.7" FontSize="11" Margin="0,2,0,0"/>
+        <!-- 2. Resumen Financiero Sencillo -->
+        <Border Grid.Row="1" Background="White" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,12">
+            <UniformGrid Columns="4">
+                <StackPanel Margin="8,0">
+                    <TextBlock Text="CUBIERTO EN BODEGA" FontSize="11" Foreground="#475569" FontWeight="Bold" />
+                    <TextBlock Text="{Binding TotalDeductedDisplay}" FontSize="15" FontWeight="Bold" Foreground="#16A34A" />
                 </StackPanel>
-
-                <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="CUBIERTO EN BODEGA" FontSize="10" Foreground="#166534" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalDeductedDisplay}" FontSize="15" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalInventoryDeductedPurchaseCostDisplay}" FontSize="10" Foreground="#15803D" HorizontalAlignment="Right" />
+                <StackPanel Margin="8,0">
+                    <TextBlock Text="TOTAL COMPRA (NETO)" FontSize="11" Foreground="#475569" FontWeight="Bold" />
+                    <TextBlock Text="{Binding TotalEstimatedCostDisplay}" FontSize="15" FontWeight="Bold" Foreground="#D97706" />
                 </StackPanel>
-
-                <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="TOTAL COMPRA (NETO)" FontSize="10" Foreground="#B45309" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalEstimatedCostDisplay}" FontSize="16" FontWeight="Bold" Foreground="#B45309" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalNetToOrderDisplay}" FontSize="10" Foreground="#B45309" HorizontalAlignment="Right" />
+                <StackPanel Margin="8,0">
+                    <TextBlock Text="TOTAL VENTA (CLIENTES)" FontSize="11" Foreground="#475569" FontWeight="Bold" />
+                    <TextBlock Text="{Binding TotalEstimatedSalesDisplay}" FontSize="15" FontWeight="Bold" Foreground="#2563EB" />
                 </StackPanel>
-
-                <StackPanel Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="TOTAL VENTA (CLIENTES)" FontSize="10" Foreground="#1E40AF" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalEstimatedSalesDisplay}" FontSize="16" FontWeight="Bold" Foreground="#1E40AF" HorizontalAlignment="Right" />
+                <StackPanel Margin="8,0">
+                    <TextBlock Text="GANANCIA PROYECTADA" FontSize="11" Foreground="#475569" FontWeight="Bold" />
+                    <TextBlock Text="{Binding TotalProfitMarginDisplay}" FontSize="15" FontWeight="Bold" Foreground="#16A34A" />
                 </StackPanel>
-
-                <StackPanel Grid.Column="7" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="DIFERENCIA GANANCIA" FontSize="10" Foreground="#15803D" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalProfitMarginDisplay}" FontSize="16" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
-                </StackPanel>
-
-                <StackPanel Grid.Column="9" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="MARGEN BRUTO" FontSize="10" Foreground="#15803D" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding ProfitMarginPercentageDisplay}" FontSize="16" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
-                </StackPanel>
-            </Grid>
+            </UniformGrid>
         </Border>
 
-        <!-- Content Card (Grid) -->
-        <Border Grid.Row="2" Margin="0,0,0,12" Background="White" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1" ClipToBounds="True">
-            <Grid>
-                <ProgressBar IsIndeterminate="True" 
-                             Visibility="{Binding IsLoadingVisibility}" 
-                             VerticalAlignment="Top" Height="4" Panel.ZIndex="10" Foreground="#4F46E5" />
+        <!-- 3. Tabla Principal de Productos -->
+        <Border Grid.Row="2" Background="White" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Margin="0,0,0,12">
+            <DataGrid ItemsSource="{Binding ConsolidatedProducts}" 
+                      AutoGenerateColumns="False" 
+                      IsReadOnly="True" 
+                      HeadersVisibility="Column"
+                      GridLinesVisibility="Horizontal"
+                      HorizontalGridLinesBrush="#E2E8F0"
+                      Background="White"
+                      RowBackground="White"
+                      AlternatingRowBackground="#F8FAFC"
+                      BorderThickness="0">
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="Código" Width="90">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ProductCode}" VerticalAlignment="Center" Margin="6,4" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                <DataGrid ItemsSource="{Binding ConsolidatedProducts}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" Style="{x:Null}">
-                    <DataGrid.Columns>
-                        <DataGridTemplateColumn Header="Código" Width="95">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding ProductCode}" VerticalAlignment="Center" Margin="6,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Producto" Width="*">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ProductName}" VerticalAlignment="Center" Margin="6,4" TextTrimming="CharacterEllipsis" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="Producto" Width="*">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding ProductName}" VerticalAlignment="Center" Margin="6,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="U.M." Width="60">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding UnitOfMeasure}" VerticalAlignment="Center" Margin="6,4" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="U.M." Width="65">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding UnitOfMeasure}" VerticalAlignment="Center" Margin="6,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Cant. Pedida" Width="90">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding TotalQuantity, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="Cant. Pedida" Width="95">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding TotalQuantity, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="En Bodega" Width="90">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding DeductedFromInventory, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" Foreground="#16A34A" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="Stock Deducido" Width="105">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding DeductedFromInventory, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Neto A Pedir" Width="95">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding NetQuantityToOrder, StringFormat='{}{0:N2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" Foreground="#D97706" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="Neto A Pedir" Width="100">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding NetQuantityToOrder, StringFormat='{}{0:N2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Costo Unit." Width="85">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding UnitCost, StringFormat='{}{0:C2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="Costo Unit." Width="90">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding UnitCost, StringFormat='{}{0:C2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Total Compra" Width="105">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding TotalPurchaseCost, StringFormat='{}{0:C2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" Foreground="#D97706" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="Total Compra" Width="110">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding TotalPurchaseCost, StringFormat='{}{0:C2}'}" FontWeight="Bold" Foreground="#B45309" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Venta Unit." Width="85">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding UnitPrice, StringFormat='{}{0:C2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="Venta Unit." Width="90">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding UnitPrice, StringFormat='{}{0:C2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
+                    <DataGridTemplateColumn Header="Total Venta" Width="105">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding NetSalesAmount, StringFormat='{}{0:C2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" Foreground="#2563EB" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
 
-                        <DataGridTemplateColumn Header="Total Venta" Width="110">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding NetSalesAmount, StringFormat='{}{0:C2}'}" FontWeight="Bold" Foreground="#1E40AF" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTemplateColumn Header="Diferencia ($)" Width="115">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding ProfitMarginAmount, StringFormat='{}{0:C2}'}" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-
-                        <DataGridTemplateColumn Header="Observaciones" Width="160">
-                            <DataGridTemplateColumn.CellTemplate>
-                                <DataTemplate>
-                                    <TextBlock Text="{Binding Observation}" VerticalAlignment="Center" Margin="6,0" />
-                                </DataTemplate>
-                            </DataGridTemplateColumn.CellTemplate>
-                        </DataGridTemplateColumn>
-                    </DataGrid.Columns>
-                </DataGrid>
-                
-                <TextBlock Text="No se encontraron pedidos móviles en estado Recibido." 
-                           HorizontalAlignment="Center" VerticalAlignment="Center"
-                           FontSize="14" Opacity="0.5"
-                           Visibility="{Binding ShowEmptyMessageVisibility}" />
-            </Grid>
+                    <DataGridTemplateColumn Header="Ganancia ($)" Width="105">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <TextBlock Text="{Binding ProfitMarginAmount, StringFormat='{}{0:C2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" Foreground="#16A34A" />
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                </DataGrid.Columns>
+            </DataGrid>
         </Border>
 
-        <!-- Observaciones Generales -->
-        <StackPanel Grid.Row="3" Margin="0,0,0,16">
-            <TextBlock Text="Observaciones Generales del Consolidado (se incluirán en el Excel)" 
-                       FontSize="13" FontWeight="Bold" Margin="0,0,0,4" Foreground="#334155" />
-            <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
-                <TextBox x:Name="TxtGeneralObservations" Style="{x:Null}"
-                         TextWrapping="True" AcceptsReturn="True" Height="45" FontSize="13" 
-                         BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
-            </Border>
+        <!-- 4. Observaciones Generales (Sencillo) -->
+        <StackPanel Grid.Row="3" Margin="0,0,0,12">
+            <TextBlock Text="Observaciones Generales (se incluirán en el Excel)" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,4" />
+            <TextBox x:Name="TxtGeneralObservations" Height="40" TextWrapping="True" AcceptsReturn="True" Background="White" BorderBrush="#CBD5E1" BorderThickness="1" Padding="4" />
         </StackPanel>
 
-        <!-- Footer Actions -->
+        <!-- 5. Botones de Acción Directos -->
         <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="8" />
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            
-            <Button Grid.Column="0" Click="ExportExcel_Click"
-                    Background="#166534" Foreground="White" BorderThickness="0" Padding="16,8"
-                    IsEnabled="{Binding HasData}">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="FileExcel" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
-                    <TextBlock Text="Exportar a Excel (.xlsx)" VerticalAlignment="Center" FontWeight="Bold" />
-                </StackPanel>
-            </Button>
 
-            <Button Grid.Column="2" Click="ConfirmResumen_Click"
-                    Background="#4F46E5" Foreground="White" BorderThickness="0" Padding="16,8"
-                    IsEnabled="{Binding HasData}">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="CheckCircleOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
-                    <TextBlock Text="Confirmar Resumen (Pasar a En Proceso)" VerticalAlignment="Center" FontWeight="Bold" />
-                </StackPanel>
-            </Button>
-            
-            <Button Grid.Column="4" Click="Close_Click" Content="Cerrar"
-                    Background="Transparent" Foreground="#64748B" BorderThickness="0" Padding="12,8" />
+            <Button Grid.Column="0" Click="ExportExcel_Click" Content="Exportar a Excel (.xlsx)" 
+                    Background="#166534" Foreground="White" BorderThickness="0" Padding="16,8" FontWeight="Bold" />
+
+            <Button Grid.Column="2" Click="ConfirmResumen_Click" Content="Confirmar Resumen (Pasar a En Proceso)" 
+                    Background="#2563EB" Foreground="White" BorderThickness="0" Padding="16,8" FontWeight="Bold" />
+
+            <Button Grid.Column="4" Click="Close_Click" Content="Cerrar" 
+                    Background="#E2E8F0" Foreground="#334155" BorderThickness="0" Padding="16,8" />
         </Grid>
     </Grid>
 </Window>
