@@ -185,7 +185,7 @@
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBox Text="{Binding MissingReason, UpdateSourceTrigger=PropertyChanged}" 
-                                                 materialDesign:HintAssist.Hint="Ej: Sin stock / Daño" 
+                                                 ToolTip="Ej: Sin stock / Daño" 
                                                  VerticalContentAlignment="Center" FontSize="12" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>

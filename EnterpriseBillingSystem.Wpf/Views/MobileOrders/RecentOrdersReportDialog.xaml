@@ -133,12 +133,14 @@
         </materialDesign:Card>
 
         <!-- Observaciones Generales -->
-        <Grid Grid.Row="3" Margin="0,0,0,16">
+        <StackPanel Grid.Row="3" Margin="0,0,0,16">
+            <TextBlock Text="Observaciones Generales del Consolidado (se incluirán en el Excel)" 
+                       Style="{StaticResource MaterialDesignSubtitle2TextBlock}" 
+                       FontWeight="Bold" Margin="0,0,0,4" />
             <TextBox Style="{StaticResource MaterialDesignOutlinedTextBox}"
                      Text="{Binding GeneralObservations, UpdateSourceTrigger=PropertyChanged}"
-                     materialDesign:HintAssist.Hint="Observaciones generales para el reporte de consolidación (se incluirán en el Excel)"
-                     TextWrapping="True" AcceptsReturn="True" Height="50" FontSize="13" />
-        </Grid>
+                     TextWrapping="True" AcceptsReturn="True" Height="50" FontSize="13" VerticalContentAlignment="Top" />
+        </StackPanel>
 
         <!-- Footer Actions -->
         <Grid Grid.Row="4">
