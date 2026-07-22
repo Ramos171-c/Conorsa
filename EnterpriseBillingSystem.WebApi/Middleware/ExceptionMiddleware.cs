@@ -63,7 +63,7 @@ public class ExceptionMiddleware
                 ValidationException => "Error de validación",
                 _ => "Error interno del servidor"
             },
-            Detail = _env.IsDevelopment() || exception is ValidationException ? exception.Message : "Ha ocurrido un error interno al procesar su solicitud.",
+            Detail = _env.IsDevelopment() || exception is ValidationException || exception is ArgumentException || exception is InvalidOperationException || exception is KeyNotFoundException ? exception.Message : "Ha ocurrido un error interno al procesar su solicitud.",
             Instance = context.Request.Path
         };
 

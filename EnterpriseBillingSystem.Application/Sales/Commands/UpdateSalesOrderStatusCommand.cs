@@ -124,15 +124,18 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                     }
 
                     // Update order detail line quantities and amounts
-                    detail.Quantity = dispatchedQty;
-                    detail.DiscountAmount = (dispatchedQty * detail.UnitPrice) * (detail.DiscountPercentage / 100m);
+                    detail.Quantity = Math.Round(dispatchedQty, 4);
+                    detail.DiscountAmount = Math.Round((detail.Quantity * detail.UnitPrice) * (detail.DiscountPercentage / 100m), 4);
                     
-                    decimal lineSubtotal = (dispatchedQty * detail.UnitPrice) - detail.DiscountAmount;
-                    detail.TaxAmount = lineSubtotal * (detail.TaxPercentage / 100m);
-                    detail.NetAmount = lineSubtotal + detail.TaxAmount;
+                    decimal lineSubtotal = (detail.Quantity * detail.UnitPrice) - detail.DiscountAmount;
+                    detail.TaxAmount = Math.Round(lineSubtotal * (detail.TaxPercentage / 100m), 4);
+                    detail.NetAmount = Math.Round(lineSubtotal + detail.TaxAmount, 4);
                 }
 
-                if (dispatchedInBaseUnit > 0)
+                dispatchedInBaseUnit = Math.Round(dispatchedInBaseUnit, 4);
+                dispatchedQty = Math.Round(dispatchedQty, 4);
+
+                if (dispatchedInBaseUnit > 0.0000m && dispatchedQty > 0.0000m)
                 {
                     if (inventory == null)
                     {
@@ -158,6 +161,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                     movement.Details.Add(new InventoryMovementDetail
                     {
                         Id = Guid.NewGuid(),
+                        InventoryMovementId = movement.Id,
                         BranchId = warehouse.BranchId,
                         ProductId = detail.ProductId,
                         Quantity = dispatchedQty,

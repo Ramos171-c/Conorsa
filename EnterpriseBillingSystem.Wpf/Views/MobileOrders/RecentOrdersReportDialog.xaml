@@ -63,15 +63,21 @@
                 <!-- KPI 1: Deducido de Inventario (Existencia) -->
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <TextBlock Text="CUBIERTO EN BODEGA" FontSize="10" Foreground="#166534" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalDeducted, StringFormat={}{0:N2} pzas}" FontSize="15" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalInventoryDeductedPurchaseCost, StringFormat='Val. Compra: {0:C2}'}" FontSize="10" Foreground="#15803D" HorizontalAlignment="Right" />
+                    <TextBlock FontSize="15" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right">
+                        <Run Text="{Binding TotalDeducted, StringFormat={}{0:N2}}" /><Run Text=" pzas" />
+                    </TextBlock>
+                    <TextBlock FontSize="10" Foreground="#15803D" HorizontalAlignment="Right">
+                        <Run Text="Val. Compra: " /><Run Text="{Binding TotalInventoryDeductedPurchaseCost, StringFormat={}{0:C2}}" />
+                    </TextBlock>
                 </StackPanel>
 
                 <!-- KPI 2: Neto a Comprar al Proveedor -->
                 <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <TextBlock Text="TOTAL COMPRA (NETO)" FontSize="10" Foreground="#B45309" FontWeight="Bold" HorizontalAlignment="Right" />
                     <TextBlock Text="{Binding TotalEstimatedCost, StringFormat={}{0:C2}}" FontSize="16" FontWeight="Bold" Foreground="#B45309" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalNetToOrder, StringFormat={}{0:N2} pzas a pedir}" FontSize="10" Foreground="#B45309" HorizontalAlignment="Right" />
+                    <TextBlock FontSize="10" Foreground="#B45309" HorizontalAlignment="Right">
+                        <Run Text="{Binding TotalNetToOrder, StringFormat={}{0:N2}}" /><Run Text=" pzas a pedir" />
+                    </TextBlock>
                 </StackPanel>
 
                 <!-- KPI 3: Venta Total Neta Estimada -->
