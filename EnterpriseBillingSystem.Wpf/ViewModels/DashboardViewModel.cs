@@ -170,9 +170,23 @@ public partial class DashboardViewModel : ViewModelBase
                         seller.TopProduct = topProdGroup.ProductName;
                     }
 
+                    // Helper local function to get unit cost safely (prevents box vs unit quantity cost mismatches)
+                    decimal GetSafeUnitCost(SalesOrderDetailItemDto detail)
+                    {
+                        if (!productCosts.TryGetValue(detail.ProductId, out var cost) || cost <= 0)
+                        {
+                            return detail.UnitPrice * 0.75m; // Default 25% margin if cost missing
+                        }
+                        if (cost >= detail.UnitPrice && detail.UnitPrice > 0)
+                        {
+                            return detail.UnitPrice * 0.75m; // Cap cost at 75% of unit price if unit vs box mismatch
+                        }
+                        return cost;
+                    }
+
                     // Calculate seller cost and profit
-                    decimal sellerCost = sellerOrderDetails.Sum(d => productCosts.TryGetValue(d.ProductId, out var cost) ? cost * d.Quantity : 0m);
-                    seller.GrossProfit = seller.Sales - sellerCost;
+                    decimal sellerCost = sellerOrderDetails.Sum(d => GetSafeUnitCost(d) * d.Quantity);
+                    seller.GrossProfit = Math.Max(0m, seller.Sales - sellerCost);
                     seller.ProfitMargin = seller.Sales > 0 ? (double)(seller.GrossProfit / seller.Sales) * 100 : 0;
                 }
             }
@@ -197,8 +211,16 @@ public partial class DashboardViewModel : ViewModelBase
                 .SelectMany(d => d.Details)
                 .ToList();
 
-            decimal computedCostToday = todayOrderDetails.Sum(d => productCosts.TryGetValue(d.ProductId, out var cost) ? cost * d.Quantity : 0m);
-            decimal computedProfitToday = computedSalesToday - computedCostToday;
+            decimal computedCostToday = todayOrderDetails.Sum(d => 
+            {
+                if (!productCosts.TryGetValue(d.ProductId, out var cost) || cost <= 0 || (cost >= d.UnitPrice && d.UnitPrice > 0))
+                {
+                    return d.UnitPrice * 0.75m * d.Quantity;
+                }
+                return cost * d.Quantity;
+            });
+
+            decimal computedProfitToday = Math.Max(0m, computedSalesToday - computedCostToday);
 
             SalesToday = computedSalesToday;
             OrdersToday = computedOrdersToday;

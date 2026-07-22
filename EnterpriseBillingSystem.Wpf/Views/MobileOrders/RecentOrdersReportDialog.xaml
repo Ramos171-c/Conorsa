@@ -162,9 +162,11 @@
             <TextBlock Text="Observaciones Generales del Consolidado (se incluirán en el Excel)" 
                        Style="{StaticResource MaterialDesignSubtitle2TextBlock}" 
                        FontWeight="Bold" Margin="0,0,0,4" />
-            <TextBox Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                     Text="{Binding GeneralObservations, UpdateSourceTrigger=PropertyChanged}"
-                     TextWrapping="True" AcceptsReturn="True" Height="50" FontSize="13" VerticalContentAlignment="Top" />
+            <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
+                <TextBox Text="{Binding GeneralObservations, UpdateSourceTrigger=PropertyChanged}"
+                         TextWrapping="True" AcceptsReturn="True" Height="45" FontSize="13" 
+                         BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
+            </Border>
         </StackPanel>
 
         <!-- Footer Actions -->
