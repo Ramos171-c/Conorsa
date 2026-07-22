@@ -17,6 +17,12 @@ public record ConsolidatedProductDto(
     decimal AvailableStock,
     decimal DeductedFromInventory,
     decimal NetQuantityToOrder,
+    decimal UnitCost,
+    decimal UnitPrice,
+    decimal TotalPurchaseCost,
+    decimal NetSalesAmount,
+    decimal ProfitMarginAmount,
+    decimal ProfitMarginPercentage,
     decimal TotalNetAmount,
     decimal TotalCost,
     string Observation = ""
@@ -62,7 +68,8 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
         foreach (var g in detailsGrouped)
         {
             var totalQuantity = g.Sum(x => x.Quantity);
-            var totalNetAmount = g.Sum(x => x.NetAmount);
+            var grossSalesAmount = g.Sum(x => x.NetAmount);
+            var unitPrice = totalQuantity > 0 ? grossSalesAmount / totalQuantity : 0m;
 
             // Obtener existencias disponibles desde el diccionario en memoria (O(1))
             stockDict.TryGetValue(g.Key.ProductId, out decimal availableStock);
@@ -75,8 +82,15 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             var presentation = sampleDetail.Product?.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == sampleDetail.UnitOfMeasureId);
             var unitCost = presentation != null ? presentation.Cost : (sampleDetail.Product?.CurrentCost ?? 0m);
 
-            // El costo total estimado se calcula sobre lo que realmente se debe pedir (neto)
-            var totalCost = netToOrder * unitCost;
+            // Costo total de compra al proveedor (sobre lo neto a pedir)
+            var totalPurchaseCost = netToOrder * unitCost;
+
+            // Venta total neta estimada al cliente (sobre lo neto a pedir)
+            var netSalesAmount = netToOrder * unitPrice;
+
+            // Diferencia / Ganancia bruta estimada
+            var profitMarginAmount = netSalesAmount - totalPurchaseCost;
+            var profitMarginPercentage = netSalesAmount > 0 ? (profitMarginAmount / netSalesAmount) * 100m : 0m;
 
             string obs;
             if (availableStock >= totalQuantity)
@@ -85,7 +99,7 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             }
             else if (availableStock > 0)
             {
-                obs = $"Stock parcial en inventario ({availableStock:F2} disp.). Se deducen {deducted:F2} pzas. Pedir {netToOrder:F2}";
+                obs = $"Stock parcial ({availableStock:F2} disp.). Se deducen {deducted:F2} pzas. Pedir {netToOrder:F2}";
             }
             else
             {
@@ -101,8 +115,14 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
                 AvailableStock: availableStock,
                 DeductedFromInventory: deducted,
                 NetQuantityToOrder: netToOrder,
-                TotalNetAmount: totalNetAmount,
-                TotalCost: totalCost,
+                UnitCost: unitCost,
+                UnitPrice: unitPrice,
+                TotalPurchaseCost: totalPurchaseCost,
+                NetSalesAmount: netSalesAmount,
+                ProfitMarginAmount: profitMarginAmount,
+                ProfitMarginPercentage: profitMarginPercentage,
+                TotalNetAmount: grossSalesAmount,
+                TotalCost: totalPurchaseCost,
                 Observation: obs
             ));
         }

@@ -19,9 +19,9 @@ public static class ExcelExportService
         ws.ShowGridLines = true;
 
         // 1. Encabezado de la Empresa y Titulo del Reporte
-        var titleRange = ws.Range("A1:J2");
+        var titleRange = ws.Range("A1:L2");
         titleRange.Merge();
-        titleRange.Value = "EMPRESA BILLING SYSTEM - REPORTE CONSOLIDADO DE COMPRAS";
+        titleRange.Value = "EMPRESA BILLING SYSTEM - REPORTE CONSOLIDADO DE COMPRAS Y VENTAS";
         titleRange.Style.Font.SetBold(true);
         titleRange.Style.Font.SetFontSize(16);
         titleRange.Style.Font.SetFontColor(XLColor.White);
@@ -29,9 +29,9 @@ public static class ExcelExportService
         titleRange.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
         titleRange.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
 
-        var subtitleRange = ws.Range("A3:J3");
+        var subtitleRange = ws.Range("A3:L3");
         subtitleRange.Merge();
-        subtitleRange.Value = $"Bodega Principal Corporativa | Fecha: {DateTime.Now:dd/MM/yyyy HH:mm} | Estado: Pedidos Recibidos";
+        subtitleRange.Value = $"Bodega Principal Corporativa | Fecha: {DateTime.Now:dd/MM/yyyy HH:mm} | Detalle Exacto Financiero (Venta vs Compra)";
         subtitleRange.Style.Font.SetFontSize(10);
         subtitleRange.Style.Font.SetFontColor(XLColor.FromHtml("#94A3B8"));
         subtitleRange.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#0F172A"));
@@ -48,9 +48,11 @@ public static class ExcelExportService
             "Cant. Solicitada",
             "Stock Deducido",
             "NETO A PEDIR",
-            "Costo Unit. Est.",
-            "Total Est. a Pedir ($)",
-            "Estado de Stock",
+            "Costo Unit. Compra",
+            "TOTAL COMPRA ($)",
+            "Precio Unit. Venta",
+            "TOTAL VENTA ($)",
+            "DIFERENCIA GANANCIA ($)",
             "Observaciones"
         };
 
@@ -59,7 +61,7 @@ public static class ExcelExportService
             var cell = ws.Cell(headerRow, i + 1);
             cell.Value = headers[i];
             cell.Style.Font.SetBold(true);
-            cell.Style.Font.SetFontSize(11);
+            cell.Style.Font.SetFontSize(10);
             cell.Style.Font.SetFontColor(XLColor.White);
             cell.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#0F172A"));
             cell.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
@@ -107,54 +109,49 @@ public static class ExcelExportService
             ws.Cell(currentRow, 6).Style.Font.SetBold(true);
             ws.Cell(currentRow, 6).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#FEF3C7")); // Soft Amber Fill
 
-            // Costo Unitario Estimado
-            decimal unitCost = item.NetQuantityToOrder > 0 ? (item.TotalCost / item.NetQuantityToOrder) : (item.TotalQuantity > 0 ? item.TotalNetAmount / item.TotalQuantity : 0m);
-            ws.Cell(currentRow, 7).Value = unitCost;
+            // Costo Unitario de Compra
+            ws.Cell(currentRow, 7).Value = item.UnitCost;
             ws.Cell(currentRow, 7).Style.NumberFormat.SetFormat("$#,##0.00");
             ws.Cell(currentRow, 7).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
 
-            // Total Estimado a Pedir
-            ws.Cell(currentRow, 8).Value = item.TotalCost;
+            // TOTAL COMPRA PROVEEDOR ($)
+            ws.Cell(currentRow, 8).Value = item.TotalPurchaseCost;
             ws.Cell(currentRow, 8).Style.NumberFormat.SetFormat("$#,##0.00");
             ws.Cell(currentRow, 8).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
             ws.Cell(currentRow, 8).Style.Font.SetBold(true);
-            ws.Cell(currentRow, 8).Style.Font.SetFontColor(XLColor.FromHtml("#1E293B"));
+            ws.Cell(currentRow, 8).Style.Font.SetFontColor(XLColor.FromHtml("#B45309"));
 
-            // Estado Badge Cell
-            var statusCell = ws.Cell(currentRow, 9);
-            statusCell.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
-            statusCell.Style.Font.SetBold(true);
-            if (item.AvailableStock >= item.TotalQuantity)
-            {
-                statusCell.Value = "Stock Suficiente";
-                statusCell.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#DCFCE7"));
-                statusCell.Style.Font.SetFontColor(XLColor.FromHtml("#15803D"));
-            }
-            else if (item.AvailableStock > 0)
-            {
-                statusCell.Value = "Stock Parcial";
-                statusCell.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#FEF3C7"));
-                statusCell.Style.Font.SetFontColor(XLColor.FromHtml("#B45309"));
-            }
-            else
-            {
-                statusCell.Value = "Sin Stock";
-                statusCell.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#FFEDD5"));
-                statusCell.Style.Font.SetFontColor(XLColor.FromHtml("#C2410C"));
-            }
+            // Precio Unitario Venta
+            ws.Cell(currentRow, 9).Value = item.UnitPrice;
+            ws.Cell(currentRow, 9).Style.NumberFormat.SetFormat("$#,##0.00");
+            ws.Cell(currentRow, 9).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+
+            // TOTAL VENTA CLIENTE ($)
+            ws.Cell(currentRow, 10).Value = item.NetSalesAmount;
+            ws.Cell(currentRow, 10).Style.NumberFormat.SetFormat("$#,##0.00");
+            ws.Cell(currentRow, 10).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+            ws.Cell(currentRow, 10).Style.Font.SetBold(true);
+            ws.Cell(currentRow, 10).Style.Font.SetFontColor(XLColor.FromHtml("#1E40AF"));
+
+            // DIFERENCIA / GANANCIA ($)
+            ws.Cell(currentRow, 11).Value = item.ProfitMarginAmount;
+            ws.Cell(currentRow, 11).Style.NumberFormat.SetFormat("$#,##0.00");
+            ws.Cell(currentRow, 11).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+            ws.Cell(currentRow, 11).Style.Font.SetBold(true);
+            ws.Cell(currentRow, 11).Style.Font.SetFontColor(XLColor.FromHtml("#15803D"));
 
             // Observaciones de la fila
-            ws.Cell(currentRow, 10).Value = item.Observation;
-            ws.Cell(currentRow, 10).Style.Font.SetItalic(true);
-            ws.Cell(currentRow, 10).Style.Font.SetFontSize(9);
+            ws.Cell(currentRow, 12).Value = item.Observation;
+            ws.Cell(currentRow, 12).Style.Font.SetItalic(true);
+            ws.Cell(currentRow, 12).Style.Font.SetFontSize(9);
 
             // Zebra Striping & Borders
-            var rowRange = ws.Range(currentRow, 1, currentRow, 10);
+            var rowRange = ws.Range(currentRow, 1, currentRow, 12);
             if (currentRow % 2 == 1)
             {
-                for (int col = 1; col <= 10; col++)
+                for (int col = 1; col <= 12; col++)
                 {
-                    if (col != 6 && col != 9) // Conservar los rellenos destacados
+                    if (col != 6) // Conservar el relleno de Neto a Pedir
                     {
                         ws.Cell(currentRow, col).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#F8FAFC"));
                     }
@@ -173,11 +170,11 @@ public static class ExcelExportService
         int dataEndRow = currentRow - 1;
 
         // 4. RECALCAR EN LA PARTE DE ABAJO DEL EXCEL (Sección de Totales y Resumen Ejecutivo)
-        currentRow += 2; // Espacio
+        currentRow += 2;
 
-        var summaryTitleRange = ws.Range(currentRow, 1, currentRow, 10);
+        var summaryTitleRange = ws.Range(currentRow, 1, currentRow, 12);
         summaryTitleRange.Merge();
-        summaryTitleRange.Value = "RESUMEN EJECUTIVO Y TOTALES RECALCADOS DE CONSOLIDACIÓN";
+        summaryTitleRange.Value = "RESUMEN EJECUTIVO Y TOTALES RECALCADOS DE CONSOLIDACIÓN (SIN QUE FALTE UN CENTAVO)";
         summaryTitleRange.Style.Font.SetBold(true);
         summaryTitleRange.Style.Font.SetFontSize(12);
         summaryTitleRange.Style.Font.SetFontColor(XLColor.White);
@@ -189,7 +186,7 @@ public static class ExcelExportService
 
         // Fila Totales Solicitados (Brutos)
         ws.Range(currentRow, 1, currentRow, 5).Merge();
-        ws.Cell(currentRow, 1).Value = "TOTAL PIEZAS SOLICITADAS POR PEDIDOS (BRUTO):";
+        ws.Cell(currentRow, 1).Value = "TOTAL PIEZAS SOLICITADAS POR CLIENTES (BRUTO):";
         ws.Cell(currentRow, 1).Style.Font.SetBold(true);
         ws.Cell(currentRow, 1).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
         ws.Cell(currentRow, 6).FormulaA1 = dataEndRow >= dataStartRow ? $"SUM(D{dataStartRow}:D{dataEndRow})" : "0";
@@ -197,12 +194,12 @@ public static class ExcelExportService
         ws.Cell(currentRow, 6).Style.Font.SetBold(true);
         ws.Cell(currentRow, 6).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
         ws.Cell(currentRow, 6).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#F1F5F9"));
-        ws.Range(currentRow, 1, currentRow, 10).Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
+        ws.Range(currentRow, 1, currentRow, 12).Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
         currentRow++;
 
         // Fila Totales Deducidos de Inventario
         ws.Range(currentRow, 1, currentRow, 5).Merge();
-        ws.Cell(currentRow, 1).Value = "TOTAL PIEZAS DEDUCIDAS DE INVENTARIO (NO SE RE-PIDEN):";
+        ws.Cell(currentRow, 1).Value = "TOTAL PIEZAS DEDUCIDAS DE INVENTARIO (DISPONIBLES EN BODEGA):";
         ws.Cell(currentRow, 1).Style.Font.SetBold(true);
         ws.Cell(currentRow, 1).Style.Font.SetFontColor(XLColor.FromHtml("#15803D"));
         ws.Cell(currentRow, 1).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
@@ -212,7 +209,7 @@ public static class ExcelExportService
         ws.Cell(currentRow, 6).Style.Font.SetFontColor(XLColor.FromHtml("#15803D"));
         ws.Cell(currentRow, 6).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
         ws.Cell(currentRow, 6).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#DCFCE7"));
-        ws.Range(currentRow, 1, currentRow, 10).Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
+        ws.Range(currentRow, 1, currentRow, 12).Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
         currentRow++;
 
         // Fila NETO TOTAL A PEDIR AL PROVEEDOR
@@ -229,29 +226,63 @@ public static class ExcelExportService
         ws.Cell(currentRow, 6).Style.Font.SetFontColor(XLColor.FromHtml("#B45309"));
         ws.Cell(currentRow, 6).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
         ws.Cell(currentRow, 6).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#FEF3C7"));
-        ws.Range(currentRow, 1, currentRow, 10).Style.Border.SetOutsideBorder(XLBorderStyleValues.Medium);
+        ws.Range(currentRow, 1, currentRow, 12).Style.Border.SetOutsideBorder(XLBorderStyleValues.Medium);
         currentRow++;
 
-        // Fila MONTO TOTAL ESTIMADO A PEDIR ($)
+        // Fila MONTO TOTAL ESTIMADO DE COMPRA AL PROVEEDOR ($)
         ws.Range(currentRow, 1, currentRow, 7).Merge();
-        ws.Cell(currentRow, 1).Value = "MONTO TOTAL ESTIMADO DE REQUERIMIENTO ($):";
+        ws.Cell(currentRow, 1).Value = "MONTO TOTAL ESTIMADO DE COMPRA AL PROVEEDOR ($):";
         ws.Cell(currentRow, 1).Style.Font.SetBold(true);
-        ws.Cell(currentRow, 1).Style.Font.SetFontSize(13);
-        ws.Cell(currentRow, 1).Style.Font.SetFontColor(XLColor.FromHtml("#166534"));
+        ws.Cell(currentRow, 1).Style.Font.SetFontSize(12);
+        ws.Cell(currentRow, 1).Style.Font.SetFontColor(XLColor.FromHtml("#B45309"));
         ws.Cell(currentRow, 1).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
         ws.Cell(currentRow, 8).FormulaA1 = dataEndRow >= dataStartRow ? $"SUM(H{dataStartRow}:H{dataEndRow})" : "0";
         ws.Cell(currentRow, 8).Style.NumberFormat.SetFormat("$#,##0.00");
         ws.Cell(currentRow, 8).Style.Font.SetBold(true);
-        ws.Cell(currentRow, 8).Style.Font.SetFontSize(13);
-        ws.Cell(currentRow, 8).Style.Font.SetFontColor(XLColor.FromHtml("#166534"));
+        ws.Cell(currentRow, 8).Style.Font.SetFontSize(12);
+        ws.Cell(currentRow, 8).Style.Font.SetFontColor(XLColor.FromHtml("#B45309"));
         ws.Cell(currentRow, 8).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
-        ws.Cell(currentRow, 8).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#D1FAE5"));
-        ws.Range(currentRow, 1, currentRow, 10).Style.Border.SetOutsideBorder(XLBorderStyleValues.Medium);
+        ws.Cell(currentRow, 8).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#FEF3C7"));
+        ws.Range(currentRow, 1, currentRow, 12).Style.Border.SetOutsideBorder(XLBorderStyleValues.Medium);
+        currentRow++;
+
+        // Fila MONTO TOTAL ESTIMADO DE VENTA A CLIENTES ($)
+        ws.Range(currentRow, 1, currentRow, 9).Merge();
+        ws.Cell(currentRow, 1).Value = "MONTO TOTAL ESTIMADO DE VENTA A CLIENTES ($):";
+        ws.Cell(currentRow, 1).Style.Font.SetBold(true);
+        ws.Cell(currentRow, 1).Style.Font.SetFontSize(12);
+        ws.Cell(currentRow, 1).Style.Font.SetFontColor(XLColor.FromHtml("#1E40AF"));
+        ws.Cell(currentRow, 1).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+        ws.Cell(currentRow, 10).FormulaA1 = dataEndRow >= dataStartRow ? $"SUM(J{dataStartRow}:J{dataEndRow})" : "0";
+        ws.Cell(currentRow, 10).Style.NumberFormat.SetFormat("$#,##0.00");
+        ws.Cell(currentRow, 10).Style.Font.SetBold(true);
+        ws.Cell(currentRow, 10).Style.Font.SetFontSize(12);
+        ws.Cell(currentRow, 10).Style.Font.SetFontColor(XLColor.FromHtml("#1E40AF"));
+        ws.Cell(currentRow, 10).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+        ws.Cell(currentRow, 10).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#DBEAFE"));
+        ws.Range(currentRow, 1, currentRow, 12).Style.Border.SetOutsideBorder(XLBorderStyleValues.Medium);
+        currentRow++;
+
+        // Fila DIFERENCIA / MARGEN DE GANANCIA BRUTA ($)
+        ws.Range(currentRow, 1, currentRow, 10).Merge();
+        ws.Cell(currentRow, 1).Value = "DIFERENCIA / MARGEN DE GANANCIA ESTIMADO (VENTA - COMPRA):";
+        ws.Cell(currentRow, 1).Style.Font.SetBold(true);
+        ws.Cell(currentRow, 1).Style.Font.SetFontSize(13);
+        ws.Cell(currentRow, 1).Style.Font.SetFontColor(XLColor.FromHtml("#166534"));
+        ws.Cell(currentRow, 1).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+        ws.Cell(currentRow, 11).FormulaA1 = dataEndRow >= dataStartRow ? $"SUM(K{dataStartRow}:K{dataEndRow})" : "0";
+        ws.Cell(currentRow, 11).Style.NumberFormat.SetFormat("$#,##0.00");
+        ws.Cell(currentRow, 11).Style.Font.SetBold(true);
+        ws.Cell(currentRow, 11).Style.Font.SetFontSize(13);
+        ws.Cell(currentRow, 11).Style.Font.SetFontColor(XLColor.FromHtml("#166534"));
+        ws.Cell(currentRow, 11).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+        ws.Cell(currentRow, 11).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#DCFCE7"));
+        ws.Range(currentRow, 1, currentRow, 12).Style.Border.SetOutsideBorder(XLBorderStyleValues.Medium);
         currentRow++;
 
         // 5. SECCIÓN DE OBSERVACIONES GENERALES DE LA CONSOLIDACIÓN
         currentRow += 2;
-        var obsHeaderRange = ws.Range(currentRow, 1, currentRow, 10);
+        var obsHeaderRange = ws.Range(currentRow, 1, currentRow, 12);
         obsHeaderRange.Merge();
         obsHeaderRange.Value = "OBSERVACIONES Y NOTAS GENERALES DE LA CONSOLIDACIÓN:";
         obsHeaderRange.Style.Font.SetBold(true);
@@ -260,7 +291,7 @@ public static class ExcelExportService
         obsHeaderRange.Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
         currentRow++;
 
-        var obsBoxRange = ws.Range(currentRow, 1, currentRow + 2, 10);
+        var obsBoxRange = ws.Range(currentRow, 1, currentRow + 2, 12);
         obsBoxRange.Merge();
         obsBoxRange.Value = string.IsNullOrWhiteSpace(generalObservations)
             ? "Sin observaciones adicionales registradas para este reporte de consolidación."
@@ -279,10 +310,11 @@ public static class ExcelExportService
         ws.Column(2).Width = Math.Max(ws.Column(2).Width, 35);
         ws.Column(4).Width = Math.Max(ws.Column(4).Width, 18);
         ws.Column(5).Width = Math.Max(ws.Column(5).Width, 18);
-        ws.Column(6).Width = Math.Max(ws.Column(6).Width, 20);
-        ws.Column(8).Width = Math.Max(ws.Column(8).Width, 22);
-        ws.Column(9).Width = Math.Max(ws.Column(9).Width, 18);
-        ws.Column(10).Width = Math.Max(ws.Column(10).Width, 35);
+        ws.Column(6).Width = Math.Max(ws.Column(6).Width, 18);
+        ws.Column(8).Width = Math.Max(ws.Column(8).Width, 20);
+        ws.Column(10).Width = Math.Max(ws.Column(10).Width, 20);
+        ws.Column(11).Width = Math.Max(ws.Column(11).Width, 22);
+        ws.Column(12).Width = Math.Max(ws.Column(12).Width, 30);
 
         workbook.SaveAs(filePath);
     }

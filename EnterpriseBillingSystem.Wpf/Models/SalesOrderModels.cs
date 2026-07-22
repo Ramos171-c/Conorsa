@@ -127,6 +127,12 @@ public record ConsolidatedProductDto(
     decimal AvailableStock,
     decimal DeductedFromInventory,
     decimal NetQuantityToOrder,
+    decimal UnitCost,
+    decimal UnitPrice,
+    decimal TotalPurchaseCost,
+    decimal NetSalesAmount,
+    decimal ProfitMarginAmount,
+    decimal ProfitMarginPercentage,
     decimal TotalNetAmount,
     decimal TotalCost,
     string Observation = ""

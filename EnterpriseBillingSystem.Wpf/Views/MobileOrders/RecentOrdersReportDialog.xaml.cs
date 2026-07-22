@@ -53,7 +53,10 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         public decimal TotalItems => ConsolidatedProducts.Sum(p => p.TotalQuantity);
         public decimal TotalDeducted => ConsolidatedProducts.Sum(p => p.DeductedFromInventory);
         public decimal TotalNetToOrder => ConsolidatedProducts.Sum(p => p.NetQuantityToOrder);
-        public decimal TotalEstimatedCost => ConsolidatedProducts.Sum(p => p.TotalCost);
+        public decimal TotalEstimatedCost => ConsolidatedProducts.Sum(p => p.TotalPurchaseCost);
+        public decimal TotalEstimatedSales => ConsolidatedProducts.Sum(p => p.NetSalesAmount);
+        public decimal TotalProfitMargin => TotalEstimatedSales - TotalEstimatedCost;
+        public decimal ProfitMarginPercentage => TotalEstimatedSales > 0 ? (TotalProfitMargin / TotalEstimatedSales) * 100m : 0m;
 
         public ObservableCollection<ConsolidatedProductDto> ConsolidatedProducts { get; } = new();
 
@@ -93,6 +96,9 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 OnPropertyChanged(nameof(TotalDeducted));
                 OnPropertyChanged(nameof(TotalNetToOrder));
                 OnPropertyChanged(nameof(TotalEstimatedCost));
+                OnPropertyChanged(nameof(TotalEstimatedSales));
+                OnPropertyChanged(nameof(TotalProfitMargin));
+                OnPropertyChanged(nameof(ProfitMarginPercentage));
             }
             catch (Exception ex)
             {

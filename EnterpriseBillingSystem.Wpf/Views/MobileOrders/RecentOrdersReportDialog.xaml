@@ -39,47 +39,56 @@
             </StackPanel>
         </Grid>
 
-        <!-- Summary Info Card (4 KPIs) -->
-        <materialDesign:Card Grid.Row="1" Margin="0,0,0,16" Padding="16" materialDesign:ElevationAssist.Elevation="Dp1" Background="#F8FAFC">
+        <!-- Summary Info Card (5 Financial KPIs) -->
+        <materialDesign:Card Grid.Row="1" Margin="0,0,0,16" Padding="12,14" materialDesign:ElevationAssist.Elevation="Dp1" Background="#F8FAFC">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="16" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="16" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="16" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="16" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="Consolidado de Pedidos 'Recibido'" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource PrimaryHueMidBrush}" />
-                    <TextBlock Text="Deducción de existencias en bodega corporativa" Opacity="0.7" FontSize="11" Margin="0,2,0,0"/>
+                    <TextBlock Text="Consolidado Financiero de Compras y Ventas" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                    <TextBlock Text="Deducción exacta de existencias y margen proyectado" Opacity="0.7" FontSize="11" Margin="0,2,0,0"/>
                 </StackPanel>
 
-                <!-- KPI 1: Cantidad Solicitada (Bruta) -->
+                <!-- KPI 1: Deducido de Inventario -->
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="SOLICITADO BRUTO" FontSize="10" Foreground="#64748B" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalItems, StringFormat={}{0:N2}}" FontSize="18" FontWeight="Bold" Foreground="#334155" HorizontalAlignment="Right" />
+                    <TextBlock Text="STOCK DEDUCIDO" FontSize="10" Foreground="#166534" FontWeight="Bold" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalDeducted, StringFormat={}{0:N2} pzas}" FontSize="15" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
                 </StackPanel>
 
-                <!-- KPI 2: Deducido de Inventario -->
+                <!-- KPI 2: Neto a Comprar al Proveedor -->
                 <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="DEDUCIDO INVENTARIO" FontSize="10" Foreground="#166534" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalDeducted, StringFormat={}{0:N2}}" FontSize="18" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
+                    <TextBlock Text="TOTAL COMPRA (NETO)" FontSize="10" Foreground="#B45309" FontWeight="Bold" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalEstimatedCost, StringFormat={}{0:C2}}" FontSize="16" FontWeight="Bold" Foreground="#B45309" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalNetToOrder, StringFormat={}{0:N2} pzas a pedir}" FontSize="10" Foreground="#B45309" HorizontalAlignment="Right" />
                 </StackPanel>
 
-                <!-- KPI 3: Neto a Pedir -->
+                <!-- KPI 3: Venta Total Neta Estimada -->
                 <StackPanel Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="NETO A PEDIR" FontSize="10" Foreground="#B45309" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalNetToOrder, StringFormat={}{0:N2}}" FontSize="18" FontWeight="Bold" Foreground="#B45309" HorizontalAlignment="Right" />
+                    <TextBlock Text="TOTAL VENTA (CLIENTES)" FontSize="10" Foreground="#1E40AF" FontWeight="Bold" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalEstimatedSales, StringFormat={}{0:C2}}" FontSize="16" FontWeight="Bold" Foreground="#1E40AF" HorizontalAlignment="Right" />
                 </StackPanel>
 
-                <!-- KPI 4: Valor Estimado Neto -->
+                <!-- KPI 4: Diferencia en Dinero -->
                 <StackPanel Grid.Column="7" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="VALOR EST. NETO" FontSize="10" Foreground="#64748B" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalEstimatedCost, StringFormat={}{0:C2}}" FontSize="18" FontWeight="Bold" Foreground="#2E7D32" HorizontalAlignment="Right" />
+                    <TextBlock Text="DIFERENCIA GANANCIA" FontSize="10" Foreground="#15803D" FontWeight="Bold" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalProfitMargin, StringFormat={}{0:C2}}" FontSize="16" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
+                </StackPanel>
+
+                <!-- KPI 5: Margen % -->
+                <StackPanel Grid.Column="9" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock Text="MARGEN BRUTO" FontSize="10" Foreground="#15803D" FontWeight="Bold" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding ProfitMarginPercentage, StringFormat={}{0:N1}%}" FontSize="16" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
                 </StackPanel>
             </Grid>
         </materialDesign:Card>
@@ -93,14 +102,18 @@
 
                 <DataGrid ItemsSource="{Binding ConsolidatedProducts}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="110" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="95" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
                         <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="70" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding TotalQuantity, StringFormat={}{0:N2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Stock Deducido" Binding="{Binding DeductedFromInventory, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="NETO A PEDIR" Binding="{Binding NetQuantityToOrder, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
-                        <DataGridTextColumn Header="Total Est. a Pedir" Binding="{Binding TotalCost, StringFormat={}{0:C2}}" Width="130" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
-                        <DataGridTextColumn Header="Observaciones" Binding="{Binding Observation}" Width="200" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="65" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding TotalQuantity, StringFormat={}{0:N2}}" Width="95" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                        <DataGridTextColumn Header="Stock Deducido" Binding="{Binding DeductedFromInventory, StringFormat={}{0:N2}}" Width="105" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                        <DataGridTextColumn Header="Neto A Pedir" Binding="{Binding NetQuantityToOrder, StringFormat={}{0:N2}}" Width="100" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Costo Unit." Binding="{Binding UnitCost, StringFormat={}{0:C2}}" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                        <DataGridTextColumn Header="Total Compra" Binding="{Binding TotalPurchaseCost, StringFormat={}{0:C2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" Foreground="#B45309" />
+                        <DataGridTextColumn Header="Venta Unit." Binding="{Binding UnitPrice, StringFormat={}{0:C2}}" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                        <DataGridTextColumn Header="Total Venta" Binding="{Binding NetSalesAmount, StringFormat={}{0:C2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" Foreground="#1E40AF" />
+                        <DataGridTextColumn Header="Diferencia ($)" Binding="{Binding ProfitMarginAmount, StringFormat={}{0:C2}}" Width="115" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" Foreground="#15803D" />
+                        <DataGridTextColumn Header="Observaciones" Binding="{Binding Observation}" Width="160" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                     </DataGrid.Columns>
                 </DataGrid>
                 
