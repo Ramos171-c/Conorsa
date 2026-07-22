@@ -490,6 +490,9 @@ class _PosScreenState extends State<PosScreen> {
       return;
     }
 
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final isAdmin = auth.userProfile?.isAdmin == true;
+    DateTime selectedDate = DateTime.now();
     final notesController = TextEditingController(text: 'Pedido desde POS Móvil (Vendedor)');
     String? localError;
 
@@ -545,6 +548,58 @@ class _PosScreenState extends State<PosScreen> {
                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF1E293B)),
                     ),
                     const SizedBox(height: 12),
+                    if (isAdmin) ...[
+                      const Text(
+                        'Fecha del Pedido (Admin)',
+                        style: TextStyle(fontWeight: FontWeight.bold, fontSize: 12, color: Color(0xFF64748B)),
+                      ),
+                      const SizedBox(height: 6),
+                      InkWell(
+                        onTap: () async {
+                          final DateTime? picked = await showDatePicker(
+                            context: context,
+                            initialDate: selectedDate,
+                            firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                            lastDate: DateTime.now().add(const Duration(days: 365)),
+                            builder: (context, child) {
+                              return Theme(
+                                data: Theme.of(context).copyWith(
+                                  colorScheme: const ColorScheme.light(
+                                    primary: Color(0xFF0F172A),
+                                    onPrimary: Colors.white,
+                                    onSurface: Color(0xFF0F172A),
+                                  ),
+                                ),
+                                child: child!,
+                              );
+                            },
+                          );
+                          if (picked != null) {
+                            setDialogState(() {
+                              selectedDate = picked;
+                            });
+                          }
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                          decoration: BoxDecoration(
+                            border: Border.all(color: Colors.grey.shade400),
+                            borderRadius: BorderRadius.circular(6),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                '${selectedDate.day.toString().padLeft(2, '0')}/${selectedDate.month.toString().padLeft(2, '0')}/${selectedDate.year}',
+                                style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14),
+                              ),
+                              const Icon(Icons.calendar_today_rounded, size: 18, color: Color(0xFF64748B)),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 16),
+                    ],
                     TextField(
                       controller: notesController,
                       maxLines: 3,
@@ -602,6 +657,7 @@ class _PosScreenState extends State<PosScreen> {
                           
                           final success = await posProv.checkout(
                             notes: notesController.text.trim(),
+                            customDate: isAdmin ? selectedDate : null,
                           );
 
                           if (success) {

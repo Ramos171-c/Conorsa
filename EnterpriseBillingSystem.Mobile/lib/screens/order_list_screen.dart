@@ -4,6 +4,7 @@ import '../providers/order_provider.dart';
 import '../providers/pos_provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/order.dart';
+import '../models/route.dart';
 import 'pos_screen.dart';
 
 class OrderListScreen extends StatefulWidget {
@@ -14,11 +15,17 @@ class OrderListScreen extends StatefulWidget {
 }
 
 class _OrderListScreenState extends State<OrderListScreen> {
+  String? _selectedRouteId;
+
   @override
   void initState() {
     super.initState();
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<OrderProvider>(context, listen: false).fetchOrders();
+      final authProv = Provider.of<AuthProvider>(context, listen: false);
+      if (authProv.userProfile?.isAdmin == true) {
+        Provider.of<OrderProvider>(context, listen: false).fetchRoutes();
+      }
+      Provider.of<OrderProvider>(context, listen: false).fetchOrders(routeId: _selectedRouteId);
     });
   }
 
@@ -238,6 +245,8 @@ class _OrderListScreenState extends State<OrderListScreen> {
                         _buildDetailRow('Cliente', detail.customerName),
                         _buildDetailRow('Fecha', '${detail.orderDate.day}/${detail.orderDate.month}/${detail.orderDate.year}'),
                         _buildDetailRow('Estado', _getStatusText(detail.status)),
+                        if (detail.createdBy != null && detail.createdBy!.isNotEmpty)
+                          _buildDetailRow('Vendedor', detail.createdBy!),
                         if (detail.notes != null && detail.notes!.isNotEmpty)
                           _buildDetailRow('Notas', detail.notes!),
                         const SizedBox(height: 16),
@@ -367,172 +376,227 @@ class _OrderListScreenState extends State<OrderListScreen> {
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
       ),
-      body: RefreshIndicator(
-        onRefresh: () => provider.fetchOrders(),
-        child: provider.isLoading && provider.orders.isEmpty
-            ? const Center(child: CircularProgressIndicator())
-            : provider.orders.isEmpty
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.history_toggle_off_rounded, size: 70, color: Color(0xFFCBD5E1)),
-                        SizedBox(height: 16),
-                        Text(
-                          'No hay pedidos registrados',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF757575)),
+      body: Column(
+        children: [
+          if (Provider.of<AuthProvider>(context, listen: false).userProfile?.isAdmin == true)
+            Container(
+              color: Colors.white,
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              child: Card(
+                elevation: 0,
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12),
+                  side: const BorderSide(color: Color(0xFFE2E8F0)),
+                ),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 12),
+                  child: DropdownButtonHideUnderline(
+                    child: DropdownButtonFormField<String?>(
+                      value: _selectedRouteId,
+                      decoration: const InputDecoration(
+                        labelText: 'Filtrar por Ruta',
+                        border: InputBorder.none,
+                        prefixIcon: Icon(Icons.route_rounded, color: Color(0xFF475569)),
+                      ),
+                      items: [
+                        const DropdownMenuItem<String?>(
+                          value: null,
+                          child: Text('Todas las rutas'),
                         ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Los pedidos que registre se mostrarán aquí.',
-                          style: TextStyle(color: Color(0xFF64748B)),
-                        ),
+                        ...provider.routes.map((RouteItem route) {
+                          return DropdownMenuItem<String?>(
+                            value: route.id,
+                            child: Text('${route.code} - ${route.name}'),
+                          );
+                        }),
                       ],
+                      onChanged: (val) {
+                        setState(() {
+                          _selectedRouteId = val;
+                        });
+                        provider.fetchOrders(routeId: val);
+                      },
                     ),
-                  )
-                : ListView.builder(
-                    padding: const EdgeInsets.all(16),
-                    itemCount: provider.orders.length,
-                    itemBuilder: (context, index) {
-                      final order = provider.orders[index];
-                      final statusColor = _getStatusColor(order.status);
-                      final formattedDate = '${order.orderDate.day}/${order.orderDate.month}/${order.orderDate.year}';
-
-                      // 10 minute rule for editing
-                      final difference = DateTime.now().difference(order.orderDate.toLocal());
-                      final statusLower = order.status.toLowerCase();
-                      final canCancel = statusLower == 'recibido' ||
-                          statusLower == '2' ||
-                          statusLower == 'enproceso' ||
-                          statusLower == '4';
-                      final canEdit = difference.inMinutes < 10 && canCancel;
-
-                      return Card(
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(12),
-                          side: const BorderSide(color: Color(0xFFE2E8F0)),
-                        ),
-                        color: Colors.white,
-                        margin: const EdgeInsets.only(bottom: 12),
-                        child: Padding(
+                  ),
+                ),
+              ),
+            ),
+          Expanded(
+            child: RefreshIndicator(
+              onRefresh: () => provider.fetchOrders(routeId: _selectedRouteId),
+              child: provider.isLoading && provider.orders.isEmpty
+                  ? const Center(child: CircularProgressIndicator())
+                  : provider.orders.isEmpty
+                      ? ListView(
+                          physics: const AlwaysScrollableScrollPhysics(),
+                          children: [
+                            SizedBox(height: MediaQuery.of(context).size.height * 0.2),
+                            const Center(
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  Icon(Icons.history_toggle_off_rounded, size: 70, color: Color(0xFFCBD5E1)),
+                                  SizedBox(height: 16),
+                                  Text(
+                                    'No hay pedidos registrados',
+                                    style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF757575)),
+                                  ),
+                                  SizedBox(height: 6),
+                                  Text(
+                                    'Los pedidos que registre se mostrarán aquí.',
+                                    style: TextStyle(color: Color(0xFF64748B)),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        )
+                      : ListView.builder(
                           padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.stretch,
-                            children: [
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  Text(
-                                    'Pedido #${order.orderNumber}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 16,
-                                      color: Color(0xFF1E293B),
-                                    ),
-                                  ),
-                                  Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                                    decoration: BoxDecoration(
-                                      color: statusColor.withOpacity(0.1),
-                                      border: Border.all(color: statusColor),
-                                      borderRadius: BorderRadius.circular(20),
-                                    ),
-                                    child: Text(
-                                      _getStatusText(order.status),
-                                      style: TextStyle(
-                                        color: statusColor,
-                                        fontWeight: FontWeight.bold,
-                                        fontSize: 12,
-                                      ),
-                                    ),
-                                  ),
-                                ],
+                          itemCount: provider.orders.length,
+                          itemBuilder: (context, index) {
+                            final order = provider.orders[index];
+                            final statusColor = _getStatusColor(order.status);
+                            final formattedDate = '${order.orderDate.day}/${order.orderDate.month}/${order.orderDate.year}';
+
+                            // 10 minute rule for editing
+                            final difference = DateTime.now().difference(order.orderDate.toLocal());
+                            final statusLower = order.status.toLowerCase();
+                            final canCancel = statusLower == 'recibido' ||
+                                statusLower == '2' ||
+                                statusLower == 'enproceso' ||
+                                statusLower == '4';
+                            final canEdit = difference.inMinutes < 10 && canCancel;
+
+                            return Card(
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                                side: const BorderSide(color: Color(0xFFE2E8F0)),
                               ),
-                              const SizedBox(height: 12),
-                              Row(
-                                children: [
-                                  Icon(Icons.person, size: 16, color: Colors.grey.shade400),
-                                  const SizedBox(width: 6),
-                                  Expanded(
-                                    child: Text(
-                                      order.customerName,
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w600,
-                                        color: Color(0xFF475569),
-                                      ),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 6),
-                              Row(
-                                children: [
-                                  Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade400),
-                                  const SizedBox(width: 8),
-                                  Text(
-                                    formattedDate,
-                                    style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 12),
-                              const Divider(),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  const Text(
-                                    'Total del Pedido:',
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      color: Color(0xFF64748B),
-                                      fontWeight: FontWeight.w500,
-                                    ),
-                                  ),
-                                  Text(
-                                    '\$${order.totalAmount.toStringAsFixed(2)}',
-                                    style: const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      fontSize: 18,
-                                      color: Color(0xFF1E3A8A),
-                                    ),
-                                  ),
-                                ],
-                              ),
-                              const SizedBox(height: 8),
-                              const Divider(),
-                              SingleChildScrollView(
-                                scrollDirection: Axis.horizontal,
-                                child: Row(
-                                  mainAxisAlignment: MainAxisAlignment.end,
+                              color: Colors.white,
+                              margin: const EdgeInsets.only(bottom: 12),
+                              child: Padding(
+                                padding: const EdgeInsets.all(16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.stretch,
                                   children: [
-                                    TextButton.icon(
-                                      onPressed: () => _showOrderDetails(context, order.id),
-                                      icon: const Icon(Icons.info_outline, size: 18),
-                                      label: const Text('Ver Detalles'),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        Text(
+                                          'Pedido #${order.orderNumber}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 16,
+                                            color: Color(0xFF1E293B),
+                                          ),
+                                        ),
+                                        Container(
+                                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                                          decoration: BoxDecoration(
+                                            color: statusColor.withOpacity(0.1),
+                                            border: Border.all(color: statusColor),
+                                            borderRadius: BorderRadius.circular(20),
+                                          ),
+                                          child: Text(
+                                            _getStatusText(order.status),
+                                            style: TextStyle(
+                                              color: statusColor,
+                                              fontWeight: FontWeight.bold,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ),
+                                      ],
                                     ),
-                                    if (canEdit)
-                                      TextButton.icon(
-                                        onPressed: () => _editOrder(context, order),
-                                        icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
-                                        label: const Text('Editar', style: TextStyle(color: Colors.blue)),
+                                    const SizedBox(height: 12),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.person, size: 16, color: Colors.grey.shade400),
+                                        const SizedBox(width: 6),
+                                        Expanded(
+                                          child: Text(
+                                            order.customerName,
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w600,
+                                              color: Color(0xFF475569),
+                                            ),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 6),
+                                    Row(
+                                      children: [
+                                        Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade400),
+                                        const SizedBox(width: 8),
+                                        Text(
+                                          formattedDate,
+                                          style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 12),
+                                    const Divider(),
+                                    const SizedBox(height: 8),
+                                    Row(
+                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                      children: [
+                                        const Text(
+                                          'Total del Pedido:',
+                                          style: TextStyle(
+                                            fontSize: 14,
+                                            color: Color(0xFF64748B),
+                                            fontWeight: FontWeight.w500,
+                                          ),
+                                        ),
+                                        Text(
+                                          '\$${order.totalAmount.toStringAsFixed(2)}',
+                                          style: const TextStyle(
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 18,
+                                            color: Color(0xFF1E3A8A),
+                                          ),
+                                        ),
+                                      ],
+                                    ),
+                                    const SizedBox(height: 8),
+                                    const Divider(),
+                                    SingleChildScrollView(
+                                      scrollDirection: Axis.horizontal,
+                                      child: Row(
+                                        mainAxisAlignment: MainAxisAlignment.end,
+                                        children: [
+                                          TextButton.icon(
+                                            onPressed: () => _showOrderDetails(context, order.id),
+                                            icon: const Icon(Icons.info_outline, size: 18),
+                                            label: const Text('Ver Detalles'),
+                                          ),
+                                          if (canEdit)
+                                            TextButton.icon(
+                                              onPressed: () => _editOrder(context, order),
+                                              icon: const Icon(Icons.edit_outlined, size: 18, color: Colors.blue),
+                                              label: const Text('Editar', style: TextStyle(color: Colors.blue)),
+                                            ),
+                                          if (canCancel)
+                                            TextButton.icon(
+                                              onPressed: () => _cancelOrderDialog(context, order.id),
+                                              icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.red),
+                                              label: const Text('Sol. Anulación', style: TextStyle(color: Colors.red)),
+                                            ),
+                                        ],
                                       ),
-                                    if (canCancel)
-                                      TextButton.icon(
-                                        onPressed: () => _cancelOrderDialog(context, order.id),
-                                        icon: const Icon(Icons.cancel_outlined, size: 18, color: Colors.red),
-                                        label: const Text('Sol. Anulación', style: TextStyle(color: Colors.red)),
-                                      ),
+                                    ),
                                   ],
                                 ),
                               ),
-                            ],
-                          ),
+                            );
+                          },
                         ),
-                      );
-                    },
-                  ),
+            ),
+          ),
+        ],
       ),
     );
   }

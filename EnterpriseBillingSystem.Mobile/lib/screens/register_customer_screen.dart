@@ -6,7 +6,8 @@ import '../services/offline_service.dart';
 import '../providers/auth_provider.dart';
 
 class RegisterCustomerScreen extends StatefulWidget {
-  const RegisterCustomerScreen({super.key});
+  final Map<String, dynamic>? editCustomerData;
+  const RegisterCustomerScreen({super.key, this.editCustomerData});
 
   @override
   State<RegisterCustomerScreen> createState() => _RegisterCustomerScreenState();
@@ -44,9 +45,54 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
   bool _isSaving = false;
   String? _errorMessage;
 
+  bool _isEditMode = false;
+  String? _addressId;
+  String? _phoneId;
+  String? _emailId;
+  int _status = 1;
+  String? _routeId;
+
   @override
   void initState() {
     super.initState();
+    if (widget.editCustomerData != null) {
+      final editData = widget.editCustomerData!;
+      _isEditMode = true;
+      _identificationNumber = editData['identificationNumber'] ?? '';
+      _identificationType = editData['identificationType'] ?? 1;
+      _customerType = editData['customerType'] ?? 1;
+      _name = editData['name'] ?? '';
+      _legalName = editData['legalName'] ?? '';
+      _selectedCategoryId = editData['customerCategoryId'];
+      _selectedPricingProfileId = editData['customerPricingProfileId'];
+      _isTaxExempt = editData['isTaxExempt'] ?? false;
+      _defaultDiscountPercentage = (editData['defaultDiscountPercentage'] as num?)?.toDouble() ?? 0.0;
+      _routeId = editData['routeId'];
+      _status = editData['status'] ?? 1;
+
+      // Addresses
+      final addresses = editData['addresses'] as List<dynamic>? ?? [];
+      if (addresses.isNotEmpty) {
+        _addressId = addresses[0]['id'];
+        _addressLine1 = addresses[0]['addressLine1'] ?? '';
+        _city = addresses[0]['city'] ?? '';
+        _country = addresses[0]['country'] ?? 'Nicaragua';
+      }
+
+      // Phones
+      final phones = editData['phones'] as List<dynamic>? ?? [];
+      if (phones.isNotEmpty) {
+        _phoneId = phones[0]['id'];
+        _phoneNumber = phones[0]['phoneNumber'] ?? '';
+      }
+
+      // Emails
+      final emails = editData['emails'] as List<dynamic>? ?? [];
+      if (emails.isNotEmpty) {
+        _emailId = emails[0]['id'];
+        _emailAddress = emails[0]['emailAddress'] ?? '';
+      }
+    }
     _loadConfiguration();
   }
 
@@ -99,11 +145,11 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
       _categories = loadedCategories;
       _pricingProfiles = loadedProfiles;
       
-      // Select first values if available
-      if (_categories.isNotEmpty) {
+      // Select first values if available if not already selected
+      if (_selectedCategoryId == null && _categories.isNotEmpty) {
         _selectedCategoryId = _categories[0]['id'];
       }
-      if (_pricingProfiles.isNotEmpty) {
+      if (_selectedPricingProfileId == null && _pricingProfiles.isNotEmpty) {
         final retailProfile = _pricingProfiles.firstWhere(
           (p) => (p['name'] as String? ?? '').toLowerCase().contains('detalle') || p['type'] == 1,
           orElse: () => _pricingProfiles.first,
@@ -147,6 +193,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
       final List<Map<String, dynamic>> addresses = [];
       if (_addressLine1.trim().isNotEmpty || _city.trim().isNotEmpty) {
         addresses.add({
+          'Id': _addressId ?? '00000000-0000-0000-0000-000000000000',
           'AddressLine1': _addressLine1.trim().isNotEmpty ? _addressLine1.trim() : 'Dirección principal',
           'AddressLine2': '',
           'City': _city.trim().isNotEmpty ? _city.trim() : 'Managua',
@@ -162,6 +209,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
       final List<Map<String, dynamic>> phones = [];
       if (_phoneNumber.trim().isNotEmpty) {
         phones.add({
+          'Id': _phoneId ?? '00000000-0000-0000-0000-000000000000',
           'PhoneNumber': _phoneNumber.trim(),
           'PhoneType': 'Mobile',
           'IsDefault': true,
@@ -172,6 +220,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
       final List<Map<String, dynamic>> emails = [];
       if (_emailAddress.trim().isNotEmpty) {
         emails.add({
+          'Id': _emailId ?? '00000000-0000-0000-0000-000000000000',
           'EmailAddress': _emailAddress.trim(),
           'EmailType': 'Work',
           'IsDefault': true,
@@ -179,6 +228,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
       }
 
       final body = {
+        if (_isEditMode) 'Id': widget.editCustomerData!['id'],
         'IdentificationNumber': _identificationNumber.trim(),
         'IdentificationType': _identificationType,
         'CustomerType': _customerType,
@@ -191,15 +241,19 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
         'CanUseCredit': _canUseCredit,
         'IsTaxExempt': _isTaxExempt,
         'DefaultDiscountPercentage': _defaultDiscountPercentage,
+        if (_isEditMode) 'Status': _status,
+        if (_isEditMode) 'RouteId': _routeId,
         'Addresses': addresses,
         'Phones': phones,
         'Emails': emails,
         'Contacts': [],
       };
 
-      final response = await apiService.post('/customers', body);
+      final response = _isEditMode
+          ? await apiService.put('/customers/${widget.editCustomerData!['id']}', body)
+          : await apiService.post('/customers', body);
 
-      if (response.statusCode == 201 || response.statusCode == 200) {
+      if (response.statusCode == 201 || response.statusCode == 200 || response.statusCode == 204) {
         // Success dialog
         if (mounted) {
           showDialog(
@@ -208,8 +262,10 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
             builder: (context) => AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               icon: const Icon(Icons.check_circle_outline_rounded, color: Colors.green, size: 64),
-              title: const Text('Cliente Registrado'),
-              content: Text('El cliente "$_name" ha sido creado exitosamente en el sistema.'),
+              title: Text(_isEditMode ? 'Cliente Actualizado' : 'Cliente Registrado'),
+              content: Text(_isEditMode
+                  ? 'El cliente "$_name" ha sido actualizado exitosamente en el sistema.'
+                  : 'El cliente "$_name" ha sido creado exitosamente en el sistema.'),
               actions: [
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(

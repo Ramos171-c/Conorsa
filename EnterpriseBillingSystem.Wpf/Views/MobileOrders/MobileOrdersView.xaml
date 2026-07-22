@@ -354,10 +354,12 @@
                                     <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
                                     <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
                                     
-                                    <DataGridTextColumn Header="Cant. Solicitada" Binding="{Binding TotalQuantity, StringFormat={}{0:N2}}" Width="140" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Cant. Solicitada" Binding="{Binding TotalQuantity, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Stock Deducido" Binding="{Binding DeductedFromInventory, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
+                                    <DataGridTextColumn Header="Neto a Pedir" Binding="{Binding NetQuantityToOrder, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" FontWeight="Bold" />
                                     
                                     <!-- Editable Loaded Quantity -->
-                                    <DataGridTemplateColumn Header="Cant. Real Cargada" Width="150">
+                                    <DataGridTemplateColumn Header="Cant. Real Cargada" Width="140">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
                                                 <TextBox Text="{Binding QuantityLoaded, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N2}}" 
@@ -367,7 +369,8 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTextColumn Header="Total Neto" Binding="{Binding TotalNetAmount, StringFormat={}{0:C2}}" Width="150" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" FontWeight="Bold" />
+                                    <DataGridTextColumn Header="Total Neto" Binding="{Binding TotalNetAmount, StringFormat={}{0:C2}}" Width="130" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" FontWeight="Bold" />
+                                    <DataGridTextColumn Header="Observaciones" Binding="{Binding Observation}" Width="180" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
                                 </DataGrid.Columns>
                             </DataGrid>
 

@@ -63,10 +63,13 @@ public partial class InventoryStockViewModel : ViewModelBase
         {
             var warehouses = await _inventoryApiClient.GetWarehousesAsync();
             Warehouses.Clear();
-            Warehouses.Add(new WarehouseDto(Guid.Empty, "-- Todas las Bodegas --", "-- Todas --", null, true));
             foreach (var w in warehouses)
             {
                 Warehouses.Add(w);
+            }
+            if (Warehouses.Count > 0)
+            {
+                SelectedWarehouseId = Warehouses[0].Id;
             }
 
             var productsResult = await _productApiClient.GetProductsPagedAsync(1, 1000);

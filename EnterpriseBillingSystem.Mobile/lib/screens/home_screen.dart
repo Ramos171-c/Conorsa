@@ -9,6 +9,8 @@ import 'order_list_screen.dart';
 import 'catalog_screen.dart';
 import 'register_customer_screen.dart';
 import 'goals_screen.dart';
+import 'dashboard_screen.dart';
+import 'customer_list_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -191,6 +193,23 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
+                  // Menu Option 3: Dashboard de Preventas
+                  _buildMenuCard(
+                    context,
+                    title: 'Dashboard de Preventas',
+                    subtitle: 'Ver totales de venta, pedidos y desgloses',
+                    icon: Icons.dashboard_rounded,
+                    iconBg: const Color(0xFFEFF6FF), // blue 50
+                    iconColor: const Color(0xFF2563EB), // blue 600
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const DashboardScreen()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
                   const Text(
                     'Gestión de Campo',
                     style: TextStyle(
@@ -201,21 +220,37 @@ class HomeScreen extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
 
-                  // Menu Option: Register Customer
-                  _buildMenuCard(
-                    context,
-                    title: 'Registrar Cliente',
-                    subtitle: 'Dar de alta un nuevo cliente en ruta',
-                    icon: Icons.person_add_alt_1_rounded,
-                    iconBg: const Color(0xFFECFDF5),
-                    iconColor: const Color(0xFF059669),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(builder: (context) => const RegisterCustomerScreen()),
-                      );
-                    },
-                  ),
+                  // Menu Option: Customer Management (Admins) OR simple Register Customer (Sellers)
+                  if (profile?.isAdmin == true)
+                    _buildMenuCard(
+                      context,
+                      title: 'Gestión de Clientes',
+                      subtitle: 'Ver, editar, eliminar y agregar clientes',
+                      icon: Icons.people_rounded,
+                      iconBg: const Color(0xFFECFDF5),
+                      iconColor: const Color(0xFF059669),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const CustomerListScreen()),
+                        );
+                      },
+                    )
+                  else
+                    _buildMenuCard(
+                      context,
+                      title: 'Registrar Cliente',
+                      subtitle: 'Dar de alta un nuevo cliente en ruta',
+                      icon: Icons.person_add_alt_1_rounded,
+                      iconBg: const Color(0xFFECFDF5),
+                      iconColor: const Color(0xFF059669),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(builder: (context) => const RegisterCustomerScreen()),
+                        );
+                      },
+                    ),
                   const SizedBox(height: 16),
 
                   // Menu Option: My Goals

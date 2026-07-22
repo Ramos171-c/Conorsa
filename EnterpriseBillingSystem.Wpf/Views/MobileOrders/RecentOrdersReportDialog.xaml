@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Resumen de Pedidos para Compra (Consolidado)" Height="620" Width="880"
+        Title="Consolidación de Pedidos para Compra (Bodega Única)" Height="720" Width="1050"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Medium"
@@ -21,10 +21,11 @@
 
     <Grid Margin="16">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" /> <!-- Header -->
-            <RowDefinition Height="Auto" /> <!-- Summary Info Card -->
-            <RowDefinition Height="*" />    <!-- Grid -->
-            <RowDefinition Height="Auto" /> <!-- Footer -->
+            <RowDefinition Height="Auto" /> <!-- Encabezado -->
+            <RowDefinition Height="Auto" /> <!-- Tarjetas KPI Resumen -->
+            <RowDefinition Height="*" />    <!-- Tabla de Productos -->
+            <RowDefinition Height="Auto" /> <!-- Observaciones Generales -->
+            <RowDefinition Height="Auto" /> <!-- Footer Acciones -->
         </Grid.RowDefinitions>
 
         <!-- Header -->
@@ -32,41 +33,59 @@
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
                     <materialDesign:PackIcon Kind="ClipboardTextOutline" Width="28" Height="28" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="Resumen de Pedidos para Compra (Consolidado)" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Center"/>
+                    <TextBlock Text="Consolidación de Pedidos para Compra (Bodega Única)" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Center"/>
                 </StackPanel>
-                <TextBlock Text="Resumen general de productos requeridos de todos los pedidos móviles en estado Recibido." Opacity="0.7" FontSize="12"/>
+                <TextBlock Text="Descuento automático de existencias de inventario para generar el neto real a pedir a proveedor." Opacity="0.7" FontSize="12"/>
             </StackPanel>
         </Grid>
 
-        <!-- Summary Info Card -->
+        <!-- Summary Info Card (4 KPIs) -->
         <materialDesign:Card Grid.Row="1" Margin="0,0,0,16" Padding="16" materialDesign:ElevationAssist.Elevation="Dp1" Background="#F8FAFC">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
-                    <ColumnDefinition Width="32" />
+                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="24" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="24" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="Pedidos en Estado 'Recibido'" FontWeight="Bold" FontSize="16" Foreground="{DynamicResource PrimaryHueMidBrush}" />
-                    <TextBlock Text="Muestra la suma total de productos necesarios para abastecer los pedidos actuales." Opacity="0.7" FontSize="12" Margin="0,4,0,0"/>
+                    <TextBlock Text="Consolidado de Pedidos 'Recibido'" FontWeight="Bold" FontSize="15" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                    <TextBlock Text="Deducción de existencias en bodega corporativa" Opacity="0.7" FontSize="11" Margin="0,2,0,0"/>
                 </StackPanel>
 
+                <!-- KPI 1: Cantidad Solicitada (Bruta) -->
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="CANTIDAD TOTAL" FontSize="11" Foreground="#64748B" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalItems, StringFormat={}{0:N2}}" FontSize="20" FontWeight="Bold" Foreground="#0F172A" HorizontalAlignment="Right" />
+                    <TextBlock Text="SOLICITADO BRUTO" FontSize="10" Foreground="#64748B" FontWeight="Bold" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalItems, StringFormat={}{0:N2}}" FontSize="18" FontWeight="Bold" Foreground="#334155" HorizontalAlignment="Right" />
                 </StackPanel>
 
+                <!-- KPI 2: Deducido de Inventario -->
                 <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
-                    <TextBlock Text="VALOR ESTIMADO" FontSize="11" Foreground="#64748B" FontWeight="Bold" HorizontalAlignment="Right" />
-                    <TextBlock Text="{Binding TotalEstimatedCost, StringFormat={}{0:C2}}" FontSize="20" FontWeight="Bold" Foreground="#2E7D32" HorizontalAlignment="Right" />
+                    <TextBlock Text="DEDUCIDO INVENTARIO" FontSize="10" Foreground="#166534" FontWeight="Bold" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalDeducted, StringFormat={}{0:N2}}" FontSize="18" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
+                </StackPanel>
+
+                <!-- KPI 3: Neto a Pedir -->
+                <StackPanel Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock Text="NETO A PEDIR" FontSize="10" Foreground="#B45309" FontWeight="Bold" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalNetToOrder, StringFormat={}{0:N2}}" FontSize="18" FontWeight="Bold" Foreground="#B45309" HorizontalAlignment="Right" />
+                </StackPanel>
+
+                <!-- KPI 4: Valor Estimado Neto -->
+                <StackPanel Grid.Column="7" VerticalAlignment="Center" HorizontalAlignment="Right">
+                    <TextBlock Text="VALOR EST. NETO" FontSize="10" Foreground="#64748B" FontWeight="Bold" HorizontalAlignment="Right" />
+                    <TextBlock Text="{Binding TotalEstimatedCost, StringFormat={}{0:C2}}" FontSize="18" FontWeight="Bold" Foreground="#2E7D32" HorizontalAlignment="Right" />
                 </StackPanel>
             </Grid>
         </materialDesign:Card>
 
-        <!-- Content Card -->
-        <materialDesign:Card Grid.Row="2" Margin="0,0,0,16" materialDesign:ElevationAssist.Elevation="Dp1">
+        <!-- Content Card (Grid) -->
+        <materialDesign:Card Grid.Row="2" Margin="0,0,0,12" materialDesign:ElevationAssist.Elevation="Dp1">
             <Grid>
                 <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}" IsIndeterminate="True" 
                              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" 
@@ -74,11 +93,14 @@
 
                 <DataGrid ItemsSource="{Binding ConsolidatedProducts}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="110" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
                         <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="Cant. Total" Binding="{Binding TotalQuantity, StringFormat={}{0:N2}}" Width="130" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Total Estimado" Binding="{Binding TotalCost, StringFormat={}{0:C2}}" Width="150" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="70" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding TotalQuantity, StringFormat={}{0:N2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                        <DataGridTextColumn Header="Stock Deducido" Binding="{Binding DeductedFromInventory, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                        <DataGridTextColumn Header="NETO A PEDIR" Binding="{Binding NetQuantityToOrder, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Total Est. a Pedir" Binding="{Binding TotalCost, StringFormat={}{0:C2}}" Width="130" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Observaciones" Binding="{Binding Observation}" Width="200" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                     </DataGrid.Columns>
                 </DataGrid>
                 
@@ -90,8 +112,16 @@
             </Grid>
         </materialDesign:Card>
 
+        <!-- Observaciones Generales -->
+        <Grid Grid.Row="3" Margin="0,0,0,16">
+            <TextBox Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                     Text="{Binding GeneralObservations, UpdateSourceTrigger=PropertyChanged}"
+                     materialDesign:HintAssist.Hint="Observaciones generales para el reporte de consolidación (se incluirán en el Excel)"
+                     TextWrapping="True" AcceptsReturn="True" Height="50" FontSize="13" />
+        </Grid>
+
         <!-- Footer Actions -->
-        <Grid Grid.Row="3">
+        <Grid Grid.Row="4">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
@@ -100,13 +130,13 @@
                 <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
             
-            <Button Grid.Column="0" Click="ExportCsv_Click"
+            <Button Grid.Column="0" Click="ExportExcel_Click"
                     Style="{StaticResource MaterialDesignRaisedButton}" 
-                    Background="#2E7D32" BorderBrush="#2E7D32"
+                    Background="#166534" BorderBrush="#166534"
                     IsEnabled="{Binding HasData}">
                 <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="FileExport" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
-                    <TextBlock Text="Exportar a CSV" VerticalAlignment="Center" />
+                    <materialDesign:PackIcon Kind="FileExcel" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
+                    <TextBlock Text="Exportar a Excel (.xlsx)" VerticalAlignment="Center" FontWeight="Bold" />
                 </StackPanel>
             </Button>
 

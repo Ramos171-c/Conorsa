@@ -8,6 +8,7 @@ using System.Windows;
 using EnterpriseBillingSystem.Wpf.Models;
 using EnterpriseBillingSystem.Wpf.Services.Api;
 using EnterpriseBillingSystem.Wpf.Services.Dialogs;
+using EnterpriseBillingSystem.Wpf.Services.Export;
 
 namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 {
@@ -17,6 +18,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         private readonly INotificationService _notificationService;
 
         private bool _isLoading;
+        private string _generalObservations = string.Empty;
 
         public bool IsLoading
         {
@@ -32,10 +34,25 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             }
         }
 
+        public string GeneralObservations
+        {
+            get => _generalObservations;
+            set
+            {
+                if (_generalObservations != value)
+                {
+                    _generalObservations = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
         public bool HasData => ConsolidatedProducts.Count > 0;
         public bool ShowEmptyMessage => !IsLoading && ConsolidatedProducts.Count == 0;
 
         public decimal TotalItems => ConsolidatedProducts.Sum(p => p.TotalQuantity);
+        public decimal TotalDeducted => ConsolidatedProducts.Sum(p => p.DeductedFromInventory);
+        public decimal TotalNetToOrder => ConsolidatedProducts.Sum(p => p.NetQuantityToOrder);
         public decimal TotalEstimatedCost => ConsolidatedProducts.Sum(p => p.TotalCost);
 
         public ObservableCollection<ConsolidatedProductDto> ConsolidatedProducts { get; } = new();
@@ -73,6 +90,8 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 OnPropertyChanged(nameof(HasData));
                 OnPropertyChanged(nameof(ShowEmptyMessage));
                 OnPropertyChanged(nameof(TotalItems));
+                OnPropertyChanged(nameof(TotalDeducted));
+                OnPropertyChanged(nameof(TotalNetToOrder));
                 OnPropertyChanged(nameof(TotalEstimatedCost));
             }
             catch (Exception ex)
@@ -100,7 +119,6 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             IsLoading = true;
             try
             {
-                // 1. Get all received orders (non-paginated, up to 9999 items)
                 var result = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, null, "Recibido");
                 if (result?.Items == null || !result.Items.Any())
                 {
@@ -111,7 +129,6 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 int successCount = 0;
                 int errorCount = 0;
 
-                // 2. Bulk confirm them (will transition from Recibido -> EnProceso on backend)
                 foreach (var order in result.Items)
                 {
                     try
@@ -129,10 +146,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 _notificationService.ShowSuccess($"Procesamiento completado. {successCount} pedidos procesados y pasados a 'En Proceso' exitosamente." + 
                     (errorCount > 0 ? $" ({errorCount} errores)." : ""));
 
-                // 3. Clear/Refresh report
                 await LoadReportAsync();
-                
-                // Set DialogResult so parent knows it has changed and needs refresh
                 DialogResult = true;
             }
             catch (Exception ex)
@@ -145,53 +159,28 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             }
         }
 
-        private void ExportCsv_Click(object sender, RoutedEventArgs e)
+        private void ExportExcel_Click(object sender, RoutedEventArgs e)
         {
             if (ConsolidatedProducts.Count == 0) return;
 
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
-                Filter = "Archivo CSV (*.csv)|*.csv",
-                FileName = $"Resumen_Pedidos_Recibidos_{DateTime.Today:yyyyMMdd}.csv"
+                Filter = "Libro de Excel (*.xlsx)|*.xlsx",
+                FileName = $"Consolidado_Compras_Bodega_{DateTime.Today:yyyyMMdd}.xlsx"
             };
 
             if (saveFileDialog.ShowDialog() == true)
             {
                 try
                 {
-                    using (var writer = new System.IO.StreamWriter(saveFileDialog.FileName, false, System.Text.Encoding.UTF8))
-                    {
-                        writer.WriteLine("sep=;");
-                        writer.WriteLine("Codigo;Producto;U.M.;Cantidad Total;Total Estimado");
-                        foreach (var item in ConsolidatedProducts)
-                        {
-                            var code = EscapeCsv(item.ProductCode);
-                            var name = EscapeCsv(item.ProductName);
-                            var uom = EscapeCsv(item.UnitOfMeasure);
-                            var qty = item.TotalQuantity.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
-                            var amount = item.TotalCost.ToString("F2", System.Globalization.CultureInfo.InvariantCulture);
-
-                            writer.WriteLine($"{code};{name};{uom};{qty};{amount}");
-                        }
-                    }
-                    _notificationService.ShowSuccess("Resumen exportado exitosamente a CSV.");
+                    ExcelExportService.ExportConsolidationToExcel(ConsolidatedProducts, saveFileDialog.FileName, GeneralObservations);
+                    _notificationService.ShowSuccess("Consolidado exportado exitosamente a Excel con diseño corporativo y totales recalcados.");
                 }
                 catch (Exception ex)
                 {
-                    _notificationService.ShowError($"Error al exportar a CSV: {ex.Message}");
+                    _notificationService.ShowError($"Error al exportar a Excel: {ex.Message}");
                 }
             }
-        }
-
-        private string EscapeCsv(string val)
-        {
-            if (string.IsNullOrEmpty(val)) return string.Empty;
-            val = val.Replace(";", ",");
-            if (val.Contains("\"") || val.Contains("\n") || val.Contains("\r"))
-            {
-                return "\"" + val.Replace("\"", "\"\"") + "\"";
-            }
-            return val;
         }
 
         private void Close_Click(object sender, RoutedEventArgs e)

@@ -508,6 +508,8 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
   // UI Step 3: Cart Summary
   Widget _buildSummaryStep(OrderProvider provider) {
     final draft = provider.draftOrder;
+    final authProv = Provider.of<AuthProvider>(context, listen: false);
+    final isAdmin = authProv.userProfile?.isAdmin == true;
 
     return Container(
       color: const Color(0xFFF8FAFC),
@@ -671,7 +673,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
             decoration: const BoxDecoration(
               color: Colors.white,
               border: Border(top: BorderSide(color: Color(0xFFE2E8F0))),
-            ),
+),
             padding: const EdgeInsets.all(20.0),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -686,6 +688,72 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
                   maxLines: 2,
                 ),
                 const SizedBox(height: 16),
+                if (isAdmin) ...[
+                  InkWell(
+                    onTap: () async {
+                      final DateTime? picked = await showDatePicker(
+                        context: context,
+                        initialDate: draft.orderDate,
+                        firstDate: DateTime.now().subtract(const Duration(days: 365)),
+                        lastDate: DateTime.now().add(const Duration(days: 365)),
+                        builder: (context, child) {
+                          return Theme(
+                            data: Theme.of(context).copyWith(
+                              colorScheme: const ColorScheme.light(
+                                primary: Color(0xFF0F172A),
+                                onPrimary: Colors.white,
+                                onSurface: Color(0xFF0F172A),
+                              ),
+                              textButtonTheme: TextButtonThemeData(
+                                style: TextButton.styleFrom(
+                                  foregroundColor: const Color(0xFF0F172A),
+                                ),
+                              ),
+                            ),
+                            child: child!,
+                          );
+                        },
+                      );
+                      if (picked != null) {
+                        provider.setOrderDate(picked);
+                      }
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: const Color(0xFFCBD5E1)),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                        children: [
+                          Row(
+                            children: [
+                              const Icon(Icons.calendar_today_rounded, color: Color(0xFF475569), size: 20),
+                              const SizedBox(width: 12),
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text(
+                                    'Fecha del Pedido (Admin)',
+                                    style: TextStyle(fontSize: 11, color: Color(0xFF64748B), fontWeight: FontWeight.bold),
+                                  ),
+                                  const SizedBox(height: 2),
+                                  Text(
+                                    '${draft.orderDate.day.toString().padLeft(2, '0')}/${draft.orderDate.month.toString().padLeft(2, '0')}/${draft.orderDate.year}',
+                                    style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 14, color: Color(0xFF0F172A)),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                          const Icon(Icons.arrow_drop_down, color: Color(0xFF475569)),
+                        ],
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [

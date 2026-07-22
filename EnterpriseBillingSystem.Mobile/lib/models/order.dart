@@ -104,6 +104,7 @@ class SalesOrderDetail {
   final String? notes;
   final DateTime createdOnUtc;
   final List<SalesOrderDetailItem> details;
+  final String? createdBy;
 
   SalesOrderDetail({
     required this.id,
@@ -120,6 +121,7 @@ class SalesOrderDetail {
     this.notes,
     required this.createdOnUtc,
     required this.details,
+    this.createdBy,
   });
 
   factory SalesOrderDetail.fromJson(Map<String, dynamic> json) {
@@ -143,6 +145,7 @@ class SalesOrderDetail {
       notes: json['notes'] as String?,
       createdOnUtc: DateTime.parse(json['createdOnUtc'] as String),
       details: detailsList,
+      createdBy: json['createdBy'] as String?,
     );
   }
 }

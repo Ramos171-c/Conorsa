@@ -568,7 +568,11 @@ public partial class VerifiableProduct : ObservableObject
     public string ProductName { get; }
     public string UnitOfMeasure { get; }
     public decimal TotalQuantity { get; }
+    public decimal AvailableStock { get; }
+    public decimal DeductedFromInventory { get; }
+    public decimal NetQuantityToOrder { get; }
     public decimal TotalNetAmount { get; }
+    public string Observation { get; }
 
     [ObservableProperty]
     private bool _isVerified;
@@ -583,7 +587,11 @@ public partial class VerifiableProduct : ObservableObject
         ProductName = dto.ProductName;
         UnitOfMeasure = dto.UnitOfMeasure;
         TotalQuantity = dto.TotalQuantity;
+        AvailableStock = dto.AvailableStock;
+        DeductedFromInventory = dto.DeductedFromInventory;
+        NetQuantityToOrder = dto.NetQuantityToOrder;
         TotalNetAmount = dto.TotalNetAmount;
-        QuantityLoaded = dto.TotalQuantity;
+        Observation = dto.Observation;
+        QuantityLoaded = dto.NetQuantityToOrder > 0 ? dto.NetQuantityToOrder : dto.TotalQuantity;
     }
 }

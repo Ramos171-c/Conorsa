@@ -17,6 +17,8 @@ x86/
 [Bb]in/
 [Oo]bj/
 [Log]s/
+**/Logs/
+Logs/
 [Tt]est[Rr]esults/
 
 # OTI project files

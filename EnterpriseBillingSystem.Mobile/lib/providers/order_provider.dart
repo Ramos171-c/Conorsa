@@ -5,6 +5,7 @@ import '../services/offline_service.dart';
 import '../models/customer.dart';
 import '../models/product.dart';
 import '../models/order.dart';
+import '../models/route.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -15,6 +16,8 @@ class OrderProvider extends ChangeNotifier {
   List<Product> _products = [];
   List<Product> _topProducts = [];
   List<SalesOrderListItem> _orders = [];
+  List<RouteItem> _routes = [];
+  List<SalesOrderListItem> _dashboardOrders = [];
   List<dynamic> _productCategories = [];
   double _minimumInvoiceAmount = 600.0;
   
@@ -29,6 +32,8 @@ class OrderProvider extends ChangeNotifier {
   List<Product> get products => _products;
   List<Product> get topProducts => _topProducts;
   List<SalesOrderListItem> get orders => _orders;
+  List<RouteItem> get routes => _routes;
+  List<SalesOrderListItem> get dashboardOrders => _dashboardOrders;
   List<dynamic> get productCategories => _productCategories;
   double get minimumInvoiceAmount => _minimumInvoiceAmount;
   DraftOrder get draftOrder => _draftOrder;
@@ -86,6 +91,31 @@ class OrderProvider extends ChangeNotifier {
       } else {
         _errorMessage = 'Error al cargar clientes: $e';
       }
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Delete customer
+  Future<bool> deleteCustomer(String id) async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await apiService.delete('/customers/$id');
+      if (response.statusCode == 200 || response.statusCode == 204) {
+        _successMessage = 'Cliente eliminado correctamente.';
+        _customers.removeWhere((c) => c.id == id);
+        return true;
+      } else {
+        _errorMessage = 'No se pudo eliminar el cliente (Código ${response.statusCode}).';
+        return false;
+      }
+    } catch (e) {
+      _errorMessage = 'Error al eliminar cliente: $e';
+      return false;
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -165,13 +195,14 @@ class OrderProvider extends ChangeNotifier {
   }
 
   // Fetch placed orders history
-  Future<void> fetchOrders() async {
+  Future<void> fetchOrders({String? routeId}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
-      final response = await apiService.get('/sales-orders?pageNumber=1&pageSize=50');
+      final routeParam = routeId != null && routeId.isNotEmpty ? '&routeId=$routeId' : '';
+      final response = await apiService.get('/sales-orders?pageNumber=1&pageSize=50$routeParam');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
@@ -185,6 +216,61 @@ class OrderProvider extends ChangeNotifier {
     } catch (e) {
       // For orders, if offline we just keep what was loaded, or show connection error
       _errorMessage = 'Error al cargar pedidos (Modo sin conexión): $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Fetch routes
+  Future<void> fetchRoutes() async {
+    _isLoading = true;
+    _errorMessage = null;
+    notifyListeners();
+
+    try {
+      final response = await apiService.get('/routes?includeInactive=false');
+      if (response.statusCode == 200) {
+        final List<dynamic> data = jsonDecode(response.body);
+        _routes = data.map((e) => RouteItem.fromJson(e)).toList();
+      } else {
+        _errorMessage = 'No se pudieron cargar las rutas.';
+      }
+    } catch (e) {
+      _errorMessage = 'Error al cargar rutas: $e';
+    } finally {
+      _isLoading = false;
+      notifyListeners();
+    }
+  }
+
+  // Fetch dashboard orders
+  Future<void> fetchDashboardOrders({
+    DateTime? fromDate,
+    DateTime? toDate,
+    String? routeId,
+  }) async {
+    _isLoading = true;
+    _errorMessage = null;
+    _dashboardOrders = [];
+    notifyListeners();
+
+    try {
+      final fromStr = fromDate != null ? '&fromDate=${fromDate.toIso8601String()}' : '';
+      final toStr = toDate != null ? '&toDate=${toDate.toIso8601String()}' : '';
+      final routeStr = routeId != null && routeId.isNotEmpty ? '&routeId=$routeId' : '';
+
+      final response = await apiService.get('/sales-orders?pageNumber=1&pageSize=1000$fromStr$toStr$routeStr');
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final items = data['items'] as List<dynamic>? ?? [];
+        _dashboardOrders = items.map((e) => SalesOrderListItem.fromJson(e)).toList();
+      } else {
+        _errorMessage = 'No se pudieron cargar los pedidos del dashboard.';
+      }
+    } catch (e) {
+      _errorMessage = 'Error al cargar pedidos del dashboard: $e';
     } finally {
       _isLoading = false;
       notifyListeners();
@@ -300,6 +386,12 @@ class OrderProvider extends ChangeNotifier {
   // Set notes
   void setNotes(String val) {
     _draftOrder.notes = val;
+  }
+
+  // Set order date
+  void setOrderDate(DateTime val) {
+    _draftOrder.orderDate = val;
+    notifyListeners();
   }
 
   // Reset/Clear cart

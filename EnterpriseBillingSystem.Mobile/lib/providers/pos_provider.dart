@@ -328,6 +328,7 @@ class PosProvider extends ChangeNotifier {
   // Checkout (Crear Pedido / Sales Order)
   Future<bool> checkout({
     String? notes,
+    DateTime? customDate,
   }) async {
     _isBusy = true;
     _errorMessage = null;
@@ -357,7 +358,7 @@ class PosProvider extends ChangeNotifier {
         final updateBody = {
           'Id': _editingOrderId,
           'CustomerId': customerId,
-          'OrderDate': DateTime.now().toUtc().toIso8601String(),
+          'OrderDate': (customDate ?? DateTime.now()).toUtc().toIso8601String(),
           'Notes': notes ?? 'Pedido Modificado desde POS Móvil (Vendedor)',
           'Details': _cart.map((item) {
             return {
@@ -390,7 +391,7 @@ class PosProvider extends ChangeNotifier {
       // Create Sales Order request command
       final createBody = {
         'CustomerId': customerId,
-        'OrderDate': DateTime.now().toUtc().toIso8601String(),
+        'OrderDate': (customDate ?? DateTime.now()).toUtc().toIso8601String(),
         'Notes': notes ?? 'Pedido desde POS Móvil (Vendedor)',
         'Details': _cart.map((item) {
           return {

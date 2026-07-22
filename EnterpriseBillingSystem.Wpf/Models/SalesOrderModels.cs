@@ -59,7 +59,8 @@ public record SalesOrderDetailDto(
     string Status,
     string? Notes,
     DateTime CreatedOnUtc,
-    List<SalesOrderDetailItemDto> Details
+    List<SalesOrderDetailItemDto> Details,
+    string? CreatedBy
 );
 
 public record CancelSalesOrderCommandDto(
@@ -73,6 +74,10 @@ public record ConsolidatedProductDto(
     string ProductName,
     string UnitOfMeasure,
     decimal TotalQuantity,
+    decimal AvailableStock,
+    decimal DeductedFromInventory,
+    decimal NetQuantityToOrder,
     decimal TotalNetAmount,
-    decimal TotalCost
+    decimal TotalCost,
+    string Observation = ""
 );

@@ -55,7 +55,8 @@ public record SalesOrderDetailDto(
     string Status,
     string? Notes,
     DateTime CreatedOnUtc,
-    List<SalesOrderDetailItemDto> Details
+    List<SalesOrderDetailItemDto> Details,
+    string? CreatedBy
 );
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
@@ -151,6 +152,7 @@ public class GetSalesOrderByIdQueryHandler : IRequestHandler<GetSalesOrderByIdQu
             order.Status.ToString(),
             order.Notes,
             order.CreatedOnUtc,
-            details);
+            details,
+            order.CreatedBy);
     }
 }
