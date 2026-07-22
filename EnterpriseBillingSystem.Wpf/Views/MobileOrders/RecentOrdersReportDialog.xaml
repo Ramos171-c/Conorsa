@@ -18,21 +18,29 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
 
-        <Style x:Key="ReportBoldColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
+        <!-- Estilo base local auto-contenido (sin BasedOn externo) -->
+        <Style x:Key="LocalRightAlignedStyle" TargetType="TextBlock">
+            <Setter Property="HorizontalAlignment" Value="Right" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="TextAlignment" Value="Right" />
+            <Setter Property="Margin" Value="0,0,8,0" />
+        </Style>
+
+        <Style x:Key="LocalBoldColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource LocalRightAlignedStyle}">
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
 
-        <Style x:Key="ReportPurchaseColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
+        <Style x:Key="LocalPurchaseColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource LocalRightAlignedStyle}">
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Foreground" Value="#B45309" />
         </Style>
 
-        <Style x:Key="ReportSalesColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
+        <Style x:Key="LocalSalesColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource LocalRightAlignedStyle}">
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Foreground" Value="#1E40AF" />
         </Style>
 
-        <Style x:Key="ReportProfitColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
+        <Style x:Key="LocalProfitColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource LocalRightAlignedStyle}">
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Foreground" Value="#15803D" />
         </Style>
@@ -40,11 +48,11 @@
 
     <Grid Margin="16">
         <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" /> <!-- Encabezado -->
-            <RowDefinition Height="Auto" /> <!-- Tarjetas KPI Resumen -->
-            <RowDefinition Height="*" />    <!-- Tabla de Productos -->
-            <RowDefinition Height="Auto" /> <!-- Observaciones Generales -->
-            <RowDefinition Height="Auto" /> <!-- Footer Acciones -->
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
         </Grid.RowDefinitions>
 
         <!-- Header -->
@@ -79,33 +87,28 @@
                     <TextBlock Text="Deducción exacta de existencias y margen proyectado" Opacity="0.7" FontSize="11" Margin="0,2,0,0"/>
                 </StackPanel>
 
-                <!-- KPI 1: Deducido de Inventario (Existencia) -->
                 <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <TextBlock Text="CUBIERTO EN BODEGA" FontSize="10" Foreground="#166534" FontWeight="Bold" HorizontalAlignment="Right" />
                     <TextBlock Text="{Binding TotalDeductedDisplay}" FontSize="15" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
                     <TextBlock Text="{Binding TotalInventoryDeductedPurchaseCostDisplay}" FontSize="10" Foreground="#15803D" HorizontalAlignment="Right" />
                 </StackPanel>
 
-                <!-- KPI 2: Neto a Comprar al Proveedor -->
                 <StackPanel Grid.Column="3" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <TextBlock Text="TOTAL COMPRA (NETO)" FontSize="10" Foreground="#B45309" FontWeight="Bold" HorizontalAlignment="Right" />
                     <TextBlock Text="{Binding TotalEstimatedCostDisplay}" FontSize="16" FontWeight="Bold" Foreground="#B45309" HorizontalAlignment="Right" />
                     <TextBlock Text="{Binding TotalNetToOrderDisplay}" FontSize="10" Foreground="#B45309" HorizontalAlignment="Right" />
                 </StackPanel>
 
-                <!-- KPI 3: Venta Total Neta Estimada -->
                 <StackPanel Grid.Column="5" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <TextBlock Text="TOTAL VENTA (CLIENTES)" FontSize="10" Foreground="#1E40AF" FontWeight="Bold" HorizontalAlignment="Right" />
                     <TextBlock Text="{Binding TotalEstimatedSalesDisplay}" FontSize="16" FontWeight="Bold" Foreground="#1E40AF" HorizontalAlignment="Right" />
                 </StackPanel>
 
-                <!-- KPI 4: Diferencia en Dinero -->
                 <StackPanel Grid.Column="7" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <TextBlock Text="DIFERENCIA GANANCIA" FontSize="10" Foreground="#15803D" FontWeight="Bold" HorizontalAlignment="Right" />
                     <TextBlock Text="{Binding TotalProfitMarginDisplay}" FontSize="16" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
                 </StackPanel>
 
-                <!-- KPI 5: Margen % -->
                 <StackPanel Grid.Column="9" VerticalAlignment="Center" HorizontalAlignment="Right">
                     <TextBlock Text="MARGEN BRUTO" FontSize="10" Foreground="#15803D" FontWeight="Bold" HorizontalAlignment="Right" />
                     <TextBlock Text="{Binding ProfitMarginPercentageDisplay}" FontSize="16" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
@@ -125,19 +128,18 @@
                         <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="95" />
                         <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" />
                         <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="65" />
-                        <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding TotalQuantity, StringFormat='{}{0:N2}'}" Width="95" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Stock Deducido" Binding="{Binding DeductedFromInventory, StringFormat='{}{0:N2}'}" Width="105" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Neto A Pedir" Binding="{Binding NetQuantityToOrder, StringFormat='{}{0:N2}'}" Width="100" ElementStyle="{StaticResource ReportBoldColumnStyle}" />
-                        <DataGridTextColumn Header="Costo Unit." Binding="{Binding UnitCost, StringFormat='{}{0:C2}'}" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Total Compra" Binding="{Binding TotalPurchaseCost, StringFormat='{}{0:C2}'}" Width="110" ElementStyle="{StaticResource ReportPurchaseColumnStyle}" />
-                        <DataGridTextColumn Header="Venta Unit." Binding="{Binding UnitPrice, StringFormat='{}{0:C2}'}" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Total Venta" Binding="{Binding NetSalesAmount, StringFormat='{}{0:C2}'}" Width="110" ElementStyle="{StaticResource ReportSalesColumnStyle}" />
-                        <DataGridTextColumn Header="Diferencia ($)" Binding="{Binding ProfitMarginAmount, StringFormat='{}{0:C2}'}" Width="115" ElementStyle="{StaticResource ReportProfitColumnStyle}" />
+                        <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding TotalQuantity, StringFormat='{}{0:N2}'}" Width="95" ElementStyle="{StaticResource LocalRightAlignedStyle}" />
+                        <DataGridTextColumn Header="Stock Deducido" Binding="{Binding DeductedFromInventory, StringFormat='{}{0:N2}'}" Width="105" ElementStyle="{StaticResource LocalRightAlignedStyle}" />
+                        <DataGridTextColumn Header="Neto A Pedir" Binding="{Binding NetQuantityToOrder, StringFormat='{}{0:N2}'}" Width="100" ElementStyle="{StaticResource LocalBoldColumnStyle}" />
+                        <DataGridTextColumn Header="Costo Unit." Binding="{Binding UnitCost, StringFormat='{}{0:C2}'}" Width="90" ElementStyle="{StaticResource LocalRightAlignedStyle}" />
+                        <DataGridTextColumn Header="Total Compra" Binding="{Binding TotalPurchaseCost, StringFormat='{}{0:C2}'}" Width="110" ElementStyle="{StaticResource LocalPurchaseColumnStyle}" />
+                        <DataGridTextColumn Header="Venta Unit." Binding="{Binding UnitPrice, StringFormat='{}{0:C2}'}" Width="90" ElementStyle="{StaticResource LocalRightAlignedStyle}" />
+                        <DataGridTextColumn Header="Total Venta" Binding="{Binding NetSalesAmount, StringFormat='{}{0:C2}'}" Width="110" ElementStyle="{StaticResource LocalSalesColumnStyle}" />
+                        <DataGridTextColumn Header="Diferencia ($)" Binding="{Binding ProfitMarginAmount, StringFormat='{}{0:C2}'}" Width="115" ElementStyle="{StaticResource LocalProfitColumnStyle}" />
                         <DataGridTextColumn Header="Observaciones" Binding="{Binding Observation}" Width="160" />
                     </DataGrid.Columns>
                 </DataGrid>
                 
-                <!-- Empty State Message -->
                 <TextBlock Text="No se encontraron pedidos móviles en estado Recibido." 
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            FontSize="14" Opacity="0.5"
@@ -150,9 +152,9 @@
             <TextBlock Text="Observaciones Generales del Consolidado (se incluirán en el Excel)" 
                        FontSize="13" FontWeight="Bold" Margin="0,0,0,4" Foreground="#334155" />
             <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
-                <TextBox Text="{Binding GeneralObservations, Mode=TwoWay}"
-                          TextWrapping="True" AcceptsReturn="True" Height="45" FontSize="13" 
-                          BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
+                <TextBox Text="{Binding GeneralObservations, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         TextWrapping="True" AcceptsReturn="True" Height="45" FontSize="13" 
+                         BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
             </Border>
         </StackPanel>
 
