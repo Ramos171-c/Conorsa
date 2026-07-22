@@ -4,6 +4,7 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+        xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
         mc:Ignorable="d"
         Title="Consolidación de Pedidos para Compra (Bodega Única)" Height="720" Width="1050"
         WindowStartupLocation="CenterOwner"
@@ -16,7 +17,7 @@
         FontFamily="Segoe UI">
 
     <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BoolToVis" />
+        <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
     </Window.Resources>
 
     <Grid Margin="16">
@@ -208,7 +209,7 @@
             <TextBlock Text="Observaciones Generales del Consolidado (se incluirán en el Excel)" 
                        FontSize="13" FontWeight="Bold" Margin="0,0,0,4" Foreground="#334155" />
             <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
-                <TextBox Text="{Binding GeneralObservations, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox Text="{Binding GeneralObservations}"
                          TextWrapping="True" AcceptsReturn="True" Height="45" FontSize="13" 
                          BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
             </Border>
