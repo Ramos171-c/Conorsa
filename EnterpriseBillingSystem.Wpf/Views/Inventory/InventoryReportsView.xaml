@@ -86,12 +86,48 @@
 
                             <DataGrid Grid.Row="1" ItemsSource="{Binding StockReportItems}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Bodega" Binding="{Binding WarehouseName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Código" Binding="{Binding ProductInternalCode}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Físico" Binding="{Binding PhysicalStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                    <DataGridTextColumn Header="Reservado" Binding="{Binding ReservedStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                    <DataGridTextColumn Header="Disponible" Binding="{Binding AvailableStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                                    <DataGridTemplateColumn Header="Bodega" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding WarehouseName}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Código" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ProductInternalCode}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Producto" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ProductName}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Físico" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding PhysicalStock, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Reservado" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ReservedStock, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Disponible" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding AvailableStock, StringFormat='{}{0:N2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>
@@ -115,12 +151,48 @@
 
                             <DataGrid Grid.Row="1" ItemsSource="{Binding ValuationReportItems}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Bodega" Binding="{Binding WarehouseName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Existencia" Binding="{Binding PhysicalStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                    <DataGridTextColumn Header="Costo Unitario" Binding="{Binding PurchasePrice, StringFormat={}{0:C}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                    <DataGridTextColumn Header="Valor Total" Binding="{Binding TotalValue, StringFormat={}{0:C}}" Width="150" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                                    <DataGridTemplateColumn Header="Bodega" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding WarehouseName}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Código" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ProductCode}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Producto" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ProductName}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Existencia" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding PhysicalStock, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Costo Unitario" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding PurchasePrice, StringFormat='{}{0:C}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Valor Total" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding TotalValue, StringFormat='{}{0:C}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
 
@@ -149,12 +221,48 @@
 
                             <DataGrid Grid.Row="1" ItemsSource="{Binding MovementReportItems}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Fecha (UTC)" Binding="{Binding MovementDate, StringFormat={}{0:g}}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Nº Movimiento" Binding="{Binding MovementNumber}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Tipo" Binding="{Binding MovementTypeName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Documento Ref." Binding="{Binding ReferenceDocument}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Cantidad" Binding="{Binding Quantity, StringFormat={}{0:N2}}" Width="100" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                    <DataGridTextColumn Header="Unidad" Binding="{Binding UnitOfMeasureCode}" Width="80" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTemplateColumn Header="Fecha (UTC)" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding MovementDate, StringFormat='{}{0:g}'}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Nº Movimiento" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding MovementNumber}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Tipo" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding MovementTypeName}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Documento Ref." Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ReferenceDocument}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Cantidad" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Quantity, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+                                    <DataGridTemplateColumn Header="Unidad" Width="80">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding UnitOfMeasureCode}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     <DataGridTemplateColumn Header="Sentencia" Width="100">
                                         <!-- Custom format for Entry / Exit -->
                                         <DataGridTemplateColumn.CellTemplate>
@@ -178,7 +286,13 @@
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
-                                    <DataGridTextColumn Header="Observaciones" Binding="{Binding Notes}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                                    <DataGridTemplateColumn Header="Observaciones" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Notes}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
                         </Grid>

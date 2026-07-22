@@ -84,13 +84,61 @@
                             <DataGrid ItemsSource="{Binding Orders}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
                                       Visibility="{Binding ConnectionFailed, Converter={StaticResource InverseBoolToVis}}">
                                 <DataGrid.Columns>
-                                    <DataGridTextColumn Header="Nro. Pedido" Binding="{Binding OrderNumber}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
-                                    <DataGridTextColumn Header="Cliente" Binding="{Binding CustomerName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Fecha Pedido" Binding="{Binding OrderDate, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="140" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                                    <DataGridTextColumn Header="Subtotal" Binding="{Binding SubTotal, StringFormat={}{0:C2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                    <DataGridTextColumn Header="Descuento" Binding="{Binding DiscountAmount, StringFormat={}{0:C2}}" Width="100" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                    <DataGridTextColumn Header="Impuestos" Binding="{Binding TaxAmount, StringFormat={}{0:C2}}" Width="100" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                    <DataGridTextColumn Header="Total" Binding="{Binding TotalAmount, StringFormat={}{0:C2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                                    <DataGridTemplateColumn Header="Nro. Pedido" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding OrderNumber}" FontWeight="Bold" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="Cliente" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding CustomerName}" VerticalAlignment="Center" Margin="6,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="Fecha Pedido" Width="140">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding OrderDate, StringFormat='{}{0:dd/MM/yyyy HH:mm}'}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="Subtotal" Width="110">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding SubTotal, StringFormat='{}{0:C2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="Descuento" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DiscountAmount, StringFormat='{}{0:C2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="Impuestos" Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding TaxAmount, StringFormat='{}{0:C2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="Total" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding TotalAmount, StringFormat='{}{0:C2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     
                                     <!-- Status Badge -->
                                     <DataGridTemplateColumn Header="Estado" Width="130">
@@ -350,27 +398,79 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" IsReadOnly="True" />
-                                    <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
-                                    <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
+                                    <DataGridTemplateColumn Header="Código" Width="150">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ProductCode}" FontWeight="Bold" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="Producto" Width="*">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding ProductName}" VerticalAlignment="Center" Margin="6,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="U.M." Width="100">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding UnitOfMeasure}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                     
-                                    <DataGridTextColumn Header="Cant. Solicitada" Binding="{Binding TotalQuantity, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
-                                    <DataGridTextColumn Header="Stock Deducido" Binding="{Binding DeductedFromInventory, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
-                                    <DataGridTextColumn Header="Neto a Pedir" Binding="{Binding NetQuantityToOrder, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" FontWeight="Bold" />
-                                    
+                                    <DataGridTemplateColumn Header="Cant. Solicitada" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding TotalQuantity, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="Stock Deducido" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding DeductedFromInventory, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="Neto a Pedir" Width="120">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding NetQuantityToOrder, StringFormat='{}{0:N2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
                                     <!-- Editable Loaded Quantity -->
                                     <DataGridTemplateColumn Header="Cant. Real Cargada" Width="140">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>
-                                                <TextBox Text="{Binding QuantityLoaded, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N2}}" 
-                                                         Style="{StaticResource MaterialDesignTextBox}"
+                                                <TextBox Text="{Binding QuantityLoaded, UpdateSourceTrigger=PropertyChanged, StringFormat='{}{0:N2}'}" 
                                                          HorizontalAlignment="Right" TextAlignment="Right" Width="100" />
                                             </DataTemplate>
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
-                                    <DataGridTextColumn Header="Total Neto" Binding="{Binding TotalNetAmount, StringFormat={}{0:C2}}" Width="130" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" FontWeight="Bold" />
-                                    <DataGridTextColumn Header="Observaciones" Binding="{Binding Observation}" Width="180" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" IsReadOnly="True" />
+                                    <DataGridTemplateColumn Header="Total Neto" Width="130">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding TotalNetAmount, StringFormat='{}{0:C2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
+
+                                    <DataGridTemplateColumn Header="Observaciones" Width="180">
+                                        <DataGridTemplateColumn.CellTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Observation}" VerticalAlignment="Center" Margin="6,0" />
+                                            </DataTemplate>
+                                        </DataGridTemplateColumn.CellTemplate>
+                                    </DataGridTemplateColumn>
                                 </DataGrid.Columns>
                             </DataGrid>
 
