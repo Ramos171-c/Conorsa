@@ -18,7 +18,6 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         private readonly INotificationService _notificationService;
 
         private bool _isLoading;
-        private string _generalObservations = string.Empty;
 
         public bool IsDarkTheme => false;
 
@@ -31,26 +30,20 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 {
                     _isLoading = value;
                     OnPropertyChanged();
+                    OnPropertyChanged(nameof(IsLoadingVisibility));
                     OnPropertyChanged(nameof(ShowEmptyMessage));
+                    OnPropertyChanged(nameof(ShowEmptyMessageVisibility));
                 }
             }
         }
 
-        public string GeneralObservations
-        {
-            get => _generalObservations;
-            set
-            {
-                if (_generalObservations != value)
-                {
-                    _generalObservations = value;
-                    OnPropertyChanged();
-                }
-            }
-        }
+        public string GeneralObservations => TxtGeneralObservations?.Text ?? string.Empty;
 
         public bool HasData => ConsolidatedProducts.Count > 0;
         public bool ShowEmptyMessage => !IsLoading && ConsolidatedProducts.Count == 0;
+
+        public Visibility IsLoadingVisibility => IsLoading ? Visibility.Visible : Visibility.Collapsed;
+        public Visibility ShowEmptyMessageVisibility => ShowEmptyMessage ? Visibility.Visible : Visibility.Collapsed;
 
         public decimal TotalItems => ConsolidatedProducts.Sum(p => p.TotalQuantity);
         public decimal TotalGrossPurchaseCost => ConsolidatedProducts.Sum(p => p.GrossPurchaseCost);
@@ -79,8 +72,8 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
         public RecentOrdersReportDialog(SalesApiClient salesApiClient, INotificationService notificationService)
         {
-            DataContext = this;
             InitializeComponent();
+            DataContext = this;
             _salesApiClient = salesApiClient;
             _notificationService = notificationService;
 
@@ -97,7 +90,6 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             IsLoading = true;
             try
             {
-                // Query only "Recibido" orders with no date filters
                 var list = await _salesApiClient.GetConsolidatedProductsAsync(null, "Recibido", null, null);
                 
                 ConsolidatedProducts.Clear();
@@ -108,6 +100,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 
                 OnPropertyChanged(nameof(HasData));
                 OnPropertyChanged(nameof(ShowEmptyMessage));
+                OnPropertyChanged(nameof(ShowEmptyMessageVisibility));
                 OnPropertyChanged(nameof(TotalItems));
                 OnPropertyChanged(nameof(TotalDeducted));
                 OnPropertyChanged(nameof(TotalNetToOrder));

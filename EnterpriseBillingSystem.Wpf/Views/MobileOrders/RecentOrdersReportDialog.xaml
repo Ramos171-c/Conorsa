@@ -4,7 +4,6 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
-        xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
         mc:Ignorable="d"
         Title="Consolidación de Pedidos para Compra (Bodega Única)" Height="720" Width="1050"
         WindowStartupLocation="CenterOwner"
@@ -15,10 +14,6 @@
         TextElement.FontWeight="Medium"
         TextElement.FontSize="14"
         FontFamily="Segoe UI">
-
-    <Window.Resources>
-        <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
-    </Window.Resources>
 
     <Grid Margin="16">
         <Grid.RowDefinitions>
@@ -94,7 +89,7 @@
         <Border Grid.Row="2" Margin="0,0,0,12" Background="White" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1" ClipToBounds="True">
             <Grid>
                 <ProgressBar IsIndeterminate="True" 
-                             Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" 
+                             Visibility="{Binding IsLoadingVisibility}" 
                              VerticalAlignment="Top" Height="4" Panel.ZIndex="10" Foreground="#4F46E5" />
 
                 <DataGrid ItemsSource="{Binding ConsolidatedProducts}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
@@ -200,7 +195,7 @@
                 <TextBlock Text="No se encontraron pedidos móviles en estado Recibido." 
                            HorizontalAlignment="Center" VerticalAlignment="Center"
                            FontSize="14" Opacity="0.5"
-                           Visibility="{Binding ShowEmptyMessage, Converter={StaticResource BoolToVis}}" />
+                           Visibility="{Binding ShowEmptyMessageVisibility}" />
             </Grid>
         </Border>
 
@@ -209,7 +204,7 @@
             <TextBlock Text="Observaciones Generales del Consolidado (se incluirán en el Excel)" 
                        FontSize="13" FontWeight="Bold" Margin="0,0,0,4" Foreground="#334155" />
             <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
-                <TextBox Text="{Binding GeneralObservations}"
+                <TextBox x:Name="TxtGeneralObservations"
                          TextWrapping="True" AcceptsReturn="True" Height="45" FontSize="13" 
                          BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
             </Border>
