@@ -92,7 +92,7 @@
                              Visibility="{Binding IsLoadingVisibility}" 
                              VerticalAlignment="Top" Height="4" Panel.ZIndex="10" Foreground="#4F46E5" />
 
-                <DataGrid ItemsSource="{Binding ConsolidatedProducts}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
+                <DataGrid ItemsSource="{Binding ConsolidatedProducts}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column" Style="{x:Null}">
                     <DataGrid.Columns>
                         <DataGridTemplateColumn Header="Código" Width="95">
                             <DataGridTemplateColumn.CellTemplate>
@@ -204,7 +204,7 @@
             <TextBlock Text="Observaciones Generales del Consolidado (se incluirán en el Excel)" 
                        FontSize="13" FontWeight="Bold" Margin="0,0,0,4" Foreground="#334155" />
             <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
-                <TextBox x:Name="TxtGeneralObservations"
+                <TextBox x:Name="TxtGeneralObservations" Style="{x:Null}"
                          TextWrapping="True" AcceptsReturn="True" Height="45" FontSize="13" 
                          BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
             </Border>

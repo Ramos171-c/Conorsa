@@ -255,7 +255,7 @@
                     <StackPanel Grid.Row="0" Margin="0,0,0,8">
                         <TextBlock Text="Notas / Observaciones del Vendedor" FontSize="13" FontWeight="Bold" Margin="0,0,0,4" Foreground="#334155" />
                         <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
-                            <TextBox Text="{Binding Notes}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" 
+                            <TextBox Text="{Binding Notes}" Style="{x:Null}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" 
                                       VerticalScrollBarVisibility="Auto" Height="45" 
                                       BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
                         </Border>
@@ -265,7 +265,7 @@
                     <StackPanel Grid.Row="1">
                         <TextBlock Text="Observaciones de Entrega / Despacho / Faltantes" FontSize="13" FontWeight="Bold" Margin="0,0,0,4" Foreground="#334155" />
                         <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
-                            <TextBox Text="{Binding DispatcherNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" 
+                            <TextBox Text="{Binding DispatcherNotes, UpdateSourceTrigger=PropertyChanged}" Style="{x:Null}" AcceptsReturn="True" TextWrapping="Wrap" 
                                       VerticalScrollBarVisibility="Auto" Height="45" 
                                       BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
                         </Border>
