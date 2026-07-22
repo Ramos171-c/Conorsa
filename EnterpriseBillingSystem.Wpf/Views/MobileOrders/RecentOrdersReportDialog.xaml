@@ -18,27 +18,21 @@
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
 
-        <Style x:Key="RightAlignedColumnStyle" TargetType="TextBlock">
-            <Setter Property="HorizontalAlignment" Value="Right" />
-            <Setter Property="VerticalAlignment" Value="Center" />
-            <Setter Property="Margin" Value="0,0,8,0" />
-        </Style>
-
-        <Style x:Key="RightAlignedBoldColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
+        <Style x:Key="ReportBoldColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
             <Setter Property="FontWeight" Value="Bold" />
         </Style>
 
-        <Style x:Key="RightAlignedPurchaseColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
+        <Style x:Key="ReportPurchaseColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Foreground" Value="#B45309" />
         </Style>
 
-        <Style x:Key="RightAlignedSalesColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
+        <Style x:Key="ReportSalesColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Foreground" Value="#1E40AF" />
         </Style>
 
-        <Style x:Key="RightAlignedProfitColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
+        <Style x:Key="ReportProfitColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource RightAlignedColumnStyle}">
             <Setter Property="FontWeight" Value="Bold" />
             <Setter Property="Foreground" Value="#15803D" />
         </Style>
@@ -133,12 +127,12 @@
                         <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="65" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding TotalQuantity, StringFormat={}{0:N2}}" Width="95" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                         <DataGridTextColumn Header="Stock Deducido" Binding="{Binding DeductedFromInventory, StringFormat={}{0:N2}}" Width="105" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Neto A Pedir" Binding="{Binding NetQuantityToOrder, StringFormat={}{0:N2}}" Width="100" ElementStyle="{StaticResource RightAlignedBoldColumnStyle}" />
+                        <DataGridTextColumn Header="Neto A Pedir" Binding="{Binding NetQuantityToOrder, StringFormat={}{0:N2}}" Width="100" ElementStyle="{StaticResource ReportBoldColumnStyle}" />
                         <DataGridTextColumn Header="Costo Unit." Binding="{Binding UnitCost, StringFormat={}{0:C2}}" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Total Compra" Binding="{Binding TotalPurchaseCost, StringFormat={}{0:C2}}" Width="110" ElementStyle="{StaticResource RightAlignedPurchaseColumnStyle}" />
+                        <DataGridTextColumn Header="Total Compra" Binding="{Binding TotalPurchaseCost, StringFormat={}{0:C2}}" Width="110" ElementStyle="{StaticResource ReportPurchaseColumnStyle}" />
                         <DataGridTextColumn Header="Venta Unit." Binding="{Binding UnitPrice, StringFormat={}{0:C2}}" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Total Venta" Binding="{Binding NetSalesAmount, StringFormat={}{0:C2}}" Width="110" ElementStyle="{StaticResource RightAlignedSalesColumnStyle}" />
-                        <DataGridTextColumn Header="Diferencia ($)" Binding="{Binding ProfitMarginAmount, StringFormat={}{0:C2}}" Width="115" ElementStyle="{StaticResource RightAlignedProfitColumnStyle}" />
+                        <DataGridTextColumn Header="Total Venta" Binding="{Binding NetSalesAmount, StringFormat={}{0:C2}}" Width="110" ElementStyle="{StaticResource ReportSalesColumnStyle}" />
+                        <DataGridTextColumn Header="Diferencia ($)" Binding="{Binding ProfitMarginAmount, StringFormat={}{0:C2}}" Width="115" ElementStyle="{StaticResource ReportProfitColumnStyle}" />
                         <DataGridTextColumn Header="Observaciones" Binding="{Binding Observation}" Width="160" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                     </DataGrid.Columns>
                 </DataGrid>
