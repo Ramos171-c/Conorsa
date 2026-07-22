@@ -26,92 +26,28 @@
             <converters:BooleanToVisibilityConverter x:Key="InverseBoolToVis" Inverse="True" />
             <converters:InverseBooleanConverter x:Key="InverseBool" />
 
-            <!-- Estilo Premium Global para todas las tablas (DataGrid) del sistema -->
-            <Style x:Key="RightAlignedColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignDataGridTextColumnStyle}">
+            <!-- Estilos Globales Seguros para Tablas (DataGrid) sin dependencias a BAML MarkupExtensions -->
+            <Style x:Key="RightAlignedColumnStyle" TargetType="TextBlock">
                 <Setter Property="HorizontalAlignment" Value="Right" />
                 <Setter Property="TextAlignment" Value="Right" />
                 <Setter Property="Margin" Value="0,0,8,0" />
             </Style>
 
-            <Style x:Key="CenterAlignedColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignDataGridTextColumnStyle}">
+            <Style x:Key="CenterAlignedColumnStyle" TargetType="TextBlock">
                 <Setter Property="HorizontalAlignment" Value="Center" />
                 <Setter Property="TextAlignment" Value="Center" />
             </Style>
 
-            <Style TargetType="DataGrid" BasedOn="{StaticResource MaterialDesignDataGrid}">
+            <Style TargetType="DataGrid">
                 <Setter Property="GridLinesVisibility" Value="None" />
                 <Setter Property="Background" Value="Transparent" />
                 <Setter Property="BorderThickness" Value="0" />
                 <Setter Property="AlternationCount" Value="2" />
-                <Setter Property="materialDesign:DataGridAssist.CellPadding" Value="16 12" />
-                <Setter Property="ColumnHeaderStyle">
-                    <Setter.Value>
-                        <Style TargetType="DataGridColumnHeader" BasedOn="{StaticResource MaterialDesignDataGridColumnHeader}">
-                            <Setter Property="Background" Value="#F3E8FF" />
-                            <Setter Property="Foreground" Value="#4A148C" />
-                            <Setter Property="FontWeight" Value="Bold" />
-                            <Setter Property="FontSize" Value="13" />
-                            <Setter Property="Height" Value="48" />
-                            <Setter Property="Padding" Value="16,0" />
-                            <Setter Property="BorderBrush" Value="#E0E0E0" />
-                            <Setter Property="BorderThickness" Value="0,0,0,2" />
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="True">
-                                    <Setter Property="Background" Value="#2A1B3D" />
-                                    <Setter Property="Foreground" Value="#E1BEE7" />
-                                    <Setter Property="BorderBrush" Value="#4F3674" />
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Setter.Value>
-                </Setter>
-                <Setter Property="RowStyle">
-                    <Setter.Value>
-                        <Style TargetType="DataGridRow" BasedOn="{StaticResource MaterialDesignDataGridRow}">
-                            <Setter Property="Background" Value="Transparent" />
-                            <Setter Property="BorderBrush" Value="{DynamicResource MaterialDesignDivider}" />
-                            <Setter Property="BorderThickness" Value="0,0,0,1" />
-                            <Style.Triggers>
-                                <Trigger Property="ItemsControl.AlternationIndex" Value="1">
-                                    <Setter Property="Background" Value="{DynamicResource MaterialDesignPaper}" />
-                                </Trigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True" />
-                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="True" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Background" Value="#2E223A" />
-                                </MultiDataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True" />
-                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="False" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Background" Value="#F5EDFA" />
-                                </MultiDataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected}" Value="True" />
-                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="True" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Background" Value="#4F3674" />
-                                    <Setter Property="Foreground" Value="White" />
-                                </MultiDataTrigger>
-                                <MultiDataTrigger>
-                                    <MultiDataTrigger.Conditions>
-                                        <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected}" Value="True" />
-                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="False" />
-                                    </MultiDataTrigger.Conditions>
-                                    <Setter Property="Background" Value="#EADDF6" />
-                                    <Setter Property="Foreground" Value="#4A148C" />
-                                </MultiDataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Setter.Value>
-                </Setter>
+                <Setter Property="RowBackground" Value="White" />
+                <Setter Property="AlternatingRowBackground" Value="#F8FAFC" />
             </Style>
 
-            <!-- DataTemplates for navigation mapping ViewModels to Views -->
+            <!-- DataTemplates para mapeo de ViewModels a Views -->
             <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
                 <vd:DashboardView />
             </DataTemplate>
