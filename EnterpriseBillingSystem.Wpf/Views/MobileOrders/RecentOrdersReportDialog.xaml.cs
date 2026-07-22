@@ -68,11 +68,10 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
         public RecentOrdersReportDialog(SalesApiClient salesApiClient, INotificationService notificationService)
         {
+            DataContext = this;
             InitializeComponent();
             _salesApiClient = salesApiClient;
             _notificationService = notificationService;
-
-            DataContext = this;
 
             Loaded += RecentOrdersReportDialog_Loaded;
         }

@@ -163,7 +163,7 @@
                        Style="{StaticResource MaterialDesignSubtitle2TextBlock}" 
                        FontWeight="Bold" Margin="0,0,0,4" />
             <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
-                <TextBox Text="{Binding GeneralObservations, UpdateSourceTrigger=PropertyChanged}"
+                <TextBox Text="{Binding GeneralObservations, Mode=TwoWay}"
                          TextWrapping="True" AcceptsReturn="True" Height="45" FontSize="13" 
                          BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
             </Border>
