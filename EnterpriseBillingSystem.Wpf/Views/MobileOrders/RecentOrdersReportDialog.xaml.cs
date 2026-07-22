@@ -126,22 +126,22 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                     return;
                 }
 
-                int successCount = 0;
-                int errorCount = 0;
-
-                foreach (var order in result.Items)
+                var resultsBag = new System.Collections.Concurrent.ConcurrentBag<bool>();
+                await Parallel.ForEachAsync(result.Items, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (order, ct) =>
                 {
                     try
                     {
                         var ok = await _salesApiClient.ConfirmSalesOrderAsync(order.Id);
-                        if (ok) successCount++;
-                        else errorCount++;
+                        resultsBag.Add(ok);
                     }
                     catch
                     {
-                        errorCount++;
+                        resultsBag.Add(false);
                     }
-                }
+                });
+
+                int successCount = resultsBag.Count(x => x);
+                int errorCount = resultsBag.Count(x => !x);
 
                 _notificationService.ShowSuccess($"Procesamiento completado. {successCount} pedidos procesados y pasados a 'En Proceso' exitosamente." + 
                     (errorCount > 0 ? $" ({errorCount} errores)." : ""));

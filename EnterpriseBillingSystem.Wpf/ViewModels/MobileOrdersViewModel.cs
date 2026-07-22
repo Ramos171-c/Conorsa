@@ -234,23 +234,23 @@ public partial class MobileOrdersViewModel : ViewModelBase
                 return;
             }
 
-            int successCount = 0;
-            int errorCount = 0;
-
-            // 2. Bulk confirm them (will transition from Recibido -> EnProceso on backend)
-            foreach (var order in result.Items)
+            // 2. Parallel bulk confirmation (Max concurrency 5) for ultra-fast processing
+            var resultsBag = new System.Collections.Concurrent.ConcurrentBag<bool>();
+            await Parallel.ForEachAsync(result.Items, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (order, ct) =>
             {
                 try
                 {
                     var ok = await _salesApiClient.ConfirmSalesOrderAsync(order.Id);
-                    if (ok) successCount++;
-                    else errorCount++;
+                    resultsBag.Add(ok);
                 }
                 catch
                 {
-                    errorCount++;
+                    resultsBag.Add(false);
                 }
-            }
+            });
+
+            int successCount = resultsBag.Count(x => x);
+            int errorCount = resultsBag.Count(x => !x);
 
             _notificationService.ShowSuccess($"Procesamiento completado. {successCount} pedidos procesados exitosamente." + 
                 (errorCount > 0 ? $" ({errorCount} errores)." : ""));

@@ -75,6 +75,25 @@ public class InventoryRepository : Repository<Inventory>, IInventoryRepository
         return lowStock.Select(x => (x.Product, x.CurrentStock));
     }
 
+    public async Task<Dictionary<Guid, decimal>> GetAvailableStockByProductIdsAsync(IEnumerable<Guid> productIds, CancellationToken cancellationToken = default)
+    {
+        var idsList = productIds.Distinct().ToList();
+        if (!idsList.Any()) return new Dictionary<Guid, decimal>();
+
+        var stockList = await _context.Inventories
+            .AsNoTracking()
+            .Where(i => idsList.Contains(i.ProductId))
+            .GroupBy(i => i.ProductId)
+            .Select(g => new
+            {
+                ProductId = g.Key,
+                Available = g.Sum(i => (decimal?)i.PhysicalStock - i.ReservedStock - i.CommittedStock) ?? 0m
+            })
+            .ToListAsync(cancellationToken);
+
+        return stockList.ToDictionary(x => x.ProductId, x => Math.Max(0, x.Available));
+    }
+
     public async Task<InventoryDashboardKpis> GetDashboardKpisAsync(Guid branchId, CancellationToken cancellationToken = default)
     {
         var totalProducts = await _context.Products.CountAsync(cancellationToken);

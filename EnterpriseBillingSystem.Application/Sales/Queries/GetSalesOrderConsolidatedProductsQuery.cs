@@ -53,6 +53,10 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             .GroupBy(d => new { d.ProductId, Code = d.Product?.InternalCode ?? string.Empty, Name = d.Product?.Name ?? "Producto Desconocido", Uom = d.UnitOfMeasure?.Code ?? string.Empty })
             .ToList();
 
+        // Optimización N+1: Consultar todo el inventario disponible en 1 sola consulta SQL por lotes
+        var productIds = detailsGrouped.Select(g => g.Key.ProductId).ToList();
+        var stockDict = await _inventoryRepository.GetAvailableStockByProductIdsAsync(productIds, cancellationToken);
+
         var result = new List<ConsolidatedProductDto>();
 
         foreach (var g in detailsGrouped)
@@ -60,9 +64,8 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             var totalQuantity = g.Sum(x => x.Quantity);
             var totalNetAmount = g.Sum(x => x.NetAmount);
 
-            // Consultar existencias disponibles en la bodega única de la empresa para este producto
-            var (stockItems, _) = await _inventoryRepository.GetStockInquiryAsync(null, g.Key.ProductId, 1, 100, cancellationToken);
-            var availableStock = Math.Max(0, stockItems.Sum(i => i.PhysicalStock - i.ReservedStock - i.CommittedStock));
+            // Obtener existencias disponibles desde el diccionario en memoria (O(1))
+            stockDict.TryGetValue(g.Key.ProductId, out decimal availableStock);
 
             // Deducir del inventario existente para no volver a pedirlo
             var deducted = Math.Min(totalQuantity, availableStock);

@@ -18,6 +18,8 @@ public interface IInventoryRepository : IRepository<Inventory>
 
     Task<IEnumerable<(Product Product, decimal CurrentStock)>> GetLowStockItemsAsync(CancellationToken cancellationToken = default);
 
+    Task<Dictionary<Guid, decimal>> GetAvailableStockByProductIdsAsync(IEnumerable<Guid> productIds, CancellationToken cancellationToken = default);
+
     Task<InventoryDashboardKpis> GetDashboardKpisAsync(Guid branchId, CancellationToken cancellationToken = default);
 }
 
