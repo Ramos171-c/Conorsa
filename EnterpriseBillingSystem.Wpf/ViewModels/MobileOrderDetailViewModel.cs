@@ -126,11 +126,13 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
 
     public decimal EffectiveTotalAmount => Details.Sum(d => d.EffectiveNetAmount);
     public decimal TotalMissingQuantity => Details.Sum(d => d.MissingQuantity);
+    public string TotalMissingQuantityDisplay => $"{TotalMissingQuantity:N2} pzas";
 
     public void RecalculateTotalsAndNotes()
     {
         OnPropertyChanged(nameof(EffectiveTotalAmount));
         OnPropertyChanged(nameof(TotalMissingQuantity));
+        OnPropertyChanged(nameof(TotalMissingQuantityDisplay));
 
         var missingItems = Details.Where(d => d.MissingQuantity > 0).ToList();
         if (missingItems.Any())

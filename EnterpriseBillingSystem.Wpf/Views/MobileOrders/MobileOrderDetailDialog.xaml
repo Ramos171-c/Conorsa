@@ -250,9 +250,7 @@
 
                         <!-- Piezas Faltantes -->
                         <TextBlock Grid.Row="1" Grid.Column="0" Text="Piezas Faltantes (No Vino):" Foreground="#DC2626" FontWeight="SemiBold" VerticalAlignment="Center" Margin="0,3" />
-                        <TextBlock Grid.Row="1" Grid.Column="1" Foreground="#DC2626" FontWeight="Bold" VerticalAlignment="Center" Margin="0,3">
-                            <Run Text="{Binding TotalMissingQuantity, StringFormat={}{0:N2}}" /><Run Text=" pzas" />
-                        </TextBlock>
+                        <TextBlock Grid.Row="1" Grid.Column="1" Text="{Binding TotalMissingQuantityDisplay}" Foreground="#DC2626" FontWeight="Bold" VerticalAlignment="Center" Margin="0,3" />
 
                         <!-- Impuestos -->
                         <TextBlock Grid.Row="2" Grid.Column="0" Text="Impuestos (IVA):" VerticalAlignment="Center" Margin="0,3" />

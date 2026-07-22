@@ -64,6 +64,10 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         public decimal TotalProfitMargin => TotalEstimatedSales - TotalEstimatedCost;
         public decimal ProfitMarginPercentage => TotalEstimatedSales > 0 ? (TotalProfitMargin / TotalEstimatedSales) * 100m : 0m;
 
+        public string TotalDeductedDisplay => $"{TotalDeducted:N2} pzas";
+        public string TotalInventoryDeductedPurchaseCostDisplay => $"Val. Compra: {TotalInventoryDeductedPurchaseCost:C2}";
+        public string TotalNetToOrderDisplay => $"{TotalNetToOrder:N2} pzas a pedir";
+
         public ObservableCollection<ConsolidatedProductDto> ConsolidatedProducts { get; } = new();
 
         public RecentOrdersReportDialog(SalesApiClient salesApiClient, INotificationService notificationService)
