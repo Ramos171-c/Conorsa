@@ -20,6 +20,8 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         private bool _isLoading;
         private string _generalObservations = string.Empty;
 
+        public bool IsDarkTheme => false;
+
         public bool IsLoading
         {
             get => _isLoading;

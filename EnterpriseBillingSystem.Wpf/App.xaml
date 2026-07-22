@@ -56,7 +56,7 @@
                             <Setter Property="BorderBrush" Value="#E0E0E0" />
                             <Setter Property="BorderThickness" Value="0,0,0,2" />
                             <Style.Triggers>
-                                <DataTrigger Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}" Value="True">
+                                <DataTrigger Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="True">
                                     <Setter Property="Background" Value="#2A1B3D" />
                                     <Setter Property="Foreground" Value="#E1BEE7" />
                                     <Setter Property="BorderBrush" Value="#4F3674" />
@@ -78,21 +78,21 @@
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True" />
-                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}" Value="True" />
+                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="True" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Background" Value="#2E223A" />
                                 </MultiDataTrigger>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsMouseOver}" Value="True" />
-                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}" Value="False" />
+                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="False" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Background" Value="#F5EDFA" />
                                 </MultiDataTrigger>
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected}" Value="True" />
-                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}" Value="True" />
+                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="True" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Background" Value="#4F3674" />
                                     <Setter Property="Foreground" Value="White" />
@@ -100,7 +100,7 @@
                                 <MultiDataTrigger>
                                     <MultiDataTrigger.Conditions>
                                         <Condition Binding="{Binding RelativeSource={RelativeSource Self}, Path=IsSelected}" Value="True" />
-                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}}" Value="False" />
+                                        <Condition Binding="{Binding DataContext.IsDarkTheme, RelativeSource={RelativeSource AncestorType=Window}, FallbackValue=False}" Value="False" />
                                     </MultiDataTrigger.Conditions>
                                     <Setter Property="Background" Value="#EADDF6" />
                                     <Setter Property="Foreground" Value="#4A148C" />
