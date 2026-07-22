@@ -9,11 +9,11 @@
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         ResizeMode="CanResizeWithGrip"
-        Background="{DynamicResource MaterialDesignPaper}"
-        TextElement.Foreground="{DynamicResource MaterialDesignBody}"
+        Background="#F8FAFC"
+        Foreground="#1E293B"
         TextElement.FontWeight="Medium"
         TextElement.FontSize="14"
-        FontFamily="{materialDesign:MaterialDesignFont}">
+        FontFamily="Segoe UI">
 
     <Window.Resources>
         <BooleanToVisibilityConverter x:Key="BoolToVis" />
@@ -51,15 +51,15 @@
         <Grid Grid.Row="0" Margin="0,0,0,16">
             <StackPanel>
                 <StackPanel Orientation="Horizontal" Margin="0,0,0,4">
-                    <materialDesign:PackIcon Kind="ClipboardTextOutline" Width="28" Height="28" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,8,0" VerticalAlignment="Center"/>
-                    <TextBlock Text="Consolidación de Pedidos para Compra (Bodega Única)" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" VerticalAlignment="Center"/>
+                    <materialDesign:PackIcon Kind="ClipboardTextOutline" Width="28" Height="28" Foreground="#4F46E5" Margin="0,0,8,0" VerticalAlignment="Center"/>
+                    <TextBlock Text="Consolidación de Pedidos para Compra (Bodega Única)" FontSize="20" FontWeight="Bold" Foreground="#4F46E5" VerticalAlignment="Center"/>
                 </StackPanel>
                 <TextBlock Text="Descuento automático de existencias de inventario para generar el neto real a pedir a proveedor." Opacity="0.7" FontSize="12"/>
             </StackPanel>
         </Grid>
 
         <!-- Summary Info Card (5 Financial KPIs) -->
-        <materialDesign:Card Grid.Row="1" Margin="0,0,0,16" Padding="12,14" materialDesign:ElevationAssist.Elevation="Dp1" Background="#F8FAFC">
+        <Border Grid.Row="1" Margin="0,0,0,16" Padding="12,14" Background="White" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
@@ -75,7 +75,7 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" VerticalAlignment="Center">
-                    <TextBlock Text="Consolidado Financiero de Compras y Ventas" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                    <TextBlock Text="Consolidado Financiero de Compras y Ventas" FontWeight="Bold" FontSize="14" Foreground="#4F46E5" />
                     <TextBlock Text="Deducción exacta de existencias y margen proyectado" Opacity="0.7" FontSize="11" Margin="0,2,0,0"/>
                 </StackPanel>
 
@@ -111,20 +111,20 @@
                     <TextBlock Text="{Binding ProfitMarginPercentageDisplay}" FontSize="16" FontWeight="Bold" Foreground="#15803D" HorizontalAlignment="Right" />
                 </StackPanel>
             </Grid>
-        </materialDesign:Card>
+        </Border>
 
         <!-- Content Card (Grid) -->
-        <materialDesign:Card Grid.Row="2" Margin="0,0,0,12" materialDesign:ElevationAssist.Elevation="Dp1">
+        <Border Grid.Row="2" Margin="0,0,0,12" Background="White" CornerRadius="8" BorderBrush="#E2E8F0" BorderThickness="1" ClipToBounds="True">
             <Grid>
-                <ProgressBar Style="{StaticResource MaterialDesignLinearProgressBar}" IsIndeterminate="True" 
+                <ProgressBar IsIndeterminate="True" 
                              Visibility="{Binding IsLoading, Converter={StaticResource BoolToVis}}" 
-                             VerticalAlignment="Top" Height="4" Panel.ZIndex="10" />
+                             VerticalAlignment="Top" Height="4" Panel.ZIndex="10" Foreground="#4F46E5" />
 
                 <DataGrid ItemsSource="{Binding ConsolidatedProducts}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="95" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="65" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Código" Binding="{Binding ProductCode}" Width="95" />
+                        <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" />
+                        <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="65" />
                         <DataGridTextColumn Header="Cant. Pedida" Binding="{Binding TotalQuantity, StringFormat='{}{0:N2}'}" Width="95" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                         <DataGridTextColumn Header="Stock Deducido" Binding="{Binding DeductedFromInventory, StringFormat='{}{0:N2}'}" Width="105" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                         <DataGridTextColumn Header="Neto A Pedir" Binding="{Binding NetQuantityToOrder, StringFormat='{}{0:N2}'}" Width="100" ElementStyle="{StaticResource ReportBoldColumnStyle}" />
@@ -133,27 +133,26 @@
                         <DataGridTextColumn Header="Venta Unit." Binding="{Binding UnitPrice, StringFormat='{}{0:C2}'}" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                         <DataGridTextColumn Header="Total Venta" Binding="{Binding NetSalesAmount, StringFormat='{}{0:C2}'}" Width="110" ElementStyle="{StaticResource ReportSalesColumnStyle}" />
                         <DataGridTextColumn Header="Diferencia ($)" Binding="{Binding ProfitMarginAmount, StringFormat='{}{0:C2}'}" Width="115" ElementStyle="{StaticResource ReportProfitColumnStyle}" />
-                        <DataGridTextColumn Header="Observaciones" Binding="{Binding Observation}" Width="160" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Observaciones" Binding="{Binding Observation}" Width="160" />
                     </DataGrid.Columns>
                 </DataGrid>
                 
                 <!-- Empty State Message -->
                 <TextBlock Text="No se encontraron pedidos móviles en estado Recibido." 
                            HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Style="{StaticResource MaterialDesignBody1TextBlock}" Opacity="0.5"
+                           FontSize="14" Opacity="0.5"
                            Visibility="{Binding ShowEmptyMessage, Converter={StaticResource BoolToVis}}" />
             </Grid>
-        </materialDesign:Card>
+        </Border>
 
         <!-- Observaciones Generales -->
         <StackPanel Grid.Row="3" Margin="0,0,0,16">
             <TextBlock Text="Observaciones Generales del Consolidado (se incluirán en el Excel)" 
-                       Style="{StaticResource MaterialDesignSubtitle2TextBlock}" 
-                       FontWeight="Bold" Margin="0,0,0,4" />
+                       FontSize="13" FontWeight="Bold" Margin="0,0,0,4" Foreground="#334155" />
             <Border BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="4" Background="White" Padding="6,4">
                 <TextBox Text="{Binding GeneralObservations, Mode=TwoWay}"
-                         TextWrapping="True" AcceptsReturn="True" Height="45" FontSize="13" 
-                         BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
+                          TextWrapping="True" AcceptsReturn="True" Height="45" FontSize="13" 
+                          BorderThickness="0" VerticalContentAlignment="Top" Background="Transparent" />
             </Border>
         </StackPanel>
 
@@ -168,8 +167,7 @@
             </Grid.ColumnDefinitions>
             
             <Button Grid.Column="0" Click="ExportExcel_Click"
-                    Style="{StaticResource MaterialDesignRaisedButton}" 
-                    Background="#166534" BorderBrush="#166534"
+                    Background="#166534" Foreground="White" BorderThickness="0" Padding="16,8"
                     IsEnabled="{Binding HasData}">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="FileExcel" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
@@ -178,17 +176,16 @@
             </Button>
 
             <Button Grid.Column="2" Click="ConfirmResumen_Click"
-                    Style="{StaticResource MaterialDesignRaisedButton}"
-                    Background="{DynamicResource PrimaryHueMidBrush}"
+                    Background="#4F46E5" Foreground="White" BorderThickness="0" Padding="16,8"
                     IsEnabled="{Binding HasData}">
                 <StackPanel Orientation="Horizontal">
                     <materialDesign:PackIcon Kind="CheckCircleOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
-                    <TextBlock Text="Confirmar Resumen (Pasar a En Proceso)" VerticalAlignment="Center" />
+                    <TextBlock Text="Confirmar Resumen (Pasar a En Proceso)" VerticalAlignment="Center" FontWeight="Bold" />
                 </StackPanel>
             </Button>
             
-            <Button Grid.Column="4" Style="{StaticResource MaterialDesignFlatButton}" 
-                    Click="Close_Click" Content="Cerrar" />
+            <Button Grid.Column="4" Click="Close_Click" Content="Cerrar"
+                    Background="Transparent" Foreground="#64748B" BorderThickness="0" Padding="12,8" />
         </Grid>
     </Grid>
 </Window>
