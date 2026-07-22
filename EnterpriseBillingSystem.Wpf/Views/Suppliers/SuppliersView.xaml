@@ -92,7 +92,7 @@
                 <DataGrid ItemsSource="{Binding Suppliers}" AutoGenerateColumns="False" IsReadOnly="True" 
                           HeadersVisibility="Column">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Código" Binding="{Binding SupplierCode}" Width="110" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Código" Binding="{Binding SupplierCode}" Width="110" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Identificación" Binding="{Binding IdentificationNumber}" Width="130" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Nombre / Razón Social" Binding="{Binding Name}" Width="2*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Categoría" Binding="{Binding CategoryName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />

@@ -86,11 +86,12 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
 
         if (!string.IsNullOrWhiteSpace(status))
         {
-            if (status.Equals("RecentReport", StringComparison.OrdinalIgnoreCase))
+            var normalizedStatus = status.Replace(" ", "");
+            if (normalizedStatus.Equals("RecentReport", StringComparison.OrdinalIgnoreCase))
             {
                 query = query.Where(so => so.Status != SalesOrderStatus.Recibido && so.Status != SalesOrderStatus.Anulado);
             }
-            else if (Enum.TryParse<SalesOrderStatus>(status, true, out var statusEnum))
+            else if (Enum.TryParse<SalesOrderStatus>(normalizedStatus, true, out var statusEnum))
             {
                 query = query.Where(so => so.Status == statusEnum);
             }
@@ -138,11 +139,12 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
 
         if (!string.IsNullOrWhiteSpace(status))
         {
-            if (status.Equals("RecentReport", StringComparison.OrdinalIgnoreCase))
+            var normalizedStatus = status.Replace(" ", "");
+            if (normalizedStatus.Equals("RecentReport", StringComparison.OrdinalIgnoreCase))
             {
                 query = query.Where(so => so.Status != SalesOrderStatus.Recibido && so.Status != SalesOrderStatus.Anulado);
             }
-            else if (Enum.TryParse<SalesOrderStatus>(status, true, out var statusEnum))
+            else if (Enum.TryParse<SalesOrderStatus>(normalizedStatus, true, out var statusEnum))
             {
                 query = query.Where(so => so.Status == statusEnum);
             }

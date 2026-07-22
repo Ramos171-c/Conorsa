@@ -39,7 +39,25 @@ public class PurchaseApiClient
         if (!response.IsSuccessStatusCode)
         {
             var body = await response.Content.ReadAsStringAsync();
-            throw new Exception($"Error {(int)response.StatusCode}: {(string.IsNullOrWhiteSpace(body) ? response.ReasonPhrase : body)}");
+            string errorMessage = $"Error {(int)response.StatusCode}";
+            try
+            {
+                using var jsonDoc = System.Text.Json.JsonDocument.Parse(body);
+                if (jsonDoc.RootElement.TryGetProperty("message", out var msgProp))
+                {
+                    errorMessage = msgProp.GetString() ?? errorMessage;
+                }
+                else if (jsonDoc.RootElement.TryGetProperty("detail", out var detailProp))
+                {
+                    errorMessage = detailProp.GetString() ?? errorMessage;
+                }
+                else if (jsonDoc.RootElement.TryGetProperty("title", out var titleProp))
+                {
+                    errorMessage = titleProp.GetString() ?? errorMessage;
+                }
+            }
+            catch {}
+            throw new Exception(errorMessage);
         }
         return await response.Content.ReadFromJsonAsync<Guid>();
     }

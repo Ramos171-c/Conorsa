@@ -62,7 +62,7 @@
                 <DataGrid ItemsSource="{Binding AuditLogs}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Fecha Cambio" Binding="{Binding ChangedAt, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="140" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="Modificado Por" Binding="{Binding ChangedBy}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Modificado Por" Binding="{Binding ChangedBy}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         
                         <!-- Cost: Old -> New -->
                         <DataGridTemplateColumn Header="Costo (Antes -> Después)" Width="150">

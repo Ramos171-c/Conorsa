@@ -115,7 +115,7 @@
 
                                 <DataGrid Grid.Row="1" ItemsSource="{Binding Currencies}" SelectedItem="{Binding SelectedCurrency}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Código" Binding="{Binding Code}" Width="80" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                                        <DataGridTextColumn Header="Código" Binding="{Binding Code}" Width="80" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                                         <DataGridTextColumn Header="Moneda" Binding="{Binding Name}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                                         <DataGridTextColumn Header="Símbolo" Binding="{Binding Symbol}" Width="80" ElementStyle="{StaticResource CenterAlignedColumnStyle}" />
                                         <DataGridTextColumn Header="Tasa Cambio" Binding="{Binding ExchangeRate, StringFormat={}{0:F4}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
@@ -214,7 +214,7 @@
 
                                 <DataGrid Grid.Row="1" ItemsSource="{Binding SalesGoals}" SelectedItem="{Binding SelectedGoal}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Vendedor" Binding="{Binding UserFullName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                                        <DataGridTextColumn Header="Vendedor" Binding="{Binding UserFullName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                                         <DataGridTextColumn Header="Periodo" Binding="{Binding PeriodName}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                                         <DataGridTextColumn Header="Objetivo" Binding="{Binding TargetAmount, StringFormat={}C$ {0:N2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                                         <DataGridTextColumn Header="Vendido" Binding="{Binding CurrentAmount, StringFormat={}C$ {0:N2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
@@ -322,7 +322,7 @@
 
                                 <DataGrid Grid.Row="1" ItemsSource="{Binding RoutesList}" SelectedItem="{Binding SelectedRoute}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                                     <DataGrid.Columns>
-                                        <DataGridTextColumn Header="Código" Binding="{Binding Code}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                                        <DataGridTextColumn Header="Código" Binding="{Binding Code}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                                         <DataGridTextColumn Header="Ruta / Zona" Binding="{Binding Name}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                                         
                                         <!-- Active indicator using CheckBox -->

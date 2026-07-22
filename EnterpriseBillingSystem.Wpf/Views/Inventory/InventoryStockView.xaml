@@ -77,7 +77,7 @@
                         <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Stock Físico" Binding="{Binding PhysicalStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                         <DataGridTextColumn Header="Stock Reservado" Binding="{Binding ReservedStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Stock Disponible" Binding="{Binding AvailableStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Stock Disponible" Binding="{Binding AvailableStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

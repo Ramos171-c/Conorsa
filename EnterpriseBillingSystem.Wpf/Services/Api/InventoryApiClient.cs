@@ -22,6 +22,31 @@ public class InventoryApiClient
         return response ?? new List<WarehouseDto>();
     }
 
+    public async Task<Guid> ReceiveItemAsync(object command)
+    {
+        var response = await _httpClient.PostAsJsonAsync("Inventory/receive", command);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            string errorMessage = $"Error {(int)response.StatusCode}";
+            try
+            {
+                using var jsonDoc = System.Text.Json.JsonDocument.Parse(errorContent);
+                if (jsonDoc.RootElement.TryGetProperty("message", out var msgProp))
+                {
+                    errorMessage = msgProp.GetString() ?? errorMessage;
+                }
+                else if (jsonDoc.RootElement.TryGetProperty("detail", out var detailProp))
+                {
+                    errorMessage = detailProp.GetString() ?? errorMessage;
+                }
+            }
+            catch {}
+            throw new Exception(errorMessage);
+        }
+        return await response.Content.ReadFromJsonAsync<Guid>();
+    }
+
     public async Task<PagedResult<InventoryDto>?> GetStockInquiryAsync(Guid? branchWarehouseId, Guid? productId, int page, int pageSize)
     {
         var url = $"Inventory/stock?pageNumber={page}&pageSize={pageSize}";

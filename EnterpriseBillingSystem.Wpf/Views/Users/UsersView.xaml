@@ -66,7 +66,7 @@
                 <DataGrid ItemsSource="{Binding Users}" AutoGenerateColumns="False" IsReadOnly="True" 
                           HeadersVisibility="Column">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Usuario" Binding="{Binding Username}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Usuario" Binding="{Binding Username}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Nombre" Binding="{Binding FirstName}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Apellido" Binding="{Binding LastName}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         

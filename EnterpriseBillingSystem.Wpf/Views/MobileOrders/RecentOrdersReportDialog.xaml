@@ -73,10 +73,10 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <DataGridTemplateColumn Header="U.M." Width="60">
+                    <DataGridTemplateColumn Header="U.M." Width="70">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding UnitOfMeasure}" VerticalAlignment="Center" Margin="6,4" />
+                                <TextBlock Text="{Binding FullUnitOfMeasure}" VerticalAlignment="Center" Margin="6,4" FontWeight="SemiBold" Foreground="#334155" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -132,7 +132,7 @@
                     <DataGridTemplateColumn Header="Total Venta" Width="105">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding NetSalesAmount, StringFormat='{}{0:C2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" Foreground="#2563EB" />
+                                <TextBlock Text="{Binding DisplayTotalSales, StringFormat='{}{0:C2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" Foreground="#2563EB" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -140,7 +140,7 @@
                     <DataGridTemplateColumn Header="Ganancia ($)" Width="105">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding ProfitMarginAmount, StringFormat='{}{0:C2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" Foreground="#16A34A" />
+                                <TextBlock Text="{Binding DisplayProfit, StringFormat='{}{0:C2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" Foreground="#16A34A" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -151,7 +151,7 @@
         <!-- 4. Observaciones Generales (Sencillo) -->
         <StackPanel Grid.Row="3" Margin="0,0,0,12">
             <TextBlock Text="Observaciones Generales (se incluirán en el Excel)" FontWeight="Bold" Foreground="#334155" Margin="0,0,0,4" />
-            <TextBox x:Name="TxtGeneralObservations" Height="40" TextWrapping="True" AcceptsReturn="True" Background="White" BorderBrush="#CBD5E1" BorderThickness="1" Padding="4" />
+            <TextBox x:Name="TxtGeneralObservations" Height="45" TextWrapping="Wrap" AcceptsReturn="True" Padding="6" />
         </StackPanel>
 
         <!-- 5. Botones de Acción Directos -->

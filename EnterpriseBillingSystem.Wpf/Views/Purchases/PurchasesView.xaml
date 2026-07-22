@@ -71,7 +71,7 @@
 
                 <DataGrid ItemsSource="{Binding Receipts}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Nro. Recepción" Binding="{Binding ReceiptNumber}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Nro. Recepción" Binding="{Binding ReceiptNumber}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Proveedor" Binding="{Binding SupplierName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Bodega Destino" Binding="{Binding WarehouseName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Fecha Ingreso" Binding="{Binding ReceiptDate, StringFormat={}{0:dd/MM/yyyy}}" Width="140" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />

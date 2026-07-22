@@ -34,31 +34,6 @@ public class DbInitializer : IDbInitializer
             await _context.Database.MigrateAsync();
         }
 
-        // TEMPORARY WIPE - Reset inventory and empty Kardex on startup using EF Core
-        try
-        {
-            var inventories = await _context.Inventories.ToListAsync();
-            foreach (var inv in inventories)
-            {
-                inv.PhysicalStock = 0;
-                inv.ReservedStock = 0;
-                inv.CommittedStock = 0;
-                _context.Inventories.Update(inv);
-            }
-            
-            var details = await _context.InventoryMovementDetails.ToListAsync();
-            _context.InventoryMovementDetails.RemoveRange(details);
-            
-            var movements = await _context.InventoryMovements.ToListAsync();
-            _context.InventoryMovements.RemoveRange(movements);
-            
-            await _context.SaveChangesAsync();
-            System.Console.WriteLine("[TEMP WIPE] Inventario y Kardex limpiados correctamente usando EF Core.");
-        }
-        catch (System.Exception ex)
-        {
-            System.Console.WriteLine($"[TEMP WIPE] Error al limpiar inventario: {ex.Message}");
-        }
 
         // 1.5. Sembrar Rutas por Defecto
         if (!await _context.Routes.AnyAsync())

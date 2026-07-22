@@ -1,10 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Threading.Tasks;
 using System.Windows;
+using Microsoft.Extensions.DependencyInjection;
 using EnterpriseBillingSystem.Wpf.Models;
 using EnterpriseBillingSystem.Wpf.Services.Api;
 using EnterpriseBillingSystem.Wpf.Services.Dialogs;
@@ -16,6 +18,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
     {
         private readonly SalesApiClient _salesApiClient;
         private readonly INotificationService _notificationService;
+        private readonly string _targetStatus;
 
         private bool _isLoading;
 
@@ -55,8 +58,8 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
         public decimal TotalNetToOrder => ConsolidatedProducts.Sum(p => p.NetQuantityToOrder);
         public decimal TotalEstimatedCost => ConsolidatedProducts.Sum(p => p.TotalPurchaseCost);
-        public decimal TotalEstimatedSales => ConsolidatedProducts.Sum(p => p.NetSalesAmount);
-        public decimal TotalProfitMargin => TotalEstimatedSales - TotalEstimatedCost;
+        public decimal TotalEstimatedSales => ConsolidatedProducts.Sum(p => p.DisplayTotalSales);
+        public decimal TotalProfitMargin => ConsolidatedProducts.Sum(p => p.DisplayProfit);
         public decimal ProfitMarginPercentage => TotalEstimatedSales > 0 ? (TotalProfitMargin / TotalEstimatedSales) * 100m : 0m;
 
         public string TotalDeductedDisplay => $"{TotalDeducted:N2} pzas";
@@ -70,14 +73,42 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
         public ObservableCollection<ConsolidatedProductDto> ConsolidatedProducts { get; } = new();
 
-        public RecentOrdersReportDialog(SalesApiClient salesApiClient, INotificationService notificationService)
+        public RecentOrdersReportDialog(SalesApiClient salesApiClient, INotificationService notificationService, string? targetStatus = "EnProceso")
         {
             InitializeComponent();
             DataContext = this;
             _salesApiClient = salesApiClient;
             _notificationService = notificationService;
+            _targetStatus = string.IsNullOrWhiteSpace(targetStatus) || targetStatus == "-- Todos --" ? "Recibido" : targetStatus;
 
+            ConsolidatedProducts.CollectionChanged += (s, e) => NotifyTotals();
             Loaded += RecentOrdersReportDialog_Loaded;
+        }
+
+        private void NotifyTotals()
+        {
+            OnPropertyChanged(nameof(HasData));
+            OnPropertyChanged(nameof(ShowEmptyMessage));
+            OnPropertyChanged(nameof(ShowEmptyMessageVisibility));
+            OnPropertyChanged(nameof(TotalItems));
+            OnPropertyChanged(nameof(TotalGrossPurchaseCost));
+            OnPropertyChanged(nameof(TotalGrossSales));
+            OnPropertyChanged(nameof(TotalDeducted));
+            OnPropertyChanged(nameof(TotalInventoryDeductedPurchaseCost));
+            OnPropertyChanged(nameof(TotalInventoryDeductedSales));
+            OnPropertyChanged(nameof(TotalNetToOrder));
+            OnPropertyChanged(nameof(TotalEstimatedCost));
+            OnPropertyChanged(nameof(TotalEstimatedSales));
+            OnPropertyChanged(nameof(TotalProfitMargin));
+            OnPropertyChanged(nameof(ProfitMarginPercentage));
+
+            OnPropertyChanged(nameof(TotalDeductedDisplay));
+            OnPropertyChanged(nameof(TotalInventoryDeductedPurchaseCostDisplay));
+            OnPropertyChanged(nameof(TotalNetToOrderDisplay));
+            OnPropertyChanged(nameof(TotalEstimatedCostDisplay));
+            OnPropertyChanged(nameof(TotalEstimatedSalesDisplay));
+            OnPropertyChanged(nameof(TotalProfitMarginDisplay));
+            OnPropertyChanged(nameof(ProfitMarginPercentageDisplay));
         }
 
         private async void RecentOrdersReportDialog_Loaded(object sender, RoutedEventArgs e)
@@ -90,24 +121,45 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             IsLoading = true;
             try
             {
-                var list = await _salesApiClient.GetConsolidatedProductsAsync(null, "Recibido", null, null);
+                var list = await _salesApiClient.GetConsolidatedProductsAsync(null, _targetStatus, null, null);
                 
+                Dictionary<string, string> descriptionMap = new(StringComparer.OrdinalIgnoreCase);
+                try
+                {
+                    var productApiClient = App.AppHost?.Services.GetService<ProductApiClient>();
+                    if (productApiClient != null)
+                    {
+                        var pagedResult = await productApiClient.GetProductsPagedAsync(1, 5000);
+                        if (pagedResult?.Items != null)
+                        {
+                            foreach (var p in pagedResult.Items)
+                            {
+                                if (!string.IsNullOrWhiteSpace(p.InternalCode) && !string.IsNullOrWhiteSpace(p.Description))
+                                {
+                                    descriptionMap[p.InternalCode] = p.Description;
+                                }
+                            }
+                        }
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Failed to load product descriptions map: {ex.Message}");
+                }
+
                 ConsolidatedProducts.Clear();
                 foreach (var item in list)
                 {
-                    ConsolidatedProducts.Add(item);
+                    string displayName = item.ProductName;
+                    if (!string.IsNullOrWhiteSpace(item.ProductCode) && descriptionMap.TryGetValue(item.ProductCode, out var desc) && !string.IsNullOrWhiteSpace(desc))
+                    {
+                        displayName = desc;
+                    }
+
+                    ConsolidatedProducts.Add(item with { ProductName = displayName });
                 }
                 
-                OnPropertyChanged(nameof(HasData));
-                OnPropertyChanged(nameof(ShowEmptyMessage));
-                OnPropertyChanged(nameof(ShowEmptyMessageVisibility));
-                OnPropertyChanged(nameof(TotalItems));
-                OnPropertyChanged(nameof(TotalDeducted));
-                OnPropertyChanged(nameof(TotalNetToOrder));
-                OnPropertyChanged(nameof(TotalEstimatedCost));
-                OnPropertyChanged(nameof(TotalEstimatedSales));
-                OnPropertyChanged(nameof(TotalProfitMargin));
-                OnPropertyChanged(nameof(ProfitMarginPercentage));
+                NotifyTotals();
             }
             catch (Exception ex)
             {
@@ -124,7 +176,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             if (ConsolidatedProducts.Count == 0) return;
 
             var confirm = Views.Dialogs.CustomMessageBox.Show(
-                "¿Está seguro de que desea confirmar este resumen? Esto cambiará el estado de TODOS los pedidos en estado 'Recibido' a 'En Proceso'.",
+                $"¿Está seguro de que desea confirmar este resumen? Esto procesará los pedidos en estado '{_targetStatus}'.",
                 "Confirmar Resumen",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
@@ -134,10 +186,10 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             IsLoading = true;
             try
             {
-                var result = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, null, "Recibido");
+                var result = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, null, _targetStatus);
                 if (result?.Items == null || !result.Items.Any())
                 {
-                    _notificationService.ShowWarning("No se encontraron pedidos en estado Recibido para procesar.");
+                    _notificationService.ShowWarning($"No se encontraron pedidos en estado '{_targetStatus}' para procesar.");
                     return;
                 }
 
@@ -158,7 +210,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 int successCount = resultsBag.Count(x => x);
                 int errorCount = resultsBag.Count(x => !x);
 
-                _notificationService.ShowSuccess($"Procesamiento completado. {successCount} pedidos procesados y pasados a 'En Proceso' exitosamente." + 
+                _notificationService.ShowSuccess($"Procesamiento completado. {successCount} pedidos procesados exitosamente." + 
                     (errorCount > 0 ? $" ({errorCount} errores)." : ""));
 
                 await LoadReportAsync();

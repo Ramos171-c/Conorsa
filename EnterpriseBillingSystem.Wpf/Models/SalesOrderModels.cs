@@ -140,4 +140,11 @@ public record ConsolidatedProductDto(
     decimal TotalNetAmount,
     decimal TotalCost,
     string Observation = ""
-);
+)
+{
+    public string FullUnitOfMeasure => !string.IsNullOrWhiteSpace(UnitOfMeasure) ? UnitOfMeasure : "UND";
+
+    public decimal DisplayTotalSales => GrossSalesAmount > 0 ? GrossSalesAmount : TotalQuantity * UnitPrice;
+    public decimal DisplayGrossPurchase => GrossPurchaseCost > 0 ? GrossPurchaseCost : TotalQuantity * UnitCost;
+    public decimal DisplayProfit => DisplayTotalSales - DisplayGrossPurchase;
+}

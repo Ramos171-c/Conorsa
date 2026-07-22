@@ -60,7 +60,15 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
 
         var detailsGrouped = orders
             .SelectMany(o => o.Details)
-            .GroupBy(d => new { d.ProductId, Code = d.Product?.InternalCode ?? string.Empty, Name = d.Product?.Name ?? "Producto Desconocido", Uom = d.UnitOfMeasure?.Code ?? string.Empty })
+            .GroupBy(d => new 
+            { 
+                d.ProductId, 
+                Code = d.Product?.InternalCode ?? string.Empty, 
+                Name = !string.IsNullOrWhiteSpace(d.Product?.Description) 
+                    ? d.Product.Description 
+                    : (d.Product?.Name ?? "Producto Desconocido"), 
+                Uom = d.UnitOfMeasure != null ? d.UnitOfMeasure.Code : "UND"
+            })
             .ToList();
 
         // Optimización N+1: Consultar todo el inventario disponible en 1 sola consulta SQL por lotes

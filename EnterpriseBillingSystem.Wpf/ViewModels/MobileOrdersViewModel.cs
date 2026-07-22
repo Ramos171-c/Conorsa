@@ -272,7 +272,8 @@ public partial class MobileOrdersViewModel : ViewModelBase
     [RelayCommand]
     private async Task OpenRecentOrdersReportAsync()
     {
-        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _notificationService)
+        string? statusToFilter = string.IsNullOrWhiteSpace(SelectedStatus) || SelectedStatus == "-- Todos --" ? "Recibido" : SelectedStatus;
+        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _notificationService, statusToFilter)
         {
             Owner = System.Windows.Application.Current.MainWindow
         };

@@ -84,7 +84,7 @@ public static class ExcelExportService
             ws.Cell(currentRow, 2).Value = item.ProductName;
             ws.Cell(currentRow, 2).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Left);
 
-            ws.Cell(currentRow, 3).Value = item.UnitOfMeasure;
+            ws.Cell(currentRow, 3).Value = item.FullUnitOfMeasure;
             ws.Cell(currentRow, 3).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
 
             // Cantidad Solicitada (Bruta)
@@ -127,14 +127,14 @@ public static class ExcelExportService
             ws.Cell(currentRow, 9).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
 
             // TOTAL VENTA CLIENTE ($)
-            ws.Cell(currentRow, 10).Value = item.NetSalesAmount;
+            ws.Cell(currentRow, 10).Value = item.DisplayTotalSales;
             ws.Cell(currentRow, 10).Style.NumberFormat.SetFormat("$#,##0.00");
             ws.Cell(currentRow, 10).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
             ws.Cell(currentRow, 10).Style.Font.SetBold(true);
             ws.Cell(currentRow, 10).Style.Font.SetFontColor(XLColor.FromHtml("#1E40AF"));
 
             // DIFERENCIA / GANANCIA ($)
-            ws.Cell(currentRow, 11).Value = item.ProfitMarginAmount;
+            ws.Cell(currentRow, 11).Value = item.DisplayProfit;
             ws.Cell(currentRow, 11).Style.NumberFormat.SetFormat("$#,##0.00");
             ws.Cell(currentRow, 11).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
             ws.Cell(currentRow, 11).Style.Font.SetBold(true);

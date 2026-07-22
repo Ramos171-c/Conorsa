@@ -95,38 +95,58 @@
             </materialDesign:Card.Style>
             <Grid>
                 <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="2*" />
                     <ColumnDefinition Width="1.5*" />
-                    <ColumnDefinition Width="100" />
-                    <ColumnDefinition Width="120" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="1.2*" />
+                    <ColumnDefinition Width="80" />
+                    <ColumnDefinition Width="110" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <ComboBox Grid.Column="0" ItemsSource="{Binding Products}" 
+                <!-- Search Input by Code / Name / Barcode -->
+                <TextBox Grid.Column="0" 
+                         Text="{Binding ProductSearchText, UpdateSourceTrigger=PropertyChanged}" 
+                         materialDesign:HintAssist.Hint="Buscar Cód. / Nombre" 
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}" 
+                         Margin="0,0,6,0" />
+
+                <!-- Filtered Product Selector -->
+                <ComboBox Grid.Column="1" 
+                          ItemsSource="{Binding FilteredProducts}" 
                           SelectedItem="{Binding SelectedProduct}" 
-                          DisplayMemberPath="Name" 
                           materialDesign:HintAssist.Hint="Seleccionar Producto"
                           Style="{StaticResource MaterialDesignOutlinedComboBox}" 
-                          Margin="0,0,8,0" />
+                          Margin="6,0,6,0">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <StackPanel Orientation="Horizontal">
+                                <TextBlock Text="{Binding InternalCode}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,6,0" />
+                                <TextBlock Text="-" Foreground="#94A3B8" Margin="0,0,6,0" />
+                                <TextBlock Text="{Binding Name}" TextTrimming="CharacterEllipsis" />
+                            </StackPanel>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
 
-                <ComboBox Grid.Column="1" ItemsSource="{Binding Presentations}" 
+                <ComboBox Grid.Column="2" ItemsSource="{Binding Presentations}" 
                           SelectedItem="{Binding SelectedPresentation}" 
                           DisplayMemberPath="Name" 
                           materialDesign:HintAssist.Hint="Presentación"
                           Style="{StaticResource MaterialDesignOutlinedComboBox}" 
-                          Margin="8,0,8,0" />
+                          Margin="6,0,6,0" />
 
-                <TextBox Grid.Column="2" Text="{Binding QuantityToAdd, UpdateSourceTrigger=PropertyChanged}" 
+                <TextBox Grid.Column="3" Text="{Binding QuantityToAdd, UpdateSourceTrigger=PropertyChanged}" 
                          materialDesign:HintAssist.Hint="Cantidad" 
                          Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                         Margin="8,0,8,0" />
+                         Margin="6,0,6,0" />
 
-                <TextBox Grid.Column="3" Text="{Binding UnitPriceToAdd, UpdateSourceTrigger=PropertyChanged}" 
+                <TextBox Grid.Column="4" Text="{Binding UnitPriceToAdd, UpdateSourceTrigger=PropertyChanged}" 
                          materialDesign:HintAssist.Hint="Costo Unit." 
                          Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                         Margin="8,0,8,0" />
+                         Margin="6,0,6,0" />
 
-                <Button Grid.Column="4" Command="{Binding AddDetailCommand}" Style="{StaticResource MaterialDesignRaisedButton}" VerticalAlignment="Center">
+                <Button Grid.Column="5" Command="{Binding AddDetailCommand}" Style="{StaticResource MaterialDesignRaisedButton}" VerticalAlignment="Center">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="PlaylistPlus" Width="18" Height="18" Margin="0,0,4,0" VerticalAlignment="Center" />
                         <TextBlock Text="Agregar" VerticalAlignment="Center" />

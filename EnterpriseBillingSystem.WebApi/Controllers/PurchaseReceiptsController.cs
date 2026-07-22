@@ -18,8 +18,24 @@ public class PurchaseReceiptsController : ApiControllerBase
     [HasPermission("purchases.receive")]
     public async Task<ActionResult<Guid>> Register([FromBody] RegisterPurchaseReceiptCommand command)
     {
-        var id = await Mediator.Send(command);
-        return CreatedAtAction(nameof(GetById), new { id }, id);
+        try
+        {
+            var id = await Mediator.Send(command);
+            return CreatedAtAction(nameof(GetById), new { id }, id);
+        }
+        catch (ArgumentException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
+        catch (Exception ex)
+        {
+            Serilog.Log.Error(ex, "Error al registrar la recepción de compra");
+            return StatusCode(500, new { Message = ex.Message });
+        }
     }
 
     /// <summary>

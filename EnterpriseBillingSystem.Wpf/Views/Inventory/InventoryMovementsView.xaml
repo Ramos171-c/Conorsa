@@ -129,7 +129,7 @@
 
                         <DataGridTextColumn Header="Cantidad" Binding="{Binding Quantity, StringFormat={}{0:N2}}" Width="100" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                         <DataGridTextColumn Header="Presentación" Binding="{Binding UnitOfMeasureCode}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="Cant. Base" Binding="{Binding QuantityInBaseUnit, StringFormat={}{0:N2}}" Width="100" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" />
+                        <DataGridTextColumn Header="Cant. Base" Binding="{Binding QuantityInBaseUnit, StringFormat={}{0:N2}}" Width="100" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                         <DataGridTextColumn Header="Notas" Binding="{Binding Notes}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                     </DataGrid.Columns>
                 </DataGrid>
