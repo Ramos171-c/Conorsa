@@ -1505,15 +1505,13 @@ public class DbInitializer : IDbInitializer
                 _ => catToallas
             };
 
-            var cleanCode = data.Code.Replace("-", "").Trim();
             var altCode = data.Code.StartsWith("TA") ? data.Code.Replace("TA", "TO") : (data.Code.StartsWith("TO") ? data.Code.Replace("TO", "TA") : data.Code);
             var existingProduct = await _context.Products
                 .Include(p => p.Presentations)
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(p => p.InternalCode == data.Code 
                                        || p.InternalCode == altCode
-                                       || p.InternalCode.Replace("-", "") == cleanCode 
-                                       || p.Name.Trim().ToLower() == data.Name.Trim().ToLower());
+                                       || p.Name == data.Name);
 
             if (existingProduct != null)
             {
