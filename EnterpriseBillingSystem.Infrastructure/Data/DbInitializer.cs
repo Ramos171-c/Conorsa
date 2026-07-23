@@ -1480,19 +1480,19 @@ public class DbInitializer : IDbInitializer
             new("MA015", "GUITAR SHAPED MARSMALLOW", "Malvaviscos", "1*24*30", 24, 124.51m, 2988.24m, 124.51m, 2988.24m, 124.51m, 2988.24m, 105.83m, 2540.00m),
 
             // Toallas y Otros (13)
-            new("TO001", "TOALLAS HUMEDAS FAMILYS ROBELLY CELESTE 96 HOJAS", "Toallas y Otros", "1*12", 12, 63.53m, 762.35m, 57.47m, 689.66m, 61.36m, 736.36m, 50.00m, 600.00m),
-            new("TO002", "TOALLAS HUMEDAS MIDDY BEAR 80 HOJAS", "Toallas y Otros", "1*12", 12, 68.82m, 825.88m, 62.26m, 747.13m, 66.48m, 797.73m, 54.17m, 650.00m),
-            new("TO003", "PAQUETE DE TOALLITA HUMEDA MIDDY BEAR 120 HOJAS", "Toallas y Otros", "1*12", 12, 72.00m, 864.00m, 65.13m, 781.61m, 69.55m, 834.55m, 56.67m, 680.00m),
-            new("TO004", "UNIDAD JN203 TOALLITA COMPRIMIDA MIDDY BEAR", "Toallas y Otros", "1*30*10", 30, 79.71m, 2391.43m, 59.39m, 1781.61m, 63.41m, 1902.27m, 51.67m, 1550.00m),
-            new("TO005", "TOALLA HUMEDA SIPPACK MIDDY BEAR", "Toallas y Otros", "1*20*8", 20, 57.86m, 1157.14m, 43.10m, 862.07m, 46.02m, 920.45m, 37.50m, 750.00m),
-            new("TO006", "PAPEL HIGIENICO ROBELLY 1620 HOJAS", "Toallas y Otros", "1/24", 24, 23.82m, 571.76m, 21.55m, 517.24m, 23.01m, 552.27m, 18.75m, 450.00m),
-            new("TO007", "BOLSON DE PAÑALES CALSON OSITO -TALLAS; S,M,L,XL,XXL,3XL Y 4XL.", "Toallas y Otros", "1/4", 4, 594.51m, 2378.05m, 560.34m, 2241.38m, 541.67m, 2166.67m, 487.50m, 1950.00m),
-            new("TO008", "BOLSON DE PAÑALES PEGA PEGA OSITO -TALLAS; S,M,L,XL,XXL Y XXXL.", "Toallas y Otros", "1/4", 4, 594.51m, 2378.05m, 560.34m, 2241.38m, 541.67m, 2166.67m, 487.50m, 1950.00m),
-            new("TO009", "PAQUETE DE PAÑAL ADULTO MOMMY BEAR -TALLAS; M,G,L,XL.", "Toallas y Otros", "1*8*10", 8, 321.43m, 2571.43m, 258.62m, 2068.97m, 255.68m, 2045.45m, 225.00m, 1800.00m),
-            new("TO010", "TALCO SURTIDO MIDDY BEAR 635GR.", "Toallas y Otros", "1*12", 12, 77.14m, 925.71m, 57.47m, 689.66m, 61.36m, 736.36m, 50.00m, 600.00m),
-            new("TO011", "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6XL", "Toallas y Otros", "1*4*50", 4, 594.51m, 2378.05m, 560.34m, 2241.38m, 541.67m, 2166.67m, 487.50m, 1950.00m),
-            new("TO012", "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL", "Toallas y Otros", "1*4*50", 4, 304.88m, 1219.51m, 287.36m, 1149.43m, 277.78m, 1111.11m, 250.00m, 1000.00m),
-            new("TO013", "PAPEL HIGIENICO ROBELLY 1620 HOJAS", "Toallas y Otros", "1*12", 12, 23.82m, 285.88m, 21.55m, 258.62m, 23.01m, 276.12m, 18.75m, 225.00m),
+            new("TA001", "TOALLAS HUMEDAS FAMILYS ROBELLY CELESTE 96 HOJAS", "Toallas y Otros", "1*12", 12, 63.53m, 762.35m, 57.47m, 689.66m, 61.36m, 736.36m, 50.00m, 600.00m),
+            new("TA002", "TOALLAS HUMEDAS MIDDY BEAR 80 HOJAS", "Toallas y Otros", "1*12", 12, 68.82m, 825.88m, 62.26m, 747.13m, 66.48m, 797.73m, 54.17m, 650.00m),
+            new("TA003", "PAQUETE DE TOALLITA HUMEDA MIDDY BEAR 120 HOJAS", "Toallas y Otros", "1*12", 12, 72.00m, 864.00m, 65.13m, 781.61m, 69.55m, 834.55m, 56.67m, 680.00m),
+            new("TA004", "UNIDAD JN203 TOALLITA COMPRIMIDA MIDDY BEAR", "Toallas y Otros", "1*30*10", 30, 79.71m, 2391.43m, 59.39m, 1781.61m, 63.41m, 1902.27m, 51.67m, 1550.00m),
+            new("TA005", "TOALLA HUMEDA SIPPACK MIDDY BEAR", "Toallas y Otros", "1*20*8", 20, 57.86m, 1157.14m, 43.10m, 862.07m, 46.02m, 920.45m, 37.50m, 750.00m),
+            new("TA006", "PAPEL HIGIENICO ROBELLY 1620 HOJAS", "Toallas y Otros", "1/24", 24, 23.82m, 571.76m, 21.55m, 517.24m, 23.01m, 552.27m, 18.75m, 450.00m),
+            new("TA007", "BOLSON DE PAÑALES CALSON OSITO -TALLAS; S,M,L,XL,XXL,3XL Y 4XL.", "Toallas y Otros", "1/4", 4, 594.51m, 2378.05m, 560.34m, 2241.38m, 541.67m, 2166.67m, 487.50m, 1950.00m),
+            new("TA008", "BOLSON DE PAÑALES PEGA PEGA OSITO -TALLAS; S,M,L,XL,XXL Y XXXL.", "Toallas y Otros", "1/4", 4, 594.51m, 2378.05m, 560.34m, 2241.38m, 541.67m, 2166.67m, 487.50m, 1950.00m),
+            new("TA009", "PAQUETE DE PAÑAL ADULTO MOMMY BEAR -TALLAS; M,G,L,XL.", "Toallas y Otros", "1*8*10", 8, 321.43m, 2571.43m, 258.62m, 2068.97m, 255.68m, 2045.45m, 225.00m, 1800.00m),
+            new("TA010", "TALCO SURTIDO MIDDY BEAR 635GR.", "Toallas y Otros", "1*12", 12, 77.14m, 925.71m, 57.47m, 689.66m, 61.36m, 736.36m, 50.00m, 600.00m),
+            new("TA011", "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6XL", "Toallas y Otros", "1*4*50", 4, 594.51m, 2378.05m, 560.34m, 2241.38m, 541.67m, 2166.67m, 487.50m, 1950.00m),
+            new("TA012", "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL", "Toallas y Otros", "1*4*50", 4, 304.88m, 1219.51m, 287.36m, 1149.43m, 277.78m, 1111.11m, 250.00m, 1000.00m),
+            new("TA013", "PAPEL HIGIENICO ROBELLY 1620 HOJAS", "Toallas y Otros", "1*12", 12, 23.82m, 285.88m, 21.55m, 258.62m, 23.01m, 276.12m, 18.75m, 225.00m),
         };
 
         foreach (var data in productsData)
@@ -1506,10 +1506,12 @@ public class DbInitializer : IDbInitializer
             };
 
             var cleanCode = data.Code.Replace("-", "").Trim();
+            var altCode = data.Code.StartsWith("TA") ? data.Code.Replace("TA", "TO") : (data.Code.StartsWith("TO") ? data.Code.Replace("TO", "TA") : data.Code);
             var existingProduct = await _context.Products
                 .Include(p => p.Presentations)
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(p => p.InternalCode == data.Code 
+                                       || p.InternalCode == altCode
                                        || p.InternalCode.Replace("-", "") == cleanCode 
                                        || p.Name.Trim().ToLower() == data.Name.Trim().ToLower());
 
