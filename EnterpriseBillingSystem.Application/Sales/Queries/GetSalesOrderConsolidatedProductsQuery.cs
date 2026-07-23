@@ -72,8 +72,9 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             .ToList();
 
         // Optimización N+1: Consultar todo el inventario disponible en 1 sola consulta SQL por lotes
-        var productIds = detailsGrouped.Select(g => g.Key.ProductId).ToList();
+        var productIds = detailsGrouped.Select(g => g.Key.ProductId).Distinct().ToList();
         var stockDict = await _inventoryRepository.GetAvailableStockByProductIdsAsync(productIds, cancellationToken);
+        var remainingBaseStock = new Dictionary<Guid, decimal>(stockDict);
 
         var result = new List<ConsolidatedProductDto>();
 
@@ -83,21 +84,31 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             var grossSalesAmount = g.Sum(x => x.NetAmount);
             var unitPrice = totalQuantity > 0 ? grossSalesAmount / totalQuantity : 0m;
 
-            // Obtener existencias disponibles desde el diccionario en memoria (O(1))
-            stockDict.TryGetValue(g.Key.ProductId, out decimal availableStock);
-
-            // Deducir del inventario existente para no volver a pedirlo
-            var deducted = Math.Min(totalQuantity, availableStock);
-            var netToOrder = Math.Max(0, totalQuantity - availableStock);
-
             var sampleDetail = g.First();
             var presentation = sampleDetail.Product?.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == sampleDetail.UnitOfMeasureId);
+            var conversionFactor = presentation?.ConversionFactor ?? 1.0000m;
+            if (conversionFactor <= 0) conversionFactor = 1.0000m;
+
             var unitCost = presentation != null ? presentation.Cost : (sampleDetail.Product?.CurrentCost ?? 0m);
+
+            // Obtener existencias disponibles restantes en unidades base
+            remainingBaseStock.TryGetValue(g.Key.ProductId, out decimal baseStockAvailable);
+
+            // Convertir stock disponible de unidades base a la presentación actual
+            var availableInPresUnits = baseStockAvailable / conversionFactor;
+
+            // Deducir del inventario existente en unidades de presentación
+            var deducted = Math.Min(totalQuantity, availableInPresUnits);
+            var netToOrder = Math.Max(0, totalQuantity - deducted);
+
+            // Descontar del fondo global de stock del producto en unidades base
+            var deductedBase = deducted * conversionFactor;
+            remainingBaseStock[g.Key.ProductId] = Math.Max(0m, baseStockAvailable - deductedBase);
 
             // 1. Totales Brutos Solicitados por Pedidos
             var grossPurchaseCost = totalQuantity * unitCost;
 
-            // 2. Valores Cubiertos por Inventario Existente (para tener la información de inventario en el reporte)
+            // 2. Valores Cubiertos por Inventario Existente
             var inventoryDeductedPurchaseCost = deducted * unitCost;
             var inventoryDeductedSalesAmount = deducted * unitPrice;
 
@@ -105,18 +116,18 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             var netPurchaseCost = netToOrder * unitCost;
             var netSalesAmount = netToOrder * unitPrice;
 
-            // 4. Diferencia / Ganancia bruta estimada (Neto Venta - Neto Compra)
+            // 4. Diferencia / Ganancia bruta estimada
             var profitMarginAmount = netSalesAmount - netPurchaseCost;
             var profitMarginPercentage = netSalesAmount > 0 ? (profitMarginAmount / netSalesAmount) * 100m : 0m;
 
             string obs;
-            if (availableStock >= totalQuantity)
+            if (deducted >= totalQuantity)
             {
                 obs = "Stock suficiente en inventario (No pedir)";
             }
-            else if (availableStock > 0)
+            else if (deducted > 0)
             {
-                obs = $"Stock parcial ({availableStock:F2} disp.). Se deducen {deducted:F2} pzas. Pedir {netToOrder:F2}";
+                obs = $"Stock parcial ({availableInPresUnits:F2} disp.). Se deducen {deducted:F2} pzas. Pedir {netToOrder:F2}";
             }
             else
             {
@@ -129,7 +140,7 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
                 ProductName: g.Key.Name,
                 UnitOfMeasure: g.Key.Uom,
                 TotalQuantity: totalQuantity,
-                AvailableStock: availableStock,
+                AvailableStock: availableInPresUnits,
                 DeductedFromInventory: deducted,
                 NetQuantityToOrder: netToOrder,
                 UnitCost: unitCost,
