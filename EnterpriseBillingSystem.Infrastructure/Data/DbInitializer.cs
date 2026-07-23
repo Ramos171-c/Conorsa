@@ -1363,6 +1363,24 @@ public class DbInitializer : IDbInitializer
             await _context.SaveChangesAsync();
         }
 
+        // Limpieza de productos antiguos duplicados con código TO001 a TO010 (Toallas y Otros)
+        var oldToProducts = await _context.Products
+            .IgnoreQueryFilters()
+            .Where(p => p.InternalCode.StartsWith("TO0") || p.InternalCode.StartsWith("TO-"))
+            .ToListAsync();
+
+        if (oldToProducts.Any())
+        {
+            foreach (var oldP in oldToProducts)
+            {
+                oldP.IsActive = false;
+                oldP.IsCatalogVisible = false;
+                oldP.IsDeleted = true;
+                _context.Products.Update(oldP);
+            }
+            await _context.SaveChangesAsync();
+        }
+
         // 7. Lista de productos
         var productsData = new List<TempProductData>
         {
@@ -1505,12 +1523,10 @@ public class DbInitializer : IDbInitializer
                 _ => catToallas
             };
 
-            var altCode = data.Code.StartsWith("TA") ? data.Code.Replace("TA", "TO") : (data.Code.StartsWith("TO") ? data.Code.Replace("TO", "TA") : data.Code);
             var existingProduct = await _context.Products
                 .Include(p => p.Presentations)
                 .IgnoreQueryFilters()
                 .FirstOrDefaultAsync(p => p.InternalCode == data.Code 
-                                       || p.InternalCode == altCode
                                        || p.Name == data.Name);
 
             if (existingProduct != null)
