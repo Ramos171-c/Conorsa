@@ -1505,10 +1505,13 @@ public class DbInitializer : IDbInitializer
                 _ => catToallas
             };
 
+            var cleanCode = data.Code.Replace("-", "").Trim();
             var existingProduct = await _context.Products
                 .Include(p => p.Presentations)
                 .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(p => p.InternalCode == data.Code);
+                .FirstOrDefaultAsync(p => p.InternalCode == data.Code 
+                                       || p.InternalCode.Replace("-", "") == cleanCode 
+                                       || p.Name.Trim().ToLower() == data.Name.Trim().ToLower());
 
             if (existingProduct != null)
             {
@@ -1522,20 +1525,41 @@ public class DbInitializer : IDbInitializer
                     existingProduct.CurrentCost = data.CostUnit.Value;
                 }
 
-                foreach (var presentation in existingProduct.Presentations)
+                var basePres = existingProduct.Presentations.FirstOrDefault(p => p.IsBaseUnit || p.ConversionFactor == 1.0000m || p.Name == "Unidad");
+                if (basePres != null)
                 {
-                    if (presentation.IsBaseUnit || presentation.ConversionFactor == 1.0000m)
-                    {
-                        presentation.RetailPrice = data.RetailUnit;
-                        if (data.CostUnit.HasValue) presentation.Cost = data.CostUnit.Value;
-                    }
-                    else
-                    {
-                        presentation.ConversionFactor = (decimal)data.BoxFactor;
-                        presentation.RetailPrice = data.RetailBox;
-                        if (data.CostBox.HasValue) presentation.Cost = data.CostBox.Value;
-                    }
+                    basePres.RetailPrice = data.RetailUnit;
+                    if (data.CostUnit.HasValue) basePres.Cost = data.CostUnit.Value;
                 }
+
+                var boxPres = existingProduct.Presentations.FirstOrDefault(p => !p.IsBaseUnit && (p.ConversionFactor > 1.0000m || p.Name == "Caja"));
+                if (boxPres != null)
+                {
+                    boxPres.ConversionFactor = (decimal)data.BoxFactor;
+                    boxPres.RetailPrice = data.RetailBox;
+                    if (data.CostBox.HasValue) boxPres.Cost = data.CostBox.Value;
+                }
+                else if (data.BoxFactor > 1)
+                {
+                    boxPres = new ProductPresentation
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = existingProduct.Id,
+                        UnitOfMeasureId = uomCaja.Id,
+                        Name = "Caja",
+                        ConversionFactor = (decimal)data.BoxFactor,
+                        Barcode = existingProduct.InternalCode + "C",
+                        Cost = data.CostBox ?? (data.WholesaleBox * 0.85m),
+                        RetailPrice = data.RetailBox,
+                        SemiWholesalePrice = data.SemiBox,
+                        WholesalePrice = data.WholesaleBox,
+                        IsBaseUnit = false,
+                        IsDefaultSalePresentation = false,
+                        IsActive = true
+                    };
+                    existingProduct.Presentations.Add(boxPres);
+                }
+
                 _context.Products.Update(existingProduct);
             }
             else
