@@ -1363,10 +1363,11 @@ public class DbInitializer : IDbInitializer
             await _context.SaveChangesAsync();
         }
 
-        // Limpieza de productos antiguos duplicados con código TO001 a TO010 (Toallas y Otros)
+        // Limpieza estricta únicamente de los productos antiguos duplicados TO001 a TO010
+        var toCodesToDelete = new HashSet<string> { "TO001", "TO002", "TO003", "TO004", "TO005", "TO006", "TO007", "TO008", "TO009", "TO010" };
         var oldToProducts = await _context.Products
             .IgnoreQueryFilters()
-            .Where(p => p.InternalCode.StartsWith("TO0") || p.InternalCode.StartsWith("TO-"))
+            .Where(p => toCodesToDelete.Contains(p.InternalCode))
             .ToListAsync();
 
         if (oldToProducts.Any())
@@ -1377,6 +1378,25 @@ public class DbInitializer : IDbInitializer
                 oldP.IsCatalogVisible = false;
                 oldP.IsDeleted = true;
                 _context.Products.Update(oldP);
+            }
+            await _context.SaveChangesAsync();
+        }
+
+        // Restaurar explícitamente TO011, TO012, TO013 y TA011, TA012, TA013 por si fueron marcados como eliminados
+        var toRestore = await _context.Products
+            .IgnoreQueryFilters()
+            .Where(p => p.InternalCode == "TO011" || p.InternalCode == "TO012" || p.InternalCode == "TO013" ||
+                        p.InternalCode == "TA011" || p.InternalCode == "TA012" || p.InternalCode == "TA013")
+            .ToListAsync();
+
+        if (toRestore.Any())
+        {
+            foreach (var rP in toRestore)
+            {
+                rP.IsActive = true;
+                rP.IsCatalogVisible = true;
+                rP.IsDeleted = false;
+                _context.Products.Update(rP);
             }
             await _context.SaveChangesAsync();
         }
