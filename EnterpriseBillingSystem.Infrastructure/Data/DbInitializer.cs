@@ -1339,6 +1339,30 @@ public class DbInitializer : IDbInitializer
         var branchWarehouses = await _context.BranchWarehouses.Include(bw => bw.Warehouse).Where(bw => bw.BranchId == branchId).ToListAsync();
         var bgCM = branchWarehouses.FirstOrDefault(bw => bw.Warehouse.Name.Contains("General")) ?? branchWarehouses.FirstOrDefault();
 
+        // Limpieza de movimientos de inventario semilla iniciales si existieran (CARGA-INICIAL-CATALOGO)
+        var initMovements = await _context.InventoryMovements
+            .Include(m => m.Details)
+            .Where(m => m.ReferenceDocument == "CARGA-INICIAL-CATALOGO" || m.MovementNumber.StartsWith("MOV-INIT-"))
+            .ToListAsync();
+
+        if (initMovements.Any())
+        {
+            foreach (var mov in initMovements)
+            {
+                foreach (var detail in mov.Details)
+                {
+                    var inv = await _context.Inventories.FirstOrDefaultAsync(i => i.ProductId == detail.ProductId);
+                    if (inv != null)
+                    {
+                        inv.PhysicalStock = Math.Max(0m, inv.PhysicalStock - detail.QuantityInBaseUnit);
+                        _context.Inventories.Update(inv);
+                    }
+                }
+                _context.InventoryMovements.Remove(mov);
+            }
+            await _context.SaveChangesAsync();
+        }
+
         // 7. Lista de productos
         var productsData = new List<TempProductData>
         {
@@ -1579,52 +1603,7 @@ public class DbInitializer : IDbInitializer
 
                 await _context.Products.AddAsync(product);
 
-                // Existencias Iniciales (100 Cajas de cada producto = 100 * BoxFactor Unidades)
-                if (bgCM != null)
-                {
-                    decimal initialStock = 100m * data.BoxFactor;
-                    var inventory = new Inventory
-                    {
-                        Id = Guid.NewGuid(),
-                        BranchWarehouseId = bgCM.Id,
-                        ProductId = product.Id,
-                        PhysicalStock = initialStock,
-                        ReservedStock = 0.0000m,
-                        CommittedStock = 0.0000m,
-                        CreatedBy = "System",
-                        CreatedOnUtc = DateTime.UtcNow
-                    };
-                    await _context.Inventories.AddAsync(inventory);
 
-                    // Movimiento inicial de inventario
-                    var movement = new InventoryMovement
-                    {
-                        Id = Guid.NewGuid(),
-                        MovementNumber = $"MOV-INIT-{data.Code}",
-                        MovementType = MovementType.Entry,
-                        ToBranchWarehouseId = bgCM.Id,
-                        ReferenceDocument = "CARGA-INICIAL-CATALOGO",
-                        Notes = $"Carga de existencias iniciales para {data.Name}",
-                        MovementDate = DateTime.UtcNow,
-                        CreatedBy = "System",
-                        CreatedOnUtc = DateTime.UtcNow
-                    };
-
-                    movement.Details.Add(new InventoryMovementDetail
-                    {
-                        Id = Guid.NewGuid(),
-                        ProductId = product.Id,
-                        Quantity = 100m,
-                        UnitOfMeasureId = uomCaja.Id,
-                        ProductPresentationId = presentationBox.Id,
-                        ConversionFactor = (decimal)data.BoxFactor,
-                        QuantityInBaseUnit = initialStock,
-                        CreatedBy = "System",
-                        CreatedOnUtc = DateTime.UtcNow
-                    });
-
-                    await _context.InventoryMovements.AddAsync(movement);
-                }
             }
         }
 
