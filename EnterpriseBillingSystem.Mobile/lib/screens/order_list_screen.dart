@@ -693,13 +693,15 @@ class _OrderListScreenState extends State<OrderListScreen> {
                             final statusColor = _getStatusColor(order.status);
                             final formattedDate = '${order.orderDate.day}/${order.orderDate.month}/${order.orderDate.year}';
 
+                            final isAdmin = Provider.of<AuthProvider>(context, listen: false).userProfile?.isAdmin == true;
+                            final difference = DateTime.now().difference(order.orderDate.toLocal());
                             final statusLower = order.status.toLowerCase();
                             final canCancel = statusLower == 'recibido' ||
                                 statusLower == '2' ||
                                 statusLower == 'enproceso' ||
                                 statusLower == '4';
-                            // Permite editar cualquier pedido sin importar la fecha
-                            final canEdit = canCancel;
+                            // Admins can edit anytime; Sellers have a 10-minute window
+                            final canEdit = canCancel && (isAdmin || difference.inMinutes < 10);
 
                             return Card(
                               shape: RoundedRectangleBorder(
