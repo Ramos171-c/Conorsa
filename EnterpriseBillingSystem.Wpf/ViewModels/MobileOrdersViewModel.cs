@@ -430,16 +430,6 @@ public partial class MobileOrdersViewModel : ViewModelBase
                 totalsPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
                 sec.Blocks.Add(totalsPara);
 
-                // Signature / Receipt line
-                var signPara = new System.Windows.Documents.Paragraph
-                {
-                    Margin = new System.Windows.Thickness(0, 16, 0, 0)
-                };
-                signPara.Inlines.Add(new System.Windows.Documents.Run("FIRMA CLIENTE (RECIBIDO CONFORME):\n\n"));
-                signPara.Inlines.Add(new System.Windows.Documents.Run("_________________________________________\n"));
-                signPara.Inlines.Add(new System.Windows.Documents.Run("Nombre: ________________________________\n\n"));
-                sec.Blocks.Add(signPara);
-
                 flowDoc.Blocks.Add(sec);
             }
 
