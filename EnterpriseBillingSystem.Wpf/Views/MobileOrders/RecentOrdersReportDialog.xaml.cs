@@ -300,10 +300,12 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
                 if (isDispatchMode)
                 {
-                    // Map for stock tracking across batch dispatch
-                    var stockDict = ConsolidatedProducts.ToDictionary(
-                        p => p.ProductId, 
-                        p => p.DeductedFromInventory);
+                    // Map for stock tracking across batch dispatch (grouped to handle multiple presentations of same product)
+                    var stockDict = ConsolidatedProducts
+                        .GroupBy(p => p.ProductId)
+                        .ToDictionary(
+                            g => g.Key, 
+                            g => g.Sum(p => p.DeductedFromInventory));
 
                     foreach (var orderHeader in result.Items)
                     {

@@ -137,8 +137,8 @@ public class CreateSalesInvoiceCommandHandler : IRequestHandler<CreateSalesInvoi
                 throw new ArgumentException("El pedido especificado no existe.");
             if (salesOrder.CustomerId != request.CustomerId)
                 throw new InvalidOperationException("El pedido no pertenece al cliente especificado.");
-            if (salesOrder.Status != SalesOrderStatus.Recibido)
-                throw new InvalidOperationException($"El pedido debe estar en estado Recibido para poder facturarse. Estado actual: {salesOrder.Status}.");
+            if (salesOrder.Status != SalesOrderStatus.Recibido && salesOrder.Status != SalesOrderStatus.EnProceso && salesOrder.Status != SalesOrderStatus.EnCamino)
+                throw new InvalidOperationException($"El pedido no está disponible para facturarse. Estado actual: {salesOrder.Status}.");
         }
 
         // 4. Calcular detalles y snapshots
