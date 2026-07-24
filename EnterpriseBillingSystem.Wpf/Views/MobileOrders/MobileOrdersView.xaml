@@ -29,12 +29,29 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Command="{Binding OpenRecentOrdersReportCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Margin="0,0,12,0">
+                <!-- Botón 1: Resumen de Pedidos para Compra (Recibido) -->
+                <Button Command="{Binding OpenRecentOrdersReportCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Margin="0,0,12,0"
+                        Visibility="{Binding IsRecibidoSelected, Converter={StaticResource BoolToVis}}">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="ClipboardTextOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
                         <TextBlock Text="Resumen de Pedidos para Compra" VerticalAlignment="Center" />
                     </StackPanel>
                 </Button>
+
+                <!-- Botón 2: Consolidado de Despacho (En Proceso -> En Camino) -->
+                <Button Command="{Binding OpenDispatchConsolidationCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="#0284C7" BorderBrush="#0284C7" 
+                        Margin="0,0,12,0"
+                        Visibility="{Binding IsEnProcesoSelected, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="TruckDelivery" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="🚚 Consolidado de Despacho (En Proceso ➔ En Camino)" VerticalAlignment="Center" FontWeight="Bold" />
+                    </StackPanel>
+                </Button>
+
                 <Button Command="{Binding RefreshCommand}" Style="{StaticResource MaterialDesignFlatButton}">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />

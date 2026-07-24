@@ -17,10 +17,67 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
     public partial class RecentOrdersReportDialog : Window, INotifyPropertyChanged
     {
         private readonly SalesApiClient _salesApiClient;
+        private readonly CustomerApiClient? _customerApiClient;
         private readonly INotificationService _notificationService;
         private readonly string _targetStatus;
 
         private bool _isLoading;
+        private DateTime? _fromDate;
+        private DateTime? _toDate;
+        private RouteDto? _selectedRoute;
+
+        public ObservableCollection<RouteDto> Routes { get; } = new();
+
+        public string DialogTitle => _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
+            ? "Consolidado de Carga para Despacho (En Proceso ➔ En Camino)"
+            : "Consolidación de Pedidos para Compra (Recibido ➔ En Proceso)";
+
+        public string ConfirmButtonText => _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
+            ? "🚚 Confirmar Despacho (Pasar a En Camino)"
+            : "Confirmar Resumen (Pasar a En Proceso)";
+
+        public string ConfirmButtonBackground => _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
+            ? "#0284C7"
+            : "#2563EB";
+
+        public DateTime? FromDate
+        {
+            get => _fromDate;
+            set
+            {
+                if (_fromDate != value)
+                {
+                    _fromDate = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public DateTime? ToDate
+        {
+            get => _toDate;
+            set
+            {
+                if (_toDate != value)
+                {
+                    _toDate = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
+
+        public RouteDto? SelectedRoute
+        {
+            get => _selectedRoute;
+            set
+            {
+                if (_selectedRoute != value)
+                {
+                    _selectedRoute = value;
+                    OnPropertyChanged();
+                }
+            }
+        }
 
         public bool IsDarkTheme => false;
 
@@ -64,7 +121,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
         public string TotalDeductedDisplay => $"{TotalDeducted:N2} pzas";
         public string TotalInventoryDeductedPurchaseCostDisplay => $"Val. Compra: {TotalInventoryDeductedPurchaseCost:C2}";
-        public string TotalNetToOrderDisplay => $"{TotalNetToOrder:N2} pzas a pedir";
+        public string TotalNetToOrderDisplay => $"{TotalNetToOrder:N2} pzas faltantes";
 
         public string TotalEstimatedCostDisplay => $"{TotalEstimatedCost:C2}";
         public string TotalEstimatedSalesDisplay => $"{TotalEstimatedSales:C2}";
@@ -73,11 +130,12 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
         public ObservableCollection<ConsolidatedProductDto> ConsolidatedProducts { get; } = new();
 
-        public RecentOrdersReportDialog(SalesApiClient salesApiClient, INotificationService notificationService, string? targetStatus = "EnProceso")
+        public RecentOrdersReportDialog(SalesApiClient salesApiClient, CustomerApiClient? customerApiClient, INotificationService notificationService, string? targetStatus = "EnProceso")
         {
             InitializeComponent();
             DataContext = this;
             _salesApiClient = salesApiClient;
+            _customerApiClient = customerApiClient;
             _notificationService = notificationService;
             _targetStatus = string.IsNullOrWhiteSpace(targetStatus) || targetStatus == "-- Todos --" ? "Recibido" : targetStatus;
 
@@ -113,6 +171,32 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
         private async void RecentOrdersReportDialog_Loaded(object sender, RoutedEventArgs e)
         {
+            await LoadRoutesAsync();
+            await LoadReportAsync();
+        }
+
+        private async Task LoadRoutesAsync()
+        {
+            if (_customerApiClient == null) return;
+            try
+            {
+                var routes = await _customerApiClient.GetRoutesAsync();
+                Routes.Clear();
+                Routes.Add(new RouteDto(Guid.Empty, "ALL", "-- Todas las Rutas --", true));
+                foreach (var r in routes.Where(x => x.IsActive))
+                {
+                    Routes.Add(r);
+                }
+                SelectedRoute = Routes[0];
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error al cargar rutas en dialogo: {ex.Message}");
+            }
+        }
+
+        private async void RefreshReport_Click(object sender, RoutedEventArgs e)
+        {
             await LoadReportAsync();
         }
 
@@ -121,7 +205,8 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             IsLoading = true;
             try
             {
-                var list = await _salesApiClient.GetConsolidatedProductsAsync(null, _targetStatus, null, null);
+                Guid? routeId = SelectedRoute != null && SelectedRoute.Id != Guid.Empty ? SelectedRoute.Id : null;
+                var list = await _salesApiClient.GetConsolidatedProductsAsync(null, _targetStatus, FromDate, ToDate, routeId);
                 
                 Dictionary<string, string> descriptionMap = new(StringComparer.OrdinalIgnoreCase);
                 try
@@ -175,9 +260,13 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         {
             if (ConsolidatedProducts.Count == 0) return;
 
+            string actionMsg = _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
+                ? "confirmar el despacho de la carga y cambiar los pedidos a 'En Camino'"
+                : $"confirmar este resumen y pasar los pedidos a 'En Proceso'";
+
             var confirm = Views.Dialogs.CustomMessageBox.Show(
-                $"¿Está seguro de que desea confirmar este resumen? Esto procesará los pedidos en estado '{_targetStatus}'.",
-                "Confirmar Resumen",
+                $"¿Está seguro de que desea {actionMsg}?",
+                "Confirmar Operación",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
@@ -186,7 +275,8 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             IsLoading = true;
             try
             {
-                var result = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, null, _targetStatus);
+                Guid? routeId = SelectedRoute != null && SelectedRoute.Id != Guid.Empty ? SelectedRoute.Id : null;
+                var result = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, routeId, _targetStatus, FromDate, ToDate);
                 if (result?.Items == null || !result.Items.Any())
                 {
                     _notificationService.ShowWarning($"No se encontraron pedidos en estado '{_targetStatus}' para procesar.");
@@ -194,31 +284,55 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 }
 
                 var resultsBag = new System.Collections.Concurrent.ConcurrentBag<bool>();
-                await Parallel.ForEachAsync(result.Items, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (order, ct) =>
+
+                if (_targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase))
                 {
-                    try
+                    // Cambiar a EnCamino (5)
+                    await Parallel.ForEachAsync(result.Items, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (order, ct) =>
                     {
-                        var ok = await _salesApiClient.ConfirmSalesOrderAsync(order.Id);
-                        resultsBag.Add(ok);
-                    }
-                    catch
+                        try
+                        {
+                            var ok = await _salesApiClient.UpdateSalesOrderStatusAsync(order.Id, 5); // 5 = EnCamino
+                            resultsBag.Add(ok);
+                        }
+                        catch
+                        {
+                            resultsBag.Add(false);
+                        }
+                    });
+                }
+                else
+                {
+                    // Cambiar a EnProceso (4)
+                    await Parallel.ForEachAsync(result.Items, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (order, ct) =>
                     {
-                        resultsBag.Add(false);
-                    }
-                });
+                        try
+                        {
+                            var ok = await _salesApiClient.ConfirmSalesOrderAsync(order.Id);
+                            resultsBag.Add(ok);
+                        }
+                        catch
+                        {
+                            resultsBag.Add(false);
+                        }
+                    });
+                }
 
                 int successCount = resultsBag.Count(x => x);
                 int errorCount = resultsBag.Count(x => !x);
 
-                _notificationService.ShowSuccess($"Procesamiento completado. {successCount} pedidos procesados exitosamente." + 
-                    (errorCount > 0 ? $" ({errorCount} errores)." : ""));
+                string messageText = _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
+                    ? $"Despacho completado. {successCount} pedidos pasaron a estado 'En Camino'."
+                    : $"Procesamiento completado. {successCount} pedidos pasaron a estado 'En Proceso'.";
+
+                _notificationService.ShowSuccess(messageText + (errorCount > 0 ? $" ({errorCount} errores)." : ""));
 
                 await LoadReportAsync();
                 DialogResult = true;
             }
             catch (Exception ex)
             {
-                _notificationService.ShowError($"Error al confirmar resumen: {ex.Message}");
+                _notificationService.ShowError($"Error al procesar: {ex.Message}");
             }
             finally
             {
@@ -230,10 +344,14 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         {
             if (ConsolidatedProducts.Count == 0) return;
 
+            string defaultFileName = _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
+                ? $"Consolidado_Despacho_EnProceso_{DateTime.Today:yyyyMMdd}.xlsx"
+                : $"Consolidado_Compras_Recibido_{DateTime.Today:yyyyMMdd}.xlsx";
+
             var saveFileDialog = new Microsoft.Win32.SaveFileDialog
             {
                 Filter = "Libro de Excel (*.xlsx)|*.xlsx",
-                FileName = $"Consolidado_Compras_Bodega_{DateTime.Today:yyyyMMdd}.xlsx"
+                FileName = defaultFileName
             };
 
             if (saveFileDialog.ShowDialog() == true)
@@ -241,7 +359,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 try
                 {
                     ExcelExportService.ExportConsolidationToExcel(ConsolidatedProducts, saveFileDialog.FileName, GeneralObservations);
-                    _notificationService.ShowSuccess("Consolidado exportado exitosamente a Excel con diseño corporativo y totales recalcados.");
+                    _notificationService.ShowSuccess("Consolidado exportado exitosamente a Excel con comprobación de inventario.");
                 }
                 catch (Exception ex)
                 {

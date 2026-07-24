@@ -269,11 +269,28 @@ public partial class MobileOrdersViewModel : ViewModelBase
         }
     }
 
+    public bool IsRecibidoSelected => string.IsNullOrWhiteSpace(SelectedStatus) || SelectedStatus == "-- Todos --" || SelectedStatus.Equals("Recibido", StringComparison.OrdinalIgnoreCase);
+    public bool IsEnProcesoSelected => !string.IsNullOrWhiteSpace(SelectedStatus) && SelectedStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase);
+
     [RelayCommand]
     private async Task OpenRecentOrdersReportAsync()
     {
-        string? statusToFilter = string.IsNullOrWhiteSpace(SelectedStatus) || SelectedStatus == "-- Todos --" ? "Recibido" : SelectedStatus;
-        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _notificationService, statusToFilter)
+        string statusToFilter = string.IsNullOrWhiteSpace(SelectedStatus) || SelectedStatus == "-- Todos --" ? "Recibido" : SelectedStatus;
+        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _customerApiClient, _notificationService, statusToFilter)
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+        var result = dialog.ShowDialog();
+        if (result == true)
+        {
+            await LoadOrdersAsync();
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenDispatchConsolidationAsync()
+    {
+        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _customerApiClient, _notificationService, "EnProceso")
         {
             Owner = System.Windows.Application.Current.MainWindow
         };
@@ -552,6 +569,8 @@ public partial class MobileOrdersViewModel : ViewModelBase
     partial void OnSelectedStatusChanged(string? value)
     {
         PageNumber = 1;
+        OnPropertyChanged(nameof(IsRecibidoSelected));
+        OnPropertyChanged(nameof(IsEnProcesoSelected));
         _ = LoadOrdersAsync();
     }
 
