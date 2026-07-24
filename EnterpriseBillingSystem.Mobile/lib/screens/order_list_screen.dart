@@ -16,6 +16,9 @@ class OrderListScreen extends StatefulWidget {
 
 class _OrderListScreenState extends State<OrderListScreen> {
   String? _selectedRouteId;
+  DateTime? _fromDate;
+  DateTime? _toDate;
+  String _dateFilterLabel = 'Todas las fechas';
 
   @override
   void initState() {
@@ -25,8 +28,162 @@ class _OrderListScreenState extends State<OrderListScreen> {
       if (authProv.userProfile?.isAdmin == true) {
         Provider.of<OrderProvider>(context, listen: false).fetchRoutes();
       }
-      Provider.of<OrderProvider>(context, listen: false).fetchOrders(routeId: _selectedRouteId);
+      Provider.of<OrderProvider>(context, listen: false).fetchOrders(
+        routeId: _selectedRouteId,
+        fromDate: _fromDate,
+        toDate: _toDate,
+      );
     });
+  }
+
+  void _selectDateRange() async {
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2024, 1, 1),
+      lastDate: DateTime(now.year + 1, 12, 31),
+      initialDateRange: _fromDate != null && _toDate != null
+          ? DateTimeRange(start: _fromDate!, end: _toDate!)
+          : DateTimeRange(start: now.subtract(const Duration(days: 7)), end: now),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _fromDate = DateTime(picked.start.year, picked.start.month, picked.start.day, 0, 0, 0);
+        _toDate = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
+        _dateFilterLabel = '${picked.start.day}/${picked.start.month} - ${picked.end.day}/${picked.end.month}';
+      });
+      Provider.of<OrderProvider>(context, listen: false).fetchOrders(
+        routeId: _selectedRouteId,
+        fromDate: _fromDate,
+        toDate: _toDate,
+      );
+    }
+  }
+
+  void _setDateFilterQuick(String filterType) {
+    final now = DateTime.now();
+    DateTime? start;
+    DateTime? end;
+    String label = 'Todas las fechas';
+
+    if (filterType == 'today') {
+      start = DateTime(now.year, now.month, now.day, 0, 0, 0);
+      end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+      label = 'Hoy';
+    } else if (filterType == 'yesterday') {
+      final y = now.subtract(const Duration(days: 1));
+      start = DateTime(y.year, y.month, y.day, 0, 0, 0);
+      end = DateTime(y.year, y.month, y.day, 23, 59, 59);
+      label = 'Ayer';
+    } else if (filterType == 'month') {
+      start = DateTime(now.year, now.month, 1, 0, 0, 0);
+      end = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+      label = 'Este Mes';
+    }
+
+    setState(() {
+      _fromDate = start;
+      _toDate = end;
+      _dateFilterLabel = label;
+    });
+
+    Provider.of<OrderProvider>(context, listen: false).fetchOrders(
+      routeId: _selectedRouteId,
+      fromDate: _fromDate,
+      toDate: _toDate,
+    );
+  }
+
+  // Voucher Delivery Ticket Dialog
+  void _showDeliveryVoucher(BuildContext context, SalesOrderDetail detail) {
+    final formattedDate = '${detail.orderDate.day.toString().padLeft(2, '0')}/${detail.orderDate.month.toString().padLeft(2, '0')}/${detail.orderDate.year} ${detail.orderDate.hour.toString().padLeft(2, '0')}:${detail.orderDate.minute.toString().padLeft(2, '0')}';
+    final totalUsd = detail.totalAmount / 36.5;
+
+    final StringBuffer ticketBuffer = StringBuffer();
+    ticketBuffer.writeln('=================================');
+    ticketBuffer.writeln('       CONORZA - DISTRIBUIDORA   ');
+    ticketBuffer.writeln('       VOUCHER DE ENTREGA        ');
+    ticketBuffer.writeln('=================================');
+    ticketBuffer.writeln('Pedido No: ${detail.orderNumber}');
+    ticketBuffer.writeln('Fecha:     $formattedDate');
+    ticketBuffer.writeln('Cliente:   ${detail.customerName}');
+    ticketBuffer.writeln('Estado:    ${_getStatusText(detail.status)}');
+    ticketBuffer.writeln('---------------------------------');
+    ticketBuffer.writeln('PRODUCTOS:');
+    for (var item in detail.details) {
+      ticketBuffer.writeln('${item.productName}');
+      ticketBuffer.writeln('  ${item.quantity.toStringAsFixed(0)} ${item.unitOfMeasure} x C\$${item.unitPrice.toStringAsFixed(2)} = C\$${item.netAmount.toStringAsFixed(2)}');
+    }
+    ticketBuffer.writeln('---------------------------------');
+    ticketBuffer.writeln('SUBTOTAL:  C\$${detail.subTotal.toStringAsFixed(2)}');
+    if (detail.discountAmount > 0) {
+      ticketBuffer.writeln('DESCUENTO: -C\$${detail.discountAmount.toStringAsFixed(2)}');
+    }
+    ticketBuffer.writeln('IVA:       C\$${detail.taxAmount.toStringAsFixed(2)}');
+    ticketBuffer.writeln('TOTAL C\$: C\$${detail.totalAmount.toStringAsFixed(2)}');
+    ticketBuffer.writeln('TOTAL USD: \$${totalUsd.toStringAsFixed(2)}');
+    ticketBuffer.writeln('=================================');
+    if (detail.notes != null && detail.notes!.isNotEmpty) {
+      ticketBuffer.writeln('NOTAS: ${detail.notes}');
+      ticketBuffer.writeln('=================================');
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              const Icon(Icons.receipt_long_rounded, color: Color(0xFF1E3A8A)),
+              const SizedBox(width: 8),
+              const Text('Voucher de Entrega', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFCBD5E1)),
+                  ),
+                  child: Text(
+                    ticketBuffer.toString(),
+                    style: const TextStyle(fontFamily: 'monospace', fontSize: 12, height: 1.3, color: Color(0xFF1E293B)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.close),
+              label: const Text('Cerrar'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Voucher de entrega preparado para impresión.')),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3A8A),
+                foregroundColor: Colors.white,
+              ),
+              icon: const Icon(Icons.print_rounded),
+              label: const Text('Imprimir Voucher'),
+            ),
+          ],
+        );
+      },
+    );
   }
 
   // Get status color
@@ -151,7 +308,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
       final posProv = Provider.of<PosProvider>(context, listen: false);
       final authProv = Provider.of<AuthProvider>(context, listen: false);
       
-      // Cargar detalles, productos y clientes concurrentemente para tener el catálogo listo
       final detailFuture = orderProv.fetchOrderDetail(orderItem.id);
       final productsFuture = orderProv.products.isEmpty ? orderProv.fetchProducts() : Future.value();
       final customersFuture = orderProv.customers.isEmpty ? orderProv.fetchCustomers(routeId: authProv.userProfile?.effectiveRouteId) : Future.value();
@@ -160,7 +316,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
       final detail = await detailFuture;
 
       if (!context.mounted) return;
-      Navigator.pop(context); // Cerrar dialogo de carga
+      Navigator.pop(context);
 
       if (detail != null) {
         posProv.loadOrderToCart(detail, orderProv.customers, orderProv.products);
@@ -176,7 +332,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
       }
     } catch (e) {
       if (context.mounted) {
-        Navigator.pop(context); // Cerrar dialogo de carga si ocurre un error
+        Navigator.pop(context);
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Error al editar: $e')),
         );
@@ -201,7 +357,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
             ),
           ),
           padding: const EdgeInsets.all(20),
-          height: MediaQuery.of(context).size.height * 0.75,
+          height: MediaQuery.of(context).size.height * 0.80,
           child: FutureBuilder<SalesOrderDetail?>(
             future: orderProv.fetchOrderDetail(orderId),
             builder: (context, snapshot) {
@@ -332,6 +488,24 @@ class _OrderListScreenState extends State<OrderListScreen> {
                       ),
                     ],
                   ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton.icon(
+                      onPressed: () {
+                        Navigator.pop(context);
+                        _showDeliveryVoucher(context, detail);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF0F172A),
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                      ),
+                      icon: const Icon(Icons.receipt_long_rounded),
+                      label: const Text('Ver / Imprimir Voucher de Entrega', style: TextStyle(fontWeight: FontWeight.bold)),
+                    ),
+                  ),
                 ],
               );
             },
@@ -375,55 +549,115 @@ class _OrderListScreenState extends State<OrderListScreen> {
         title: const Text('Historial de Pedidos'),
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.calendar_month_rounded),
+            tooltip: 'Filtrar por Rango de Fechas',
+            onPressed: _selectDateRange,
+          ),
+        ],
       ),
       body: Column(
         children: [
-          if (Provider.of<AuthProvider>(context, listen: false).userProfile?.isAdmin == true)
-            Container(
-              color: Colors.white,
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-              child: Card(
-                elevation: 0,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(12),
-                  side: const BorderSide(color: Color(0xFFE2E8F0)),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
-                  child: DropdownButtonHideUnderline(
-                    child: DropdownButtonFormField<String?>(
-                      value: _selectedRouteId,
-                      decoration: const InputDecoration(
-                        labelText: 'Filtrar por Ruta',
-                        border: InputBorder.none,
-                        prefixIcon: Icon(Icons.route_rounded, color: Color(0xFF475569)),
-                      ),
-                      items: [
-                        const DropdownMenuItem<String?>(
-                          value: null,
-                          child: Text('Todas las rutas'),
+          // Filter Section (Date & Route)
+          Container(
+            color: Colors.white,
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 12),
+            child: Column(
+              children: [
+                // Date Filter Chips Bar
+                SingleChildScrollView(
+                  scrollDirection: Axis.horizontal,
+                  child: Row(
+                    children: [
+                      const Icon(Icons.filter_list_rounded, size: 18, color: Color(0xFF64748B)),
+                      const SizedBox(width: 8),
+                      ActionChip(
+                        avatar: const Icon(Icons.calendar_today, size: 14),
+                        label: Text(_dateFilterLabel),
+                        onPressed: _selectDateRange,
+                        backgroundColor: _fromDate != null ? const Color(0xFFDBEAFE) : const Color(0xFFF1F5F9),
+                        labelStyle: TextStyle(
+                          color: _fromDate != null ? const Color(0xFF1E40AF) : const Color(0xFF475569),
+                          fontWeight: FontWeight.bold,
                         ),
-                        ...provider.routes.map((RouteItem route) {
-                          return DropdownMenuItem<String?>(
-                            value: route.id,
-                            child: Text('${route.code} - ${route.name}'),
-                          );
-                        }),
+                      ),
+                      const SizedBox(width: 6),
+                      ChoiceChip(
+                        label: const Text('Hoy'),
+                        selected: _dateFilterLabel == 'Hoy',
+                        onSelected: (sel) => _setDateFilterQuick('today'),
+                      ),
+                      const SizedBox(width: 6),
+                      ChoiceChip(
+                        label: const Text('Ayer'),
+                        selected: _dateFilterLabel == 'Ayer',
+                        onSelected: (sel) => _setDateFilterQuick('yesterday'),
+                      ),
+                      const SizedBox(width: 6),
+                      ChoiceChip(
+                        label: const Text('Este Mes'),
+                        selected: _dateFilterLabel == 'Este Mes',
+                        onSelected: (sel) => _setDateFilterQuick('month'),
+                      ),
+                      if (_fromDate != null) ...[
+                        const SizedBox(width: 6),
+                        IconButton(
+                          icon: const Icon(Icons.clear, size: 18, color: Colors.red),
+                          tooltip: 'Limpiar filtro de fecha',
+                          onPressed: () => _setDateFilterQuick('all'),
+                        ),
                       ],
-                      onChanged: (val) {
-                        setState(() {
-                          _selectedRouteId = val;
-                        });
-                        provider.fetchOrders(routeId: val);
-                      },
-                    ),
+                    ],
                   ),
                 ),
-              ),
+                if (Provider.of<AuthProvider>(context, listen: false).userProfile?.isAdmin == true) ...[
+                  const SizedBox(height: 8),
+                  Card(
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      side: const BorderSide(color: Color(0xFFE2E8F0)),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 12),
+                      child: DropdownButtonHideUnderline(
+                        child: DropdownButtonFormField<String?>(
+                          value: _selectedRouteId,
+                          decoration: const InputDecoration(
+                            labelText: 'Filtrar por Ruta',
+                            border: InputBorder.none,
+                            prefixIcon: Icon(Icons.route_rounded, color: Color(0xFF475569)),
+                          ),
+                          items: [
+                            const DropdownMenuItem<String?>(
+                              value: null,
+                              child: Text('Todas las rutas'),
+                            ),
+                            ...provider.routes.map((RouteItem route) {
+                              return DropdownMenuItem<String?>(
+                                value: route.id,
+                                child: Text('${route.code} - ${route.name}'),
+                              );
+                            }),
+                          ],
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedRouteId = val;
+                            });
+                            provider.fetchOrders(routeId: val, fromDate: _fromDate, toDate: _toDate);
+                          },
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ],
             ),
+          ),
           Expanded(
             child: RefreshIndicator(
-              onRefresh: () => provider.fetchOrders(routeId: _selectedRouteId),
+              onRefresh: () => provider.fetchOrders(routeId: _selectedRouteId, fromDate: _fromDate, toDate: _toDate),
               child: provider.isLoading && provider.orders.isEmpty
                   ? const Center(child: CircularProgressIndicator())
                   : provider.orders.isEmpty
@@ -459,14 +693,13 @@ class _OrderListScreenState extends State<OrderListScreen> {
                             final statusColor = _getStatusColor(order.status);
                             final formattedDate = '${order.orderDate.day}/${order.orderDate.month}/${order.orderDate.year}';
 
-                            // 10 minute rule for editing
-                            final difference = DateTime.now().difference(order.orderDate.toLocal());
                             final statusLower = order.status.toLowerCase();
                             final canCancel = statusLower == 'recibido' ||
                                 statusLower == '2' ||
                                 statusLower == 'enproceso' ||
                                 statusLower == '4';
-                            final canEdit = difference.inMinutes < 10 && canCancel;
+                            // Permite editar cualquier pedido sin importar la fecha
+                            final canEdit = canCancel;
 
                             return Card(
                               shape: RoundedRectangleBorder(

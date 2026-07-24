@@ -195,14 +195,17 @@ class OrderProvider extends ChangeNotifier {
   }
 
   // Fetch placed orders history
-  Future<void> fetchOrders({String? routeId}) async {
+  Future<void> fetchOrders({String? routeId, DateTime? fromDate, DateTime? toDate}) async {
     _isLoading = true;
     _errorMessage = null;
     notifyListeners();
 
     try {
       final routeParam = routeId != null && routeId.isNotEmpty ? '&routeId=$routeId' : '';
-      final response = await apiService.get('/sales-orders?pageNumber=1&pageSize=50$routeParam');
+      final fromStr = fromDate != null ? '&fromDate=${fromDate.toIso8601String()}' : '';
+      final toStr = toDate != null ? '&toDate=${toDate.toIso8601String()}' : '';
+
+      final response = await apiService.get('/sales-orders?pageNumber=1&pageSize=100$routeParam$fromStr$toStr');
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
