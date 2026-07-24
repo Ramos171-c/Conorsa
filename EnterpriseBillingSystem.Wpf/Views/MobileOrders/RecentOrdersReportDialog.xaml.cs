@@ -105,23 +105,29 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         public Visibility IsLoadingVisibility => IsLoading ? Visibility.Visible : Visibility.Collapsed;
         public Visibility ShowEmptyMessageVisibility => ShowEmptyMessage ? Visibility.Visible : Visibility.Collapsed;
 
-        public decimal TotalItems => ConsolidatedProducts.Sum(p => p.TotalQuantity);
+        public decimal TotalQuantity => ConsolidatedProducts.Sum(p => p.TotalQuantity);
         public decimal TotalGrossPurchaseCost => ConsolidatedProducts.Sum(p => p.GrossPurchaseCost);
         public decimal TotalGrossSales => ConsolidatedProducts.Sum(p => p.GrossSalesAmount);
 
         public decimal TotalDeducted => ConsolidatedProducts.Sum(p => p.DeductedFromInventory);
         public decimal TotalInventoryDeductedPurchaseCost => ConsolidatedProducts.Sum(p => p.InventoryDeductedPurchaseCost);
-        public decimal TotalInventoryDeductedSales => ConsolidatedProducts.Sum(p => p.InventoryDeductedSalesAmount);
+        public decimal TotalDeliveredSales => ConsolidatedProducts.Sum(p => p.InventoryDeductedSalesAmount);
 
         public decimal TotalNetToOrder => ConsolidatedProducts.Sum(p => p.NetQuantityToOrder);
+        public decimal TotalLostSales => ConsolidatedProducts.Sum(p => (p.TotalQuantity - p.DeductedFromInventory) * p.UnitPrice);
+
         public decimal TotalEstimatedCost => ConsolidatedProducts.Sum(p => p.TotalPurchaseCost);
         public decimal TotalEstimatedSales => ConsolidatedProducts.Sum(p => p.DisplayTotalSales);
         public decimal TotalProfitMargin => ConsolidatedProducts.Sum(p => p.DisplayProfit);
         public decimal ProfitMarginPercentage => TotalEstimatedSales > 0 ? (TotalProfitMargin / TotalEstimatedSales) * 100m : 0m;
 
-        public string TotalDeductedDisplay => $"{TotalDeducted:N2} pzas";
-        public string TotalInventoryDeductedPurchaseCostDisplay => $"Val. Compra: {TotalInventoryDeductedPurchaseCost:C2}";
+        public string TotalQuantityDisplay => $"{TotalQuantity:N2} pzas pedidas";
+        public string TotalDeductedDisplay => $"{TotalDeducted:N2} pzas cubiertas";
         public string TotalNetToOrderDisplay => $"{TotalNetToOrder:N2} pzas faltantes";
+
+        public string TotalGrossSalesDisplay => $"{TotalGrossSales:C2}";
+        public string TotalDeliveredSalesDisplay => $"{TotalDeliveredSales:C2}";
+        public string TotalLostSalesDisplay => $"{TotalLostSales:C2}";
 
         public string TotalEstimatedCostDisplay => $"{TotalEstimatedCost:C2}";
         public string TotalEstimatedSalesDisplay => $"{TotalEstimatedSales:C2}";
@@ -148,21 +154,25 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             OnPropertyChanged(nameof(HasData));
             OnPropertyChanged(nameof(ShowEmptyMessage));
             OnPropertyChanged(nameof(ShowEmptyMessageVisibility));
-            OnPropertyChanged(nameof(TotalItems));
+            OnPropertyChanged(nameof(TotalQuantity));
             OnPropertyChanged(nameof(TotalGrossPurchaseCost));
             OnPropertyChanged(nameof(TotalGrossSales));
             OnPropertyChanged(nameof(TotalDeducted));
             OnPropertyChanged(nameof(TotalInventoryDeductedPurchaseCost));
-            OnPropertyChanged(nameof(TotalInventoryDeductedSales));
+            OnPropertyChanged(nameof(TotalDeliveredSales));
             OnPropertyChanged(nameof(TotalNetToOrder));
+            OnPropertyChanged(nameof(TotalLostSales));
             OnPropertyChanged(nameof(TotalEstimatedCost));
             OnPropertyChanged(nameof(TotalEstimatedSales));
             OnPropertyChanged(nameof(TotalProfitMargin));
             OnPropertyChanged(nameof(ProfitMarginPercentage));
 
+            OnPropertyChanged(nameof(TotalQuantityDisplay));
             OnPropertyChanged(nameof(TotalDeductedDisplay));
-            OnPropertyChanged(nameof(TotalInventoryDeductedPurchaseCostDisplay));
             OnPropertyChanged(nameof(TotalNetToOrderDisplay));
+            OnPropertyChanged(nameof(TotalGrossSalesDisplay));
+            OnPropertyChanged(nameof(TotalDeliveredSalesDisplay));
+            OnPropertyChanged(nameof(TotalLostSalesDisplay));
             OnPropertyChanged(nameof(TotalEstimatedCostDisplay));
             OnPropertyChanged(nameof(TotalEstimatedSalesDisplay));
             OnPropertyChanged(nameof(TotalProfitMarginDisplay));
@@ -260,13 +270,16 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         {
             if (ConsolidatedProducts.Count == 0) return;
 
-            string actionMsg = _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
-                ? "confirmar el despacho de la carga y cambiar los pedidos a 'En Camino'"
+            bool isDispatchMode = _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase);
+
+            string actionMsg = isDispatchMode
+                ? "confirmar el despacho de la carga, ajustar automáticamente los pedidos al stock disponible y pasarlos a 'En Camino'"
                 : $"confirmar este resumen y pasar los pedidos a 'En Proceso'";
 
             var confirm = Views.Dialogs.CustomMessageBox.Show(
-                $"¿Está seguro de que desea {actionMsg}?",
-                "Confirmar Operación",
+                $"¿Está seguro de que desea {actionMsg}?\n\n" +
+                (isDispatchMode ? "⚠️ Los productos sin stock suficiente serán ajustados/removidos de los pedidos para que la factura final refleje ÚNICAMENTE lo entregado." : ""),
+                "Confirmar Operación de Despacho",
                 MessageBoxButton.YesNo,
                 MessageBoxImage.Question);
 
@@ -285,21 +298,89 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
                 var resultsBag = new System.Collections.Concurrent.ConcurrentBag<bool>();
 
-                if (_targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase))
+                if (isDispatchMode)
                 {
-                    // Cambiar a EnCamino (5)
-                    await Parallel.ForEachAsync(result.Items, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (order, ct) =>
+                    // Map for stock tracking across batch dispatch
+                    var stockDict = ConsolidatedProducts.ToDictionary(
+                        p => p.ProductId, 
+                        p => p.DeductedFromInventory);
+
+                    foreach (var orderHeader in result.Items)
                     {
                         try
                         {
-                            var ok = await _salesApiClient.UpdateSalesOrderStatusAsync(order.Id, 5); // 5 = EnCamino
+                            var fullOrder = await _salesApiClient.GetSalesOrderByIdAsync(orderHeader.Id);
+                            if (fullOrder == null || fullOrder.Details == null || !fullOrder.Details.Any())
+                            {
+                                var okStatus = await _salesApiClient.UpdateSalesOrderStatusAsync(orderHeader.Id, 5); // 5 = EnCamino
+                                resultsBag.Add(okStatus);
+                                continue;
+                            }
+
+                            List<SalesOrderDetailRequestDto> adjustedDetails = new();
+                            List<string> missingLogs = new();
+
+                            foreach (var d in fullOrder.Details)
+                            {
+                                decimal available = stockDict.TryGetValue(d.ProductId, out var avail) ? avail : d.Quantity;
+                                decimal delivered = Math.Min(d.Quantity, available);
+                                decimal missing = d.Quantity - delivered;
+
+                                if (stockDict.ContainsKey(d.ProductId))
+                                {
+                                    stockDict[d.ProductId] = Math.Max(0, available - delivered);
+                                }
+
+                                if (delivered > 0)
+                                {
+                                    adjustedDetails.Add(new SalesOrderDetailRequestDto(
+                                        ProductId: d.ProductId,
+                                        UnitOfMeasureId: d.UnitOfMeasureId,
+                                        Quantity: delivered, // Facturar SOLO lo entregado real
+                                        UnitPrice: d.UnitPrice,
+                                        DiscountPercentage: d.DiscountPercentage,
+                                        TaxPercentage: d.TaxPercentage
+                                    ));
+                                }
+
+                                if (missing > 0)
+                                {
+                                    missingLogs.Add($"{d.ProductName}: Faltaron {missing:N2} {d.UnitOfMeasure} por falta de stock. Entregado: {delivered:N2}");
+                                }
+                            }
+
+                            string updatedNotes = fullOrder.Notes ?? string.Empty;
+                            if (missingLogs.Any())
+                            {
+                                string logStr = "[AJUSTE AUTOMÁTICO EN BODEGA]: " + string.Join("; ", missingLogs);
+                                if (!updatedNotes.Contains("[AJUSTE AUTOMÁTICO EN BODEGA]:"))
+                                {
+                                    updatedNotes = (string.IsNullOrWhiteSpace(updatedNotes) ? "" : updatedNotes + "\n") + logStr;
+                                }
+                            }
+
+                            if (adjustedDetails.Any())
+                            {
+                                var updateCmd = new UpdateSalesOrderCommandDto(
+                                    Id: fullOrder.Id,
+                                    CustomerId: fullOrder.CustomerId,
+                                    OrderDate: fullOrder.OrderDate,
+                                    Notes: updatedNotes,
+                                    Details: adjustedDetails
+                                );
+                                await _salesApiClient.UpdateSalesOrderAsync(fullOrder.Id, updateCmd);
+                            }
+
+                            // Cambiar a EnCamino (5)
+                            var ok = await _salesApiClient.UpdateSalesOrderStatusAsync(fullOrder.Id, 5);
                             resultsBag.Add(ok);
                         }
-                        catch
+                        catch (Exception ex)
                         {
+                            System.Diagnostics.Debug.WriteLine($"Error ajustando pedido {orderHeader.OrderNumber}: {ex.Message}");
                             resultsBag.Add(false);
                         }
-                    });
+                    }
                 }
                 else
                 {

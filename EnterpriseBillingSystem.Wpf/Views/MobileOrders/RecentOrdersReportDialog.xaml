@@ -55,24 +55,28 @@
             </Grid>
         </Border>
 
-        <!-- 3. Resumen Financiero e Inventario -->
+        <!-- 3. Resumen Financiero e Inventario (Total Pedido, Total Entregado, Total Perdido/Faltante) -->
         <Border Grid.Row="2" Background="White" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6" Padding="12" Margin="0,0,0,12">
             <UniformGrid Columns="4">
-                <StackPanel Margin="8,0">
-                    <TextBlock Text="CUBIERTO EN BODEGA" FontSize="11" Foreground="#475569" FontWeight="Bold" />
-                    <TextBlock Text="{Binding TotalDeductedDisplay}" FontSize="15" FontWeight="Bold" Foreground="#16A34A" />
+                <StackPanel Margin="6,0">
+                    <TextBlock Text="TOTAL PEDIDO (ORIGINAL)" FontSize="10" Foreground="#475569" FontWeight="Bold" />
+                    <TextBlock Text="{Binding TotalGrossSalesDisplay}" FontSize="15" FontWeight="Bold" Foreground="#1E293B" />
+                    <TextBlock Text="{Binding TotalQuantityDisplay}" FontSize="11" Foreground="#64748B" />
                 </StackPanel>
-                <StackPanel Margin="8,0">
-                    <TextBlock Text="FALTANTE EN INVENTARIO" FontSize="11" Foreground="#475569" FontWeight="Bold" />
-                    <TextBlock Text="{Binding TotalNetToOrderDisplay}" FontSize="15" FontWeight="Bold" Foreground="#DC2626" />
+                <StackPanel Margin="6,0">
+                    <TextBlock Text="TOTAL ENTREGADO (A FACTURAR)" FontSize="10" Foreground="#16A34A" FontWeight="Bold" />
+                    <TextBlock Text="{Binding TotalDeliveredSalesDisplay}" FontSize="15" FontWeight="Bold" Foreground="#16A34A" />
+                    <TextBlock Text="{Binding TotalDeductedDisplay}" FontSize="11" Foreground="#15803D" FontWeight="SemiBold" />
                 </StackPanel>
-                <StackPanel Margin="8,0">
-                    <TextBlock Text="TOTAL VENTA (CLIENTES)" FontSize="11" Foreground="#475569" FontWeight="Bold" />
-                    <TextBlock Text="{Binding TotalEstimatedSalesDisplay}" FontSize="15" FontWeight="Bold" Foreground="#2563EB" />
+                <StackPanel Margin="6,0">
+                    <TextBlock Text="TOTAL PERDIDO / NO VINO" FontSize="10" Foreground="#DC2626" FontWeight="Bold" />
+                    <TextBlock Text="{Binding TotalLostSalesDisplay}" FontSize="15" FontWeight="Bold" Foreground="#DC2626" />
+                    <TextBlock Text="{Binding TotalNetToOrderDisplay}" FontSize="11" Foreground="#B91C1C" FontWeight="SemiBold" />
                 </StackPanel>
-                <StackPanel Margin="8,0">
-                    <TextBlock Text="GANANCIA PROYECTADA" FontSize="11" Foreground="#475569" FontWeight="Bold" />
-                    <TextBlock Text="{Binding TotalProfitMarginDisplay}" FontSize="15" FontWeight="Bold" Foreground="#16A34A" />
+                <StackPanel Margin="6,0">
+                    <TextBlock Text="GANANCIA PROYECTADA" FontSize="10" Foreground="#2563EB" FontWeight="Bold" />
+                    <TextBlock Text="{Binding TotalProfitMarginDisplay}" FontSize="15" FontWeight="Bold" Foreground="#2563EB" />
+                    <TextBlock Text="{Binding ProfitMarginPercentageDisplay}" FontSize="11" Foreground="#1D4ED8" />
                 </StackPanel>
             </UniformGrid>
         </Border>
