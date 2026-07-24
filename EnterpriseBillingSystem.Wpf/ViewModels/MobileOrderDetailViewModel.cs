@@ -154,9 +154,9 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private void RemoveDetailItem(SalesOrderDetailItemDto item)
+    private void RemoveDetailItem(object? parameter)
     {
-        if (item == null) return;
+        if (parameter is not SalesOrderDetailItemDto item) return;
 
         if (Details.Count <= 1)
         {
