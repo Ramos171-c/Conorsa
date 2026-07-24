@@ -285,9 +285,9 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task ViewOrderDetailsAsync(SalesOrderListItemDto order)
+    private async Task ViewOrderDetailsAsync(object? parameter)
     {
-        if (order == null) return;
+        if (parameter is not SalesOrderListItemDto order) return;
 
         IsLoading = true;
         try
@@ -322,9 +322,9 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task ConfirmOrderAsync(SalesOrderListItemDto order)
+    private async Task ConfirmOrderAsync(object? parameter)
     {
-        if (order == null) return;
+        if (parameter is not SalesOrderListItemDto order) return;
 
         var confirm = Views.Dialogs.CustomMessageBox.Show(
             $"¿Está seguro de que desea procesar el pedido {order.OrderNumber}? Esto cambiará su estado a En Proceso.",
@@ -359,9 +359,9 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task ShipOrderAsync(SalesOrderListItemDto order)
+    private async Task ShipOrderAsync(object? parameter)
     {
-        if (order == null) return;
+        if (parameter is not SalesOrderListItemDto order) return;
 
         var confirm = Views.Dialogs.CustomMessageBox.Show(
             $"¿Está seguro de que desea confirmar el envío del pedido {order.OrderNumber}? Esto cambiará su estado a En Camino.",
@@ -396,9 +396,9 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task DeliverOrderAsync(SalesOrderListItemDto order)
+    private async Task DeliverOrderAsync(object? parameter)
     {
-        if (order == null) return;
+        if (parameter is not SalesOrderListItemDto order) return;
 
         var confirm = Views.Dialogs.CustomMessageBox.Show(
             $"¿Está seguro de que desea confirmar la entrega del pedido {order.OrderNumber}? Esto cambiará su estado a Completado.",
@@ -433,9 +433,9 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task CancelOrderAsync(SalesOrderListItemDto order)
+    private async Task CancelOrderAsync(object? parameter)
     {
-        if (order == null) return;
+        if (parameter is not SalesOrderListItemDto order) return;
 
         var input = Views.Dialogs.CustomInputDialog.Show(
             $"Escriba el motivo de la anulación del pedido {order.OrderNumber}:",
@@ -476,9 +476,9 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task ApproveCancellationAsync(SalesOrderListItemDto order)
+    private async Task ApproveCancellationAsync(object? parameter)
     {
-        if (order == null) return;
+        if (parameter is not SalesOrderListItemDto order) return;
 
         var confirm = Views.Dialogs.CustomMessageBox.Show(
             $"¿Está seguro de que desea APROBAR la solicitud de anulación del pedido {order.OrderNumber}? Esto anulará el pedido permanentemente.",
@@ -513,9 +513,9 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task RejectCancellationAsync(SalesOrderListItemDto order)
+    private async Task RejectCancellationAsync(object? parameter)
     {
-        if (order == null) return;
+        if (parameter is not SalesOrderListItemDto order) return;
 
         var confirm = Views.Dialogs.CustomMessageBox.Show(
             $"¿Está seguro de que desea RECHAZAR la solicitud de anulación del pedido {order.OrderNumber}? El pedido regresará a estado Recibido.",
