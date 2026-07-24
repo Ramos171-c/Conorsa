@@ -142,8 +142,17 @@
                 </StackPanel>
             </materialDesign:Card>
 
+            <!-- Partial Delivery & Invoicing Info Banner -->
+            <materialDesign:Card Grid.Row="1" Margin="0,0,0,8" Padding="12,8" Background="#EFF6FF" materialDesign:ElevationAssist.Elevation="Dp0">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon Kind="Information" Foreground="#2563EB" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
+                    <TextBlock Text="Ajuste la 'Cant. Entregada' o 'No Vino / Faltante'. La factura se emitirá únicamente por la Cantidad Entregada." 
+                               FontSize="12" FontWeight="SemiBold" Foreground="#1E40AF" VerticalAlignment="Center" TextWrapping="Wrap" />
+                </StackPanel>
+            </materialDesign:Card>
+
             <!-- Product Lines DataGrid -->
-            <materialDesign:Card Grid.Row="1" Margin="0,0,0,16" materialDesign:ElevationAssist.Elevation="Dp1">
+            <materialDesign:Card Grid.Row="1" Margin="0,38,0,16" materialDesign:ElevationAssist.Elevation="Dp1">
                 <Grid>
                     <ProgressBar IsIndeterminate="True" 
                                  Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVis}}" 

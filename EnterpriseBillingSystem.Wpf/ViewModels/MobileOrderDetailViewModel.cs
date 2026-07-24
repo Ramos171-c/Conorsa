@@ -186,15 +186,25 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
     [RelayCommand]
     private async Task SaveOrderChangesAsync()
     {
-        if (Details.Count == 0)
+        var billableDetails = Details.Where(d => d.DeliveredQuantity > 0).ToList();
+
+        if (!billableDetails.Any())
         {
-            _notificationService.ShowError("El pedido debe contener al menos un producto.");
+            _notificationService.ShowError("El pedido debe contener al menos un producto a entregar.");
             return;
         }
 
+        var missingItems = Details.Where(d => d.MissingQuantity > 0 || d.DeliveredQuantity < d.Quantity).ToList();
+
+        string confirmMsg = $"¿Desea guardar las modificaciones en el pedido {OrderNumber}?";
+        if (missingItems.Any())
+        {
+            confirmMsg = $"Se han registrado faltantes ({missingItems.Count} producto(s)). El pedido se ajustará a las cantidades reales entregadas y se facturarán ÚNICAMENTE las unidades entregadas. ¿Desea continuar?";
+        }
+
         var confirm = Views.Dialogs.CustomMessageBox.Show(
-            $"¿Desea guardar las modificaciones en el pedido {OrderNumber}? Los productos eliminados serán removidos permanentemente y no aparecerán en la tarjeta de entrega.",
-            "Guardar Cambios de Pedido",
+            confirmMsg,
+            "Guardar Cambios y Ajustar Facturación",
             MessageBoxButton.YesNo,
             MessageBoxImage.Question);
 
@@ -203,10 +213,23 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
         IsProcessing = true;
         try
         {
-            var reqDetails = Details.Select(d => new SalesOrderDetailRequestDto(
+            string updatedNotes = Notes ?? string.Empty;
+            if (missingItems.Any())
+            {
+                var missingSummary = string.Join("; ", missingItems.Select(m => 
+                    $"{m.ProductName}: Faltaron {m.MissingQuantity:N2} {m.UnitOfMeasure} [Motivo: {(string.IsNullOrWhiteSpace(m.MissingReason) ? "No vino en pedido general" : m.MissingReason)}]"));
+                
+                if (!updatedNotes.Contains("[PRODUCTOS NO ENTREGADOS / NO VINIERON]:"))
+                {
+                    updatedNotes = (string.IsNullOrWhiteSpace(updatedNotes) ? "" : updatedNotes + "\n") + 
+                                   $"[PRODUCTOS NO ENTREGADOS / NO VINIERON]: {missingSummary}";
+                }
+            }
+
+            var reqDetails = billableDetails.Select(d => new SalesOrderDetailRequestDto(
                 ProductId: d.ProductId,
                 UnitOfMeasureId: d.UnitOfMeasureId,
-                Quantity: d.Quantity,
+                Quantity: d.DeliveredQuantity, // Facturar SOLO la cantidad entregada real
                 UnitPrice: d.UnitPrice,
                 DiscountPercentage: d.DiscountPercentage,
                 TaxPercentage: d.TaxPercentage
@@ -216,7 +239,7 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                 Id: _order.Id,
                 CustomerId: _order.CustomerId,
                 OrderDate: OrderDate,
-                Notes: Notes,
+                Notes: updatedNotes,
                 Details: reqDetails
             );
 
@@ -224,7 +247,8 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             if (success)
             {
                 IsOrderEdited = false;
-                _notificationService.ShowSuccess($"Pedido {OrderNumber} actualizado exitosamente.");
+                Notes = updatedNotes;
+                _notificationService.ShowSuccess($"Pedido {OrderNumber} ajustado exitosamente. Se facturará únicamente lo entregado.");
                 OrderActionTaken?.Invoke();
             }
             else
@@ -246,6 +270,14 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
     private async Task ConfirmOrderAsync()
     {
         if (!IsActionEnabled) return;
+
+        var missingItems = Details.Where(d => d.MissingQuantity > 0 || d.DeliveredQuantity < d.Quantity).ToList();
+
+        if (IsOrderEdited || missingItems.Any())
+        {
+            await SaveOrderChangesAsync();
+            if (IsOrderEdited) return;
+        }
 
         var confirm = Views.Dialogs.CustomMessageBox.Show(
             $"¿Está seguro de que desea confirmar el pedido {OrderNumber}?",
