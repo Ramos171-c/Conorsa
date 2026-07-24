@@ -124,12 +124,23 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
         RecalculateTotalsAndNotes();
     }
 
+    [ObservableProperty]
+    private bool _isOrderEdited;
+
+    public bool CanEditOrder => !Status.Equals("Anulado", StringComparison.OrdinalIgnoreCase) && 
+                                !Status.Equals("Completado", StringComparison.OrdinalIgnoreCase);
+
     public decimal EffectiveTotalAmount => Details.Sum(d => d.EffectiveNetAmount);
     public decimal TotalMissingQuantity => Details.Sum(d => d.MissingQuantity);
     public string TotalMissingQuantityDisplay => $"{TotalMissingQuantity:N2} pzas";
 
     public void RecalculateTotalsAndNotes()
     {
+        SubTotal = Details.Sum(d => d.Quantity * d.UnitPrice);
+        DiscountAmount = Details.Sum(d => d.DiscountAmount);
+        TaxAmount = Details.Sum(d => d.TaxAmount);
+        TotalAmount = SubTotal - DiscountAmount + TaxAmount;
+
         OnPropertyChanged(nameof(EffectiveTotalAmount));
         OnPropertyChanged(nameof(TotalMissingQuantity));
         OnPropertyChanged(nameof(TotalMissingQuantityDisplay));
@@ -139,6 +150,95 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
         {
             var summary = string.Join("; ", missingItems.Select(m => $"{m.ProductName}: faltan {m.MissingQuantity:N2} pzas{(string.IsNullOrWhiteSpace(m.MissingReason) ? "" : $" [{m.MissingReason}]")}"));
             DispatcherNotes = $"[PRODUCTOS FALTANTES REGISTRADOS]: {summary}";
+        }
+    }
+
+    [RelayCommand]
+    private void RemoveDetailItem(SalesOrderDetailItemDto item)
+    {
+        if (item == null) return;
+
+        if (Details.Count <= 1)
+        {
+            Views.Dialogs.CustomMessageBox.Show(
+                "No se puede eliminar el único producto del pedido. Si desea cancelar todo el pedido, utilice la opción 'Anular Pedido'.",
+                "Operación no permitida",
+                MessageBoxButton.OK,
+                MessageBoxImage.Warning);
+            return;
+        }
+
+        var confirm = Views.Dialogs.CustomMessageBox.Show(
+            $"¿Está seguro de que desea eliminar el producto '{item.ProductName}' del pedido?",
+            "Eliminar Producto del Pedido",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (confirm != MessageBoxResult.Yes) return;
+
+        Details.Remove(item);
+        IsOrderEdited = true;
+        RecalculateTotalsAndNotes();
+
+        _notificationService.ShowWarning($"Producto '{item.ProductName}' retirado del pedido. Presione 'Guardar Cambios' para aplicar en el servidor.");
+    }
+
+    [RelayCommand]
+    private async Task SaveOrderChangesAsync()
+    {
+        if (Details.Count == 0)
+        {
+            _notificationService.ShowError("El pedido debe contener al menos un producto.");
+            return;
+        }
+
+        var confirm = Views.Dialogs.CustomMessageBox.Show(
+            $"¿Desea guardar las modificaciones en el pedido {OrderNumber}? Los productos eliminados serán removidos permanentemente y no aparecerán en la tarjeta de entrega.",
+            "Guardar Cambios de Pedido",
+            MessageBoxButton.YesNo,
+            MessageBoxImage.Question);
+
+        if (confirm != MessageBoxResult.Yes) return;
+
+        IsProcessing = true;
+        try
+        {
+            var reqDetails = Details.Select(d => new SalesOrderDetailRequestDto(
+                ProductId: d.ProductId,
+                UnitOfMeasureId: d.UnitOfMeasureId,
+                Quantity: d.Quantity,
+                UnitPrice: d.UnitPrice,
+                DiscountPercentage: d.DiscountPercentage,
+                TaxPercentage: d.TaxPercentage
+            )).ToList();
+
+            var command = new UpdateSalesOrderCommandDto(
+                Id: _order.Id,
+                CustomerId: _order.CustomerId,
+                OrderDate: OrderDate,
+                Notes: Notes,
+                Details: reqDetails
+            );
+
+            var success = await _salesApiClient.UpdateSalesOrderAsync(_order.Id, command);
+            if (success)
+            {
+                IsOrderEdited = false;
+                _notificationService.ShowSuccess($"Pedido {OrderNumber} actualizado exitosamente.");
+                OrderActionTaken?.Invoke();
+            }
+            else
+            {
+                _notificationService.ShowError("Error al guardar los cambios del pedido.");
+            }
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al actualizar pedido: {ex.Message}");
+        }
+        finally
+        {
+            IsProcessing = false;
         }
     }
 

@@ -148,3 +148,20 @@ public record ConsolidatedProductDto(
     public decimal DisplayGrossPurchase => GrossPurchaseCost > 0 ? GrossPurchaseCost : TotalQuantity * UnitCost;
     public decimal DisplayProfit => DisplayTotalSales - DisplayGrossPurchase;
 }
+
+public record SalesOrderDetailRequestDto(
+    Guid ProductId,
+    Guid UnitOfMeasureId,
+    decimal Quantity,
+    decimal UnitPrice,
+    decimal DiscountPercentage,
+    decimal TaxPercentage
+);
+
+public record UpdateSalesOrderCommandDto(
+    Guid Id,
+    Guid CustomerId,
+    DateTime OrderDate,
+    string? Notes,
+    List<SalesOrderDetailRequestDto> Details
+);

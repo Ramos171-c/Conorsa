@@ -232,6 +232,21 @@
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
+
+                            <!-- Delete Item Button Column -->
+                            <DataGridTemplateColumn Width="45">
+                                <DataGridTemplateColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <Button Command="{Binding DataContext.RemoveDetailItemCommand, RelativeSource={RelativeSource AncestorType=Window}}" 
+                                                CommandParameter="{Binding}" 
+                                                ToolTip="Eliminar este producto del pedido" 
+                                                Style="{StaticResource MaterialDesignIconButton}" 
+                                                Width="28" Height="28" Padding="0">
+                                            <materialDesign:PackIcon Kind="TrashCanOutline" Width="16" Height="16" Foreground="#DC2626" />
+                                        </Button>
+                                    </DataTemplate>
+                                </DataGridTemplateColumn.CellTemplate>
+                            </DataGridTemplateColumn>
                         </DataGrid.Columns>
                     </DataGrid>
                 </Grid>
@@ -321,6 +336,18 @@
 
             <!-- Grouped Actions (Confirm, Cancel, Return Partial, Return Total) -->
             <StackPanel Grid.Column="0" Grid.ColumnSpan="2" Orientation="Horizontal">
+                <!-- Save Order Edits Button (Blue) -->
+                <Button Command="{Binding SaveOrderChangesCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="#2563EB" BorderBrush="#2563EB" 
+                        Visibility="{Binding IsOrderEdited, Converter={StaticResource BoolToVis}}"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentSave" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Guardar Cambios" VerticalAlignment="Center" FontWeight="Bold" />
+                    </StackPanel>
+                </Button>
+
                 <!-- Cancel / Reject Button (Red) -->
                 <Button Command="{Binding CancelOrderCommand}" 
                         Style="{StaticResource MaterialDesignRaisedButton}" 

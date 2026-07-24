@@ -150,4 +150,29 @@ public class SalesApiClient
         }
         return true;
     }
+
+    public async Task<bool> UpdateSalesOrderAsync(Guid id, UpdateSalesOrderCommandDto command)
+    {
+        var response = await _httpClient.PutAsJsonAsync($"sales-orders/{id}", command);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            string errorMessage = "Error en el servidor al actualizar el pedido.";
+            try
+            {
+                using var jsonDoc = System.Text.Json.JsonDocument.Parse(errorContent);
+                if (jsonDoc.RootElement.TryGetProperty("detail", out var detailProp))
+                {
+                    errorMessage = detailProp.GetString() ?? errorMessage;
+                }
+                else if (jsonDoc.RootElement.TryGetProperty("message", out var msgProp))
+                {
+                    errorMessage = msgProp.GetString() ?? errorMessage;
+                }
+            }
+            catch {}
+            throw new Exception(errorMessage);
+        }
+        return true;
+    }
 }

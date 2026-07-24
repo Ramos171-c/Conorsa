@@ -94,10 +94,6 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         if (order.Status == SalesOrderStatus.Anulado || order.Status == SalesOrderStatus.Completado)
             throw new InvalidOperationException($"No se puede editar un pedido en estado {order.Status}.");
 
-        // Regla de 10 minutos
-        if (order.CreatedOnUtc.AddMinutes(10) < DateTime.UtcNow)
-            throw new InvalidOperationException("El pedido ya no se puede editar porque han transcurrido más de 10 minutos desde su creación.");
-
         // Verificar que no tenga facturas confirmadas
         bool hasPostedInvoices = order.SalesInvoices.Any(si => si.Status == SalesInvoiceStatus.Posted);
         if (hasPostedInvoices)
@@ -176,19 +172,7 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
             }
         }
 
-        // Validar compra mínima dinámica
         decimal totalAmount = subTotal - totalDiscount + totalTax;
-        decimal minOrderAmount = 350m; // Default fallback
-        var minAmountParam = (await _systemParameterRepository.FindAsync(p => p.Key == "MinimumInvoiceAmount")).FirstOrDefault();
-        if (minAmountParam != null && decimal.TryParse(minAmountParam.Value, out var parsedMin))
-        {
-            minOrderAmount = parsedMin;
-        }
-
-        if (totalAmount < minOrderAmount)
-        {
-            throw new InvalidOperationException($"El monto total del pedido de venta debe ser igual o mayor a C${minOrderAmount:N2}.");
-        }
 
         // 4. Actualizar pedido
         order.CustomerId = request.CustomerId;
