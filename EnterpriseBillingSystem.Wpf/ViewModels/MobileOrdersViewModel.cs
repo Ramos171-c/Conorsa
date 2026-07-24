@@ -54,6 +54,8 @@ public partial class MobileOrdersViewModel : ViewModelBase
 
     public bool HasPreviousPage => PageNumber > 1;
     public bool HasNextPage => PageNumber * PageSize < TotalCount;
+    public int TotalPages => PageSize > 0 ? (int)Math.Ceiling((double)TotalCount / PageSize) : 1;
+    public string PageDisplay => $"Página {PageNumber} de {(TotalPages > 0 ? TotalPages : 1)} (Total: {TotalCount} pedidos)";
 
     public bool CanDispatchConsolidated => SelectedStatus == "Recibido" && ConsolidatedProducts.Count > 0;
 
@@ -564,6 +566,22 @@ public partial class MobileOrdersViewModel : ViewModelBase
         {
             IsLoading = false;
         }
+    }
+
+    partial void OnTotalCountChanged(int value)
+    {
+        OnPropertyChanged(nameof(TotalPages));
+        OnPropertyChanged(nameof(PageDisplay));
+        OnPropertyChanged(nameof(HasPreviousPage));
+        OnPropertyChanged(nameof(HasNextPage));
+    }
+
+    partial void OnPageNumberChanged(int value)
+    {
+        OnPropertyChanged(nameof(TotalPages));
+        OnPropertyChanged(nameof(PageDisplay));
+        OnPropertyChanged(nameof(HasPreviousPage));
+        OnPropertyChanged(nameof(HasNextPage));
     }
 
     partial void OnSelectedStatusChanged(string? value)

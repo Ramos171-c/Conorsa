@@ -372,8 +372,7 @@
 
                     <!-- Pagination -->
                     <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,12,0,0">
-                        <TextBlock Text="Página: " VerticalAlignment="Center" Margin="0,0,8,0" />
-                        <TextBlock Text="{Binding PageNumber}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0" />
+                        <TextBlock Text="{Binding PageDisplay}" FontWeight="Bold" VerticalAlignment="Center" Margin="0,0,16,0" Foreground="#334155" />
 
                         <Button Command="{Binding PreviousPageCommand}" Style="{StaticResource MaterialDesignIconButton}" Width="32" Height="32" Margin="0,0,4,0">
                             <materialDesign:PackIcon Kind="ChevronLeft" />
