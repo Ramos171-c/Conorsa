@@ -271,8 +271,15 @@ public partial class MobileOrdersViewModel : ViewModelBase
         }
     }
 
+    [ObservableProperty]
+    private DateTime? _fromDate;
+
+    [ObservableProperty]
+    private DateTime? _toDate;
+
     public bool IsRecibidoSelected => string.IsNullOrWhiteSpace(SelectedStatus) || SelectedStatus == "-- Todos --" || SelectedStatus.Equals("Recibido", StringComparison.OrdinalIgnoreCase);
     public bool IsEnProcesoSelected => !string.IsNullOrWhiteSpace(SelectedStatus) && SelectedStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase);
+    public bool IsEnCaminoSelected => !string.IsNullOrWhiteSpace(SelectedStatus) && SelectedStatus.Equals("EnCamino", StringComparison.OrdinalIgnoreCase);
 
     [RelayCommand]
     private async Task OpenRecentOrdersReportAsync()
@@ -300,6 +307,157 @@ public partial class MobileOrdersViewModel : ViewModelBase
         if (result == true)
         {
             await LoadOrdersAsync();
+        }
+    }
+
+    [RelayCommand]
+    private async Task BatchPrintDeliveryTicketsAsync()
+    {
+        IsLoading = true;
+        try
+        {
+            Guid? routeFilter = (SelectedRoute == null || SelectedRoute.Id == Guid.Empty) ? null : SelectedRoute.Id;
+            
+            // Get all orders in status EnCamino (status filter = "EnCamino")
+            var pagedResult = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, routeFilter, "EnCamino", FromDate, ToDate);
+            if (pagedResult?.Items == null || !pagedResult.Items.Any())
+            {
+                _notificationService.ShowWarning("No se encontraron pedidos en estado 'En Camino' para imprimir.");
+                return;
+            }
+
+            var confirm = System.Windows.MessageBox.Show(
+                $"Se van a generar e imprimir masivamente {pagedResult.Items.Count()} factura(s) / ticket(s) de entrega en estado 'En Camino'.\n\n¿Desea continuar?",
+                "Impresión Masiva de Entregas",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Question);
+
+            if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+            var printDialog = new System.Windows.Controls.PrintDialog();
+            if (printDialog.ShowDialog() != true) return;
+
+            var flowDoc = new System.Windows.Documents.FlowDocument
+            {
+                PagePadding = new System.Windows.Thickness(30),
+                ColumnWidth = double.PositiveInfinity,
+                FontFamily = new System.Windows.Media.FontFamily("Courier New"),
+                FontSize = 12,
+                TextAlignment = System.Windows.TextAlignment.Left
+            };
+
+            foreach (var itemHeader in pagedResult.Items)
+            {
+                var fullOrder = await _salesApiClient.GetSalesOrderByIdAsync(itemHeader.Id);
+                if (fullOrder == null || fullOrder.Details == null || !fullOrder.Details.Any()) continue;
+
+                CustomerDto? customer = null;
+                try
+                {
+                    customer = await _customerApiClient.GetCustomerByIdAsync(fullOrder.CustomerId);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error fetching customer in batch print: {ex.Message}");
+                }
+
+                var sec = new System.Windows.Documents.Section
+                {
+                    BreakPageBefore = flowDoc.Blocks.Any()
+                };
+
+                // Title Header
+                var headerPara = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("Dulce y caramelos\n"))
+                {
+                    FontSize = 18,
+                    FontWeight = System.Windows.FontWeights.Bold,
+                    TextAlignment = System.Windows.TextAlignment.Center
+                };
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("FACTURA / TICKET DE ENTREGA (EN CAMINO)\n"));
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
+                sec.Blocks.Add(headerPara);
+
+                // Customer Details
+                var custPara = new System.Windows.Documents.Paragraph();
+                custPara.Inlines.Add(new System.Windows.Documents.Run($"Pedido No:   {fullOrder.OrderNumber}\n"));
+                custPara.Inlines.Add(new System.Windows.Documents.Run($"Fecha:       {fullOrder.OrderDate:dd/MM/yyyy HH:mm}\n"));
+                custPara.Inlines.Add(new System.Windows.Documents.Run($"Cliente:     {fullOrder.CustomerName} ({fullOrder.CustomerCode})\n"));
+                
+                if (customer != null)
+                {
+                    custPara.Inlines.Add(new System.Windows.Documents.Run($"Ruta:        {customer.RouteName ?? "No asignada"}\n"));
+                    var address = customer.Addresses?.FirstOrDefault(a => a.IsDefault) ?? customer.Addresses?.FirstOrDefault();
+                    if (address != null)
+                    {
+                        custPara.Inlines.Add(new System.Windows.Documents.Run($"Dirección:   {address.AddressLine1}, {address.City}\n"));
+                    }
+                    var phone = customer.Phones?.FirstOrDefault()?.PhoneNumber;
+                    if (!string.IsNullOrEmpty(phone))
+                    {
+                        custPara.Inlines.Add(new System.Windows.Documents.Run($"Teléfono:    {phone}\n"));
+                    }
+                }
+                custPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
+                sec.Blocks.Add(custPara);
+
+                // Order Lines
+                var itemsPara = new System.Windows.Documents.Paragraph();
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run("PRODUCTOS CARGADOS A ENTREGAR\n"));
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n"));
+                
+                foreach (var detail in fullOrder.Details)
+                {
+                    if (detail.Quantity <= 0) continue;
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"{detail.ProductName}\n"));
+                    string qtyUom = $"{detail.Quantity:N2} {detail.UnitOfMeasure}";
+                    string net = $"C${detail.NetAmount:N2}";
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   {qtyUom.PadRight(22)} {net.PadLeft(14)}\n"));
+                }
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n"));
+                sec.Blocks.Add(itemsPara);
+
+                // Totals
+                var totalsPara = new System.Windows.Documents.Paragraph { TextAlignment = System.Windows.TextAlignment.Right };
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Subtotal:     C${fullOrder.SubTotal:N2}\n"));
+                if (fullOrder.DiscountAmount > 0)
+                {
+                    totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Descuento:   -C${fullOrder.DiscountAmount:N2}\n"));
+                }
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL:        C${fullOrder.TotalAmount:N2}\n"));
+                
+                decimal totalUsd = fullOrder.TotalAmount / 36.5m;
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL USD:     ${totalUsd:N2}\n"));
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
+                sec.Blocks.Add(totalsPara);
+
+                // Signature / Receipt line
+                var signPara = new System.Windows.Documents.Paragraph
+                {
+                    Margin = new System.Windows.Thickness(0, 16, 0, 0)
+                };
+                signPara.Inlines.Add(new System.Windows.Documents.Run("FIRMA CLIENTE (RECIBIDO CONFORME):\n\n"));
+                signPara.Inlines.Add(new System.Windows.Documents.Run("_________________________________________\n"));
+                signPara.Inlines.Add(new System.Windows.Documents.Run("Nombre: ________________________________\n\n"));
+                sec.Blocks.Add(signPara);
+
+                flowDoc.Blocks.Add(sec);
+            }
+
+            flowDoc.PageWidth = printDialog.PrintableAreaWidth;
+            flowDoc.PageHeight = printDialog.PrintableAreaHeight;
+            
+            var documentPaginator = ((System.Windows.Documents.IDocumentPaginatorSource)flowDoc).DocumentPaginator;
+            printDialog.PrintDocument(documentPaginator, $"Facturas_Entrega_Masivas_EnCamino_{DateTime.Now:yyyyMMdd}");
+
+            _notificationService.ShowSuccess($"Impresión masiva completada. {pagedResult.Items.Count()} facturas de entrega enviadas a la impresora.");
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error en la impresión masiva: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
         }
     }
 
