@@ -289,122 +289,44 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             try
             {
                 Guid? routeId = SelectedRoute != null && SelectedRoute.Id != Guid.Empty ? SelectedRoute.Id : null;
-                var result = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, routeId, _targetStatus, FromDate, ToDate);
+                
+                // Strictly fetch ONLY the orders matching the active filters (Route, Status, Date Range)
+                var result = await _salesApiClient.GetSalesOrdersPagedAsync(
+                    page: 1, 
+                    pageSize: 9999, 
+                    customerId: null, 
+                    status: _targetStatus, 
+                    fromDate: FromDate, 
+                    toDate: ToDate, 
+                    routeId: routeId);
+
                 if (result?.Items == null || !result.Items.Any())
                 {
-                    _notificationService.ShowWarning($"No se encontraron pedidos en estado '{_targetStatus}' para procesar.");
+                    _notificationService.ShowWarning($"No se encontraron pedidos filtrados en estado '{_targetStatus}' para procesar.");
                     return;
                 }
 
                 var resultsBag = new System.Collections.Concurrent.ConcurrentBag<bool>();
+                int targetStatusValue = isDispatchMode ? 5 : 4; // 5 = EnCamino, 4 = EnProceso
 
-                if (isDispatchMode)
+                await Parallel.ForEachAsync(result.Items, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (order, ct) =>
                 {
-                    // Map for stock tracking across batch dispatch (grouped to handle multiple presentations of same product)
-                    var stockDict = ConsolidatedProducts
-                        .GroupBy(p => p.ProductId)
-                        .ToDictionary(
-                            g => g.Key, 
-                            g => g.Sum(p => p.DeductedFromInventory));
-
-                    foreach (var orderHeader in result.Items)
+                    try
                     {
-                        try
-                        {
-                            var fullOrder = await _salesApiClient.GetSalesOrderByIdAsync(orderHeader.Id);
-                            if (fullOrder == null || fullOrder.Details == null || !fullOrder.Details.Any())
-                            {
-                                var okStatus = await _salesApiClient.UpdateSalesOrderStatusAsync(orderHeader.Id, 5); // 5 = EnCamino
-                                resultsBag.Add(okStatus);
-                                continue;
-                            }
-
-                            List<SalesOrderDetailRequestDto> adjustedDetails = new();
-                            List<string> missingLogs = new();
-
-                            foreach (var d in fullOrder.Details)
-                            {
-                                decimal available = stockDict.TryGetValue(d.ProductId, out var avail) ? avail : d.Quantity;
-                                decimal delivered = Math.Min(d.Quantity, available);
-                                decimal missing = d.Quantity - delivered;
-
-                                if (stockDict.ContainsKey(d.ProductId))
-                                {
-                                    stockDict[d.ProductId] = Math.Max(0, available - delivered);
-                                }
-
-                                if (delivered > 0)
-                                {
-                                    adjustedDetails.Add(new SalesOrderDetailRequestDto(
-                                        ProductId: d.ProductId,
-                                        UnitOfMeasureId: d.UnitOfMeasureId,
-                                        Quantity: delivered, // Facturar SOLO lo entregado real
-                                        UnitPrice: d.UnitPrice,
-                                        DiscountPercentage: d.DiscountPercentage,
-                                        TaxPercentage: d.TaxPercentage
-                                    ));
-                                }
-
-                                if (missing > 0)
-                                {
-                                    missingLogs.Add($"{d.ProductName}: Faltaron {missing:N2} {d.UnitOfMeasure} por falta de stock. Entregado: {delivered:N2}");
-                                }
-                            }
-
-                            string updatedNotes = fullOrder.Notes ?? string.Empty;
-                            if (missingLogs.Any())
-                            {
-                                string logStr = "[AJUSTE AUTOMÁTICO EN BODEGA]: " + string.Join("; ", missingLogs);
-                                if (!updatedNotes.Contains("[AJUSTE AUTOMÁTICO EN BODEGA]:"))
-                                {
-                                    updatedNotes = (string.IsNullOrWhiteSpace(updatedNotes) ? "" : updatedNotes + "\n") + logStr;
-                                }
-                            }
-
-                            if (adjustedDetails.Any())
-                            {
-                                var updateCmd = new UpdateSalesOrderCommandDto(
-                                    Id: fullOrder.Id,
-                                    CustomerId: fullOrder.CustomerId,
-                                    OrderDate: fullOrder.OrderDate,
-                                    Notes: updatedNotes,
-                                    Details: adjustedDetails
-                                );
-                                await _salesApiClient.UpdateSalesOrderAsync(fullOrder.Id, updateCmd);
-                            }
-
-                            // Cambiar a EnCamino (5)
-                            var ok = await _salesApiClient.UpdateSalesOrderStatusAsync(fullOrder.Id, 5);
-                            resultsBag.Add(ok);
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Error ajustando pedido {orderHeader.OrderNumber}: {ex.Message}");
-                            resultsBag.Add(false);
-                        }
+                        var ok = await _salesApiClient.UpdateSalesOrderStatusAsync(order.Id, targetStatusValue);
+                        resultsBag.Add(ok);
                     }
-                }
-                else
-                {
-                    // Cambiar a EnProceso (4)
-                    await Parallel.ForEachAsync(result.Items, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (order, ct) =>
+                    catch (Exception ex)
                     {
-                        try
-                        {
-                            var ok = await _salesApiClient.ConfirmSalesOrderAsync(order.Id);
-                            resultsBag.Add(ok);
-                        }
-                        catch
-                        {
-                            resultsBag.Add(false);
-                        }
-                    });
-                }
+                        System.Diagnostics.Debug.WriteLine($"Error cambiando estado de pedido {order.OrderNumber}: {ex.Message}");
+                        resultsBag.Add(false);
+                    }
+                });
 
                 int successCount = resultsBag.Count(x => x);
                 int errorCount = resultsBag.Count(x => !x);
 
-                string messageText = _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
+                string messageText = isDispatchMode
                     ? $"Despacho completado. {successCount} pedidos pasaron a estado 'En Camino'."
                     : $"Procesamiento completado. {successCount} pedidos pasaron a estado 'En Proceso'.";
 
