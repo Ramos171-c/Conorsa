@@ -708,7 +708,16 @@ public partial class MobileOrdersViewModel : ViewModelBase
                     var updated = await _salesApiClient.UpdateSalesOrderAsync(fullOrder.Id, updateCmd);
                     if (updated)
                     {
-                        await _salesApiClient.UpdateSalesOrderStatusAsync(fullOrder.Id, 4);
+                        await Task.Delay(150);
+                        try
+                        {
+                            await _salesApiClient.UpdateSalesOrderStatusAsync(fullOrder.Id, 4);
+                        }
+                        catch
+                        {
+                            await Task.Delay(300);
+                            await _salesApiClient.UpdateSalesOrderStatusAsync(fullOrder.Id, 4);
+                        }
                         recoveredCount++;
                     }
                 }
