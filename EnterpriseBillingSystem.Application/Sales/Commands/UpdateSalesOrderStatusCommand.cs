@@ -243,6 +243,18 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         {
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
+        catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException ex)
+        {
+            foreach (var entry in ex.Entries)
+            {
+                var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken);
+                if (databaseValues != null)
+                {
+                    entry.OriginalValues.SetValues(databaseValues);
+                }
+            }
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
+        }
         catch (Microsoft.EntityFrameworkCore.DbUpdateException dbEx)
         {
             var innerMessage = dbEx.InnerException?.Message ?? dbEx.Message;

@@ -618,10 +618,16 @@ public partial class MobileOrdersViewModel : ViewModelBase
             var productsResult = productApiClient != null ? await productApiClient.GetProductsPagedAsync(1, 5000) : null;
             var productList = productsResult?.Items ?? new List<ProductDto>();
 
-            var pagedOrders = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999);
-            var zeroedOrders = pagedOrders?.Items != null 
-                ? pagedOrders.Items.Where(o => o.TotalAmount == 0).ToList() 
-                : new List<SalesOrderListItemDto>();
+            var ordersEnCamino = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, status: "EnCamino");
+            var ordersEnProceso = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, status: "EnProceso");
+            var ordersRecibido = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, status: "Recibido");
+
+            var allOrders = new List<SalesOrderListItemDto>();
+            if (ordersEnCamino?.Items != null) allOrders.AddRange(ordersEnCamino.Items);
+            if (ordersEnProceso?.Items != null) allOrders.AddRange(ordersEnProceso.Items);
+            if (ordersRecibido?.Items != null) allOrders.AddRange(ordersRecibido.Items);
+
+            var zeroedOrders = allOrders.Where(o => o.TotalAmount == 0).ToList();
 
             int recoveredCount = 0;
 
@@ -634,8 +640,16 @@ public partial class MobileOrdersViewModel : ViewModelBase
 
                 var matches = System.Text.RegularExpressions.Regex.Matches(
                     fullOrder.Notes,
-                    @"-\s*([^:]+):\s*Faltó\s*([\d\.,]+)",
+                    @"-\s*([^:]+):[^\(]*?\((?:Solicitado|solicitado):\s*([\d\.,]+)",
                     System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                if (matches.Count == 0)
+                {
+                    matches = System.Text.RegularExpressions.Regex.Matches(
+                        fullOrder.Notes,
+                        @"-\s*([^:]+):\s*Faltó\s*([\d\.,]+)",
+                        System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                }
 
                 List<SalesOrderDetailRequestDto> restoredDetails = new();
 
