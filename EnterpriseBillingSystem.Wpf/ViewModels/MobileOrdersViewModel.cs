@@ -360,6 +360,8 @@ public partial class MobileOrdersViewModel : ViewModelBase
                 TextAlignment = System.Windows.TextAlignment.Left
             };
 
+            int totalLineCount = 0;
+
             foreach (var itemHeader in pagedResult.Items)
             {
                 var fullOrder = await _salesApiClient.GetSalesOrderByIdAsync(itemHeader.Id);
@@ -367,6 +369,8 @@ public partial class MobileOrdersViewModel : ViewModelBase
 
                 var validDetails = fullOrder.Details.Where(d => d.Quantity > 0).ToList();
                 if (!validDetails.Any()) continue;
+
+                totalLineCount += 14 + (validDetails.Count * 2);
 
                 CustomerDto? customer = null;
                 try
@@ -462,8 +466,10 @@ public partial class MobileOrdersViewModel : ViewModelBase
                 flowDoc.Blocks.Add(sec);
             }
 
-            flowDoc.PageWidth = printDialog.PrintableAreaWidth;
-            flowDoc.PageHeight = printDialog.PrintableAreaHeight;
+            flowDoc.PageWidth = printDialog.PrintableAreaWidth > 0 ? printDialog.PrintableAreaWidth : 280;
+            // Set dynamic height so thermal printers do NOT feed standard 11-inch letter paper height!
+            double calculatedHeight = (totalLineCount * 18) + 40;
+            flowDoc.PageHeight = Math.Max(100, calculatedHeight);
             
             var documentPaginator = ((System.Windows.Documents.IDocumentPaginatorSource)flowDoc).DocumentPaginator;
             printDialog.PrintDocument(documentPaginator, $"Facturas_Entrega_Masivas_EnCamino_{DateTime.Now:yyyyMMdd}");
