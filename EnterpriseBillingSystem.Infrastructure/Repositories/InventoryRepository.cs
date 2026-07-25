@@ -80,9 +80,24 @@ public class InventoryRepository : Repository<Inventory>, IInventoryRepository
         var idsList = productIds.Distinct().ToList();
         if (!idsList.Any()) return new Dictionary<Guid, decimal>();
 
-        var stockList = await _context.Inventories
-            .AsNoTracking()
-            .Where(i => idsList.Contains(i.ProductId))
+        var warehouse = await _context.Warehouses.AsNoTracking().FirstOrDefaultAsync(w => w.Name.Contains("Exhibici"), cancellationToken);
+        var warehouseId = warehouse?.Id;
+
+        var query = _context.Inventories.AsNoTracking().Where(i => idsList.Contains(i.ProductId));
+        if (warehouseId.HasValue)
+        {
+            var branchWarehouseIds = await _context.BranchWarehouses.AsNoTracking()
+                .Where(bw => bw.WarehouseId == warehouseId.Value)
+                .Select(bw => bw.Id)
+                .ToListAsync(cancellationToken);
+
+            if (branchWarehouseIds.Any())
+            {
+                query = query.Where(i => branchWarehouseIds.Contains(i.BranchWarehouseId));
+            }
+        }
+
+        var stockList = await query
             .GroupBy(i => i.ProductId)
             .Select(g => new
             {
