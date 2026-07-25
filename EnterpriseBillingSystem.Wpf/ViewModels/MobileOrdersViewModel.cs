@@ -541,6 +541,69 @@ public partial class MobileOrdersViewModel : ViewModelBase
         IsLoading = true;
         try
         {
+            // 1. Fetch full order
+            var fullOrder = await _salesApiClient.GetSalesOrderByIdAsync(order.Id);
+            if (fullOrder != null && fullOrder.Details != null && fullOrder.Details.Any())
+            {
+                // 2. Fetch consolidated products to verify stock
+                var consolidated = await _salesApiClient.GetConsolidatedProductsAsync(status: "EnProceso");
+                var stockDict = consolidated
+                    .GroupBy(p => p.ProductId)
+                    .ToDictionary(g => g.Key, g => g.Sum(p => p.DeductedFromInventory));
+
+                List<SalesOrderDetailRequestDto> adjustedDetails = new();
+                List<string> missingLogs = new();
+                bool needsUpdate = false;
+
+                foreach (var d in fullOrder.Details)
+                {
+                    decimal available = stockDict.TryGetValue(d.ProductId, out var avail) ? avail : d.Quantity;
+                    decimal delivered = Math.Min(d.Quantity, available);
+                    decimal missing = d.Quantity - delivered;
+
+                    if (missing > 0)
+                    {
+                        needsUpdate = true;
+                        missingLogs.Add($"{d.ProductName}: Faltaron {missing:N2} {d.UnitOfMeasure} por falta de stock. Entregado: {delivered:N2}");
+                    }
+
+                    if (delivered > 0)
+                    {
+                        adjustedDetails.Add(new SalesOrderDetailRequestDto(
+                            ProductId: d.ProductId,
+                            UnitOfMeasureId: d.UnitOfMeasureId,
+                            Quantity: delivered,
+                            UnitPrice: d.UnitPrice,
+                            DiscountPercentage: d.DiscountPercentage,
+                            TaxPercentage: d.TaxPercentage
+                        ));
+                    }
+                }
+
+                if (needsUpdate && adjustedDetails.Any())
+                {
+                    string updatedNotes = fullOrder.Notes ?? string.Empty;
+                    if (missingLogs.Any())
+                    {
+                        string logStr = "[AJUSTE AUTOMÁTICO EN BODEGA]: " + string.Join("; ", missingLogs);
+                        if (!updatedNotes.Contains("[AJUSTE AUTOMÁTICO EN BODEGA]:"))
+                        {
+                            updatedNotes = (string.IsNullOrWhiteSpace(updatedNotes) ? "" : updatedNotes + "\n") + logStr;
+                        }
+                    }
+
+                    var updateCmd = new UpdateSalesOrderCommandDto(
+                        Id: fullOrder.Id,
+                        CustomerId: fullOrder.CustomerId,
+                        OrderDate: fullOrder.OrderDate,
+                        Notes: updatedNotes,
+                        Details: adjustedDetails
+                    );
+                    await _salesApiClient.UpdateSalesOrderAsync(fullOrder.Id, updateCmd);
+                }
+            }
+
+            // 3. Update status to EnCamino (5)
             var success = await _salesApiClient.UpdateSalesOrderStatusAsync(order.Id, 5);
             if (success)
             {
