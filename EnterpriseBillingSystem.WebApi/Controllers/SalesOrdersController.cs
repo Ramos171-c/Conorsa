@@ -124,8 +124,15 @@ public class SalesOrdersController : ApiControllerBase
         if (id != command.Id)
             return BadRequest(new { Message = "El Id en la ruta no coincide con el del cuerpo." });
 
-        await Mediator.Send(command);
-        return NoContent();
+        try
+        {
+            await Mediator.Send(command);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
     /// <summary>
@@ -138,8 +145,15 @@ public class SalesOrdersController : ApiControllerBase
         if (id != command.SalesOrderId)
             return BadRequest(new { Message = "El Id en la ruta no coincide con el del cuerpo." });
 
-        await Mediator.Send(command);
-        return NoContent();
+        try
+        {
+            await Mediator.Send(command);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
     /// <summary>
@@ -149,8 +163,15 @@ public class SalesOrdersController : ApiControllerBase
     [HasPermission("sales.edit")]
     public async Task<ActionResult> UpdateStatus(Guid id, [FromBody] EnterpriseBillingSystem.Domain.Enums.SalesOrderStatus status)
     {
-        await Mediator.Send(new UpdateSalesOrderStatusCommand(id, status));
-        return NoContent();
+        try
+        {
+            await Mediator.Send(new UpdateSalesOrderStatusCommand(id, status));
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(new { Message = ex.Message });
+        }
     }
 
     /// <summary>

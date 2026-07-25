@@ -126,8 +126,6 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
             var product = await _productRepository.GetByIdWithDetailsAsync(req.ProductId, cancellationToken);
             if (product == null)
                 throw new ArgumentException($"El producto con Id '{req.ProductId}' no existe.");
-            if (!product.IsActive)
-                throw new InvalidOperationException($"El producto '{product.Name}' no está activo.");
 
             // Aplicar exención fiscal del cliente
             decimal effectiveTaxPct = customer.IsTaxExempt ? 0m : req.TaxPercentage;
