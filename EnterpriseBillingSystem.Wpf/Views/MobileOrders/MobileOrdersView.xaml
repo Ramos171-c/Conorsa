@@ -64,6 +64,17 @@
                     </StackPanel>
                 </Button>
 
+                <Button Command="{Binding RecoverZeroedOrdersCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="#D97706" BorderBrush="#D97706" 
+                        Margin="0,0,12,0"
+                        ToolTip="Escanear y restaurar pedidos que quedaron en $0.00 a su valor original">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Restore" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="🔄 Recuperar Pedidos en $0.00" VerticalAlignment="Center" FontWeight="Bold" />
+                    </StackPanel>
+                </Button>
+
                 <Button Command="{Binding RefreshCommand}" Style="{StaticResource MaterialDesignFlatButton}">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />

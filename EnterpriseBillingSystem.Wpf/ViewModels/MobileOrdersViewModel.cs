@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Microsoft.Extensions.DependencyInjection;
 using EnterpriseBillingSystem.Wpf.Models;
 using EnterpriseBillingSystem.Wpf.Services.Api;
 using EnterpriseBillingSystem.Wpf.Services.Dialogs;
@@ -541,73 +542,6 @@ public partial class MobileOrdersViewModel : ViewModelBase
         IsLoading = true;
         try
         {
-            // 1. Fetch full order
-            var fullOrder = await _salesApiClient.GetSalesOrderByIdAsync(order.Id);
-            if (fullOrder != null && fullOrder.Details != null && fullOrder.Details.Any())
-            {
-                // 2. Fetch consolidated products to verify stock
-                var consolidated = await _salesApiClient.GetConsolidatedProductsAsync(status: "EnProceso");
-                var stockDict = consolidated
-                    .GroupBy(p => p.ProductId)
-                    .ToDictionary(g => g.Key, g => g.Sum(p => p.DeductedFromInventory));
-
-                List<SalesOrderDetailRequestDto> adjustedDetails = new();
-                List<string> missingLogs = new();
-                bool needsUpdate = false;
-
-                foreach (var d in fullOrder.Details)
-                {
-                    decimal available = stockDict.TryGetValue(d.ProductId, out var avail) ? avail : d.Quantity;
-                    decimal delivered = Math.Min(d.Quantity, available);
-                    decimal missing = d.Quantity - delivered;
-
-                    if (missing > 0)
-                    {
-                        needsUpdate = true;
-                        missingLogs.Add($"{d.ProductName}: Faltaron {missing:N2} {d.UnitOfMeasure} por falta de stock. Entregado: {delivered:N2}");
-                    }
-
-                    if (delivered > 0)
-                    {
-                        adjustedDetails.Add(new SalesOrderDetailRequestDto(
-                            ProductId: d.ProductId,
-                            UnitOfMeasureId: d.UnitOfMeasureId,
-                            Quantity: delivered,
-                            UnitPrice: d.UnitPrice,
-                            DiscountPercentage: d.DiscountPercentage,
-                            TaxPercentage: d.TaxPercentage
-                        ));
-                    }
-                }
-
-                if (needsUpdate && adjustedDetails.Any())
-                {
-                    string updatedNotes = fullOrder.Notes ?? string.Empty;
-                    if (missingLogs.Any())
-                    {
-                        string logStr = "[AJUSTE BODEGA]: " + string.Join("; ", missingLogs);
-                        if (!updatedNotes.Contains("[AJUSTE BODEGA]:"))
-                        {
-                            updatedNotes = (string.IsNullOrWhiteSpace(updatedNotes) ? "" : updatedNotes + "\n") + logStr;
-                        }
-                    }
-                    if (updatedNotes.Length > 490)
-                    {
-                        updatedNotes = updatedNotes.Substring(0, 487) + "...";
-                    }
-
-                    var updateCmd = new UpdateSalesOrderCommandDto(
-                        Id: fullOrder.Id,
-                        CustomerId: fullOrder.CustomerId,
-                        OrderDate: fullOrder.OrderDate,
-                        Notes: updatedNotes,
-                        Details: adjustedDetails
-                    );
-                    await _salesApiClient.UpdateSalesOrderAsync(fullOrder.Id, updateCmd);
-                }
-            }
-
-            // 3. Update status to EnCamino (5)
             var success = await _salesApiClient.UpdateSalesOrderStatusAsync(order.Id, 5);
             if (success)
             {
@@ -635,8 +569,8 @@ public partial class MobileOrdersViewModel : ViewModelBase
         if (parameter is not SalesOrderListItemDto order) return;
 
         var confirm = Views.Dialogs.CustomMessageBox.Show(
-            $"¿Está seguro de que desea confirmar la entrega del pedido {order.OrderNumber}? Esto cambiará su estado a Completado.",
-            "Confirmar Entrega",
+            $"¿Está seguro de que desea marcar como entregado el pedido {order.OrderNumber}? Esto cambiará su estado a Completado.",
+            "Marcar como Entregado",
             System.Windows.MessageBoxButton.YesNo,
             System.Windows.MessageBoxImage.Question);
 
@@ -648,7 +582,7 @@ public partial class MobileOrdersViewModel : ViewModelBase
             var success = await _salesApiClient.UpdateSalesOrderStatusAsync(order.Id, 6);
             if (success)
             {
-                _notificationService.ShowSuccess($"Pedido {order.OrderNumber} entregado y completado exitosamente.");
+                _notificationService.ShowSuccess($"Pedido {order.OrderNumber} marcado como completado.");
                 await LoadOrdersAsync();
             }
             else
@@ -659,6 +593,105 @@ public partial class MobileOrdersViewModel : ViewModelBase
         catch (Exception ex)
         {
             _notificationService.ShowError($"Error al completar pedido: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RecoverZeroedOrdersAsync()
+    {
+        var confirm = Views.Dialogs.CustomMessageBox.Show(
+            "¿Desea escanear y recuperar los pedidos que quedaron en $0.00 a su estado 'En Proceso' con sus productos originales?",
+            "Recuperar Pedidos en $0.00",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Question);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        IsLoading = true;
+        try
+        {
+            var productApiClient = App.AppHost?.Services.GetService<ProductApiClient>();
+            var productsResult = productApiClient != null ? await productApiClient.GetProductsPagedAsync(1, 5000) : null;
+            var productList = productsResult?.Items ?? new List<ProductDto>();
+
+            var pagedOrders = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999);
+            var zeroedOrders = pagedOrders?.Items != null 
+                ? pagedOrders.Items.Where(o => o.TotalAmount == 0).ToList() 
+                : new List<SalesOrderListItemDto>();
+
+            int recoveredCount = 0;
+
+            foreach (var orderHeader in zeroedOrders)
+            {
+                var fullOrder = await _salesApiClient.GetSalesOrderByIdAsync(orderHeader.Id);
+                if (fullOrder == null || string.IsNullOrWhiteSpace(fullOrder.Notes)) continue;
+
+                if (!fullOrder.Notes.Contains("[Faltantes]:") && !fullOrder.Notes.Contains("[AJUSTE")) continue;
+
+                var matches = System.Text.RegularExpressions.Regex.Matches(
+                    fullOrder.Notes,
+                    @"-\s*([^:]+):\s*Faltó\s*([\d\.,]+)",
+                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+
+                List<SalesOrderDetailRequestDto> restoredDetails = new();
+
+                foreach (System.Text.RegularExpressions.Match match in matches)
+                {
+                    string prodName = match.Groups[1].Value.Trim();
+                    string qtyStr = match.Groups[2].Value.Trim().Replace(",", "");
+
+                    if (decimal.TryParse(qtyStr, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal qty) && qty > 0)
+                    {
+                        var prod = productList.FirstOrDefault(p =>
+                            p.Name.Equals(prodName, StringComparison.OrdinalIgnoreCase) ||
+                            (!string.IsNullOrEmpty(p.Description) && p.Description.Equals(prodName, StringComparison.OrdinalIgnoreCase)));
+
+                        if (prod != null)
+                        {
+                            restoredDetails.Add(new SalesOrderDetailRequestDto(
+                                ProductId: prod.Id,
+                                UnitOfMeasureId: prod.DefaultUnitOfMeasureId,
+                                Quantity: qty,
+                                UnitPrice: prod.DefaultSalePrice > 0 ? prod.DefaultSalePrice : prod.DefaultPrice,
+                                DiscountPercentage: 0,
+                                TaxPercentage: 0
+                            ));
+                        }
+                    }
+                }
+
+                if (restoredDetails.Any())
+                {
+                    string cleanedNotes = System.Text.RegularExpressions.Regex.Replace(fullOrder.Notes, @"\n?\[Faltantes\]:.*", "", System.Text.RegularExpressions.RegexOptions.Singleline).Trim();
+                    cleanedNotes = System.Text.RegularExpressions.Regex.Replace(cleanedNotes, @"\n?\[AJUSTE.*", "", System.Text.RegularExpressions.RegexOptions.Singleline).Trim();
+
+                    var updateCmd = new UpdateSalesOrderCommandDto(
+                        Id: fullOrder.Id,
+                        CustomerId: fullOrder.CustomerId,
+                        OrderDate: fullOrder.OrderDate,
+                        Notes: cleanedNotes,
+                        Details: restoredDetails
+                    );
+
+                    var updated = await _salesApiClient.UpdateSalesOrderAsync(fullOrder.Id, updateCmd);
+                    if (updated)
+                    {
+                        await _salesApiClient.UpdateSalesOrderStatusAsync(fullOrder.Id, 4);
+                        recoveredCount++;
+                    }
+                }
+            }
+
+            _notificationService.ShowSuccess($"Recuperación completada. Se restauraron {recoveredCount} pedidos a su valor original en estado 'En Proceso'.");
+            await LoadOrdersAsync();
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al recuperar pedidos: {ex.Message}");
         }
         finally
         {

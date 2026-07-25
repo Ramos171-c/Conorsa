@@ -310,105 +310,22 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 var errorBag = new System.Collections.Concurrent.ConcurrentBag<string>();
                 int targetStatusValue = isDispatchMode ? 5 : 4; // 5 = EnCamino, 4 = EnProceso
 
-                if (isDispatchMode)
+                await Parallel.ForEachAsync(result.Items, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (order, ct) =>
                 {
-                    var stockDict = ConsolidatedProducts
-                        .GroupBy(p => p.ProductId)
-                        .ToDictionary(g => g.Key, g => g.Sum(p => p.DeductedFromInventory));
-
-                    foreach (var orderHeader in result.Items)
+                    try
                     {
-                        try
-                        {
-                            var fullOrder = await _salesApiClient.GetSalesOrderByIdAsync(orderHeader.Id);
-                            if (fullOrder != null && fullOrder.Details != null && fullOrder.Details.Any())
-                            {
-                                List<SalesOrderDetailRequestDto> adjustedDetails = new();
-                                List<string> missingLogs = new();
-                                bool needsUpdate = false;
+                        var ok = isDispatchMode
+                            ? await _salesApiClient.UpdateSalesOrderStatusAsync(order.Id, targetStatusValue)
+                            : await _salesApiClient.ConfirmSalesOrderAsync(order.Id);
 
-                                foreach (var d in fullOrder.Details)
-                                {
-                                    decimal available = stockDict.TryGetValue(d.ProductId, out var avail) ? avail : d.Quantity;
-                                    decimal delivered = Math.Min(d.Quantity, available);
-                                    decimal missing = d.Quantity - delivered;
-
-                                    if (stockDict.ContainsKey(d.ProductId))
-                                    {
-                                        stockDict[d.ProductId] = Math.Max(0, available - delivered);
-                                    }
-
-                                    if (missing > 0)
-                                    {
-                                        needsUpdate = true;
-                                        missingLogs.Add($"{d.ProductName}: Faltaron {missing:N2} {d.UnitOfMeasure} por falta de stock. Entregado: {delivered:N2}");
-                                    }
-
-                                    if (delivered > 0)
-                                    {
-                                        adjustedDetails.Add(new SalesOrderDetailRequestDto(
-                                            ProductId: d.ProductId,
-                                            UnitOfMeasureId: d.UnitOfMeasureId,
-                                            Quantity: delivered,
-                                            UnitPrice: d.UnitPrice,
-                                            DiscountPercentage: d.DiscountPercentage,
-                                            TaxPercentage: d.TaxPercentage
-                                        ));
-                                    }
-                                }
-
-                                if (needsUpdate && adjustedDetails.Any())
-                                {
-                                    string updatedNotes = fullOrder.Notes ?? string.Empty;
-                                    if (missingLogs.Any())
-                                    {
-                                        string logStr = "[AJUSTE BODEGA]: " + string.Join("; ", missingLogs);
-                                        if (!updatedNotes.Contains("[AJUSTE BODEGA]:"))
-                                        {
-                                            updatedNotes = (string.IsNullOrWhiteSpace(updatedNotes) ? "" : updatedNotes + "\n") + logStr;
-                                        }
-                                    }
-                                    if (updatedNotes.Length > 490)
-                                    {
-                                        updatedNotes = updatedNotes.Substring(0, 487) + "...";
-                                    }
-
-                                    var updateCmd = new UpdateSalesOrderCommandDto(
-                                        Id: fullOrder.Id,
-                                        CustomerId: fullOrder.CustomerId,
-                                        OrderDate: fullOrder.OrderDate,
-                                        Notes: updatedNotes,
-                                        Details: adjustedDetails
-                                    );
-                                    await _salesApiClient.UpdateSalesOrderAsync(fullOrder.Id, updateCmd);
-                                }
-                            }
-
-                            var ok = await _salesApiClient.UpdateSalesOrderStatusAsync(orderHeader.Id, 5);
-                            if (ok) successBag.Add(true);
-                        }
-                        catch (Exception ex)
-                        {
-                            System.Diagnostics.Debug.WriteLine($"Error ajustando pedido {orderHeader.OrderNumber}: {ex.Message}");
-                            errorBag.Add($"{orderHeader.OrderNumber}: {ex.Message}");
-                        }
+                        if (ok) successBag.Add(true);
                     }
-                }
-                else
-                {
-                    await Parallel.ForEachAsync(result.Items, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (order, ct) =>
+                    catch (Exception ex)
                     {
-                        try
-                        {
-                            var ok = await _salesApiClient.ConfirmSalesOrderAsync(order.Id);
-                            if (ok) successBag.Add(true);
-                        }
-                        catch (Exception ex)
-                        {
-                            errorBag.Add($"{order.OrderNumber}: {ex.Message}");
-                        }
-                    });
-                }
+                        System.Diagnostics.Debug.WriteLine($"Error procesando pedido {order.OrderNumber}: {ex.Message}");
+                        errorBag.Add($"{order.OrderNumber}: {ex.Message}");
+                    }
+                });
 
                 int successCount = successBag.Count;
                 int errorCount = errorBag.Count;

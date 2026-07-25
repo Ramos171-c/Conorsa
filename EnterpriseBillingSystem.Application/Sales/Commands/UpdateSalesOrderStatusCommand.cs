@@ -104,16 +104,14 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                     inventory.ReservedStock = 0;
                     inventory.CommittedStock = 0;
                 }
-                decimal availableStockInBaseUnit = inventory?.PhysicalStock ?? 0;
-                if (availableStockInBaseUnit < 0) availableStockInBaseUnit = 0;
-
                 decimal requestedInBaseUnit = detail.Quantity * conversionFactor;
                 decimal dispatchedInBaseUnit = requestedInBaseUnit;
                 decimal dispatchedQty = detail.Quantity;
 
-                if (availableStockInBaseUnit < requestedInBaseUnit)
+                // Only adjust downwards if physical stock is explicitly tracked and lower than requested
+                if (inventory != null && inventory.PhysicalStock > 0 && inventory.PhysicalStock < requestedInBaseUnit)
                 {
-                    dispatchedInBaseUnit = availableStockInBaseUnit;
+                    dispatchedInBaseUnit = inventory.PhysicalStock;
                     dispatchedQty = conversionFactor > 0 ? (dispatchedInBaseUnit / conversionFactor) : 0;
                     decimal missingQty = detail.Quantity - dispatchedQty;
 
