@@ -89,17 +89,30 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                     continue;
 
                 // Find corresponding presentation
-                decimal conversionFactor = 1.0000m;
-                Guid? presentationId = null;
-
                 var presentation = product.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == detail.UnitOfMeasureId)
                     ?? product.Presentations?.FirstOrDefault();
 
-                if (presentation != null)
+                if (presentation == null)
                 {
-                    conversionFactor = presentation.ConversionFactor > 0 ? presentation.ConversionFactor : 1.0000m;
-                    presentationId = presentation.Id;
+                    presentation = new ProductPresentation
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = product.Id,
+                        Name = product.Name,
+                        UnitOfMeasureId = detail.UnitOfMeasureId,
+                        ConversionFactor = 1.0000m,
+                        Cost = product.CurrentCost,
+                        RetailPrice = detail.UnitPrice,
+                        IsBaseUnit = true,
+                        IsDefaultSalePresentation = true,
+                        IsActive = true
+                    };
+                    if (product.Presentations == null) product.Presentations = new List<ProductPresentation>();
+                    product.Presentations.Add(presentation);
                 }
+
+                decimal conversionFactor = presentation.ConversionFactor > 0 ? presentation.ConversionFactor : 1.0000m;
+                Guid presentationId = presentation.Id;
 
                 // Get inventory record
                 var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
@@ -177,7 +190,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                             ProductId = detail.ProductId,
                             Quantity = dispatchedQty,
                             UnitOfMeasureId = detail.UnitOfMeasureId,
-                            ProductPresentationId = presentationId ?? Guid.Empty,
+                            ProductPresentationId = presentationId,
                             ConversionFactor = conversionFactor,
                             QuantityInBaseUnit = dispatchedInBaseUnit,
                             CreatedBy = _currentUserService.UserId ?? "System",
