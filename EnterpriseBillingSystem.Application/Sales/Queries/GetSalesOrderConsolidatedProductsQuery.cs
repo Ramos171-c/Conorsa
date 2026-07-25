@@ -91,8 +91,12 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
 
             var unitCost = presentation != null ? presentation.Cost : (sampleDetail.Product?.CurrentCost ?? 0m);
 
-            // Obtener existencias disponibles restantes en unidades base
-            remainingBaseStock.TryGetValue(g.Key.ProductId, out decimal baseStockAvailable);
+            // Obtener existencias disponibles restantes en la bodega única
+            if (!remainingBaseStock.TryGetValue(g.Key.ProductId, out decimal baseStockAvailable))
+            {
+                // Si no hay registro previo de inventario en la bodega única, asumimos disponibilidad total del producto
+                baseStockAvailable = totalQuantity * conversionFactor;
+            }
 
             // Convertir stock disponible de unidades base a la presentación actual
             var availableInPresUnits = baseStockAvailable / conversionFactor;
