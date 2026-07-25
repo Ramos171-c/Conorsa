@@ -50,8 +50,10 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         // Deduct from inventory when transitioning to "EnCamino"
         if (request.Status == SalesOrderStatus.EnCamino && order.Status != SalesOrderStatus.EnCamino)
         {
-            var warehouse = (await _branchWarehouseRepository.FindAsync(bw => bw.IsDefault && bw.IsActive)).FirstOrDefault()
-                ?? (await _branchWarehouseRepository.FindAsync(bw => bw.IsActive)).FirstOrDefault();
+            var allActive = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
+            var warehouse = allActive.FirstOrDefault(bw => bw.Warehouse != null && bw.Warehouse.Name.Contains("Exhibici", StringComparison.OrdinalIgnoreCase))
+                ?? allActive.FirstOrDefault(bw => bw.IsDefault)
+                ?? allActive.FirstOrDefault();
 
             if (warehouse == null)
                 throw new InvalidOperationException("No hay bodegas activas configuradas en el sistema para realizar el despacho.");
@@ -252,7 +254,11 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
             foreach (var entry in ex.Entries)
             {
                 var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken);
-                if (databaseValues != null)
+                if (databaseValues == null)
+                {
+                    entry.State = Microsoft.EntityFrameworkCore.EntityState.Detached;
+                }
+                else
                 {
                     entry.OriginalValues.SetValues(databaseValues);
                 }
