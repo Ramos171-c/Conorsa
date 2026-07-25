@@ -333,4 +333,77 @@ public static class ExcelExportService
 
         workbook.SaveAs(filePath);
     }
+
+    public static void ExportRouteLiquidationToExcel(string routeName, IEnumerable<object> items, string filePath, string observations = "")
+    {
+        using var workbook = new XLWorkbook();
+        var ws = workbook.Worksheets.Add("Liquidacion de Ruta");
+        ws.ShowGridLines = true;
+
+        var titleRange = ws.Range("A1:H2");
+        titleRange.Merge();
+        titleRange.Value = $"CONSORSA - LIQUIDACIÓN Y DEVOLUCIÓN DE RUTA: {routeName.ToUpper()}";
+        titleRange.Style.Font.SetBold(true);
+        titleRange.Style.Font.SetFontSize(15);
+        titleRange.Style.Font.SetFontColor(XLColor.White);
+        titleRange.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#6A1B9A"));
+        titleRange.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+        titleRange.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
+
+        var subtitleRange = ws.Range("A3:H3");
+        subtitleRange.Merge();
+        subtitleRange.Value = $"Fecha de Emisión: {DateTime.Now:dd/MM/yyyy HH:mm} | Estado: Borrador de Liquidación";
+        subtitleRange.Style.Font.SetFontSize(10);
+        subtitleRange.Style.Font.SetFontColor(XLColor.FromHtml("#E1BEE7"));
+        subtitleRange.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#4A148C"));
+        subtitleRange.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+        int headerRow = 5;
+        string[] headers = new[]
+        {
+            "Código",
+            "Producto",
+            "Presentación / U.M.",
+            "Cant. Enviada",
+            "Cant. Retornada",
+            "Cant. Vendida",
+            "Precio Venta (C$)",
+            "Total Venta (C$)"
+        };
+
+        for (int i = 0; i < headers.Length; i++)
+        {
+            var cell = ws.Cell(headerRow, i + 1);
+            cell.Value = headers[i];
+            cell.Style.Font.SetBold(true);
+            cell.Style.Font.SetFontColor(XLColor.White);
+            cell.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#4A148C"));
+            cell.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+        }
+
+        int currentRow = 6;
+        var itemList = items.ToList();
+        foreach (dynamic item in itemList)
+        {
+            ws.Cell(currentRow, 1).Value = item.ProductCode;
+            ws.Cell(currentRow, 2).Value = item.ProductName;
+            ws.Cell(currentRow, 3).Value = item.SelectedPresentation?.Name ?? "UND";
+            ws.Cell(currentRow, 4).Value = item.QuantitySent;
+            ws.Cell(currentRow, 5).Value = item.QuantityReturned;
+            ws.Cell(currentRow, 6).Value = item.QuantitySold;
+            ws.Cell(currentRow, 7).Value = item.SalePrice;
+            ws.Cell(currentRow, 8).Value = item.SubtotalSold;
+
+            ws.Cell(currentRow, 4).Style.NumberFormat.Format = "#,##0.00";
+            ws.Cell(currentRow, 5).Style.NumberFormat.Format = "#,##0.00";
+            ws.Cell(currentRow, 6).Style.NumberFormat.Format = "#,##0.00";
+            ws.Cell(currentRow, 7).Style.NumberFormat.Format = "C$ #,##0.00";
+            ws.Cell(currentRow, 8).Style.NumberFormat.Format = "C$ #,##0.00";
+
+            currentRow++;
+        }
+
+        ws.Columns().AdjustToContents();
+        workbook.SaveAs(filePath);
+    }
 }

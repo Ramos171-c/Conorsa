@@ -136,11 +136,11 @@
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
 
-                    <!-- Subtotal Vendido -->
-                    <DataGridTemplateColumn Header="Subtotal Vendido" Width="130">
+                    <!-- Total Venta -->
+                    <DataGridTemplateColumn Header="Total Venta (C$)" Width="140">
                         <DataGridTemplateColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding SubtotalSold, StringFormat='{}C$ {0:N2}'}" FontWeight="Bold" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                <TextBlock Text="{Binding SubtotalSold, StringFormat='{}C$ {0:N2}'}" FontWeight="Bold" Foreground="#1B5E20" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
                             </DataTemplate>
                         </DataGridTemplateColumn.CellTemplate>
                     </DataGridTemplateColumn>
@@ -157,6 +157,9 @@
         <StackPanel Grid.Row="4" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button Style="{StaticResource MaterialDesignOutlinedButton}" Content="Cancelar" 
                     Command="{x:Static materialDesign:DialogHost.CloseDialogCommand}" Margin="0,0,12,0" Width="120" />
+
+            <Button Style="{StaticResource MaterialDesignOutlinedButton}" Content="Exportar Borrador Excel" 
+                    Command="{Binding ExportExcelCommand}" Margin="0,0,12,0" Width="200" Foreground="#2E7D32" BorderBrush="#2E7D32" />
 
             <Button Style="{StaticResource MaterialDesignRaisedButton}" Content="Confirmar Liquidación" 
                     Command="{Binding ConfirmLiquidationCommand}" Width="200" Background="#8E24AA" BorderBrush="#8E24AA" />

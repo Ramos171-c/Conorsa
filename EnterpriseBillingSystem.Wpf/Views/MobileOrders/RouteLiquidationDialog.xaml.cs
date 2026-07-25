@@ -110,6 +110,8 @@ public partial class RouteLiquidationDialogItem : ObservableObject
         QuantitySold = Math.Max(0, QuantitySent - QuantityReturned);
         SubtotalSold = QuantitySold * SalePrice;
         SubtotalReturned = QuantityReturned * SalePrice;
+        OnPropertyChanged(nameof(SubtotalSold));
+        OnPropertyChanged(nameof(SubtotalReturned));
     }
 }
 
@@ -182,6 +184,30 @@ public partial class RouteLiquidationDialogViewModel : ObservableObject
         OnPropertyChanged(nameof(TotalReturned));
         OnPropertyChanged(nameof(TotalSold));
         OnPropertyChanged(nameof(TotalAmountSold));
+    }
+
+    [RelayCommand]
+    private void ExportExcel()
+    {
+        try
+        {
+            var dialog = new Microsoft.Win32.SaveFileDialog
+            {
+                Filter = "Archivos de Excel (*.xlsx)|*.xlsx",
+                FileName = $"Borrador_Liquidacion_{RouteName.Replace(" ", "_")}_{DateTime.Now:yyyyMMdd_HHmm}.xlsx",
+                Title = "Guardar Borrador de Liquidación en Excel"
+            };
+
+            if (dialog.ShowDialog() == true)
+            {
+                Services.Export.ExcelExportService.ExportRouteLiquidationToExcel(RouteName, Items, dialog.FileName, Observations);
+                System.Windows.MessageBox.Show("Borrador de liquidación exportado exitosamente a Excel.", "Exportación Exitosa", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Information);
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Windows.MessageBox.Show($"Error al exportar borrador a Excel: {ex.Message}", "Error de Exportación", System.Windows.MessageBoxButton.OK, System.Windows.MessageBoxImage.Error);
+        }
     }
 
     [RelayCommand]
