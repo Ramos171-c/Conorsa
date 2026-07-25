@@ -57,6 +57,7 @@ public static class DependencyInjection
         services.AddScoped<IWarehouseRepository, WarehouseRepository>();
         services.AddScoped<IInventoryRepository, InventoryRepository>();
         services.AddScoped<IInventoryMovementRepository, InventoryMovementRepository>();
+        services.AddScoped<IRouteLiquidationRepository, RouteLiquidationRepository>();
 
         // Registrar Repositorios Personalizados (Módulo Clientes)
         services.AddScoped<ICustomerCategoryRepository, CustomerCategoryRepository>();

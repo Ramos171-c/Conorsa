@@ -604,6 +604,16 @@
                                     <TextBlock Text="Convalidar y Despachar Pedidos" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
+
+                            <Button Command="{Binding OpenRouteLiquidationDialogCommand}" 
+                                    IsEnabled="{Binding CanOpenRouteLiquidation}"
+                                    Style="{StaticResource MaterialDesignRaisedButton}" 
+                                    Background="#8E24AA" BorderBrush="#8E24AA" Margin="12,0,0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="TruckCheck" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Liquidación / Devolución Masiva" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </Grid>

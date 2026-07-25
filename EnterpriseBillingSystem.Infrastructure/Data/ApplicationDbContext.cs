@@ -39,6 +39,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<InventoryMovement> InventoryMovements => Set<InventoryMovement>();
     public DbSet<InventoryMovementDetail> InventoryMovementDetails => Set<InventoryMovementDetail>();
     public DbSet<InventoryReservation> InventoryReservations => Set<InventoryReservation>();
+    public DbSet<RouteLiquidation> RouteLiquidations => Set<RouteLiquidation>();
+    public DbSet<RouteLiquidationDetail> RouteLiquidationDetails => Set<RouteLiquidationDetail>();
     
     // Módulo Clientes
     public DbSet<CustomerCategory> CustomerCategories => Set<CustomerCategory>();

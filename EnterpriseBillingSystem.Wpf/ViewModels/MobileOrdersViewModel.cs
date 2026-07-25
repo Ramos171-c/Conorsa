@@ -59,6 +59,7 @@ public partial class MobileOrdersViewModel : ViewModelBase
     public string PageDisplay => $"Página {PageNumber} de {(TotalPages > 0 ? TotalPages : 1)} (Total: {TotalCount} pedidos)";
 
     public bool CanDispatchConsolidated => SelectedStatus == "Recibido" && ConsolidatedProducts.Count > 0;
+    public bool CanOpenRouteLiquidation => SelectedRoute != null && SelectedRoute.Id != Guid.Empty && ConsolidatedProducts.Count > 0;
 
     public int TotalConsolidatedItemsCount => ConsolidatedProducts.Count;
     public decimal TotalConsolidatedQuantity => ConsolidatedProducts.Sum(p => p.TotalQuantity);
@@ -765,6 +766,66 @@ public partial class MobileOrdersViewModel : ViewModelBase
         finally
         {
             IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenRouteLiquidationDialogAsync()
+    {
+        if (SelectedRoute == null || SelectedRoute.Id == Guid.Empty)
+        {
+            _notificationService.ShowWarning("Seleccione una ruta específica para realizar la liquidación de ruta.");
+            return;
+        }
+
+        if (!ConsolidatedProducts.Any())
+        {
+            _notificationService.ShowWarning("No hay productos consolidados en la ruta seleccionada para liquidar.");
+            return;
+        }
+
+        var consolidatedDtos = ConsolidatedProducts.Select(p => new ConsolidatedProductDto(
+            ProductId: p.ProductId,
+            ProductCode: p.ProductCode,
+            ProductName: p.ProductName,
+            UnitOfMeasure: p.UnitOfMeasure,
+            TotalQuantity: p.TotalQuantity,
+            AvailableStock: p.AvailableStock,
+            DeductedFromInventory: p.DeductedFromInventory,
+            NetQuantityToOrder: p.NetQuantityToOrder,
+            UnitCost: 0,
+            UnitPrice: p.TotalQuantity > 0 ? p.TotalNetAmount / p.TotalQuantity : 0,
+            GrossPurchaseCost: 0,
+            GrossSalesAmount: p.TotalNetAmount,
+            InventoryDeductedPurchaseCost: 0,
+            InventoryDeductedSalesAmount: p.TotalNetAmount,
+            TotalPurchaseCost: 0,
+            NetSalesAmount: p.TotalNetAmount,
+            ProfitMarginAmount: 0,
+            ProfitMarginPercentage: 0,
+            TotalNetAmount: p.TotalNetAmount,
+            TotalCost: 0,
+            Observation: p.Observation
+        )).ToList();
+
+        var dialogViewModel = new Views.MobileOrders.RouteLiquidationDialogViewModel(
+            SelectedRoute.Id,
+            SelectedRoute.Name,
+            consolidatedDtos,
+            _salesApiClient,
+            (confirmed) => { }
+        );
+
+        var dialog = new Views.MobileOrders.RouteLiquidationDialog
+        {
+            DataContext = dialogViewModel
+        };
+
+        var result = await MaterialDesignThemes.Wpf.DialogHost.Show(dialog);
+        if (result is true)
+        {
+            _notificationService.ShowSuccess($"Liquidación y devolución masiva de la ruta '{SelectedRoute.Name}' completada exitosamente.");
+            await LoadOrdersAsync();
         }
     }
 

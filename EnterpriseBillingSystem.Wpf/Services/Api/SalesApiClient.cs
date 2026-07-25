@@ -196,4 +196,48 @@ public class SalesApiClient
         }
         return true;
     }
+
+    public async Task<Guid> CreateRouteLiquidationAsync(object command)
+    {
+        var response = await _httpClient.PostAsJsonAsync("route-liquidations", command);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            string errorMessage = "Error al procesar la liquidación de ruta.";
+            try
+            {
+                using var jsonDoc = System.Text.Json.JsonDocument.Parse(errorContent);
+                if (jsonDoc.RootElement.TryGetProperty("message", out var msgProp))
+                {
+                    errorMessage = msgProp.GetString() ?? errorMessage;
+                }
+            }
+            catch {}
+            throw new Exception(errorMessage);
+        }
+        using var resultDoc = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        return resultDoc.RootElement.GetProperty("id").GetGuid();
+    }
+
+    public async Task<PagedResult<RouteLiquidationListItemDto>?> GetRouteLiquidationsPagedAsync(
+        int pageNumber,
+        int pageSize,
+        DateTime? fromDate = null,
+        DateTime? toDate = null,
+        Guid? routeId = null,
+        string? status = null)
+    {
+        var url = $"route-liquidations?pageNumber={pageNumber}&pageSize={pageSize}";
+        if (fromDate.HasValue) url += $"&fromDate={fromDate.Value:yyyy-MM-ddTHH:mm:ss}";
+        if (toDate.HasValue) url += $"&toDate={toDate.Value:yyyy-MM-ddTHH:mm:ss}";
+        if (routeId.HasValue && routeId.Value != Guid.Empty) url += $"&routeId={routeId.Value}";
+        if (!string.IsNullOrWhiteSpace(status)) url += $"&status={Uri.EscapeDataString(status)}";
+
+        return await _httpClient.GetFromJsonAsync<PagedResult<RouteLiquidationListItemDto>>(url);
+    }
+
+    public async Task<RouteLiquidationFullDto?> GetRouteLiquidationByIdAsync(Guid id)
+    {
+        return await _httpClient.GetFromJsonAsync<RouteLiquidationFullDto>($"route-liquidations/{id}");
+    }
 }
