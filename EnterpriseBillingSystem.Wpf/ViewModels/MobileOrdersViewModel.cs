@@ -665,7 +665,18 @@ public partial class MobileOrdersViewModel : ViewModelBase
                             string.Equals(p.InternalCode, prodName, StringComparison.OrdinalIgnoreCase) ||
                             (!string.IsNullOrEmpty(p.Description) && string.Equals(p.Description, prodName, StringComparison.OrdinalIgnoreCase)) ||
                             p.Name.Contains(prodName, StringComparison.OrdinalIgnoreCase) ||
-                            prodName.Contains(p.Name, StringComparison.OrdinalIgnoreCase));
+                            prodName.Contains(p.Name, StringComparison.OrdinalIgnoreCase) ||
+                            (!string.IsNullOrEmpty(p.Description) && p.Description.Contains(prodName, StringComparison.OrdinalIgnoreCase)));
+
+                        if (prod == null)
+                        {
+                            var words = prodName.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+                            if (words.Length > 0)
+                            {
+                                prod = productList.OrderByDescending(p => words.Count(w => p.Name.Contains(w, StringComparison.OrdinalIgnoreCase) || (!string.IsNullOrEmpty(p.Description) && p.Description.Contains(w, StringComparison.OrdinalIgnoreCase))))
+                                                  .FirstOrDefault(p => words.Any(w => p.Name.Contains(w, StringComparison.OrdinalIgnoreCase)));
+                            }
+                        }
 
                         if (prod != null)
                         {

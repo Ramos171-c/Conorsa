@@ -87,14 +87,18 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                     continue;
 
                 // Find corresponding presentation
-                var presentation = product.Presentations.FirstOrDefault(p => p.UnitOfMeasureId == detail.UnitOfMeasureId)
-                    ?? product.Presentations.FirstOrDefault();
+                decimal conversionFactor = 1.0000m;
+                Guid? presentationId = null;
 
-                if (presentation == null)
-                    throw new InvalidOperationException($"El producto '{product.Name}' no tiene presentaciones configuradas.");
+                var presentation = product.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == detail.UnitOfMeasureId)
+                    ?? product.Presentations?.FirstOrDefault();
 
-                decimal conversionFactor = presentation.ConversionFactor;
-                
+                if (presentation != null)
+                {
+                    conversionFactor = presentation.ConversionFactor > 0 ? presentation.ConversionFactor : 1.0000m;
+                    presentationId = presentation.Id;
+                }
+
                 // Get inventory record
                 var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
                 if (inventory != null && inventory.IsDeleted)
@@ -171,7 +175,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                             ProductId = detail.ProductId,
                             Quantity = dispatchedQty,
                             UnitOfMeasureId = detail.UnitOfMeasureId,
-                            ProductPresentationId = presentation.Id,
+                            ProductPresentationId = presentationId ?? Guid.Empty,
                             ConversionFactor = conversionFactor,
                             QuantityInBaseUnit = dispatchedInBaseUnit,
                             CreatedBy = _currentUserService.UserId ?? "System",
