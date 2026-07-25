@@ -225,8 +225,13 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 order.TaxAmount = order.Details.Sum(d => d.TaxAmount);
                 order.TotalAmount = order.Details.Sum(d => d.NetAmount);
 
-                var faltantesText = "\n[Faltantes]:\n" + string.Join("\n", faltantesList);
-                order.Notes = (order.Notes ?? "") + faltantesText;
+                var faltantesText = "\n[Faltantes]: " + string.Join("; ", faltantesList);
+                string newNotes = (order.Notes ?? "") + faltantesText;
+                if (newNotes.Length > 490)
+                {
+                    newNotes = newNotes.Substring(0, 487) + "...";
+                }
+                order.Notes = newNotes;
             }
         }
 

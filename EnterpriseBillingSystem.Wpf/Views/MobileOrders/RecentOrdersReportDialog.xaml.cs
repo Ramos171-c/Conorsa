@@ -362,11 +362,15 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                                     string updatedNotes = fullOrder.Notes ?? string.Empty;
                                     if (missingLogs.Any())
                                     {
-                                        string logStr = "[AJUSTE AUTOMÁTICO EN BODEGA]: " + string.Join("; ", missingLogs);
-                                        if (!updatedNotes.Contains("[AJUSTE AUTOMÁTICO EN BODEGA]:"))
+                                        string logStr = "[AJUSTE BODEGA]: " + string.Join("; ", missingLogs);
+                                        if (!updatedNotes.Contains("[AJUSTE BODEGA]:"))
                                         {
                                             updatedNotes = (string.IsNullOrWhiteSpace(updatedNotes) ? "" : updatedNotes + "\n") + logStr;
                                         }
+                                    }
+                                    if (updatedNotes.Length > 490)
+                                    {
+                                        updatedNotes = updatedNotes.Substring(0, 487) + "...";
                                     }
 
                                     var updateCmd = new UpdateSalesOrderCommandDto(
