@@ -60,6 +60,10 @@ public partial class MobileOrdersViewModel : ViewModelBase
 
     public bool CanDispatchConsolidated => SelectedStatus == "Recibido" && ConsolidatedProducts.Count > 0;
 
+    public int TotalConsolidatedItemsCount => ConsolidatedProducts.Count;
+    public decimal TotalConsolidatedQuantity => ConsolidatedProducts.Sum(p => p.TotalQuantity);
+    public decimal TotalConsolidatedAmount => ConsolidatedProducts.Sum(p => p.TotalNetAmount);
+
     public MobileOrdersViewModel(SalesApiClient salesApiClient, CustomerApiClient customerApiClient, INotificationService notificationService)
     {
         _salesApiClient = salesApiClient;
@@ -150,6 +154,9 @@ public partial class MobileOrdersViewModel : ViewModelBase
             OnPropertyChanged(nameof(HasPreviousPage));
             OnPropertyChanged(nameof(HasNextPage));
             OnPropertyChanged(nameof(CanDispatchConsolidated));
+            OnPropertyChanged(nameof(TotalConsolidatedItemsCount));
+            OnPropertyChanged(nameof(TotalConsolidatedQuantity));
+            OnPropertyChanged(nameof(TotalConsolidatedAmount));
         }
         catch (Exception ex)
         {
