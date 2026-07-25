@@ -306,7 +306,8 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                     return;
                 }
 
-                var resultsBag = new System.Collections.Concurrent.ConcurrentBag<bool>();
+                var successBag = new System.Collections.Concurrent.ConcurrentBag<bool>();
+                var errorBag = new System.Collections.Concurrent.ConcurrentBag<string>();
                 int targetStatusValue = isDispatchMode ? 5 : 4; // 5 = EnCamino, 4 = EnProceso
 
                 await Parallel.ForEachAsync(result.Items, new ParallelOptions { MaxDegreeOfParallelism = 5 }, async (order, ct) =>
@@ -314,23 +315,31 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                     try
                     {
                         var ok = await _salesApiClient.UpdateSalesOrderStatusAsync(order.Id, targetStatusValue);
-                        resultsBag.Add(ok);
+                        if (ok) successBag.Add(true);
                     }
                     catch (Exception ex)
                     {
                         System.Diagnostics.Debug.WriteLine($"Error cambiando estado de pedido {order.OrderNumber}: {ex.Message}");
-                        resultsBag.Add(false);
+                        errorBag.Add($"{order.OrderNumber}: {ex.Message}");
                     }
                 });
 
-                int successCount = resultsBag.Count(x => x);
-                int errorCount = resultsBag.Count(x => !x);
+                int successCount = successBag.Count;
+                int errorCount = errorBag.Count;
 
-                string messageText = isDispatchMode
-                    ? $"Despacho completado. {successCount} pedidos pasaron a estado 'En Camino'."
-                    : $"Procesamiento completado. {successCount} pedidos pasaron a estado 'En Proceso'.";
+                if (errorCount > 0 && successCount == 0)
+                {
+                    string firstError = errorBag.FirstOrDefault() ?? "Error desconocido";
+                    _notificationService.ShowError($"No se pudo procesar el despacho ({errorCount} errores).\nDetalle: {firstError}");
+                }
+                else
+                {
+                    string messageText = isDispatchMode
+                        ? $"Despacho completado. {successCount} pedidos pasaron a estado 'En Camino'."
+                        : $"Procesamiento completado. {successCount} pedidos pasaron a estado 'En Proceso'.";
 
-                _notificationService.ShowSuccess(messageText + (errorCount > 0 ? $" ({errorCount} errores)." : ""));
+                    _notificationService.ShowSuccess(messageText + (errorCount > 0 ? $" ({errorCount} errores)." : ""));
+                }
 
                 await LoadReportAsync();
                 DialogResult = true;

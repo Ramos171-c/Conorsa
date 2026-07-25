@@ -73,8 +73,8 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
             };
 
             bool requiresMovement = false;
-
             var faltantesList = new List<string>();
+            var detailsToRemove = new List<SalesOrderDetail>();
 
             foreach (var detail in order.Details)
             {
@@ -122,58 +122,66 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                         string uomLabel = detail.UnitOfMeasure != null ? detail.UnitOfMeasure.Name : "U/E";
                         faltantesList.Add($"- {product.Name}: Faltó {missingQty:N2} {uomLabel} (Solicitado: {detail.Quantity:N2}, Despachado: {dispatchedQty:N2})");
                     }
-
-                    // Update order detail line quantities and amounts
-                    detail.Quantity = Math.Round(dispatchedQty, 4);
-                    detail.DiscountAmount = Math.Round((detail.Quantity * detail.UnitPrice) * (detail.DiscountPercentage / 100m), 4);
-                    
-                    decimal lineSubtotal = (detail.Quantity * detail.UnitPrice) - detail.DiscountAmount;
-                    detail.TaxAmount = Math.Round(lineSubtotal * (detail.TaxPercentage / 100m), 4);
-                    detail.NetAmount = Math.Round(lineSubtotal + detail.TaxAmount, 4);
                 }
 
                 dispatchedInBaseUnit = Math.Round(dispatchedInBaseUnit, 4);
                 dispatchedQty = Math.Round(dispatchedQty, 4);
 
-                if (dispatchedInBaseUnit > 0.0000m && dispatchedQty > 0.0000m)
+                if (dispatchedQty <= 0.0000m)
                 {
-                    if (inventory == null)
+                    // Remove detail line completely to prevent DB CHECK constraint CK_SalesOrderDetail_Quantity violation
+                    detailsToRemove.Add(detail);
+                }
+                else
+                {
+                    // Update order detail line quantities and amounts (Quantity > 0)
+                    detail.Quantity = dispatchedQty;
+                    detail.DiscountAmount = Math.Round((detail.Quantity * detail.UnitPrice) * (detail.DiscountPercentage / 100m), 4);
+                    
+                    decimal lineSubtotal = (detail.Quantity * detail.UnitPrice) - detail.DiscountAmount;
+                    detail.TaxAmount = Math.Round(lineSubtotal * (detail.TaxPercentage / 100m), 4);
+                    detail.NetAmount = Math.Round(lineSubtotal + detail.TaxAmount, 4);
+
+                    if (dispatchedInBaseUnit > 0.0000m)
                     {
-                        inventory = new Domain.Entities.Inventory
+                        if (inventory == null)
+                        {
+                            inventory = new Domain.Entities.Inventory
+                            {
+                                Id = Guid.NewGuid(),
+                                BranchWarehouseId = warehouse.Id,
+                                ProductId = detail.ProductId,
+                                PhysicalStock = 0,
+                                ReservedStock = 0,
+                                CommittedStock = 0,
+                                CreatedBy = _currentUserService.UserId ?? "System",
+                                CreatedOnUtc = DateTime.UtcNow
+                            };
+                            await _inventoryRepository.AddAsync(inventory);
+                        }
+
+                        // Deduct from stock
+                        inventory.PhysicalStock -= dispatchedInBaseUnit;
+                        _inventoryRepository.Update(inventory);
+
+                        // Add Kardex movement detail
+                        movement.Details.Add(new InventoryMovementDetail
                         {
                             Id = Guid.NewGuid(),
-                            BranchWarehouseId = warehouse.Id,
+                            InventoryMovementId = movement.Id,
+                            BranchId = warehouse.BranchId,
                             ProductId = detail.ProductId,
-                            PhysicalStock = 0,
-                            ReservedStock = 0,
-                            CommittedStock = 0,
+                            Quantity = dispatchedQty,
+                            UnitOfMeasureId = detail.UnitOfMeasureId,
+                            ProductPresentationId = presentation.Id,
+                            ConversionFactor = conversionFactor,
+                            QuantityInBaseUnit = dispatchedInBaseUnit,
                             CreatedBy = _currentUserService.UserId ?? "System",
                             CreatedOnUtc = DateTime.UtcNow
-                        };
-                        await _inventoryRepository.AddAsync(inventory);
+                        });
+
+                        requiresMovement = true;
                     }
-
-                    // Deduct from stock
-                    inventory.PhysicalStock -= dispatchedInBaseUnit;
-                    _inventoryRepository.Update(inventory);
-
-                    // Add Kardex movement detail
-                    movement.Details.Add(new InventoryMovementDetail
-                    {
-                        Id = Guid.NewGuid(),
-                        InventoryMovementId = movement.Id,
-                        BranchId = warehouse.BranchId,
-                        ProductId = detail.ProductId,
-                        Quantity = dispatchedQty,
-                        UnitOfMeasureId = detail.UnitOfMeasureId,
-                        ProductPresentationId = presentation.Id,
-                        ConversionFactor = conversionFactor,
-                        QuantityInBaseUnit = dispatchedInBaseUnit,
-                        CreatedBy = _currentUserService.UserId ?? "System",
-                        CreatedOnUtc = DateTime.UtcNow
-                    });
-
-                    requiresMovement = true;
                 }
 
                 // AutoMarkSoldOut check
@@ -198,13 +206,19 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 }
             }
 
+            // Remove zero-quantity detail lines from order
+            foreach (var d in detailsToRemove)
+            {
+                order.Details.Remove(d);
+            }
+
             if (requiresMovement)
             {
                 await _movementRepository.AddAsync(movement);
             }
 
-            // If there were missing items, update totals and append notes
-            if (faltantesList.Any())
+            // If there were missing items or details removed, update totals and append notes
+            if (faltantesList.Any() || detailsToRemove.Any())
             {
                 order.SubTotal = order.Details.Sum(d => d.Quantity * d.UnitPrice);
                 order.DiscountAmount = order.Details.Sum(d => d.DiscountAmount);
