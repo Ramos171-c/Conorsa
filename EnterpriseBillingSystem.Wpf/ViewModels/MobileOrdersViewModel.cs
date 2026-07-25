@@ -655,14 +655,17 @@ public partial class MobileOrdersViewModel : ViewModelBase
 
                 foreach (System.Text.RegularExpressions.Match match in matches)
                 {
-                    string prodName = match.Groups[1].Value.Trim();
+                    string prodName = match.Groups[1].Value.Trim().TrimStart('-').Trim();
                     string qtyStr = match.Groups[2].Value.Trim().Replace(",", "");
 
                     if (decimal.TryParse(qtyStr, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out decimal qty) && qty > 0)
                     {
                         var prod = productList.FirstOrDefault(p =>
-                            p.Name.Equals(prodName, StringComparison.OrdinalIgnoreCase) ||
-                            (!string.IsNullOrEmpty(p.Description) && p.Description.Equals(prodName, StringComparison.OrdinalIgnoreCase)));
+                            string.Equals(p.Name, prodName, StringComparison.OrdinalIgnoreCase) ||
+                            string.Equals(p.InternalCode, prodName, StringComparison.OrdinalIgnoreCase) ||
+                            (!string.IsNullOrEmpty(p.Description) && string.Equals(p.Description, prodName, StringComparison.OrdinalIgnoreCase)) ||
+                            p.Name.Contains(prodName, StringComparison.OrdinalIgnoreCase) ||
+                            prodName.Contains(p.Name, StringComparison.OrdinalIgnoreCase));
 
                         if (prod != null)
                         {

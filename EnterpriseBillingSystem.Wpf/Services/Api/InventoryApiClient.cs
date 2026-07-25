@@ -19,7 +19,12 @@ public class InventoryApiClient
     public async Task<List<WarehouseDto>> GetWarehousesAsync()
     {
         var response = await _httpClient.GetFromJsonAsync<List<WarehouseDto>>("Inventory/warehouses");
-        return response ?? new List<WarehouseDto>();
+        if (response == null || !response.Any()) return new List<WarehouseDto>();
+
+        // Modo Bodega Única: Retornar exclusivamente la bodega principal activa
+        var defaultWh = response.FirstOrDefault(w => w.IsActive) ?? response.FirstOrDefault();
+
+        return defaultWh != null ? new List<WarehouseDto> { defaultWh } : new List<WarehouseDto>();
     }
 
     public async Task<Guid> ReceiveItemAsync(object command)
