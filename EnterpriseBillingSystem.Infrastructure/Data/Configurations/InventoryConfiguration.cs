@@ -40,7 +40,8 @@ public class InventoryConfiguration : IEntityTypeConfiguration<Inventory>
             .OnDelete(DeleteBehavior.Restrict);
 
         // Concurrencia Optimista (RowVersion)
-        builder.Property(i => i.RowVersion);
+        builder.Property(i => i.RowVersion)
+            .ValueGeneratedOnAddOrUpdate();
 
         // Índice Único por Bodega y Producto
         builder.HasIndex(i => new { i.BranchWarehouseId, i.ProductId })
