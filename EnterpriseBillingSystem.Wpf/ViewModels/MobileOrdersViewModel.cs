@@ -702,22 +702,13 @@ public partial class MobileOrdersViewModel : ViewModelBase
                         CustomerId: fullOrder.CustomerId,
                         OrderDate: fullOrder.OrderDate,
                         Notes: cleanedNotes,
-                        Details: restoredDetails
+                        Details: restoredDetails,
+                        Status: 4
                     );
 
                     var updated = await _salesApiClient.UpdateSalesOrderAsync(fullOrder.Id, updateCmd);
                     if (updated)
                     {
-                        await Task.Delay(150);
-                        try
-                        {
-                            await _salesApiClient.UpdateSalesOrderStatusAsync(fullOrder.Id, 4);
-                        }
-                        catch
-                        {
-                            await Task.Delay(300);
-                            await _salesApiClient.UpdateSalesOrderStatusAsync(fullOrder.Id, 4);
-                        }
                         recoveredCount++;
                     }
                 }

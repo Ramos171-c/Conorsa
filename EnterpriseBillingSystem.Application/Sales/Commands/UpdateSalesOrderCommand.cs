@@ -18,7 +18,8 @@ public record UpdateSalesOrderCommand(
     Guid CustomerId,
     DateTime OrderDate,
     string? Notes,
-    List<SalesOrderDetailRequest> Details
+    List<SalesOrderDetailRequest> Details,
+    SalesOrderStatus? Status = null
 ) : IRequest<Unit>;
 
 // ─── Validator ────────────────────────────────────────────────────────────────
@@ -180,6 +181,10 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         order.TaxAmount = totalTax;
         order.TotalAmount = totalAmount;
         order.Notes = request.Notes;
+        if (request.Status.HasValue)
+        {
+            order.Status = request.Status.Value;
+        }
 
         order.LastModifiedBy = "System";
         order.LastModifiedOnUtc = DateTime.UtcNow;

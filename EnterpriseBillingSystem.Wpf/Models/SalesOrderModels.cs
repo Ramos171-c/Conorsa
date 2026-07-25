@@ -163,5 +163,6 @@ public record UpdateSalesOrderCommandDto(
     Guid CustomerId,
     DateTime OrderDate,
     string? Notes,
-    List<SalesOrderDetailRequestDto> Details
+    List<SalesOrderDetailRequestDto> Details,
+    int? Status = null
 );
