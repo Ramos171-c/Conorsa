@@ -312,6 +312,16 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task OpenRouteConsolidationEnCaminoAsync()
+    {
+        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _customerApiClient, _notificationService, "EnCamino")
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+        dialog.ShowDialog();
+    }
+
+    [RelayCommand]
     private async Task BatchPrintDeliveryTicketsAsync()
     {
         IsLoading = true;

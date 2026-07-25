@@ -28,17 +28,23 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
         public ObservableCollection<RouteDto> Routes { get; } = new();
 
-        public string DialogTitle => _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
-            ? "Consolidado de Carga para Despacho (En Proceso ➔ En Camino)"
-            : "Consolidación de Pedidos para Compra (Recibido ➔ En Proceso)";
+        public string DialogTitle => _targetStatus.Equals("EnCamino", StringComparison.OrdinalIgnoreCase)
+            ? "Consolidado de Carga por Ruta (Pedidos En Camino)"
+            : _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
+                ? "Consolidado de Carga para Despacho (En Proceso ➔ En Camino)"
+                : "Consolidación de Pedidos para Compra (Recibido ➔ En Proceso)";
 
-        public string ConfirmButtonText => _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
-            ? "🚚 Confirmar Despacho (Pasar a En Camino)"
-            : "Confirmar Resumen (Pasar a En Proceso)";
+        public string ConfirmButtonText => _targetStatus.Equals("EnCamino", StringComparison.OrdinalIgnoreCase)
+            ? "🖨️ Imprimir Hoja de Carga de Ruta"
+            : _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
+                ? "🚚 Confirmar Despacho (Pasar a En Camino)"
+                : "Confirmar Resumen (Pasar a En Proceso)";
 
-        public string ConfirmButtonBackground => _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
-            ? "#0284C7"
-            : "#2563EB";
+        public string ConfirmButtonBackground => _targetStatus.Equals("EnCamino", StringComparison.OrdinalIgnoreCase)
+            ? "#059669"
+            : _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase)
+                ? "#0284C7"
+                : "#2563EB";
 
         public DateTime? FromDate
         {
@@ -270,6 +276,14 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         {
             if (ConsolidatedProducts.Count == 0) return;
 
+            if (_targetStatus.Equals("EnCamino", StringComparison.OrdinalIgnoreCase))
+            {
+                PrintConsolidatedLoadSheet();
+                DialogResult = true;
+                Close();
+                return;
+            }
+
             bool isDispatchMode = _targetStatus.Equals("EnProceso", StringComparison.OrdinalIgnoreCase);
 
             string actionMsg = isDispatchMode
@@ -354,6 +368,64 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             finally
             {
                 IsLoading = false;
+            }
+        }
+
+        private void PrintConsolidatedLoadSheet()
+        {
+            try
+            {
+                var printDialog = new System.Windows.Controls.PrintDialog();
+                if (printDialog.ShowDialog() != true) return;
+
+                string routeName = SelectedRoute != null && SelectedRoute.Id != Guid.Empty ? SelectedRoute.Name : "Todas las Rutas";
+
+                var flowDoc = new System.Windows.Documents.FlowDocument
+                {
+                    PagePadding = new System.Windows.Thickness(30),
+                    ColumnWidth = double.PositiveInfinity,
+                    FontFamily = new System.Windows.Media.FontFamily("Courier New"),
+                    FontSize = 12,
+                    TextAlignment = System.Windows.TextAlignment.Left
+                };
+
+                var sb = new System.Text.StringBuilder();
+                sb.AppendLine("==================================================================");
+                sb.AppendLine("                 CONSOLIDADO DE CARGA POR RUTA");
+                sb.AppendLine("                     ESTADO: EN CAMINO");
+                sb.AppendLine("==================================================================");
+                sb.AppendLine($"Ruta:            {routeName}");
+                sb.AppendLine($"Fecha Impresión: {DateTime.Now:dd/MM/yyyy HH:mm}");
+                sb.AppendLine($"Total Productos: {ConsolidatedProducts.Count}");
+                sb.AppendLine("==================================================================");
+                sb.AppendLine(string.Format("{0,-12} {1,-32} {2,-8} {3,10}", "CÓDIGO", "PRODUCTO", "U.M.", "CANTIDAD"));
+                sb.AppendLine("------------------------------------------------------------------");
+
+                foreach (var item in ConsolidatedProducts)
+                {
+                    string code = (item.ProductCode ?? "").Length > 12 ? item.ProductCode.Substring(0, 12) : item.ProductCode;
+                    string name = (item.ProductName ?? "").Length > 32 ? item.ProductName.Substring(0, 32) : item.ProductName;
+                    string uom = (item.UnitOfMeasure ?? "").Length > 8 ? item.UnitOfMeasure.Substring(0, 8) : item.UnitOfMeasure;
+
+                    sb.AppendLine(string.Format("{0,-12} {1,-32} {2,-8} {3,10:N2}", code, name, uom, item.TotalQuantity));
+                }
+
+                sb.AppendLine("==================================================================");
+                sb.AppendLine("\n\n");
+                sb.AppendLine("_______________________                  _______________________");
+                sb.AppendLine(" Firma Despachador                       Firma Conductor / Chofer");
+
+                var p = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(sb.ToString()));
+                flowDoc.Blocks.Add(p);
+
+                var paginator = ((System.Windows.Documents.IDocumentPaginatorSource)flowDoc).DocumentPaginator;
+                printDialog.PrintDocument(paginator, $"Consolidado_Carga_Ruta_{routeName}");
+
+                _notificationService.ShowSuccess($"Hoja de Consolidado de Carga enviada a la impresora para ruta '{routeName}'.");
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError($"Error al imprimir consolidado de carga: {ex.Message}");
             }
         }
 

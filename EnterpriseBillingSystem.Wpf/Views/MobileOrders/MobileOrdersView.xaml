@@ -64,6 +64,18 @@
                     </StackPanel>
                 </Button>
 
+                <!-- Botón 4: Consolidado de Carga por Ruta (En Camino) -->
+                <Button Command="{Binding OpenRouteConsolidationEnCaminoCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="#0284C7" BorderBrush="#0284C7" 
+                        Margin="0,0,12,0"
+                        Visibility="{Binding IsEnCaminoSelected, Converter={StaticResource BoolToVis}}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="TruckDelivery" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="🚚 Consolidado de Carga por Ruta (En Camino)" VerticalAlignment="Center" FontWeight="Bold" />
+                    </StackPanel>
+                </Button>
+
                 <Button Command="{Binding RecoverZeroedOrdersCommand}" 
                         Style="{StaticResource MaterialDesignRaisedButton}" 
                         Background="#D97706" BorderBrush="#D97706" 
