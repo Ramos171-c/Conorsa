@@ -103,6 +103,25 @@ public class SalesApiClient
         return response ?? new List<ConsolidatedProductDto>();
     }
 
+    public async Task<int> CleanupEnCaminoZeroStockOrdersAsync()
+    {
+        try
+        {
+            var response = await _httpClient.PostAsync("sales-orders/cleanup-encamino", null);
+            if (response.IsSuccessStatusCode)
+            {
+                var countStr = await response.Content.ReadAsStringAsync();
+                int.TryParse(countStr, out int count);
+                return count;
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Cleanup error: {ex.Message}");
+        }
+        return 0;
+    }
+
     public async Task<bool> UpdateSalesOrderStatusAsync(Guid id, int statusValue)
     {
         var response = await _httpClient.PutAsJsonAsync($"sales-orders/{id}/status", statusValue);

@@ -189,4 +189,14 @@ public class SalesOrdersController : ApiControllerBase
         var result = await Mediator.Send(new GetSalesOrderConsolidatedProductsQuery(customerId, status, fromDate, toDate, routeId));
         return Ok(result);
     }
+    /// <summary>
+    /// Limpiar productos sin existencias en pedidos En Camino.
+    /// </summary>
+    [HttpPost("cleanup-encamino")]
+    [HasPermission("sales.edit")]
+    public async Task<ActionResult<int>> CleanupEnCaminoOrders()
+    {
+        var count = await Mediator.Send(new CleanupZeroStockEnCaminoOrdersCommand());
+        return Ok(count);
+    }
 }

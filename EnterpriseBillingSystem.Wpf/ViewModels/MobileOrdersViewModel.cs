@@ -327,6 +327,9 @@ public partial class MobileOrdersViewModel : ViewModelBase
         IsLoading = true;
         try
         {
+            // 1. Execute database cleanup of any zero stock items on EnCamino orders
+            await _salesApiClient.CleanupEnCaminoZeroStockOrdersAsync();
+
             Guid? routeFilter = (SelectedRoute == null || SelectedRoute.Id == Guid.Empty) ? null : SelectedRoute.Id;
             
             // Get all orders in status EnCamino (status filter = "EnCamino")
@@ -361,6 +364,9 @@ public partial class MobileOrdersViewModel : ViewModelBase
             {
                 var fullOrder = await _salesApiClient.GetSalesOrderByIdAsync(itemHeader.Id);
                 if (fullOrder == null || fullOrder.Details == null || !fullOrder.Details.Any()) continue;
+
+                var validDetails = fullOrder.Details.Where(d => d.Quantity > 0).ToList();
+                if (!validDetails.Any()) continue;
 
                 CustomerDto? customer = null;
                 try
@@ -411,32 +417,44 @@ public partial class MobileOrdersViewModel : ViewModelBase
                 custPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
                 sec.Blocks.Add(custPara);
 
-                // Order Lines
+                // Order Lines (Only items with Quantity > 0)
+                decimal orderSubtotal = 0;
+                decimal orderDiscount = 0;
+                decimal orderTax = 0;
+
                 var itemsPara = new System.Windows.Documents.Paragraph();
                 itemsPara.Inlines.Add(new System.Windows.Documents.Run("PRODUCTOS CARGADOS A ENTREGAR\n"));
                 itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n"));
                 
-                foreach (var detail in fullOrder.Details)
+                foreach (var detail in validDetails)
                 {
-                    if (detail.Quantity <= 0) continue;
+                    decimal lineDiscount = detail.DiscountAmount;
+                    decimal lineTax = detail.TaxAmount;
+                    decimal lineNet = detail.NetAmount;
+
+                    orderSubtotal += detail.Quantity * detail.UnitPrice;
+                    orderDiscount += lineDiscount;
+                    orderTax += lineTax;
+
                     itemsPara.Inlines.Add(new System.Windows.Documents.Run($"{detail.ProductName}\n"));
                     string qtyUom = $"{detail.Quantity:N2} {detail.UnitOfMeasure}";
-                    string net = $"C${detail.NetAmount:N2}";
+                    string net = $"C${lineNet:N2}";
                     itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   {qtyUom.PadRight(22)} {net.PadLeft(14)}\n"));
                 }
                 itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n"));
                 sec.Blocks.Add(itemsPara);
 
                 // Totals
+                decimal orderTotal = orderSubtotal - orderDiscount + orderTax;
                 var totalsPara = new System.Windows.Documents.Paragraph { TextAlignment = System.Windows.TextAlignment.Right };
-                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Subtotal:     C${fullOrder.SubTotal:N2}\n"));
-                if (fullOrder.DiscountAmount > 0)
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Subtotal:     C${orderSubtotal:N2}\n"));
+                if (orderDiscount > 0)
                 {
-                    totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Descuento:   -C${fullOrder.DiscountAmount:N2}\n"));
+                    totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Descuento:   -C${orderDiscount:N2}\n"));
                 }
-                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL:        C${fullOrder.TotalAmount:N2}\n"));
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL:        C${orderTotal:N2}\n"));
                 
-                decimal totalUsd = fullOrder.TotalAmount / 36.5m;
+                decimal totalUsd = orderTotal / 36.5m;
                 totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL USD:     ${totalUsd:N2}\n"));
                 totalsPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
                 sec.Blocks.Add(totalsPara);
