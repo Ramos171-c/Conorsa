@@ -109,17 +109,17 @@ public class SalesApiClient
         if (!response.IsSuccessStatusCode)
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            string errorMessage = "Error en el servidor al actualizar el estado.";
+            string errorMessage = $"Error {(int)response.StatusCode}: {errorContent}";
             try
             {
                 using var jsonDoc = System.Text.Json.JsonDocument.Parse(errorContent);
-                if (jsonDoc.RootElement.TryGetProperty("detail", out var detailProp))
+                if (jsonDoc.RootElement.TryGetProperty("detail", out var detailProp) && !string.IsNullOrWhiteSpace(detailProp.GetString()))
                 {
-                    errorMessage = detailProp.GetString() ?? errorMessage;
+                    errorMessage = detailProp.GetString()!;
                 }
-                else if (jsonDoc.RootElement.TryGetProperty("message", out var msgProp))
+                else if (jsonDoc.RootElement.TryGetProperty("message", out var msgProp) && !string.IsNullOrWhiteSpace(msgProp.GetString()))
                 {
-                    errorMessage = msgProp.GetString() ?? errorMessage;
+                    errorMessage = msgProp.GetString()!;
                 }
             }
             catch {}
@@ -159,17 +159,17 @@ public class SalesApiClient
         if (!response.IsSuccessStatusCode)
         {
             var errorContent = await response.Content.ReadAsStringAsync();
-            string errorMessage = "Error en el servidor al actualizar el pedido.";
+            string errorMessage = $"Error {(int)response.StatusCode}: {errorContent}";
             try
             {
                 using var jsonDoc = System.Text.Json.JsonDocument.Parse(errorContent);
-                if (jsonDoc.RootElement.TryGetProperty("detail", out var detailProp))
+                if (jsonDoc.RootElement.TryGetProperty("detail", out var detailProp) && !string.IsNullOrWhiteSpace(detailProp.GetString()))
                 {
-                    errorMessage = detailProp.GetString() ?? errorMessage;
+                    errorMessage = detailProp.GetString()!;
                 }
-                else if (jsonDoc.RootElement.TryGetProperty("message", out var msgProp))
+                else if (jsonDoc.RootElement.TryGetProperty("message", out var msgProp) && !string.IsNullOrWhiteSpace(msgProp.GetString()))
                 {
-                    errorMessage = msgProp.GetString() ?? errorMessage;
+                    errorMessage = msgProp.GetString()!;
                 }
             }
             catch {}
