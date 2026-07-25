@@ -38,9 +38,7 @@ public class SalesOrderConfiguration : IEntityTypeConfiguration<SalesOrder>
             .HasMaxLength(500);
 
         // Concurrencia optimista
-        builder.Property(so => so.RowVersion)
-            .IsRowVersion()
-            .IsConcurrencyToken();
+        builder.Property(so => so.RowVersion);
 
         // Índice único por número de pedido
         builder.HasIndex(so => so.OrderNumber)
