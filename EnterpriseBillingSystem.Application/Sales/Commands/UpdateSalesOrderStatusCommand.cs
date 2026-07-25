@@ -20,6 +20,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
     private readonly IInventoryMovementRepository _movementRepository;
     private readonly IProductRepository _productRepository;
     private readonly IRepository<BranchWarehouse> _branchWarehouseRepository;
+    private readonly IWarehouseRepository _warehouseRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -29,6 +30,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         IInventoryMovementRepository movementRepository,
         IProductRepository productRepository,
         IRepository<BranchWarehouse> branchWarehouseRepository,
+        IWarehouseRepository warehouseRepository,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
@@ -37,6 +39,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         _movementRepository = movementRepository;
         _productRepository = productRepository;
         _branchWarehouseRepository = branchWarehouseRepository;
+        _warehouseRepository = warehouseRepository;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }
@@ -50,10 +53,22 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         // Deduct from inventory when transitioning to "EnCamino"
         if (request.Status == SalesOrderStatus.EnCamino && order.Status != SalesOrderStatus.EnCamino)
         {
-            var allActive = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
-            var warehouse = allActive.FirstOrDefault(bw => bw.Warehouse != null && bw.Warehouse.Name.Contains("Exhibici", StringComparison.OrdinalIgnoreCase))
-                ?? allActive.FirstOrDefault(bw => bw.IsDefault)
-                ?? allActive.FirstOrDefault();
+            // Explicitly search for "Bodega Exhibición" by querying Warehouse table
+            BranchWarehouse? warehouse = null;
+            var targetWarehouses = await _warehouseRepository.FindAsync(w => w.Name.Contains("Exhibici"));
+            var targetWarehouse = targetWarehouses.FirstOrDefault();
+
+            if (targetWarehouse != null)
+            {
+                var bws = await _branchWarehouseRepository.FindAsync(bw => bw.WarehouseId == targetWarehouse.Id && bw.IsActive);
+                warehouse = bws.FirstOrDefault();
+            }
+
+            if (warehouse == null)
+            {
+                var allActive = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
+                warehouse = allActive.FirstOrDefault(bw => bw.IsDefault) ?? allActive.FirstOrDefault();
+            }
 
             if (warehouse == null)
                 throw new InvalidOperationException("No hay bodegas activas configuradas en el sistema para realizar el despacho.");
@@ -75,14 +90,13 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
             };
 
             bool requiresMovement = false;
-            var faltantesList = new List<string>();
             var detailsToRemove = new List<SalesOrderDetail>();
 
             foreach (var detail in order.Details)
             {
                 var product = await _productRepository.GetByIdWithDetailsAsync(detail.ProductId, cancellationToken);
                 if (product == null)
-                    throw new ArgumentException($"El producto con Id '{detail.ProductId}' no existe.");
+                    continue;
 
                 // If service or inventory tracking disabled, skip
                 if (product.ProductType == ProductType.Service || !product.TrackInventory)
@@ -114,44 +128,29 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 decimal conversionFactor = presentation.ConversionFactor > 0 ? presentation.ConversionFactor : 1.0000m;
                 Guid presentationId = presentation.Id;
 
-                // Get inventory record
+                // Get inventory record in Bodega Exhibición
                 var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
-                if (inventory != null && inventory.IsDeleted)
+
+                // If no stock or zero stock in Bodega Exhibición, remove line from order
+                if (inventory == null || inventory.PhysicalStock <= 0.0000m)
                 {
-                    inventory.IsDeleted = false;
-                    inventory.PhysicalStock = 0;
-                    inventory.ReservedStock = 0;
-                    inventory.CommittedStock = 0;
+                    detailsToRemove.Add(detail);
+                    continue;
                 }
+
                 decimal requestedInBaseUnit = detail.Quantity * conversionFactor;
-                decimal dispatchedInBaseUnit = requestedInBaseUnit;
-                decimal dispatchedQty = detail.Quantity;
-
-                // Only adjust downwards if physical stock is explicitly tracked and lower than requested
-                if (inventory != null && inventory.PhysicalStock > 0 && inventory.PhysicalStock < requestedInBaseUnit)
-                {
-                    dispatchedInBaseUnit = inventory.PhysicalStock;
-                    dispatchedQty = conversionFactor > 0 ? (dispatchedInBaseUnit / conversionFactor) : 0;
-                    decimal missingQty = detail.Quantity - dispatchedQty;
-
-                    if (missingQty > 0)
-                    {
-                        string uomLabel = detail.UnitOfMeasure != null ? detail.UnitOfMeasure.Name : "U/E";
-                        faltantesList.Add($"- {product.Name}: Faltó {missingQty:N2} {uomLabel} (Solicitado: {detail.Quantity:N2}, Despachado: {dispatchedQty:N2})");
-                    }
-                }
+                decimal dispatchedInBaseUnit = Math.Min(requestedInBaseUnit, inventory.PhysicalStock);
+                decimal dispatchedQty = conversionFactor > 0 ? Math.Min(detail.Quantity, dispatchedInBaseUnit / conversionFactor) : 0;
 
                 dispatchedInBaseUnit = Math.Round(dispatchedInBaseUnit, 4);
                 dispatchedQty = Math.Round(dispatchedQty, 4);
 
                 if (dispatchedQty <= 0.0000m)
                 {
-                    // Remove detail line completely to prevent DB CHECK constraint CK_SalesOrderDetail_Quantity violation
                     detailsToRemove.Add(detail);
                 }
                 else
                 {
-                    // Update order detail line quantities and amounts (Quantity > 0)
                     detail.Quantity = dispatchedQty;
                     detail.DiscountAmount = Math.Round((detail.Quantity * detail.UnitPrice) * (detail.DiscountPercentage / 100m), 4);
                     
@@ -161,27 +160,9 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
 
                     if (dispatchedInBaseUnit > 0.0000m)
                     {
-                        if (inventory == null)
-                        {
-                            inventory = new Domain.Entities.Inventory
-                            {
-                                Id = Guid.NewGuid(),
-                                BranchWarehouseId = warehouse.Id,
-                                ProductId = detail.ProductId,
-                                PhysicalStock = 0,
-                                ReservedStock = 0,
-                                CommittedStock = 0,
-                                CreatedBy = _currentUserService.UserId ?? "System",
-                                CreatedOnUtc = DateTime.UtcNow
-                            };
-                            await _inventoryRepository.AddAsync(inventory);
-                        }
-
-                        // Deduct from stock
                         inventory.PhysicalStock -= dispatchedInBaseUnit;
                         _inventoryRepository.Update(inventory);
 
-                        // Add Kardex movement detail
                         movement.Details.Add(new InventoryMovementDetail
                         {
                             Id = Guid.NewGuid(),
@@ -200,30 +181,9 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                         requiresMovement = true;
                     }
                 }
-
-                // AutoMarkSoldOut check
-                if (product.AutoMarkSoldOut)
-                {
-                    var activeWarehouses = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
-                    var activeWarehouseIds = activeWarehouses.Select(w => w.Id).ToList();
-                    var inventories = await _inventoryRepository.FindAsync(i => i.ProductId == product.Id);
-                    
-                    var totalPhysicalStock = inventories
-                        .Where(i => activeWarehouseIds.Contains(i.BranchWarehouseId))
-                        .Sum(i => i.PhysicalStock);
-
-                    var newIsSoldOut = totalPhysicalStock <= 0;
-                    if (product.IsSoldOut != newIsSoldOut)
-                    {
-                        product.IsSoldOut = newIsSoldOut;
-                        product.SoldOutAt = newIsSoldOut ? DateTime.UtcNow : null;
-                        product.SoldOutBy = newIsSoldOut ? (_currentUserService.UserId ?? "System") : null;
-                        _productRepository.Update(product);
-                    }
-                }
             }
 
-            // Remove zero-quantity detail lines from order
+            // Remove zero-quantity or missing detail lines from order
             foreach (var d in detailsToRemove)
             {
                 order.Details.Remove(d);
@@ -234,22 +194,10 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 await _movementRepository.AddAsync(movement);
             }
 
-            // If there were missing items or details removed, update totals and append notes
-            if (faltantesList.Any() || detailsToRemove.Any())
-            {
-                order.SubTotal = order.Details.Sum(d => d.Quantity * d.UnitPrice);
-                order.DiscountAmount = order.Details.Sum(d => d.DiscountAmount);
-                order.TaxAmount = order.Details.Sum(d => d.TaxAmount);
-                order.TotalAmount = order.Details.Sum(d => d.NetAmount);
-
-                var faltantesText = "\n[Faltantes]: " + string.Join("; ", faltantesList);
-                string newNotes = (order.Notes ?? "") + faltantesText;
-                if (newNotes.Length > 490)
-                {
-                    newNotes = newNotes.Substring(0, 487) + "...";
-                }
-                order.Notes = newNotes;
-            }
+            order.SubTotal = order.Details.Sum(d => d.Quantity * d.UnitPrice);
+            order.DiscountAmount = order.Details.Sum(d => d.DiscountAmount);
+            order.TaxAmount = order.Details.Sum(d => d.TaxAmount);
+            order.TotalAmount = order.Details.Sum(d => d.NetAmount);
         }
 
         order.Status = request.Status;
