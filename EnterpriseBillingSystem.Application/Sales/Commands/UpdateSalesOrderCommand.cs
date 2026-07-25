@@ -200,8 +200,6 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
                 var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken);
                 if (databaseValues == null)
                 {
-                    // La fila ya fue eliminada de la base de datos (por ejemplo, por borrado en cascada),
-                    // por lo que la desvinculamos del contexto para que EF Core no falle intentando borrarla de nuevo.
                     entry.State = Microsoft.EntityFrameworkCore.EntityState.Detached;
                 }
                 else
@@ -209,7 +207,28 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
                     entry.OriginalValues.SetValues(databaseValues);
                 }
             }
-            await _unitOfWork.SaveChangesAsync(cancellationToken);
+            try
+            {
+                await _unitOfWork.SaveChangesAsync(cancellationToken);
+            }
+            catch
+            {
+                var freshOrder = await _salesOrderRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken);
+                if (freshOrder != null)
+                {
+                    freshOrder.SubTotal = subTotal;
+                    freshOrder.DiscountAmount = totalDiscount;
+                    freshOrder.TaxAmount = totalTax;
+                    freshOrder.TotalAmount = totalAmount;
+                    freshOrder.Notes = request.Notes;
+                    if (request.Status.HasValue) freshOrder.Status = request.Status.Value;
+
+                    freshOrder.LastModifiedBy = "System";
+                    freshOrder.LastModifiedOnUtc = DateTime.UtcNow;
+
+                    await _unitOfWork.SaveChangesAsync(cancellationToken);
+                }
+            }
         }
 
         return Unit.Value;
