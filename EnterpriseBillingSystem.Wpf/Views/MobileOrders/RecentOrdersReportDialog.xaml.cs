@@ -388,10 +388,10 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
                 var flowDoc = new System.Windows.Documents.FlowDocument
                 {
-                    PagePadding = new System.Windows.Thickness(30),
+                    PagePadding = new System.Windows.Thickness(10),
                     ColumnWidth = double.PositiveInfinity,
                     FontFamily = new System.Windows.Media.FontFamily("Courier New"),
-                    FontSize = 12,
+                    FontSize = 11,
                     TextAlignment = System.Windows.TextAlignment.Left
                 };
 
@@ -417,7 +417,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 }
 
                 sb.AppendLine("==================================================================");
-                sb.AppendLine("\n\n");
+                sb.AppendLine("\n");
                 sb.AppendLine("_______________________                  _______________________");
                 sb.AppendLine(" Firma Despachador                       Firma Conductor / Chofer");
 

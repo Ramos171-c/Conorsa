@@ -353,10 +353,10 @@ public partial class MobileOrdersViewModel : ViewModelBase
 
             var flowDoc = new System.Windows.Documents.FlowDocument
             {
-                PagePadding = new System.Windows.Thickness(30),
+                PagePadding = new System.Windows.Thickness(5, 5, 5, 5),
                 ColumnWidth = double.PositiveInfinity,
                 FontFamily = new System.Windows.Media.FontFamily("Courier New"),
-                FontSize = 12,
+                FontSize = 11,
                 TextAlignment = System.Windows.TextAlignment.Left
             };
 
