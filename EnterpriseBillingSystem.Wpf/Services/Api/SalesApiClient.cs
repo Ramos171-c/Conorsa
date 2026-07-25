@@ -40,7 +40,8 @@ public class SalesApiClient
         }
         if (toDate.HasValue)
         {
-            url += $"&toDate={toDate.Value:yyyy-MM-ddTHH:mm:ss}";
+            var endOfDay = toDate.Value.TimeOfDay == TimeSpan.Zero ? toDate.Value.Date.AddDays(1).AddTicks(-1) : toDate.Value;
+            url += $"&toDate={endOfDay:yyyy-MM-ddTHH:mm:ss}";
         }
         if (routeId.HasValue)
         {
@@ -89,7 +90,8 @@ public class SalesApiClient
         }
         if (toDate.HasValue)
         {
-            url += $"toDate={toDate.Value:yyyy-MM-ddTHH:mm:ss}&";
+            var endOfDay = toDate.Value.TimeOfDay == TimeSpan.Zero ? toDate.Value.Date.AddDays(1).AddTicks(-1) : toDate.Value;
+            url += $"toDate={endOfDay:yyyy-MM-ddTHH:mm:ss}&";
         }
         if (routeId.HasValue)
         {

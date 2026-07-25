@@ -101,7 +101,10 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
             query = query.Where(so => so.OrderDate >= fromDate.Value);
 
         if (toDate.HasValue)
-            query = query.Where(so => so.OrderDate <= toDate.Value);
+        {
+            var endOfDay = toDate.Value.TimeOfDay == TimeSpan.Zero ? toDate.Value.Date.AddDays(1).AddTicks(-1) : toDate.Value;
+            query = query.Where(so => so.OrderDate <= endOfDay);
+        }
 
         int totalCount = await query.CountAsync(cancellationToken);
 
@@ -154,7 +157,10 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
             query = query.Where(so => so.OrderDate >= fromDate.Value);
 
         if (toDate.HasValue)
-            query = query.Where(so => so.OrderDate <= toDate.Value);
+        {
+            var endOfDay = toDate.Value.TimeOfDay == TimeSpan.Zero ? toDate.Value.Date.AddDays(1).AddTicks(-1) : toDate.Value;
+            query = query.Where(so => so.OrderDate <= endOfDay);
+        }
 
         return await query.ToListAsync(cancellationToken);
     }
