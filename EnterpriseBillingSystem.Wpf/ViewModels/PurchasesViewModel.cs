@@ -173,6 +173,37 @@ public partial class PurchasesViewModel : ViewModelBase
         await LoadReceiptsAsync();
     }
 
+    [RelayCommand]
+    private async Task ViewReceiptDetailAsync(PurchaseReceiptListItemDto? receipt)
+    {
+        if (receipt == null) return;
+
+        IsLoading = true;
+        try
+        {
+            var detailDto = await _purchaseApiClient.GetPurchaseReceiptByIdAsync(receipt.Id);
+            if (detailDto == null)
+            {
+                _notificationService.ShowError("No se pudo obtener el detalle de la recepción seleccionada.");
+                return;
+            }
+
+            var dialog = new Views.Purchases.PurchaseReceiptDetailDialog(detailDto)
+            {
+                Owner = System.Windows.Application.Current.MainWindow
+            };
+            dialog.ShowDialog();
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al obtener el detalle: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
     partial void OnSelectedSupplierIdChanged(Guid? value)
     {
         PageNumber = 1;

@@ -70,15 +70,20 @@
                              VerticalAlignment="Top" Height="4" Panel.ZIndex="10" />
 
                 <DataGrid ItemsSource="{Binding Receipts}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
+                    <DataGrid.InputBindings>
+                        <MouseBinding MouseAction="LeftDoubleClick" 
+                                      Command="{Binding ViewReceiptDetailCommand}" 
+                                      CommandParameter="{Binding SelectedItem, RelativeSource={RelativeSource AncestorType=DataGrid}}" />
+                    </DataGrid.InputBindings>
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Nro. Recepción" Binding="{Binding ReceiptNumber}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" FontWeight="Bold" />
                         <DataGridTextColumn Header="Proveedor" Binding="{Binding SupplierName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Bodega Destino" Binding="{Binding WarehouseName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="Fecha Ingreso" Binding="{Binding ReceiptDate, StringFormat={}{0:dd/MM/yyyy}}" Width="140" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Fecha Ingreso" Binding="{Binding ReceiptDate, StringFormat={}{0:dd/MM/yyyy HH:mm}}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Doc. Referencia" Binding="{Binding ReferenceDocument}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         
                         <!-- Status Badge -->
-                        <DataGridTemplateColumn Header="Estado" Width="120">
+                        <DataGridTemplateColumn Header="Estado" Width="110">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border CornerRadius="4" Padding="6,2" HorizontalAlignment="Center">
@@ -111,6 +116,19 @@
                                             </TextBlock.Style>
                                         </TextBlock>
                                     </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
+                        <!-- Acciones Column -->
+                        <DataGridTemplateColumn Header="Acciones" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.ViewReceiptDetailCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
+                                            CommandParameter="{Binding}" 
+                                            ToolTip="Ver detalle de la compra" 
+                                            Style="{StaticResource MaterialDesignOutlinedButton}" 
+                                            Height="28" Padding="8,0" Content="Ver Detalle" FontSize="11" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

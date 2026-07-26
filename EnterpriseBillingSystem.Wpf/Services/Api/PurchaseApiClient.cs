@@ -62,6 +62,11 @@ public class PurchaseApiClient
         return await _httpClient.GetFromJsonAsync<PagedResult<PurchaseOrderListItemDto>>(url);
     }
 
+    public async Task<PurchaseReceiptDetailDto?> GetPurchaseReceiptByIdAsync(Guid id)
+    {
+        return await _httpClient.GetFromJsonAsync<PurchaseReceiptDetailDto>($"purchase-receipts/{id}");
+    }
+
     public async Task<PurchaseOrderDetailDto?> GetPurchaseOrderByIdAsync(Guid id)
     {
         return await _httpClient.GetFromJsonAsync<PurchaseOrderDetailDto>($"purchase-orders/{id}");
