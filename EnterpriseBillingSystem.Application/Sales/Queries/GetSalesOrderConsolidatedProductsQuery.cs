@@ -203,7 +203,7 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
                 PurchaseUnitName: purchaseUnitName,
                 UnitsPerCase: boxFactor,
                 SuggestedBoxesToOrder: suggestedBoxes,
-                SuggestedTotalUnitsToOrder: netToOrderInBoxes, // Requeridas en Cajas exactas
+                SuggestedTotalUnitsToOrder: suggestedTotalUnits, // Total Unidades a recibir por cajas completas
                 BoxCost: boxCost,
                 SuggestedPurchaseCost: suggestedPurchaseCost,
                 SellerObservations: sellerObs
