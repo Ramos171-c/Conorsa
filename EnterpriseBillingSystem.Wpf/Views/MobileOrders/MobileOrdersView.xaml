@@ -87,17 +87,6 @@
                     </StackPanel>
                 </Button>
 
-                <Button Command="{Binding ResetInventoryAndOrdersCommand}" 
-                        Style="{StaticResource MaterialDesignRaisedButton}" 
-                        Background="#DC2626" BorderBrush="#DC2626" 
-                        Margin="0,0,12,0"
-                        ToolTip="Resetear existencias a 0, borrar pedidos del 18 de Julio hacia atras y mover recientes a Recibido">
-                    <StackPanel Orientation="Horizontal">
-                        <materialDesign:PackIcon Kind="DatabaseRefresh" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
-                        <TextBlock Text="⚙️ Depurar Inventario y Pedidos" VerticalAlignment="Center" FontWeight="Bold" />
-                    </StackPanel>
-                </Button>
-
                 <Button Command="{Binding RefreshCommand}" Style="{StaticResource MaterialDesignFlatButton}">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
