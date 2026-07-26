@@ -89,57 +89,68 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
 
         foreach (var g in detailsGrouped)
         {
-            var totalQuantity = g.Sum(x => x.Quantity);
-            var grossSalesAmount = g.Sum(x => x.NetAmount);
-            var unitPrice = totalQuantity > 0 ? grossSalesAmount / totalQuantity : 0m;
-
             var sampleDetail = g.First();
-            var presentation = sampleDetail.Product?.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == sampleDetail.UnitOfMeasureId);
-            var conversionFactor = presentation?.ConversionFactor ?? 1.0000m;
-            if (conversionFactor <= 0) conversionFactor = 1.0000m;
 
-            var unitCost = presentation != null ? presentation.Cost : (sampleDetail.Product?.CurrentCost ?? 0m);
+            // 1. Identificar la presentación en CAJA/Empaque del proveedor para este producto
+            var boxPresentation = sampleDetail.Product?.Presentations?.FirstOrDefault(p => p.ConversionFactor > 1 || string.Equals(p.UnitOfMeasure?.Code, "CAJA", StringComparison.OrdinalIgnoreCase));
+            decimal boxFactor = boxPresentation?.ConversionFactor ?? 1.0000m;
+            if (boxFactor <= 0) boxFactor = 1.0000m;
 
-            // Obtener existencias disponibles restantes en la bodega única
+            string purchaseUnitName = boxPresentation?.UnitOfMeasure?.Code ?? (boxPresentation?.Name ?? (string.IsNullOrWhiteSpace(g.Key.Uom) ? "Caja" : g.Key.Uom));
+            if (string.IsNullOrWhiteSpace(purchaseUnitName)) purchaseUnitName = "Caja";
+
+            // 2. Calcular la Cantidad Total Pedida convertida exactamente a UNIDADES BASE
+            decimal totalQuantityBaseUnits = g.Sum(x =>
+            {
+                var pFactor = x.Product?.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == x.UnitOfMeasureId)?.ConversionFactor ?? 1.0000m;
+                if (pFactor <= 0) pFactor = 1.0000m;
+                return x.Quantity * pFactor;
+            });
+
+            var grossSalesAmount = g.Sum(x => x.NetAmount);
+            var unitPrice = totalQuantityBaseUnits > 0 ? grossSalesAmount / totalQuantityBaseUnits : 0m;
+            var unitCost = boxPresentation?.Cost > 0 ? (boxPresentation.Cost / boxFactor) : (sampleDetail.Product?.CurrentCost ?? 0m);
+
+            // 3. Obtener existencias disponibles en unidades base en la bodega
             if (!remainingBaseStock.TryGetValue(g.Key.ProductId, out decimal baseStockAvailable))
             {
                 baseStockAvailable = 0m;
             }
 
-            // Convertir stock disponible de unidades base a la presentación actual
-            var availableInPresUnits = Math.Max(0m, baseStockAvailable / conversionFactor);
+            // 4. Deducir del inventario existente en unidades base
+            var deductedBaseUnits = Math.Min(totalQuantityBaseUnits, baseStockAvailable);
+            var netToOrderBaseUnits = Math.Max(0m, totalQuantityBaseUnits - deductedBaseUnits);
 
-            // Deducir del inventario existente real en unidades de presentación
-            var deducted = Math.Min(totalQuantity, availableInPresUnits);
-            var netToOrder = Math.Max(0m, totalQuantity - deducted);
+            // Actualizar stock restante del producto
+            remainingBaseStock[g.Key.ProductId] = Math.Max(0m, baseStockAvailable - deductedBaseUnits);
 
-            // Descontar del fondo global de stock del producto en unidades base
-            var deductedBase = deducted * conversionFactor;
-            remainingBaseStock[g.Key.ProductId] = Math.Max(0m, baseStockAvailable - deductedBase);
+            // 5. CÁLCULO EXACTO DEL PEDIDO EN CAJAS AL PROVEEDOR (Redondeo Superior CEILING sobre Unidades Faltantes)
+            // Ejemplo 1: 22 unidades faltantes / 4 por caja = CEILING(5.5) = 6 CAJAS
+            // Ejemplo 2: 113.04 unidades faltantes / 24 por caja = CEILING(4.71) = 5 CAJAS
+            int suggestedBoxes = netToOrderBaseUnits > 0 ? (int)Math.Ceiling((double)(netToOrderBaseUnits / boxFactor)) : 0;
+            decimal suggestedTotalUnits = suggestedBoxes * boxFactor;
+            decimal boxCost = unitCost * boxFactor;
+            decimal suggestedPurchaseCost = suggestedBoxes * boxCost;
 
-            // 1. Totales Brutos Solicitados por Pedidos
-            var grossPurchaseCost = totalQuantity * unitCost;
+            // Cantidades para mostrar en la fila del consolidado en la UOM solicitada
+            var sampleFactor = sampleDetail.Product?.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == sampleDetail.UnitOfMeasureId)?.ConversionFactor ?? 1.0000m;
+            if (sampleFactor <= 0) sampleFactor = 1.0000m;
 
-            // 2. Valores Cubiertos por Inventario Existente
-            var inventoryDeductedPurchaseCost = deducted * unitCost;
-            var inventoryDeductedSalesAmount = deducted * unitPrice;
+            var displayTotalQty = totalQuantityBaseUnits / sampleFactor;
+            var displayDeducted = deductedBaseUnits / sampleFactor;
+            var displayNetToOrder = netToOrderBaseUnits / sampleFactor;
+            var displayAvailable = baseStockAvailable / sampleFactor;
 
-            // 3. Totales Netos a Pedir al Proveedor
-            var netPurchaseCost = netToOrder * unitCost;
-            var netSalesAmount = netToOrder * unitPrice;
-
-            // 4. Diferencia / Ganancia bruta estimada
+            // Totales Financieros
+            var grossPurchaseCost = totalQuantityBaseUnits * unitCost;
+            var inventoryDeductedPurchaseCost = deductedBaseUnits * unitCost;
+            var inventoryDeductedSalesAmount = deductedBaseUnits * unitPrice;
+            var netPurchaseCost = netToOrderBaseUnits * unitCost;
+            var netSalesAmount = netToOrderBaseUnits * unitPrice;
             var profitMarginAmount = netSalesAmount - netPurchaseCost;
             var profitMarginPercentage = netSalesAmount > 0 ? (profitMarginAmount / netSalesAmount) * 100m : 0m;
 
-            // 5. Cálculo del Pedido de Compra Sugerido (Fórmula CEILING Redondeo Superior de Cajas Completas)
-            // Ejemplo: 97 unids / 24 por caja = CEILING(4.04) = 5 cajas
-            int suggestedBoxes = netToOrder > 0 ? (int)Math.Ceiling((double)(netToOrder / (conversionFactor > 0 ? conversionFactor : 1m))) : 0;
-            decimal suggestedTotalUnits = suggestedBoxes * conversionFactor;
-            decimal boxCost = unitCost * conversionFactor;
-            decimal suggestedPurchaseCost = suggestedBoxes * boxCost;
-
-            // 6. Recopilar Observaciones Válidas de Vendedores para este producto
+            // Recopilar Observaciones Válidas de Vendedores
             var sellerNotesList = orders
                 .Where(o => o.Details.Any(d => d.ProductId == g.Key.ProductId) && !string.IsNullOrWhiteSpace(o.Notes))
                 .Select(o => o.Notes!.Trim())
@@ -148,17 +159,16 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
                 .ToList();
 
             string sellerObs = sellerNotesList.Any() ? string.Join(" | ", sellerNotesList) : string.Empty;
-
             string supplierName = "Distribuidora Jenny";
 
             string obs;
-            if (deducted >= totalQuantity)
+            if (deductedBaseUnits >= totalQuantityBaseUnits)
             {
                 obs = "Carga completa lista para entrega";
             }
-            else if (deducted > 0)
+            else if (deductedBaseUnits > 0)
             {
-                obs = $"Stock parcial ({availableInPresUnits:F2} disp.). Se deducen {deducted:F2} pzas. Pedir {netToOrder:F2}";
+                obs = $"Stock parcial ({displayAvailable:F2} disp.). Se deducen {displayDeducted:F2} pzas. Pedir {displayNetToOrder:F2}";
             }
             else
             {
@@ -170,10 +180,10 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
                 ProductCode: g.Key.Code,
                 ProductName: g.Key.Name,
                 UnitOfMeasure: g.Key.Uom,
-                TotalQuantity: totalQuantity,
-                AvailableStock: availableInPresUnits,
-                DeductedFromInventory: deducted,
-                NetQuantityToOrder: netToOrder,
+                TotalQuantity: displayTotalQty,
+                AvailableStock: displayAvailable,
+                DeductedFromInventory: displayDeducted,
+                NetQuantityToOrder: displayNetToOrder,
                 UnitCost: unitCost,
                 UnitPrice: unitPrice,
                 GrossPurchaseCost: grossPurchaseCost,
@@ -188,8 +198,8 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
                 TotalCost: netPurchaseCost,
                 Observation: obs,
                 SupplierName: supplierName,
-                PurchaseUnitName: string.IsNullOrWhiteSpace(g.Key.Uom) ? "Caja" : g.Key.Uom,
-                UnitsPerCase: conversionFactor,
+                PurchaseUnitName: purchaseUnitName,
+                UnitsPerCase: boxFactor,
                 SuggestedBoxesToOrder: suggestedBoxes,
                 SuggestedTotalUnitsToOrder: suggestedTotalUnits,
                 BoxCost: boxCost,

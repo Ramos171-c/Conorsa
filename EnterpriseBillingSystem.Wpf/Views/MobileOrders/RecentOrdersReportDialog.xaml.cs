@@ -127,10 +127,13 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         public decimal TotalProfitMargin => ConsolidatedProducts.Sum(p => p.DisplayProfit);
         public decimal ProfitMarginPercentage => TotalEstimatedSales > 0 ? (TotalProfitMargin / TotalEstimatedSales) * 100m : 0m;
 
-        // Propiedades de Totales para el Pedido de Compra Sugerido (Empaques y Cajas)
-        public int TotalSuggestedBoxes => ConsolidatedProducts.Sum(p => p.SuggestedBoxesToOrder);
-        public decimal TotalSuggestedUnits => ConsolidatedProducts.Sum(p => p.SuggestedTotalUnitsToOrder);
-        public decimal TotalSuggestedPurchaseCost => ConsolidatedProducts.Sum(p => p.SuggestedPurchaseCost);
+        // Colección filtrada exclusivamente para los productos a pedir al proveedor (excluye los de 0 cajas)
+        public IEnumerable<ConsolidatedProductDto> SuggestedPurchaseProducts =>
+            ConsolidatedProducts.Where(p => p.SuggestedBoxesToOrder > 0 || p.NetQuantityToOrder > 0);
+
+        public int TotalSuggestedBoxes => SuggestedPurchaseProducts.Sum(p => p.SuggestedBoxesToOrder);
+        public decimal TotalSuggestedUnits => SuggestedPurchaseProducts.Sum(p => p.SuggestedTotalUnitsToOrder);
+        public decimal TotalSuggestedPurchaseCost => SuggestedPurchaseProducts.Sum(p => p.SuggestedPurchaseCost);
 
         public string TotalQuantityDisplay => $"{TotalQuantity:N2} pzas pedidas";
         public string TotalDeductedDisplay => $"{TotalDeducted:N2} pzas cubiertas";
@@ -169,6 +172,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             OnPropertyChanged(nameof(HasData));
             OnPropertyChanged(nameof(ShowEmptyMessage));
             OnPropertyChanged(nameof(ShowEmptyMessageVisibility));
+            OnPropertyChanged(nameof(SuggestedPurchaseProducts));
             OnPropertyChanged(nameof(TotalQuantity));
             OnPropertyChanged(nameof(TotalGrossPurchaseCost));
             OnPropertyChanged(nameof(TotalGrossSales));

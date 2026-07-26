@@ -211,7 +211,7 @@
 
                     <!-- Tabla de Pedido de Compra Sugerido -->
                     <Border Grid.Row="1" Background="White" BorderBrush="#CBD5E1" BorderThickness="1" CornerRadius="6">
-                        <DataGrid ItemsSource="{Binding ConsolidatedProducts}" 
+                        <DataGrid ItemsSource="{Binding SuggestedPurchaseProducts}" 
                                   AutoGenerateColumns="False" 
                                   IsReadOnly="True" 
                                   HeadersVisibility="Column"

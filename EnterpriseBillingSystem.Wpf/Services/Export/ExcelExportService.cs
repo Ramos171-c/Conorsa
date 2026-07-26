@@ -382,7 +382,8 @@ public static class ExcelExportService
         currentRow++;
 
         int poDataStartSheet1 = currentRow;
-        var groupedBySupplierSheet1 = productList.GroupBy(p => p.SupplierName).OrderBy(g => g.Key);
+        var purchaseProducts = productList.Where(p => p.SuggestedBoxesToOrder > 0 || p.NetQuantityToOrder > 0).ToList();
+        var groupedBySupplierSheet1 = purchaseProducts.GroupBy(p => p.SupplierName).OrderBy(g => g.Key);
 
         foreach (var supplierGroup in groupedBySupplierSheet1)
         {
@@ -541,7 +542,7 @@ public static class ExcelExportService
         int poCurrentRow = 6;
         int poDataStartRow = poCurrentRow;
 
-        var groupedBySupplier = productList.GroupBy(p => p.SupplierName).OrderBy(g => g.Key);
+        var groupedBySupplier = purchaseProducts.GroupBy(p => p.SupplierName).OrderBy(g => g.Key);
 
         foreach (var supplierGroup in groupedBySupplier)
         {
