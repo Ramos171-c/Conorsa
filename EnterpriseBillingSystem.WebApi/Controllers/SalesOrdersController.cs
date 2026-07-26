@@ -199,4 +199,15 @@ public class SalesOrdersController : ApiControllerBase
         var count = await Mediator.Send(new CleanupZeroStockEnCaminoOrdersCommand());
         return Ok(count);
     }
+
+    /// <summary>
+    /// Reiniciar existencias de inventario a 0.00, eliminar pedidos <= 18 Julio y poner recientes en Recibido.
+    /// </summary>
+    [HttpPost("admin-reset-and-cleanup")]
+    [HasPermission("sales.edit")]
+    public async Task<ActionResult<object>> ResetInventoryAndOrders()
+    {
+        var result = await Mediator.Send(new ResetInventoryAndOrdersCommand());
+        return Ok(new { Message = result });
+    }
 }

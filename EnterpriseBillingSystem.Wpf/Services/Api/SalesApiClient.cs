@@ -240,4 +240,16 @@ public class SalesApiClient
     {
         return await _httpClient.GetFromJsonAsync<RouteLiquidationFullDto>($"route-liquidations/{id}");
     }
+
+    public async Task<string> ResetInventoryAndOrdersAsync()
+    {
+        var response = await _httpClient.PostAsync("sales-orders/admin-reset-and-cleanup", null);
+        if (!response.IsSuccessStatusCode)
+        {
+            var errorContent = await response.Content.ReadAsStringAsync();
+            throw new Exception($"Error al reiniciar existencias y pedidos: {errorContent}");
+        }
+        using var jsonDoc = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        return jsonDoc.RootElement.GetProperty("message").GetString() ?? "Reinicio completado.";
+    }
 }

@@ -830,6 +830,37 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task ResetInventoryAndOrdersAsync()
+    {
+        var confirm = System.Windows.MessageBox.Show(
+            "¿Está seguro de realizar este ajuste administrativo?\n\n" +
+            "1. Todas las existencias de inventario se pondrán en 0.00 (sin eliminar los productos del catálogo).\n" +
+            "2. Todos los pedidos del 18 de Julio hacia atrás serán eliminados.\n" +
+            "3. Todos los pedidos del 19-20 de Julio en adelante se cambiarán al estado 'Recibido'.",
+            "Confirmar Ajuste y Depuración de Inventario",
+            System.Windows.MessageBoxButton.YesNo,
+            System.Windows.MessageBoxImage.Warning);
+
+        if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+        try
+        {
+            IsLoading = true;
+            string message = await _salesApiClient.ResetInventoryAndOrdersAsync();
+            _notificationService.ShowSuccess(message);
+            await LoadOrdersAsync();
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al reiniciar inventario y pedidos: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
     private async Task CancelOrderAsync(object? parameter)
     {
         if (parameter is not SalesOrderListItemDto order) return;
