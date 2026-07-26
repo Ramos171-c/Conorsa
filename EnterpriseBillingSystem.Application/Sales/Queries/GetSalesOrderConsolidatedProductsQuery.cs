@@ -98,13 +98,11 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             }
 
             // Convertir stock disponible de unidades base a la presentación actual
-            var availableInPresUnits = baseStockAvailable / conversionFactor;
+            var availableInPresUnits = Math.Max(0m, baseStockAvailable / conversionFactor);
 
-            bool isEnCaminoMode = string.Equals(request.Status, "EnCamino", StringComparison.OrdinalIgnoreCase);
-
-            // Deducir del inventario existente en unidades de presentación
-            var deducted = isEnCaminoMode ? totalQuantity : Math.Min(totalQuantity, availableInPresUnits);
-            var netToOrder = isEnCaminoMode ? 0m : Math.Max(0, totalQuantity - deducted);
+            // Deducir del inventario existente real en unidades de presentación
+            var deducted = Math.Min(totalQuantity, availableInPresUnits);
+            var netToOrder = Math.Max(0m, totalQuantity - deducted);
 
             // Descontar del fondo global de stock del producto en unidades base
             var deductedBase = deducted * conversionFactor;
@@ -126,7 +124,7 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             var profitMarginPercentage = netSalesAmount > 0 ? (profitMarginAmount / netSalesAmount) * 100m : 0m;
 
             string obs;
-            if (isEnCaminoMode || deducted >= totalQuantity)
+            if (deducted >= totalQuantity)
             {
                 obs = "Carga completa lista para entrega";
             }
