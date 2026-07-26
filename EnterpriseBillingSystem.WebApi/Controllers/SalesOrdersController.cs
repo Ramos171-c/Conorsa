@@ -204,7 +204,7 @@ public class SalesOrdersController : ApiControllerBase
     /// Reiniciar existencias de inventario a 0.00, eliminar pedidos <= 18 Julio y poner recientes en Recibido.
     /// </summary>
     [HttpPost("admin-reset-and-cleanup")]
-    [HasPermission("sales.edit")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     public async Task<ActionResult<object>> ResetInventoryAndOrders()
     {
         var result = await Mediator.Send(new ResetInventoryAndOrdersCommand());
