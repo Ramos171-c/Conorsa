@@ -6,10 +6,10 @@
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
         mc:Ignorable="d"
-        Title="Detalle del Pedido Móvil" Height="680" Width="950"
-        WindowStartupLocation="CenterOwner"
-        ShowInTaskbar="False"
-        ResizeMode="NoResize"
+        Title="Detalle del Pedido" Height="780" Width="1150" MinWidth="950" MinHeight="600"
+        WindowStartupLocation="CenterScreen"
+        ShowInTaskbar="True"
+        ResizeMode="CanResizeWithGrip"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Medium"
@@ -101,15 +101,15 @@
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Status}" Value="EnProceso">
                                     <Setter Property="Text" Value="EN PROCESO" />
-                                    <Setter Property="Foreground" Value="#0D47A1" />
+                                    <Setter Property="Foreground" Value="#1565C0" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Status}" Value="EnCamino">
                                     <Setter Property="Text" Value="EN CAMINO" />
-                                    <Setter Property="Foreground" Value="#4A148C" />
+                                    <Setter Property="Foreground" Value="#6A1B9A" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Status}" Value="Completado">
                                     <Setter Property="Text" Value="COMPLETADO" />
-                                    <Setter Property="Foreground" Value="#004D40" />
+                                    <Setter Property="Foreground" Value="#00695C" />
                                 </DataTrigger>
                                 <DataTrigger Binding="{Binding Status}" Value="SolicitudAnulacion">
                                     <Setter Property="Text" Value="SOLICITUD ANULACIÓN" />
@@ -122,37 +122,28 @@
             </Border>
         </Grid>
 
-        <!-- Content Area -->
-        <Grid Grid.Row="1" Margin="0,0,0,16">
+        <!-- Main Content -->
+        <Grid Grid.Row="1">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
                 <RowDefinition Height="*" />
-                <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
-            <!-- Cancellation Request Warning Banner -->
-            <materialDesign:Card Grid.Row="0" Background="#FFEBEE" UniformCornerRadius="6" Margin="0,0,0,12" Padding="12"
-                                 Visibility="{Binding IsCancellationRequested, Converter={StaticResource BoolToVis}}">
+            <!-- Cancellation Warning Banner if SolicitudAnulacion -->
+            <materialDesign:Card Grid.Row="0" Margin="0,0,0,8" Padding="12,8" Background="#FFEBEE" 
+                                 Visibility="{Binding IsCancellationRequested, Converter={StaticResource BoolToVis}}" 
+                                 materialDesign:ElevationAssist.Elevation="Dp0">
                 <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="Alert" Foreground="#C62828" Width="24" Height="24" Margin="0,12,12,0" VerticalAlignment="Top" />
+                    <materialDesign:PackIcon Kind="AlertCircle" Foreground="#C62828" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
                     <StackPanel VerticalAlignment="Center">
-                        <TextBlock Text="Solicitud de Anulación Pendiente de Aprobación" FontSize="14" FontWeight="Bold" Foreground="#C62828" />
+                        <TextBlock Text="¡EL VENDEDOR SOLICITÓ ANULAR ESTE PEDIDO!" FontSize="12" FontWeight="Bold" Foreground="#C62828" />
                         <TextBlock Text="{Binding CancellationReason, StringFormat='Motivo indicado: {0}'}" FontSize="12" Foreground="#C62828" TextWrapping="Wrap" Margin="0,2,0,0" />
                     </StackPanel>
                 </StackPanel>
             </materialDesign:Card>
 
-            <!-- Partial Delivery & Invoicing Info Banner -->
-            <materialDesign:Card Grid.Row="1" Margin="0,0,0,8" Padding="12,8" Background="#EFF6FF" materialDesign:ElevationAssist.Elevation="Dp0">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="Information" Foreground="#2563EB" Width="20" Height="20" Margin="0,0,8,0" VerticalAlignment="Center" />
-                    <TextBlock Text="Ajuste la 'Cant. Entregada' o 'No Vino / Faltante'. La factura se emitirá únicamente por la Cantidad Entregada." 
-                               FontSize="12" FontWeight="SemiBold" Foreground="#1E40AF" VerticalAlignment="Center" TextWrapping="Wrap" />
-                </StackPanel>
-            </materialDesign:Card>
-
             <!-- Product Lines DataGrid -->
-            <materialDesign:Card Grid.Row="1" Margin="0,38,0,16" materialDesign:ElevationAssist.Elevation="Dp1">
+            <materialDesign:Card Grid.Row="1" Margin="0,8,0,16" materialDesign:ElevationAssist.Elevation="Dp1">
                 <Grid>
                     <ProgressBar IsIndeterminate="True" 
                                  Visibility="{Binding IsProcessing, Converter={StaticResource BoolToVis}}" 
@@ -160,18 +151,18 @@
 
                     <DataGrid ItemsSource="{Binding Details}" AutoGenerateColumns="False" IsReadOnly="False" HeadersVisibility="Column">
                         <DataGrid.Columns>
-                            <DataGridTemplateColumn Header="Código" Width="100">
+                            <DataGridTemplateColumn Header="Código" Width="120">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding ProductCode}" VerticalAlignment="Center" Margin="6,0" />
+                                        <TextBlock Text="{Binding ProductCode}" FontWeight="Bold" Foreground="#1E293B" VerticalAlignment="Center" Margin="6,0" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>
 
-                            <DataGridTemplateColumn Header="Producto" Width="*">
+                            <DataGridTemplateColumn Header="Nombre del Producto" Width="*">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Text="{Binding ProductName}" VerticalAlignment="Center" Margin="6,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" />
+                                        <TextBlock Text="{Binding ProductName}" FontWeight="SemiBold" Foreground="#0F172A" VerticalAlignment="Center" Margin="6,0" TextWrapping="Wrap" />
                                     </DataTemplate>
                                 </DataGridTemplateColumn.CellTemplate>
                             </DataGridTemplateColumn>

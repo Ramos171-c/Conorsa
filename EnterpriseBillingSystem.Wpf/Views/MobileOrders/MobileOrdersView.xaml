@@ -24,8 +24,8 @@
             </Grid.ColumnDefinitions>
 
             <StackPanel Grid.Column="0">
-                <TextBlock Text="Seguimiento de Pedidos Móviles" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
-                <TextBlock Text="Monitoree los pedidos de venta tomados por sus vendedores y cajeros en terreno." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.7" />
+                <TextBlock Text="Seguimiento de Pedidos" Style="{StaticResource MaterialDesignHeadline4TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                <TextBlock Text="Monitoree y gestione los pedidos de venta tomados por sus vendedores en terreno." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.7" />
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
