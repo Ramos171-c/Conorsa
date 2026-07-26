@@ -56,7 +56,7 @@ public partial class MainViewModel : ViewModelBase
     public bool IsInventoryTransferVisible => _currentUserService.HasPermission("inventory.transfer");
     public bool IsInventoryReportVisible => _currentUserService.HasPermission("inventory.report");
     public bool IsSalesVisible => _currentUserService.HasPermission("sales.view") || true;
-    public bool IsPosVisible => _currentUserService.HasPermission("sales.create") || _currentUserService.HasPermission("sales.post") || true;
+    public bool IsPosVisible => false;
     public bool IsAccountsReceivableVisible => _currentUserService.HasPermission("ar.view") || true;
     public bool IsAdministrationVisible => _currentUserService.HasPermission("admin.view") || true;
 
