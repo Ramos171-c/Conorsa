@@ -80,10 +80,15 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             })
             .ToList();
 
-        // Optimización N+1: Consultar todo el inventario disponible en 1 sola consulta SQL por lotes
+        // Optimización N+1: Consultar todo el inventario disponible por ID y por Nombre de Producto (para vincular duplicados TA/TO)
         var productIds = detailsGrouped.Select(g => g.Key.ProductId).Distinct().ToList();
+        var productNames = detailsGrouped.Select(g => g.Key.Name).Distinct().ToList();
+
         var stockDict = await _inventoryRepository.GetAvailableStockByProductIdsAsync(productIds, cancellationToken);
+        var nameStockDict = await _inventoryRepository.GetAvailableStockByProductNamesAsync(productNames, cancellationToken);
+
         var remainingBaseStock = new Dictionary<Guid, decimal>(stockDict);
+        var remainingNameStock = new Dictionary<string, decimal>(nameStockDict, StringComparer.OrdinalIgnoreCase);
 
         var result = new List<ConsolidatedProductDto>();
 
@@ -111,18 +116,27 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             var unitPrice = totalQuantityBaseUnits > 0 ? grossSalesAmount / totalQuantityBaseUnits : 0m;
             var unitCost = boxPresentation?.Cost > 0 ? (boxPresentation.Cost / boxFactor) : (sampleDetail.Product?.CurrentCost ?? 0m);
 
-            // 3. Obtener existencias disponibles en unidades base en la bodega
-            if (!remainingBaseStock.TryGetValue(g.Key.ProductId, out decimal baseStockAvailable))
+            // 3. Obtener existencias disponibles en unidades base en la bodega (con fallback por Nombre de Producto si el ID exacto no tiene stock)
+            decimal baseStockAvailable = 0m;
+            if (remainingBaseStock.TryGetValue(g.Key.ProductId, out decimal idStock) && idStock > 0m)
             {
-                baseStockAvailable = 0m;
+                baseStockAvailable = idStock;
+            }
+            else if (remainingNameStock.TryGetValue(g.Key.Name, out decimal nameStock) && nameStock > 0m)
+            {
+                baseStockAvailable = nameStock;
             }
 
             // 4. Deducir del inventario existente en unidades base
             var deductedBaseUnits = Math.Min(totalQuantityBaseUnits, baseStockAvailable);
             var netToOrderBaseUnits = Math.Max(0m, totalQuantityBaseUnits - deductedBaseUnits);
 
-            // Actualizar stock restante del producto
+            // Actualizar stock restante por ID y por Nombre
             remainingBaseStock[g.Key.ProductId] = Math.Max(0m, baseStockAvailable - deductedBaseUnits);
+            if (remainingNameStock.ContainsKey(g.Key.Name))
+            {
+                remainingNameStock[g.Key.Name] = Math.Max(0m, baseStockAvailable - deductedBaseUnits);
+            }
 
             // 5. CÁLCULO EXACTO DEL PEDIDO EN CAJAS AL PROVEEDOR (Redondeo Superior CEILING en Cajas)
             // Ejemplo 1: 5.00 Cajas faltantes -> CEILING(5.00) = 5 CAJAS
