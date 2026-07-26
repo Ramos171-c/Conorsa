@@ -319,7 +319,7 @@ public static class ExcelExportService
         obsBoxRange.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#F8FAFC"));
         obsBoxRange.Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
 
-        // Auto-ajustar ancho de columnas
+        // Auto-ajustar ancho de columnas Hoja 1
         ws.Columns().AdjustToContents();
         ws.Column(1).Width = Math.Max(ws.Column(1).Width, 14);
         ws.Column(2).Width = Math.Max(ws.Column(2).Width, 35);
@@ -330,6 +330,160 @@ public static class ExcelExportService
         ws.Column(10).Width = Math.Max(ws.Column(10).Width, 20);
         ws.Column(11).Width = Math.Max(ws.Column(11).Width, 22);
         ws.Column(12).Width = Math.Max(ws.Column(12).Width, 30);
+
+        // =========================================================================
+        // HOJA 2: PEDIDO DE COMPRA SUGERIDO AL PROVEEDOR (CAJAS COMPLETAS)
+        // =========================================================================
+        var ws2 = workbook.Worksheets.Add("Pedido de Compra (Cajas)");
+        ws2.ShowGridLines = true;
+
+        var poTitleRange = ws2.Range("A1:I2");
+        poTitleRange.Merge();
+        poTitleRange.Value = "EMPRESA BILLING SYSTEM - PEDIDO DE COMPRA SUGERIDO AL PROVEEDOR";
+        poTitleRange.Style.Font.SetBold(true);
+        poTitleRange.Style.Font.SetFontSize(16);
+        poTitleRange.Style.Font.SetFontColor(XLColor.White);
+        poTitleRange.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#92400E")); // Amber / Brown
+        poTitleRange.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+        poTitleRange.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
+
+        var poSubTitleRange = ws2.Range("A3:I3");
+        poSubTitleRange.Merge();
+        poSubTitleRange.Value = "Cálculo Automático por Empaques de Proveedor | Redondeo Superior CEILING(Unidades / Caja)";
+        poSubTitleRange.Style.Font.SetFontSize(10);
+        poSubTitleRange.Style.Font.SetFontColor(XLColor.FromHtml("#FEF3C7"));
+        poSubTitleRange.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#78350F"));
+        poSubTitleRange.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+        poSubTitleRange.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
+
+        int poHeaderRow = 5;
+        string[] poHeaders = new[]
+        {
+            "Proveedor",
+            "Código",
+            "Producto",
+            "U. Compra",
+            "Contenido (U/Caja)",
+            "Requeridas (Unids)",
+            "PEDIR (CAJAS)",
+            "Total Unidades",
+            "Observaciones del Vendedor"
+        };
+
+        for (int i = 0; i < poHeaders.Length; i++)
+        {
+            var cell = ws2.Cell(poHeaderRow, i + 1);
+            cell.Value = poHeaders[i];
+            cell.Style.Font.SetBold(true);
+            cell.Style.Font.SetFontSize(10);
+            cell.Style.Font.SetFontColor(XLColor.White);
+            cell.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#78350F"));
+            cell.Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+            cell.Style.Alignment.SetVertical(XLAlignmentVerticalValues.Center);
+            cell.Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
+        }
+        ws2.Row(poHeaderRow).Height = 26;
+
+        int poCurrentRow = 6;
+        int poDataStartRow = poCurrentRow;
+
+        var groupedBySupplier = productList.GroupBy(p => p.SupplierName).OrderBy(g => g.Key);
+
+        foreach (var supplierGroup in groupedBySupplier)
+        {
+            // Subencabezado de Proveedor
+            var supHeader = ws2.Range(poCurrentRow, 1, poCurrentRow, 9);
+            supHeader.Merge();
+            supHeader.Value = $"PROVEEDOR: {supplierGroup.Key.ToUpper()}";
+            supHeader.Style.Font.SetBold(true);
+            supHeader.Style.Font.SetFontSize(11);
+            supHeader.Style.Fill.SetBackgroundColor(XLColor.FromHtml("#FEF3C7"));
+            supHeader.Style.Font.SetFontColor(XLColor.FromHtml("#92400E"));
+            supHeader.Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
+            poCurrentRow++;
+
+            foreach (var item in supplierGroup)
+            {
+                ws2.Cell(poCurrentRow, 1).Value = item.SupplierName;
+                ws2.Cell(poCurrentRow, 2).Value = item.ProductCode;
+                ws2.Cell(poCurrentRow, 2).Style.Font.SetBold(true);
+                ws2.Cell(poCurrentRow, 2).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+                ws2.Cell(poCurrentRow, 3).Value = item.ProductName;
+
+                ws2.Cell(poCurrentRow, 4).Value = item.PurchaseUnitName;
+                ws2.Cell(poCurrentRow, 4).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Center);
+
+                ws2.Cell(poCurrentRow, 5).Value = item.UnitsPerCase;
+                ws2.Cell(poCurrentRow, 5).Style.NumberFormat.SetFormat("#,##0");
+                ws2.Cell(poCurrentRow, 5).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+
+                ws2.Cell(poCurrentRow, 6).Value = item.NetQuantityToOrder;
+                ws2.Cell(poCurrentRow, 6).Style.NumberFormat.SetFormat("#,##0.00");
+                ws2.Cell(poCurrentRow, 6).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+
+                // CAJAS A PEDIR (Redondeo Superior CEILING)
+                ws2.Cell(poCurrentRow, 7).Value = item.SuggestedBoxesToOrder;
+                ws2.Cell(poCurrentRow, 7).Style.NumberFormat.SetFormat("#,##0");
+                ws2.Cell(poCurrentRow, 7).Style.Font.SetBold(true);
+                ws2.Cell(poCurrentRow, 7).Style.Font.SetFontColor(XLColor.FromHtml("#15803D"));
+                ws2.Cell(poCurrentRow, 7).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#DCFCE7"));
+                ws2.Cell(poCurrentRow, 7).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+
+                ws2.Cell(poCurrentRow, 8).Value = item.SuggestedTotalUnitsToOrder;
+                ws2.Cell(poCurrentRow, 8).Style.NumberFormat.SetFormat("#,##0.00");
+                ws2.Cell(poCurrentRow, 8).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+                ws2.Cell(poCurrentRow, 8).Style.Font.SetBold(true);
+
+                ws2.Cell(poCurrentRow, 9).Value = item.SellerObservations;
+                ws2.Cell(poCurrentRow, 9).Style.Font.SetItalic(true);
+                ws2.Cell(poCurrentRow, 9).Style.Font.SetFontColor(XLColor.FromHtml("#B45309"));
+
+                var rowRange = ws2.Range(poCurrentRow, 1, poCurrentRow, 9);
+                foreach (var cell in rowRange.Cells())
+                {
+                    cell.Style.Border.SetOutsideBorder(XLBorderStyleValues.Thin);
+                    cell.Style.Border.SetOutsideBorderColor(XLColor.FromHtml("#E2E8F0"));
+                }
+                poCurrentRow++;
+            }
+        }
+
+        int poDataEndRow = poCurrentRow - 1;
+
+        // Fila Total de Cajas Sugeridas
+        poCurrentRow++;
+        ws2.Range(poCurrentRow, 1, poCurrentRow, 6).Merge();
+        ws2.Cell(poCurrentRow, 1).Value = "TOTAL DE CAJAS COMPLETAS A SOLICITAR AL PROVEEDOR:";
+        ws2.Cell(poCurrentRow, 1).Style.Font.SetBold(true);
+        ws2.Cell(poCurrentRow, 1).Style.Font.SetFontSize(12);
+        ws2.Cell(poCurrentRow, 1).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+        ws2.Cell(poCurrentRow, 7).FormulaA1 = poDataEndRow >= poDataStartRow ? $"SUM(G{poDataStartRow}:G{poDataEndRow})" : "0";
+        ws2.Cell(poCurrentRow, 7).Style.NumberFormat.SetFormat("#,##0");
+        ws2.Cell(poCurrentRow, 7).Style.Font.SetBold(true);
+        ws2.Cell(poCurrentRow, 7).Style.Font.SetFontSize(13);
+        ws2.Cell(poCurrentRow, 7).Style.Font.SetFontColor(XLColor.FromHtml("#15803D"));
+        ws2.Cell(poCurrentRow, 7).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#DCFCE7"));
+        ws2.Cell(poCurrentRow, 7).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+
+        ws2.Cell(poCurrentRow, 8).FormulaA1 = poDataEndRow >= poDataStartRow ? $"SUM(H{poDataStartRow}:H{poDataEndRow})" : "0";
+        ws2.Cell(poCurrentRow, 8).Style.NumberFormat.SetFormat("#,##0.00");
+        ws2.Cell(poCurrentRow, 8).Style.Font.SetBold(true);
+        ws2.Cell(poCurrentRow, 8).Style.Font.SetFontSize(13);
+        ws2.Cell(poCurrentRow, 8).Style.Font.SetFontColor(XLColor.FromHtml("#1E3A8A"));
+        ws2.Cell(poCurrentRow, 8).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
+
+        ws2.Range(poCurrentRow, 1, poCurrentRow, 9).Style.Border.SetOutsideBorder(XLBorderStyleValues.Medium);
+
+        ws2.Columns().AdjustToContents();
+        ws2.Column(1).Width = Math.Max(ws2.Column(1).Width, 20);
+        ws2.Column(2).Width = Math.Max(ws2.Column(2).Width, 14);
+        ws2.Column(3).Width = Math.Max(ws2.Column(3).Width, 35);
+        ws2.Column(5).Width = Math.Max(ws2.Column(5).Width, 18);
+        ws2.Column(6).Width = Math.Max(ws2.Column(6).Width, 18);
+        ws2.Column(7).Width = Math.Max(ws2.Column(7).Width, 18);
+        ws2.Column(8).Width = Math.Max(ws2.Column(8).Width, 18);
+        ws2.Column(9).Width = Math.Max(ws2.Column(9).Width, 35);
 
         workbook.SaveAs(filePath);
     }

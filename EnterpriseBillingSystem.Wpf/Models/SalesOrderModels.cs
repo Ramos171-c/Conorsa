@@ -139,7 +139,15 @@ public record ConsolidatedProductDto(
     decimal ProfitMarginPercentage,
     decimal TotalNetAmount,
     decimal TotalCost,
-    string Observation = ""
+    string Observation = "",
+    string SupplierName = "Distribuidora Jenny",
+    string PurchaseUnitName = "Caja",
+    decimal UnitsPerCase = 1.00m,
+    int SuggestedBoxesToOrder = 0,
+    decimal SuggestedTotalUnitsToOrder = 0m,
+    decimal BoxCost = 0m,
+    decimal SuggestedPurchaseCost = 0m,
+    string SellerObservations = ""
 )
 {
     public string FullUnitOfMeasure => !string.IsNullOrWhiteSpace(UnitOfMeasure) ? UnitOfMeasure : "UND";

@@ -29,7 +29,16 @@ public record ConsolidatedProductDto(
     decimal ProfitMarginPercentage,
     decimal TotalNetAmount,
     decimal TotalCost,
-    string Observation = ""
+    string Observation = "",
+    // Nuevos Campos para Pedido de Compra Sugerido (Empaques, Redondeo Superior CEILING y Proveedor)
+    string SupplierName = "Distribuidora Jenny",
+    string PurchaseUnitName = "Caja",
+    decimal UnitsPerCase = 1.00m,
+    int SuggestedBoxesToOrder = 0,
+    decimal SuggestedTotalUnitsToOrder = 0m,
+    decimal BoxCost = 0m,
+    decimal SuggestedPurchaseCost = 0m,
+    string SellerObservations = ""
 );
 
 public record GetSalesOrderConsolidatedProductsQuery(
@@ -123,6 +132,25 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             var profitMarginAmount = netSalesAmount - netPurchaseCost;
             var profitMarginPercentage = netSalesAmount > 0 ? (profitMarginAmount / netSalesAmount) * 100m : 0m;
 
+            // 5. Cálculo del Pedido de Compra Sugerido (Fórmula CEILING Redondeo Superior de Cajas Completas)
+            // Ejemplo: 97 unids / 24 por caja = CEILING(4.04) = 5 cajas
+            int suggestedBoxes = netToOrder > 0 ? (int)Math.Ceiling((double)(netToOrder / (conversionFactor > 0 ? conversionFactor : 1m))) : 0;
+            decimal suggestedTotalUnits = suggestedBoxes * conversionFactor;
+            decimal boxCost = unitCost * conversionFactor;
+            decimal suggestedPurchaseCost = suggestedBoxes * boxCost;
+
+            // 6. Recopilar Observaciones Válidas de Vendedores para este producto
+            var sellerNotesList = orders
+                .Where(o => o.Details.Any(d => d.ProductId == g.Key.ProductId) && !string.IsNullOrWhiteSpace(o.Notes))
+                .Select(o => o.Notes!.Trim())
+                .Where(n => !n.StartsWith("[SOLICITUD ANULACIÓN]", StringComparison.OrdinalIgnoreCase))
+                .Distinct()
+                .ToList();
+
+            string sellerObs = sellerNotesList.Any() ? string.Join(" | ", sellerNotesList) : string.Empty;
+
+            string supplierName = "Distribuidora Jenny";
+
             string obs;
             if (deducted >= totalQuantity)
             {
@@ -158,7 +186,15 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
                 ProfitMarginPercentage: profitMarginPercentage,
                 TotalNetAmount: grossSalesAmount,
                 TotalCost: netPurchaseCost,
-                Observation: obs
+                Observation: obs,
+                SupplierName: supplierName,
+                PurchaseUnitName: string.IsNullOrWhiteSpace(g.Key.Uom) ? "Caja" : g.Key.Uom,
+                UnitsPerCase: conversionFactor,
+                SuggestedBoxesToOrder: suggestedBoxes,
+                SuggestedTotalUnitsToOrder: suggestedTotalUnits,
+                BoxCost: boxCost,
+                SuggestedPurchaseCost: suggestedPurchaseCost,
+                SellerObservations: sellerObs
             ));
         }
 

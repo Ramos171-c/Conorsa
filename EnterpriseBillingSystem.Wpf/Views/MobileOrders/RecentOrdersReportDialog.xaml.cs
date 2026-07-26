@@ -127,6 +127,11 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         public decimal TotalProfitMargin => ConsolidatedProducts.Sum(p => p.DisplayProfit);
         public decimal ProfitMarginPercentage => TotalEstimatedSales > 0 ? (TotalProfitMargin / TotalEstimatedSales) * 100m : 0m;
 
+        // Propiedades de Totales para el Pedido de Compra Sugerido (Empaques y Cajas)
+        public int TotalSuggestedBoxes => ConsolidatedProducts.Sum(p => p.SuggestedBoxesToOrder);
+        public decimal TotalSuggestedUnits => ConsolidatedProducts.Sum(p => p.SuggestedTotalUnitsToOrder);
+        public decimal TotalSuggestedPurchaseCost => ConsolidatedProducts.Sum(p => p.SuggestedPurchaseCost);
+
         public string TotalQuantityDisplay => $"{TotalQuantity:N2} pzas pedidas";
         public string TotalDeductedDisplay => $"{TotalDeducted:N2} pzas cubiertas";
         public string TotalNetToOrderDisplay => $"{TotalNetToOrder:N2} pzas faltantes";
@@ -139,6 +144,10 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
         public string TotalEstimatedSalesDisplay => $"{TotalEstimatedSales:C2}";
         public string TotalProfitMarginDisplay => $"{TotalProfitMargin:C2}";
         public string ProfitMarginPercentageDisplay => $"{ProfitMarginPercentage:N1}%";
+
+        public string TotalSuggestedBoxesDisplay => $"{TotalSuggestedBoxes:N0} cajas";
+        public string TotalSuggestedUnitsDisplay => $"{TotalSuggestedUnits:N2} unidades";
+        public string TotalSuggestedPurchaseCostDisplay => $"{TotalSuggestedPurchaseCost:C2}";
 
         public ObservableCollection<ConsolidatedProductDto> ConsolidatedProducts { get; } = new();
 
@@ -172,6 +181,9 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             OnPropertyChanged(nameof(TotalEstimatedSales));
             OnPropertyChanged(nameof(TotalProfitMargin));
             OnPropertyChanged(nameof(ProfitMarginPercentage));
+            OnPropertyChanged(nameof(TotalSuggestedBoxes));
+            OnPropertyChanged(nameof(TotalSuggestedUnits));
+            OnPropertyChanged(nameof(TotalSuggestedPurchaseCost));
 
             OnPropertyChanged(nameof(TotalQuantityDisplay));
             OnPropertyChanged(nameof(TotalDeductedDisplay));
@@ -183,6 +195,9 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
             OnPropertyChanged(nameof(TotalEstimatedSalesDisplay));
             OnPropertyChanged(nameof(TotalProfitMarginDisplay));
             OnPropertyChanged(nameof(ProfitMarginPercentageDisplay));
+            OnPropertyChanged(nameof(TotalSuggestedBoxesDisplay));
+            OnPropertyChanged(nameof(TotalSuggestedUnitsDisplay));
+            OnPropertyChanged(nameof(TotalSuggestedPurchaseCostDisplay));
         }
 
         private async void RecentOrdersReportDialog_Loaded(object sender, RoutedEventArgs e)
