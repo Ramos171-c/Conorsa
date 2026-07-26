@@ -262,10 +262,10 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Requeridas (Unids)" Width="130">
+                                <DataGridTemplateColumn Header="Requeridas (Cajas)" Width="130">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding NetQuantityToOrder, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" Foreground="#DC2626" FontWeight="SemiBold" />
+                                            <TextBlock Text="{Binding SuggestedTotalUnitsToOrder, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" Foreground="#DC2626" FontWeight="SemiBold" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
@@ -280,10 +280,10 @@
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>
 
-                                <DataGridTemplateColumn Header="Total Unids" Width="110">
+                                <DataGridTemplateColumn Header="Total Cajas" Width="110">
                                     <DataGridTemplateColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Text="{Binding SuggestedTotalUnitsToOrder, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" FontWeight="Bold" Foreground="#1E3A8A" />
+                                            <TextBlock Text="{Binding SuggestedBoxesToOrder, StringFormat='{}{0:N0} cajas'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="6,4" FontWeight="Bold" Foreground="#1E3A8A" />
                                         </DataTemplate>
                                     </DataGridTemplateColumn.CellTemplate>
                                 </DataGridTemplateColumn>

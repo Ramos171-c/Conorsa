@@ -124,10 +124,12 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             // Actualizar stock restante del producto
             remainingBaseStock[g.Key.ProductId] = Math.Max(0m, baseStockAvailable - deductedBaseUnits);
 
-            // 5. CÁLCULO EXACTO DEL PEDIDO EN CAJAS AL PROVEEDOR (Redondeo Superior CEILING sobre Unidades Faltantes)
-            // Ejemplo 1: 22 unidades faltantes / 4 por caja = CEILING(5.5) = 6 CAJAS
-            // Ejemplo 2: 113.04 unidades faltantes / 24 por caja = CEILING(4.71) = 5 CAJAS
-            int suggestedBoxes = netToOrderBaseUnits > 0 ? (int)Math.Ceiling((double)(netToOrderBaseUnits / boxFactor)) : 0;
+            // 5. CÁLCULO EXACTO DEL PEDIDO EN CAJAS AL PROVEEDOR (Redondeo Superior CEILING en Cajas)
+            // Ejemplo 1: 5.00 Cajas faltantes -> CEILING(5.00) = 5 CAJAS
+            // Ejemplo 2: 4.71 Cajas faltantes -> CEILING(4.71) = 5 CAJAS
+            // Ejemplo 3: 0.28 Cajas faltantes (10 unidades) -> CEILING(0.28) = 1 CAJA
+            decimal netToOrderInBoxes = netToOrderBaseUnits / boxFactor;
+            int suggestedBoxes = netToOrderBaseUnits > 0 ? (int)Math.Ceiling((double)netToOrderInBoxes) : 0;
             decimal suggestedTotalUnits = suggestedBoxes * boxFactor;
             decimal boxCost = unitCost * boxFactor;
             decimal suggestedPurchaseCost = suggestedBoxes * boxCost;
@@ -201,7 +203,7 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
                 PurchaseUnitName: purchaseUnitName,
                 UnitsPerCase: boxFactor,
                 SuggestedBoxesToOrder: suggestedBoxes,
-                SuggestedTotalUnitsToOrder: suggestedTotalUnits,
+                SuggestedTotalUnitsToOrder: netToOrderInBoxes, // Requeridas en Cajas exactas
                 BoxCost: boxCost,
                 SuggestedPurchaseCost: suggestedPurchaseCost,
                 SellerObservations: sellerObs

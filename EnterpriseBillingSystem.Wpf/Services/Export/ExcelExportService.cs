@@ -352,9 +352,9 @@ public static class ExcelExportService
             "Producto",
             "U. Compra",
             "Contenido (U/Caja)",
-            "Requeridas (Unids)",
+            "Requeridas (Cajas)",
             "PEDIR (CAJAS)",
-            "Total Unidades",
+            "Total Cajas",
             "Observaciones del Vendedor",
             "", "", ""
         };
@@ -414,11 +414,12 @@ public static class ExcelExportService
                 ws.Cell(currentRow, 5).Style.NumberFormat.SetFormat("#,##0");
                 ws.Cell(currentRow, 5).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
 
-                ws.Cell(currentRow, 6).Value = item.NetQuantityToOrder;
+                // Requeridas en Cajas exactas (ej. 5.00 cajas, 4.71 cajas, 0.28 cajas)
+                ws.Cell(currentRow, 6).Value = item.SuggestedTotalUnitsToOrder;
                 ws.Cell(currentRow, 6).Style.NumberFormat.SetFormat("#,##0.00");
                 ws.Cell(currentRow, 6).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
 
-                // CAJAS A PEDIR (Redondeo Superior CEILING)
+                // CAJAS A PEDIR COMPLETAS (Redondeo Superior CEILING)
                 ws.Cell(currentRow, 7).Value = item.SuggestedBoxesToOrder;
                 ws.Cell(currentRow, 7).Style.NumberFormat.SetFormat("#,##0");
                 ws.Cell(currentRow, 7).Style.Font.SetBold(true);
@@ -426,8 +427,9 @@ public static class ExcelExportService
                 ws.Cell(currentRow, 7).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#DCFCE7"));
                 ws.Cell(currentRow, 7).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
 
-                ws.Cell(currentRow, 8).Value = item.SuggestedTotalUnitsToOrder;
-                ws.Cell(currentRow, 8).Style.NumberFormat.SetFormat("#,##0.00");
+                // Total Cajas Solicitadas a Recibir
+                ws.Cell(currentRow, 8).Value = item.SuggestedBoxesToOrder;
+                ws.Cell(currentRow, 8).Style.NumberFormat.SetFormat("#,##0");
                 ws.Cell(currentRow, 8).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
                 ws.Cell(currentRow, 8).Style.Font.SetBold(true);
 
@@ -519,9 +521,9 @@ public static class ExcelExportService
             "Producto",
             "U. Compra",
             "Contenido (U/Caja)",
-            "Requeridas (Unids)",
+            "Requeridas (Cajas)",
             "PEDIR (CAJAS)",
-            "Total Unidades",
+            "Total Cajas",
             "Observaciones del Vendedor"
         };
 
@@ -573,11 +575,12 @@ public static class ExcelExportService
                 ws2.Cell(poCurrentRow, 5).Style.NumberFormat.SetFormat("#,##0");
                 ws2.Cell(poCurrentRow, 5).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
 
-                ws2.Cell(poCurrentRow, 6).Value = item.NetQuantityToOrder;
+                // Requeridas en Cajas exactas (ej. 5.00 cajas, 4.71 cajas, 0.28 cajas)
+                ws2.Cell(poCurrentRow, 6).Value = item.SuggestedTotalUnitsToOrder;
                 ws2.Cell(poCurrentRow, 6).Style.NumberFormat.SetFormat("#,##0.00");
                 ws2.Cell(poCurrentRow, 6).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
 
-                // CAJAS A PEDIR (Redondeo Superior CEILING)
+                // CAJAS A PEDIR COMPLETAS (Redondeo Superior CEILING)
                 ws2.Cell(poCurrentRow, 7).Value = item.SuggestedBoxesToOrder;
                 ws2.Cell(poCurrentRow, 7).Style.NumberFormat.SetFormat("#,##0");
                 ws2.Cell(poCurrentRow, 7).Style.Font.SetBold(true);
@@ -585,8 +588,9 @@ public static class ExcelExportService
                 ws2.Cell(poCurrentRow, 7).Style.Fill.SetBackgroundColor(XLColor.FromHtml("#DCFCE7"));
                 ws2.Cell(poCurrentRow, 7).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
 
-                ws2.Cell(poCurrentRow, 8).Value = item.SuggestedTotalUnitsToOrder;
-                ws2.Cell(poCurrentRow, 8).Style.NumberFormat.SetFormat("#,##0.00");
+                // Total Cajas Solicitadas a Recibir
+                ws2.Cell(poCurrentRow, 8).Value = item.SuggestedBoxesToOrder;
+                ws2.Cell(poCurrentRow, 8).Style.NumberFormat.SetFormat("#,##0");
                 ws2.Cell(poCurrentRow, 8).Style.Alignment.SetHorizontal(XLAlignmentHorizontalValues.Right);
                 ws2.Cell(poCurrentRow, 8).Style.Font.SetBold(true);
 
