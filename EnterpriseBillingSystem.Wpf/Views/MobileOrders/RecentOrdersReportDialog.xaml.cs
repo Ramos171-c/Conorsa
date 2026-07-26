@@ -251,12 +251,6 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 ConsolidatedProducts.Clear();
                 foreach (var item in list)
                 {
-                    // Omit products that already have sufficient inventory (Neto a Pedir == 0) when in purchase consolidation
-                    if (!_targetStatus.Equals("EnCamino", StringComparison.OrdinalIgnoreCase) && item.NetQuantityToOrder <= 0)
-                    {
-                        continue;
-                    }
-
                     string displayName = item.ProductName;
                     if (!string.IsNullOrWhiteSpace(item.ProductCode) && descriptionMap.TryGetValue(item.ProductCode, out var desc) && !string.IsNullOrWhiteSpace(desc))
                     {

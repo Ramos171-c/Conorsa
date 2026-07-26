@@ -94,8 +94,7 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
             // Obtener existencias disponibles restantes en la bodega única
             if (!remainingBaseStock.TryGetValue(g.Key.ProductId, out decimal baseStockAvailable))
             {
-                // Si no hay registro previo de inventario en la bodega única, asumimos disponibilidad total del producto
-                baseStockAvailable = totalQuantity * conversionFactor;
+                baseStockAvailable = 0m;
             }
 
             // Convertir stock disponible de unidades base a la presentación actual
