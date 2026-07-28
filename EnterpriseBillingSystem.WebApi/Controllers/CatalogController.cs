@@ -101,7 +101,8 @@ public class CatalogController : ApiControllerBase
                         });
 
                     page.Content()
-                        .Padding(60) // Margen de contenido para el marco
+                        .PaddingHorizontal(50)
+                        .PaddingVertical(25) // Margen ajustado para dar máximo espacio vertical a la imagen
                         .Column(column =>
                         {
                             var categories = productsArray.GroupBy(p => p.CategoryName).ToArray();
@@ -112,11 +113,11 @@ public class CatalogController : ApiControllerBase
                                 var categoryName = categoryGroup.Key ?? "Otros";
                                 
                                 // A) Categoría de Separación (Centrado sobre el fondo de dulces)
-                                column.Item().Height(400).AlignCenter().AlignMiddle().Column(catCol =>
+                                column.Item().Height(420).AlignCenter().AlignMiddle().Column(catCol =>
                                 {
                                     catCol.Item().Text(categoryName.ToUpper())
                                         .Bold()
-                                        .FontSize(42)
+                                        .FontSize(44)
                                         .FontColor("#E11D48") // Color rosa dulce
                                         .AlignCenter();
                                         
@@ -147,7 +148,7 @@ public class CatalogController : ApiControllerBase
                                         : "N/A";
                                         
                                     // 2. Detalles (Centrado, SKU y U/E)
-                                    column.Item().AlignCenter().PaddingTop(8).Text(x =>
+                                    column.Item().AlignCenter().PaddingTop(6).Text(x =>
                                     {
                                         x.Span("CÓDIGO SKU: ").Bold().FontSize(13).FontColor("#E11D48");
                                         x.Span($"{product.InternalCode}     •     ").FontSize(13).FontColor("#334155");
@@ -156,9 +157,9 @@ public class CatalogController : ApiControllerBase
                                         x.Span($"{ueText}").FontSize(13).FontColor("#334155");
                                     });
 
-                                    column.Item().PaddingVertical(8).LineHorizontal(1f).LineColor("#F1F5F9");
+                                    column.Item().PaddingVertical(6).LineHorizontal(1f).LineColor("#F1F5F9");
 
-                                    // 3. Imagen del Producto (Centrada abajo, ocupando el espacio restante)
+                                    // 3. Imagen del Producto (Centrada abajo, 100% transparente y tamaño grande)
                                     var imgPlaced = false;
                                     if (!string.IsNullOrWhiteSpace(product.ImagePath))
                                     {
@@ -177,10 +178,11 @@ public class CatalogController : ApiControllerBase
                                         var localImagePath = Path.Combine(webRoot, relativePath.TrimStart('/'));
                                         if (System.IO.File.Exists(localImagePath))
                                         {
+                                            var transparentImageBytes = MakeBackgroundTransparent(localImagePath);
                                             column.Item()
                                                 .AlignCenter()
-                                                .MaxHeight(300) // Ocupa hasta 300 de alto en formato horizontal
-                                                .Image(localImagePath, ImageScaling.FitArea);
+                                                .MaxHeight(390) // Imagen significativamente más grande (hasta 390pt de alto)
+                                                .Image(transparentImageBytes, ImageScaling.FitArea);
                                                 
                                             imgPlaced = true;
                                         }
@@ -190,7 +192,7 @@ public class CatalogController : ApiControllerBase
                                     {
                                         column.Item()
                                             .AlignCenter()
-                                            .Height(150)
+                                            .Height(180)
                                             .Border(0.5f)
                                             .BorderColor("#E2E8F0")
                                             .Background("#F8FAFC")
@@ -227,6 +229,44 @@ public class CatalogController : ApiControllerBase
                 Message = ex.Message, 
                 InnerError = ex.InnerException?.ToString() 
             });
+        }
+    }
+
+    private static byte[] MakeBackgroundTransparent(string imagePath)
+    {
+        try
+        {
+            using var original = SkiaSharp.SKBitmap.Decode(imagePath);
+            if (original == null) return System.IO.File.ReadAllBytes(imagePath);
+
+            using var transparentBitmap = new SkiaSharp.SKBitmap(original.Width, original.Height, SkiaSharp.SKColorType.Rgba8888, SkiaSharp.SKAlphaType.Premul);
+            
+            using (var canvas = new SkiaSharp.SKCanvas(transparentBitmap))
+            {
+                canvas.Clear(SkiaSharp.SKColors.Transparent);
+                canvas.DrawBitmap(original, 0, 0);
+            }
+
+            // Remover fondo blanco o casi blanco (RGB >= 230) convirtiéndolo a transparente puro (Alpha = 0)
+            for (int y = 0; y < transparentBitmap.Height; y++)
+            {
+                for (int x = 0; x < transparentBitmap.Width; x++)
+                {
+                    var color = transparentBitmap.GetPixel(x, y);
+                    if (color.Red >= 230 && color.Green >= 230 && color.Blue >= 230)
+                    {
+                        transparentBitmap.SetPixel(x, y, SkiaSharp.SKColors.Transparent);
+                    }
+                }
+            }
+
+            using var image = SkiaSharp.SKImage.FromBitmap(transparentBitmap);
+            using var data = image.Encode(SkiaSharp.SKEncodedImageFormat.Png, 100);
+            return data.ToArray();
+        }
+        catch
+        {
+            return System.IO.File.ReadAllBytes(imagePath);
         }
     }
 }
