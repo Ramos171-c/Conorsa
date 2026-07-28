@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -1385,7 +1385,7 @@ public class DbInitializer : IDbInitializer
         // Restaurar explícitamente TO011, TO012, TO013 y TA011, TA012, TA013 por si fueron marcados como eliminados
         var toRestore = await _context.Products
             .IgnoreQueryFilters()
-            .Where(p => p.InternalCode == "TO011" || p.InternalCode == "TO012" || p.InternalCode == "TO013" ||
+            .Where(p => p.InternalCode == "TA011" || p.InternalCode == "TA012" || p.InternalCode == "TA013" ||
                         p.InternalCode == "TA011" || p.InternalCode == "TA012" || p.InternalCode == "TA013")
             .ToListAsync();
 
@@ -1719,3 +1719,4 @@ public class DbInitializer : IDbInitializer
         */
     }
 }
+
