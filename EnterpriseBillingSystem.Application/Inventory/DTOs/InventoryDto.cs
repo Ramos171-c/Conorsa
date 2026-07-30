@@ -10,6 +10,8 @@ public record InventoryDto(
     Guid ProductId,
     string ProductName,
     string ProductInternalCode,
+    string UnitOfMeasure,
+    string? ProductDescription,
     decimal PhysicalStock,
     decimal ReservedStock,
     decimal CommittedStock,

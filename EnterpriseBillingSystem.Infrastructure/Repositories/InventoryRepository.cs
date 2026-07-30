@@ -36,6 +36,7 @@ public class InventoryRepository : Repository<Inventory>, IInventoryRepository
             .Include(i => i.BranchWarehouse)
                 .ThenInclude(bw => bw.Branch)
             .Include(i => i.Product)
+                .ThenInclude(p => p.DefaultUnitOfMeasure)
             .AsNoTracking();
 
         if (branchWarehouseId.HasValue)

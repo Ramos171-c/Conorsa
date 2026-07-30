@@ -74,7 +74,8 @@
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Bodega" Binding="{Binding WarehouseName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Código" Binding="{Binding ProductInternalCode}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="Producto" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Producto / Descripción" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="70" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Stock Físico" Binding="{Binding PhysicalStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                         <DataGridTextColumn Header="Stock Reservado" Binding="{Binding ReservedStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                         <DataGridTextColumn Header="Stock Disponible" Binding="{Binding AvailableStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
