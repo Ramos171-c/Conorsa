@@ -54,7 +54,7 @@ public class CatalogController : ApiControllerBase
 
             var productsList = await Mediator.Send(new GetCatalogProductsQuery());
             var products = productsList.AsEnumerable()
-                .Where(p => p.Name != null && !p.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase));
+                .Where(p => p.Name != null);
                 
             if (categoryId.HasValue)
             {
