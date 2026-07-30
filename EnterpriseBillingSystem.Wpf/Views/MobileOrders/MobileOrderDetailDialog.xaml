@@ -194,7 +194,8 @@
                         <DataGridTemplateColumn Header="Cant. Pedida" Width="95">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding Quantity, StringFormat='{}{0:N2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <TextBox Text="{Binding Quantity, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N2}}" 
+                                             HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Margin="2,0" FontWeight="SemiBold" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
