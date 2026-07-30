@@ -52,7 +52,13 @@ public class InventoryApiClient
         return await response.Content.ReadFromJsonAsync<Guid>();
     }
 
-    public async Task<PagedResult<InventoryDto>?> GetStockInquiryAsync(Guid? branchWarehouseId, Guid? productId, int page, int pageSize)
+    public async Task<PagedResult<InventoryDto>?> GetStockInquiryAsync(
+        Guid? branchWarehouseId = null, 
+        Guid? productId = null, 
+        int page = 1, 
+        int pageSize = 10,
+        Guid? categoryId = null, 
+        string? searchTerm = null)
     {
         var url = $"Inventory/stock?pageNumber={page}&pageSize={pageSize}";
         if (branchWarehouseId.HasValue)
@@ -62,6 +68,14 @@ public class InventoryApiClient
         if (productId.HasValue)
         {
             url += $"&productId={productId.Value}";
+        }
+        if (categoryId.HasValue)
+        {
+            url += $"&categoryId={categoryId.Value}";
+        }
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            url += $"&searchTerm={Uri.EscapeDataString(searchTerm)}";
         }
         return await _httpClient.GetFromJsonAsync<PagedResult<InventoryDto>>(url);
     }

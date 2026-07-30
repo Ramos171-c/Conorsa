@@ -13,6 +13,8 @@ namespace EnterpriseBillingSystem.Application.Inventory.Queries;
 public record GetStockInquiryQuery(
     Guid? BranchWarehouseId,
     Guid? ProductId,
+    Guid? CategoryId = null,
+    string? SearchTerm = null,
     int PageNumber = 1,
     int PageSize = 10
 ) : IRequest<PagedResult<InventoryDto>>;
@@ -31,6 +33,8 @@ public class GetStockInquiryQueryHandler : IRequestHandler<GetStockInquiryQuery,
         var (items, totalCount) = await _inventoryRepository.GetStockInquiryAsync(
             request.BranchWarehouseId,
             request.ProductId,
+            request.CategoryId,
+            request.SearchTerm,
             request.PageNumber,
             request.PageSize,
             cancellationToken);

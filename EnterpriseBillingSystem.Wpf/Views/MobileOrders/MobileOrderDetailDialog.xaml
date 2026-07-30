@@ -237,7 +237,8 @@
                         <DataGridTemplateColumn Header="Precio Unit." Width="105">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding UnitPrice, StringFormat='{}{0:C2}'}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                                    <TextBox Text="{Binding UnitPrice, UpdateSourceTrigger=PropertyChanged, StringFormat={}{0:N2}}" 
+                                             HorizontalContentAlignment="Right" VerticalContentAlignment="Center" Margin="2,0" FontWeight="SemiBold" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

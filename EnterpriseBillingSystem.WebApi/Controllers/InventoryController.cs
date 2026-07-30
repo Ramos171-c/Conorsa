@@ -57,10 +57,12 @@ public class InventoryController : ApiControllerBase
     public async Task<ActionResult<PagedResult<InventoryDto>>> GetStockInquiry(
         [FromQuery] Guid? branchWarehouseId,
         [FromQuery] Guid? productId,
+        [FromQuery] Guid? categoryId,
+        [FromQuery] string? searchTerm,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 10)
     {
-        var result = await Mediator.Send(new GetStockInquiryQuery(branchWarehouseId, productId, pageNumber, pageSize));
+        var result = await Mediator.Send(new GetStockInquiryQuery(branchWarehouseId, productId, categoryId, searchTerm, pageNumber, pageSize));
         return Ok(result);
     }
 

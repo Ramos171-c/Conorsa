@@ -41,8 +41,10 @@
         <materialDesign:Card Grid.Row="1" Margin="0,0,0,16" Padding="16" materialDesign:ElevationAssist.Elevation="Dp1">
             <Grid>
                 <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="200" />
+                    <ColumnDefinition Width="200" />
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <ComboBox Grid.Column="0" ItemsSource="{Binding Warehouses}" 
@@ -53,13 +55,26 @@
                           Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                           Margin="0,0,8,0" />
 
-                <ComboBox Grid.Column="1" ItemsSource="{Binding Products}" 
-                          SelectedValue="{Binding SelectedProductId}" 
+                <ComboBox Grid.Column="1" ItemsSource="{Binding Categories}" 
+                          SelectedValue="{Binding SelectedCategoryId}" 
                           SelectedValuePath="Id" 
                           DisplayMemberPath="Name" 
-                          materialDesign:HintAssist.Hint="Producto"
+                          materialDesign:HintAssist.Hint="Categoría"
                           Style="{StaticResource MaterialDesignOutlinedComboBox}" 
-                          Margin="8,0,0,0" />
+                          Margin="8,0,8,0" />
+
+                <TextBox Grid.Column="2" 
+                         Text="{Binding SearchTerm, UpdateSourceTrigger=PropertyChanged}" 
+                         materialDesign:HintAssist.Hint="Buscar por Código o Nombre de Producto..."
+                         Style="{StaticResource MaterialDesignOutlinedTextBox}"
+                         materialDesign:TextFieldAssist.HasClearButton="True"
+                         Margin="8,0,8,0" />
+
+                <Button Grid.Column="3" 
+                        Command="{Binding RefreshCommand}" 
+                        Style="{StaticResource MaterialDesignOutlinedButton}" 
+                        Content="Actualizar" 
+                        Margin="8,0,0,0" />
             </Grid>
         </materialDesign:Card>
 
@@ -72,13 +87,30 @@
 
                 <DataGrid ItemsSource="{Binding StockItems}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column">
                     <DataGrid.Columns>
-                        <DataGridTextColumn Header="Bodega" Binding="{Binding WarehouseName}" Width="150" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="Código" Binding="{Binding ProductInternalCode}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Bodega" Binding="{Binding WarehouseName}" Width="140" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
+                        <DataGridTextColumn Header="Código" Binding="{Binding ProductInternalCode}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Producto / Descripción" Binding="{Binding ProductName}" Width="*" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="U.M." Binding="{Binding UnitOfMeasure}" Width="70" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
-                        <DataGridTextColumn Header="Stock Físico" Binding="{Binding PhysicalStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Stock Reservado" Binding="{Binding ReservedStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                        <DataGridTextColumn Header="Stock Disponible" Binding="{Binding AvailableStock, StringFormat={}{0:N2}}" Width="120" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                        <DataGridTextColumn Header="Stock Físico" Binding="{Binding PhysicalStock, StringFormat={}{0:N2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                        <DataGridTextColumn Header="Stock Reservado" Binding="{Binding ReservedStock, StringFormat={}{0:N2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                        <DataGridTextColumn Header="Stock Disponible" Binding="{Binding AvailableStock, StringFormat={}{0:N2}}" Width="110" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                        
+                        <DataGridTemplateColumn Header="Acciones" Width="100">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Button Command="{Binding DataContext.EditStockCommand, RelativeSource={RelativeSource AncestorType=DataGrid}}"
+                                            CommandParameter="{Binding}"
+                                            Style="{StaticResource MaterialDesignOutlinedButton}"
+                                            Padding="6,2" Height="28" FontSize="11"
+                                            ToolTip="Editar Existencia Física Directamente">
+                                        <StackPanel Orientation="Horizontal">
+                                            <materialDesign:PackIcon Kind="Pencil" Width="14" Height="14" VerticalAlignment="Center" Margin="0,0,4,0" />
+                                            <TextBlock Text="Editar" VerticalAlignment="Center" />
+                                        </StackPanel>
+                                    </Button>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
                     </DataGrid.Columns>
                 </DataGrid>
             </Grid>

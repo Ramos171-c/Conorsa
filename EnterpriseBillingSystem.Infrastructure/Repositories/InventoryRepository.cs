@@ -26,6 +26,8 @@ public class InventoryRepository : Repository<Inventory>, IInventoryRepository
     public async Task<(IEnumerable<Inventory> Items, int TotalCount)> GetStockInquiryAsync(
         Guid? branchWarehouseId,
         Guid? productId,
+        Guid? categoryId,
+        string? searchTerm,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken = default)
@@ -47,6 +49,18 @@ public class InventoryRepository : Repository<Inventory>, IInventoryRepository
         if (productId.HasValue)
         {
             query = query.Where(i => i.ProductId == productId.Value);
+        }
+
+        if (categoryId.HasValue)
+        {
+            query = query.Where(i => i.Product.CategoryId == categoryId.Value);
+        }
+
+        if (!string.IsNullOrWhiteSpace(searchTerm))
+        {
+            query = query.Where(i => i.Product.Name.Contains(searchTerm) ||
+                                     i.Product.InternalCode.Contains(searchTerm) ||
+                                     (i.Product.Description != null && i.Product.Description.Contains(searchTerm)));
         }
 
         int totalCount = await query.CountAsync(cancellationToken);

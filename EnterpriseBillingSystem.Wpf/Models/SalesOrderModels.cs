@@ -26,7 +26,20 @@ public class SalesOrderDetailItemDto : CommunityToolkit.Mvvm.ComponentModel.Obse
     public Guid UnitOfMeasureId { get; set; }
     public string UnitOfMeasure { get; set; } = string.Empty;
     public decimal Quantity { get; set; }
-    public decimal UnitPrice { get; set; }
+    
+    private decimal _unitPrice;
+    public decimal UnitPrice
+    {
+        get => _unitPrice;
+        set
+        {
+            if (SetProperty(ref _unitPrice, value))
+            {
+                OnPropertyChanged(nameof(EffectiveNetAmount));
+            }
+        }
+    }
+
     public decimal DiscountPercentage { get; set; }
     public decimal DiscountAmount { get; set; }
     public decimal TaxPercentage { get; set; }

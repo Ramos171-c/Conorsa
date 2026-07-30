@@ -90,7 +90,9 @@ public class AdjustInventoryCommandHandler : IRequestHandler<AdjustInventoryComm
             throw new InvalidOperationException("El producto especificado no maneja control de inventario.");
 
         // 3. Obtener presentación
-        var presentation = product.Presentations.FirstOrDefault(p => p.Id == request.ProductPresentationId);
+        var presentation = product.Presentations.FirstOrDefault(p => p.Id == request.ProductPresentationId)
+            ?? product.Presentations.FirstOrDefault(p => p.IsDefaultSalePresentation)
+            ?? product.Presentations.FirstOrDefault();
         if (presentation == null)
             throw new ArgumentException("La presentación especificada no existe para este producto.");
         if (!presentation.IsActive)

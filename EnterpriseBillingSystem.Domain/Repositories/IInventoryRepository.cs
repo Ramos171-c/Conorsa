@@ -12,6 +12,8 @@ public interface IInventoryRepository : IRepository<Inventory>
     Task<(IEnumerable<Inventory> Items, int TotalCount)> GetStockInquiryAsync(
         Guid? branchWarehouseId,
         Guid? productId,
+        Guid? categoryId,
+        string? searchTerm,
         int pageNumber,
         int pageSize,
         CancellationToken cancellationToken = default);
