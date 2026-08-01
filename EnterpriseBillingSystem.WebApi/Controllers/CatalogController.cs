@@ -253,28 +253,94 @@ public class CatalogController : ApiControllerBase
             using var original = SkiaSharp.SKBitmap.Decode(imagePath);
             if (original == null) return System.IO.File.ReadAllBytes(imagePath);
 
-            using var transparentBitmap = new SkiaSharp.SKBitmap(original.Width, original.Height, SkiaSharp.SKColorType.Rgba8888, SkiaSharp.SKAlphaType.Premul);
-            
-            using (var canvas = new SkiaSharp.SKCanvas(transparentBitmap))
+            int width = original.Width;
+            int height = original.Height;
+
+            using var resultBitmap = new SkiaSharp.SKBitmap(width, height, SkiaSharp.SKColorType.Rgba8888, SkiaSharp.SKAlphaType.Premul);
+
+            using (var canvas = new SkiaSharp.SKCanvas(resultBitmap))
             {
                 canvas.Clear(SkiaSharp.SKColors.Transparent);
                 canvas.DrawBitmap(original, 0, 0);
             }
 
-            // Remover fondo blanco o casi blanco (RGB >= 230) convirtiéndolo a transparente puro (Alpha = 0)
-            for (int y = 0; y < transparentBitmap.Height; y++)
+            // Algoritmo de Flood-Fill desde el perímetro para eliminar fondos claros, oscuros y neutros
+            bool[,] visited = new bool[width, height];
+            var queue = new Queue<SkiaSharp.SKPointI>();
+
+            // Agregar todo el perímetro exterior a la cola de Flood-Fill
+            for (int x = 0; x < width; x++)
             {
-                for (int x = 0; x < transparentBitmap.Width; x++)
+                queue.Enqueue(new SkiaSharp.SKPointI(x, 0));
+                queue.Enqueue(new SkiaSharp.SKPointI(x, height - 1));
+            }
+            for (int y = 0; y < height; y++)
+            {
+                queue.Enqueue(new SkiaSharp.SKPointI(0, y));
+                queue.Enqueue(new SkiaSharp.SKPointI(width - 1, y));
+            }
+
+            // Criterio agresivo de detección de fondo:
+            // a) Fondos Blancos/Claros/Cremas (R >= 195 && G >= 195 && B >= 195)
+            // b) Fondos Negros/Oscuros (R <= 50 && G <= 50 && B <= 50)
+            // c) Fondos neutros monocromáticos (diferencia max de canales <= 25 && (R >= 170 || R <= 60))
+            static bool IsBackgroundColor(SkiaSharp.SKColor c)
+            {
+                bool isWhiteOrLight = c.Red >= 195 && c.Green >= 195 && c.Blue >= 195;
+                bool isBlackOrDark = c.Red <= 50 && c.Green <= 50 && c.Blue <= 50;
+                int maxDiff = Math.Max(Math.Abs(c.Red - c.Green), Math.Max(Math.Abs(c.Green - c.Blue), Math.Abs(c.Red - c.Blue)));
+                bool isMonochromeNeutral = maxDiff <= 25 && (c.Red >= 170 || c.Red <= 60);
+
+                return isWhiteOrLight || isBlackOrDark || isMonochromeNeutral;
+            }
+
+            while (queue.Count > 0)
+            {
+                var p = queue.Dequeue();
+                int px = p.X;
+                int py = p.Y;
+
+                if (px < 0 || px >= width || py < 0 || py >= height) continue;
+                if (visited[px, py]) continue;
+
+                visited[px, py] = true;
+
+                var pixelColor = resultBitmap.GetPixel(px, py);
+
+                if (IsBackgroundColor(pixelColor))
                 {
-                    var color = transparentBitmap.GetPixel(x, y);
-                    if (color.Red >= 230 && color.Green >= 230 && color.Blue >= 230)
+                    resultBitmap.SetPixel(px, py, SkiaSharp.SKColors.Transparent);
+
+                    // Expandir a píxeles vecinos (4 direcciones)
+                    if (px > 0 && !visited[px - 1, py]) queue.Enqueue(new SkiaSharp.SKPointI(px - 1, py));
+                    if (px < width - 1 && !visited[px + 1, py]) queue.Enqueue(new SkiaSharp.SKPointI(px + 1, py));
+                    if (py > 0 && !visited[px, py - 1]) queue.Enqueue(new SkiaSharp.SKPointI(px, py - 1));
+                    if (py < height - 1 && !visited[px, py + 1]) queue.Enqueue(new SkiaSharp.SKPointI(px, py + 1));
+                }
+            }
+
+            // Segunda pasada: Limpieza agresiva de remanentes de bordes externos (12% del margen perimetral)
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    var c = resultBitmap.GetPixel(x, y);
+                    if (c.Alpha > 0)
                     {
-                        transparentBitmap.SetPixel(x, y, SkiaSharp.SKColors.Transparent);
+                        bool isLightBorder = c.Red >= 210 && c.Green >= 210 && c.Blue >= 210;
+                        bool isDarkBorder = c.Red <= 40 && c.Green <= 40 && c.Blue <= 40;
+                        if (isLightBorder || isDarkBorder)
+                        {
+                            if (x < width * 0.12 || x > width * 0.88 || y < height * 0.12 || y > height * 0.88)
+                            {
+                                resultBitmap.SetPixel(x, y, SkiaSharp.SKColors.Transparent);
+                            }
+                        }
                     }
                 }
             }
 
-            using var image = SkiaSharp.SKImage.FromBitmap(transparentBitmap);
+            using var image = SkiaSharp.SKImage.FromBitmap(resultBitmap);
             using var data = image.Encode(SkiaSharp.SKEncodedImageFormat.Png, 100);
             return data.ToArray();
         }
