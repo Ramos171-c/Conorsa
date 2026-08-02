@@ -68,7 +68,7 @@ public partial class LoginViewModel : ViewModelBase
         }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error: {ex.Message}";
+            ErrorMessage = ex.Message;
             _notificationService.ShowError(ErrorMessage);
         }
         finally
