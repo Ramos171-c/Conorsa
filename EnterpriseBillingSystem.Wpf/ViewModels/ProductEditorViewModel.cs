@@ -196,6 +196,16 @@ public partial class ProductEditorViewModel : ViewModelBase
     private bool _autoMarkSoldOut = true;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(IsHidden))]
+    private bool _isActive = true;
+
+    public bool IsHidden
+    {
+        get => !IsActive;
+        set => IsActive = !value;
+    }
+
+    [ObservableProperty]
     private Guid _taxId;
 
     [ObservableProperty]
@@ -281,6 +291,7 @@ public partial class ProductEditorViewModel : ViewModelBase
             CatalogBadge = product.CatalogBadge;
             DisplayOrder = product.DisplayOrder;
             AutoMarkSoldOut = product.AutoMarkSoldOut;
+            IsActive = product.IsActive;
         }
     }
 
@@ -414,6 +425,60 @@ public partial class ProductEditorViewModel : ViewModelBase
         SelectedImageBytes = null;
         SelectedImageFileName = null;
         ImagePath = null;
+    }
+
+    [RelayCommand]
+    private void RotateImage()
+    {
+        try
+        {
+            byte[]? currentBytes = SelectedImageBytes;
+            if (currentBytes == null && !string.IsNullOrWhiteSpace(ImagePath))
+            {
+                if (File.Exists(ImagePath))
+                {
+                    currentBytes = File.ReadAllBytes(ImagePath);
+                }
+                else if (ImagePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                {
+                    using var httpClient = new System.Net.Http.HttpClient();
+                    currentBytes = httpClient.GetByteArrayAsync(ImagePath).GetAwaiter().GetResult();
+                }
+            }
+
+            if (currentBytes == null || currentBytes.Length == 0) return;
+
+            using var ms = new MemoryStream(currentBytes);
+            var decoder = System.Windows.Media.Imaging.BitmapDecoder.Create(
+                ms,
+                System.Windows.Media.Imaging.BitmapCreateOptions.None,
+                System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+
+            var frame = decoder.Frames[0];
+
+            // Rotate 90 degrees Clockwise using native WPF TransformedBitmap
+            var rotatedBitmap = new System.Windows.Media.Imaging.TransformedBitmap(
+                frame,
+                new System.Windows.Media.RotateTransform(90));
+
+            var encoder = new System.Windows.Media.Imaging.JpegBitmapEncoder { QualityLevel = 85 };
+            encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(rotatedBitmap));
+
+            using var outMs = new MemoryStream();
+            encoder.Save(outMs);
+
+            SelectedImageBytes = outMs.ToArray();
+            SelectedImageFileName = $"rotated_{DateTime.UtcNow.Ticks}.jpg";
+
+            // Save temp file for WPF preview
+            var tempFile = Path.Combine(Path.GetTempPath(), $"preview_{Guid.NewGuid()}.jpg");
+            File.WriteAllBytes(tempFile, SelectedImageBytes);
+            ImagePath = tempFile;
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al rotar la imagen: {ex.Message}");
+        }
     }
 
     [RelayCommand]
@@ -630,7 +695,7 @@ public partial class ProductEditorViewModel : ViewModelBase
                     AutoMarkSoldOut,
                     TaxId,
                     PriceChangeReason,
-                    IsActive = true,
+                    IsActive = IsActive,
                     Presentations = presentationsPayload,
                     BranchOverrides = new List<object>()
                 };
@@ -640,7 +705,11 @@ public partial class ProductEditorViewModel : ViewModelBase
                 {
                     if (SelectedImageBytes != null && SelectedImageFileName != null)
                     {
-                        await _productApiClient.UploadImageAsync(_originalProduct.Id, SelectedImageBytes, SelectedImageFileName);
+                        var newImageUrl = await _productApiClient.UploadImageAsync(_originalProduct.Id, SelectedImageBytes, SelectedImageFileName);
+                        if (!string.IsNullOrWhiteSpace(newImageUrl))
+                        {
+                            ImagePath = newImageUrl;
+                        }
                     }
                     else if (ImagePath == null && _originalProduct.ImagePath != null)
                     {
@@ -684,7 +753,7 @@ public partial class ProductEditorViewModel : ViewModelBase
                     DisplayOrder,
                     AutoMarkSoldOut,
                     TaxId,
-                    IsActive = true,
+                    IsActive = IsActive,
                     Presentations = presentationsPayload,
                     BranchOverrides = new List<object>()
                 };

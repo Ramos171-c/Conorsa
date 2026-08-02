@@ -162,7 +162,105 @@ public class ProductsController : ApiControllerBase
         return Ok(result);
     }
 
+    private byte[] CompressImage(byte[] imageBytes, string fileName)
+    {
+        try
+        {
+            var ext = Path.GetExtension(fileName).ToLower();
+            if (ext == ".gif") return imageBytes; // Conservar GIFs animados intactos
 
+            using var ms = new MemoryStream(imageBytes);
+            using var codec = SkiaSharp.SKCodec.Create(ms);
+            if (codec == null) return imageBytes;
+
+            using var decodedBitmap = SkiaSharp.SKBitmap.Decode(codec);
+            if (decodedBitmap == null) return imageBytes;
+
+            // Corregir orientación EXIF automática para que las fotos tomadas en vertical u horizontal salgan en su posición correcta
+            using var originalBitmap = AutoOrientBitmap(decodedBitmap, codec.EncodedOrigin);
+
+            int maxDimension = 800; // Resolución óptima para dispositivos móviles
+            int width = originalBitmap.Width;
+            int height = originalBitmap.Height;
+
+            if (width > maxDimension || height > maxDimension)
+            {
+                if (width > height)
+                {
+                    height = (int)(height * ((double)maxDimension / width));
+                    width = maxDimension;
+                }
+                else
+                {
+                    width = (int)(width * ((double)maxDimension / height));
+                    height = maxDimension;
+                }
+
+                using var resizedBitmap = originalBitmap.Resize(new SkiaSharp.SKImageInfo(width, height), new SkiaSharp.SKSamplingOptions(SkiaSharp.SKFilterMode.Linear));
+                if (resizedBitmap == null) return imageBytes;
+
+                using var image = SkiaSharp.SKImage.FromBitmap(resizedBitmap);
+                using var data = image.Encode(SkiaSharp.SKEncodedImageFormat.Jpeg, 75); // 75% calidad Jpeg (ideal balance peso/nitidez)
+                return data.ToArray();
+            }
+            else
+            {
+                using var image = SkiaSharp.SKImage.FromBitmap(originalBitmap);
+                using var data = image.Encode(SkiaSharp.SKEncodedImageFormat.Jpeg, 75);
+                return data.ToArray();
+            }
+        }
+        catch
+        {
+            return imageBytes; // Si ocurre algún error, salvaguardar la imagen original
+        }
+    }
+
+    private SkiaSharp.SKBitmap AutoOrientBitmap(SkiaSharp.SKBitmap bitmap, SkiaSharp.SKEncodedOrigin origin)
+    {
+        switch (origin)
+        {
+            case SkiaSharp.SKEncodedOrigin.RightTop: // 90 grados CW (Foto vertical de teléfono)
+                return RotateBitmap(bitmap, 90);
+            case SkiaSharp.SKEncodedOrigin.BottomRight: // 180 grados
+                return RotateBitmap(bitmap, 180);
+            case SkiaSharp.SKEncodedOrigin.LeftBottom: // 270 grados CW / 90 CCW
+                return RotateBitmap(bitmap, 270);
+            case SkiaSharp.SKEncodedOrigin.TopRight: // Flip Horizontal
+                return RotateBitmap(bitmap, 0, flipHorizontal: true);
+            case SkiaSharp.SKEncodedOrigin.BottomLeft: // Flip Vertical
+                return RotateBitmap(bitmap, 180, flipHorizontal: true);
+            case SkiaSharp.SKEncodedOrigin.LeftTop:
+                return RotateBitmap(bitmap, 90, flipHorizontal: true);
+            case SkiaSharp.SKEncodedOrigin.RightBottom:
+                return RotateBitmap(bitmap, 270, flipHorizontal: true);
+            default:
+                return bitmap.Copy();
+        }
+    }
+
+    private SkiaSharp.SKBitmap RotateBitmap(SkiaSharp.SKBitmap bitmap, int degrees, bool flipHorizontal = false)
+    {
+        bool swapDimensions = degrees == 90 || degrees == 270;
+        int newWidth = swapDimensions ? bitmap.Height : bitmap.Width;
+        int newHeight = swapDimensions ? bitmap.Width : bitmap.Height;
+
+        var rotated = new SkiaSharp.SKBitmap(newWidth, newHeight);
+        using var canvas = new SkiaSharp.SKCanvas(rotated);
+        canvas.Clear(SkiaSharp.SKColors.Transparent);
+        canvas.Translate(newWidth / 2f, newHeight / 2f);
+        if (degrees != 0)
+        {
+            canvas.RotateDegrees(degrees);
+        }
+        if (flipHorizontal)
+        {
+            canvas.Scale(-1, 1);
+        }
+        canvas.Translate(-bitmap.Width / 2f, -bitmap.Height / 2f);
+        canvas.DrawBitmap(bitmap, 0, 0);
+        return rotated;
+    }
     private string GetAbsoluteUrl(string? relativePath)
     {
         var baseUri = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";

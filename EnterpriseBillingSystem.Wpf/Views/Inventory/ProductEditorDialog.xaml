@@ -5,10 +5,10 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="{Binding Title}" Height="680" Width="800"
+        Title="{Binding Title}" Height="700" Width="880"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
-        ResizeMode="NoResize"
+        ResizeMode="CanResizeWithGrip"
         Background="{DynamicResource MaterialDesignPaper}"
         TextElement.Foreground="{DynamicResource MaterialDesignBody}"
         TextElement.FontWeight="Medium"
@@ -69,6 +69,13 @@
                         <StackPanel Orientation="Horizontal">
                             <materialDesign:PackIcon Kind="Upload" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" />
                             <TextBlock Text="Subir Imagen" VerticalAlignment="Center" />
+                        </StackPanel>
+                    </Button>
+
+                    <Button Command="{Binding RotateImageCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,0,8" Width="160" ToolTip="Girar la imagen 90° en sentido horario">
+                        <StackPanel Orientation="Horizontal">
+                            <materialDesign:PackIcon Kind="RotateRight" Width="16" Height="16" Margin="0,0,8,0" VerticalAlignment="Center" />
+                            <TextBlock Text="Rotar 90°" VerticalAlignment="Center" />
                         </StackPanel>
                     </Button>
 
@@ -262,13 +269,14 @@
                 </Grid.ColumnDefinitions>
 
                 <!-- Checkboxes group -->
-                <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <CheckBox Content="Visible Catálogo" IsChecked="{Binding IsCatalogVisible}" Margin="0,0,12,0" />
-                    <CheckBox Content="Destacar Catálogo" IsChecked="{Binding HighlightInCatalog}" Margin="0,0,12,0" />
-                    <CheckBox Content="Auto Agotar" IsChecked="{Binding AutoMarkSoldOut}" Margin="0,0,12,0" />
-                    <CheckBox Content="Agotado" IsChecked="{Binding IsSoldOut}" Margin="0,0,12,0" Foreground="Red" />
-                    <CheckBox Content="Favorito POS" IsChecked="{Binding IsFavorite}" Foreground="Orange" />
-                </StackPanel>
+                <WrapPanel Grid.Column="0" VerticalAlignment="Center" Margin="0,0,12,0">
+                    <CheckBox Content="Visible Catálogo" IsChecked="{Binding IsCatalogVisible}" Margin="0,4,16,4" ToolTip="Muestra el producto en el catálogo" />
+                    <CheckBox Content="Destacar Catálogo" IsChecked="{Binding HighlightInCatalog}" Margin="0,4,16,4" ToolTip="Destaca el producto en la portada del catálogo" />
+                    <CheckBox Content="Auto Agotar" IsChecked="{Binding AutoMarkSoldOut}" Margin="0,4,16,4" ToolTip="Marca como agotado automáticamente cuando el stock es 0" />
+                    <CheckBox Content="Agotado" IsChecked="{Binding IsSoldOut}" Margin="0,4,16,4" Foreground="Red" ToolTip="Marca el producto como agotado en el catálogo" />
+                    <CheckBox Content="Favorito POS" IsChecked="{Binding IsFavorite}" Margin="0,4,16,4" Foreground="Orange" ToolTip="Marca como favorito en la pantalla de ventas (POS)" />
+                    <CheckBox Content="Ocultar Producto (Inactivo)" IsChecked="{Binding IsHidden}" Margin="0,4,16,4" Foreground="#D32F2F" FontWeight="SemiBold" ToolTip="Oculta totalmente el producto del catálogo y POS como si estuviera eliminado" />
+                </WrapPanel>
 
                 <StackPanel Grid.Column="1" Orientation="Horizontal">
                     <Button Command="{Binding CancelCommand}" Style="{StaticResource MaterialDesignOutlinedButton}" Margin="0,0,12,0" Width="100">

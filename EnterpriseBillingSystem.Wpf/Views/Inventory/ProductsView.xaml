@@ -102,34 +102,57 @@
                                 <DataTemplate>
                                     <StackPanel Orientation="Horizontal">
                                         <Border CornerRadius="4" Padding="6,2" VerticalAlignment="Center">
-                                            <Border.Style>
-                                                <Style TargetType="Border">
-                                                    <Style.Triggers>
-                                                        <DataTrigger Binding="{Binding IsSoldOut}" Value="True">
-                                                            <Setter Property="Background" Value="#FFCDD2" />
-                                                        </DataTrigger>
-                                                        <DataTrigger Binding="{Binding IsSoldOut}" Value="False">
-                                                            <Setter Property="Background" Value="#C8E6C9" />
-                                                        </DataTrigger>
-                                                    </Style.Triggers>
-                                                </Style>
-                                            </Border.Style>
-                                            <TextBlock FontWeight="Bold" FontSize="11">
-                                                <TextBlock.Style>
-                                                    <Style TargetType="TextBlock">
-                                                        <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsSoldOut}" Value="True">
-                                                                <Setter Property="Text" Value="AGOTADO" />
-                                                                <Setter Property="Foreground" Value="Red" />
-                                                            </DataTrigger>
-                                                            <DataTrigger Binding="{Binding IsSoldOut}" Value="False">
-                                                                <Setter Property="Text" Value="DISPONIBLE" />
-                                                                <Setter Property="Foreground" Value="Green" />
-                                                            </DataTrigger>
-                                                        </Style.Triggers>
-                                                    </Style>
-                                                </TextBlock.Style>
-                                            </TextBlock>
+                                             <Border.Style>
+                                                 <Style TargetType="Border">
+                                                     <Style.Triggers>
+                                                         <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                             <Setter Property="Background" Value="#E0E0E0" />
+                                                         </DataTrigger>
+                                                         <MultiDataTrigger>
+                                                             <MultiDataTrigger.Conditions>
+                                                                 <Condition Binding="{Binding IsActive}" Value="True" />
+                                                                 <Condition Binding="{Binding IsSoldOut}" Value="True" />
+                                                             </MultiDataTrigger.Conditions>
+                                                             <Setter Property="Background" Value="#FFCDD2" />
+                                                         </MultiDataTrigger>
+                                                         <MultiDataTrigger>
+                                                             <MultiDataTrigger.Conditions>
+                                                                 <Condition Binding="{Binding IsActive}" Value="True" />
+                                                                 <Condition Binding="{Binding IsSoldOut}" Value="False" />
+                                                             </MultiDataTrigger.Conditions>
+                                                             <Setter Property="Background" Value="#C8E6C9" />
+                                                         </MultiDataTrigger>
+                                                     </Style.Triggers>
+                                                 </Style>
+                                             </Border.Style>
+                                             <TextBlock FontWeight="Bold" FontSize="11">
+                                                 <TextBlock.Style>
+                                                     <Style TargetType="TextBlock">
+                                                         <Style.Triggers>
+                                                             <DataTrigger Binding="{Binding IsActive}" Value="False">
+                                                                 <Setter Property="Text" Value="OCULTO" />
+                                                                 <Setter Property="Foreground" Value="#616161" />
+                                                             </DataTrigger>
+                                                             <MultiDataTrigger>
+                                                                 <MultiDataTrigger.Conditions>
+                                                                     <Condition Binding="{Binding IsActive}" Value="True" />
+                                                                     <Condition Binding="{Binding IsSoldOut}" Value="True" />
+                                                                 </MultiDataTrigger.Conditions>
+                                                                 <Setter Property="Text" Value="AGOTADO" />
+                                                                 <Setter Property="Foreground" Value="Red" />
+                                                             </MultiDataTrigger>
+                                                             <MultiDataTrigger>
+                                                                 <MultiDataTrigger.Conditions>
+                                                                     <Condition Binding="{Binding IsActive}" Value="True" />
+                                                                     <Condition Binding="{Binding IsSoldOut}" Value="False" />
+                                                                 </MultiDataTrigger.Conditions>
+                                                                 <Setter Property="Text" Value="DISPONIBLE" />
+                                                                 <Setter Property="Foreground" Value="Green" />
+                                                             </MultiDataTrigger>
+                                                         </Style.Triggers>
+                                                     </Style>
+                                                 </TextBlock.Style>
+                                             </TextBlock>
                                         </Border>
                                     </StackPanel>
                                 </DataTemplate>
