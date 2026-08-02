@@ -477,8 +477,8 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
 
             var sec = new System.Windows.Documents.Section();
 
-            // Header - LA UNIÓN
-            var headerPara = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("        LA UNIÓN\n"))
+            // Header - La Union
+            var headerPara = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("        La Union\n"))
             {
                 FontSize = 18,
                 FontWeight = FontWeights.Bold,
