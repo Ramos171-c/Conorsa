@@ -39,8 +39,9 @@ public record CreateProductCommand(
     int DisplayOrder,
     bool AutoMarkSoldOut,
     Guid TaxId,
-    ICollection<ProductPresentationInputDto> Presentations,
-    ICollection<CreateBranchProductOverrideDto> BranchOverrides
+    bool IsActive = true,
+    ICollection<ProductPresentationInputDto> Presentations = null!,
+    ICollection<CreateBranchProductOverrideDto> BranchOverrides = null!
 ) : IRequest<Guid>;
 
 public record CreateBranchProductOverrideDto(
@@ -295,7 +296,7 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
             DisplayOrder = request.DisplayOrder,
             AutoMarkSoldOut = request.AutoMarkSoldOut,
             TaxId = request.TaxId,
-            IsActive = true
+            IsActive = request.IsActive
         };
 
         if (request.Presentations != null)
