@@ -1466,10 +1466,16 @@ public class DbInitializer : IDbInitializer
                 categoriesCache[categoryName] = cat;
             }
 
-            var existingProduct = await _context.Products
-                .Include(p => p.Presentations)
-                .IgnoreQueryFilters()
-                .FirstOrDefaultAsync(p => p.InternalCode == data.Code);
+            var existingProduct = _context.Products.Local
+                .FirstOrDefault(p => p.InternalCode == data.Code);
+
+            if (existingProduct == null)
+            {
+                existingProduct = await _context.Products
+                    .Include(p => p.Presentations)
+                    .IgnoreQueryFilters()
+                    .FirstOrDefaultAsync(p => p.InternalCode == data.Code);
+            }
 
             var uomDetalle = uomUnd;
             var uomSemimayorista = await GetOrCreateUomAsync(data.SemiUe ?? "1x1");

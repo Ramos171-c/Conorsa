@@ -255,7 +255,7 @@
     "SemiUe": "1X4"
   },
   {
-    "Code": "LU015",
+    "Code": "LU015-A",
     "Name": "P H NUBE BLANCA",
     "CategoryName": "Papel Higienico",
     "Ue": "1X24",
@@ -272,7 +272,7 @@
     "SemiUe": "1x1"
   },
   {
-    "Code": "LU015",
+    "Code": "LU015-B",
     "Name": "P H NUBE BLANCA",
     "CategoryName": "Papel Higienico",
     "Ue": "1X6X8",
@@ -306,7 +306,7 @@
     "SemiUe": "1X4"
   },
   {
-    "Code": "LU018",
+    "Code": "LU018-A",
     "Name": "P H ROSAL VINO TINTO",
     "CategoryName": "Papel Higienico",
     "Ue": "1X24",
