@@ -29,10 +29,14 @@ public record GetSalesOrderConsolidatedProductsQuery(
 public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<GetSalesOrderConsolidatedProductsQuery, IEnumerable<ConsolidatedProductDto>>
 {
     private readonly ISalesOrderRepository _repository;
+    private readonly IInventoryRepository _inventoryRepository;
 
-    public GetSalesOrderConsolidatedProductsQueryHandler(ISalesOrderRepository repository)
+    public GetSalesOrderConsolidatedProductsQueryHandler(
+        ISalesOrderRepository repository,
+        IInventoryRepository inventoryRepository)
     {
         _repository = repository;
+        _inventoryRepository = inventoryRepository;
     }
 
     public async Task<IEnumerable<ConsolidatedProductDto>> Handle(GetSalesOrderConsolidatedProductsQuery request, CancellationToken cancellationToken)
@@ -40,31 +44,163 @@ public class GetSalesOrderConsolidatedProductsQueryHandler : IRequestHandler<Get
         var orders = await _repository.GetFilteredWithDetailsAsync(
             request.CustomerId, request.Status, request.FromDate, request.ToDate, request.RouteId, cancellationToken);
 
-        var consolidated = orders
+        var detailsGrouped = orders
             .SelectMany(o => o.Details)
-            .GroupBy(d => new { d.ProductId, Code = d.Product?.InternalCode ?? string.Empty, Name = d.Product?.Name ?? "Producto Desconocido", Uom = d.UnitOfMeasure?.Code ?? string.Empty })
-            .Select(g => {
-                var totalQuantity = g.Sum(x => x.Quantity);
-                var totalNetAmount = g.Sum(x => x.NetAmount);
-                var totalCost = g.Sum(d => {
-                    var presentation = d.Product?.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == d.UnitOfMeasureId);
-                    var unitCost = presentation != null ? presentation.Cost : (d.Product?.CurrentCost ?? 0m);
-                    return d.Quantity * unitCost;
-                });
-
-                return new ConsolidatedProductDto(
-                    ProductId: g.Key.ProductId,
-                    ProductCode: g.Key.Code,
-                    ProductName: g.Key.Name,
-                    UnitOfMeasure: g.Key.Uom,
-                    TotalQuantity: totalQuantity,
-                    TotalNetAmount: totalNetAmount,
-                    TotalCost: totalCost
-                );
+            .GroupBy(d => new 
+            { 
+                d.ProductId, 
+                Code = d.Product?.InternalCode ?? string.Empty, 
+                Name = !string.IsNullOrWhiteSpace(d.Product?.Description) 
+                    ? d.Product.Description 
+                    : (d.Product?.Name ?? "Producto Desconocido"), 
+                Uom = d.UnitOfMeasure != null ? d.UnitOfMeasure.Code : "UND"
             })
-            .OrderBy(c => c.ProductName)
             .ToList();
 
-        return consolidated;
+        // Optimización N+1: Consultar todo el inventario disponible por ID y por Nombre de Producto (para vincular duplicados TA/TO)
+        var productIds = detailsGrouped.Select(g => g.Key.ProductId).Distinct().ToList();
+        var productNames = detailsGrouped.Select(g => g.Key.Name).Distinct().ToList();
+
+        var stockDict = await _inventoryRepository.GetAvailableStockByProductIdsAsync(productIds, cancellationToken);
+        var nameStockDict = await _inventoryRepository.GetAvailableStockByProductNamesAsync(productNames, cancellationToken);
+
+        var remainingBaseStock = new Dictionary<Guid, decimal>(stockDict);
+        var remainingNameStock = new Dictionary<string, decimal>(nameStockDict, StringComparer.OrdinalIgnoreCase);
+
+        var result = new List<ConsolidatedProductDto>();
+
+        foreach (var g in detailsGrouped)
+        {
+            var sampleDetail = g.First();
+
+            // 1. Identificar la presentación en CAJA/Empaque del proveedor para este producto
+            var boxPresentation = sampleDetail.Product?.Presentations?.FirstOrDefault(p => p.ConversionFactor > 1 || string.Equals(p.UnitOfMeasure?.Code, "CAJA", StringComparison.OrdinalIgnoreCase));
+            decimal boxFactor = boxPresentation?.ConversionFactor ?? 1.0000m;
+            if (boxFactor <= 0) boxFactor = 1.0000m;
+
+            string purchaseUnitName = boxPresentation?.UnitOfMeasure?.Code ?? (boxPresentation?.Name ?? (string.IsNullOrWhiteSpace(g.Key.Uom) ? "Caja" : g.Key.Uom));
+            if (string.IsNullOrWhiteSpace(purchaseUnitName)) purchaseUnitName = "Caja";
+
+            // 2. Calcular la Cantidad Total Pedida convertida exactamente a UNIDADES BASE
+            decimal totalQuantityBaseUnits = g.Sum(x =>
+            {
+                var pFactor = x.Product?.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == x.UnitOfMeasureId)?.ConversionFactor ?? 1.0000m;
+                if (pFactor <= 0) pFactor = 1.0000m;
+                return x.Quantity * pFactor;
+            });
+
+            var grossSalesAmount = g.Sum(x => x.NetAmount);
+            var unitPrice = totalQuantityBaseUnits > 0 ? grossSalesAmount / totalQuantityBaseUnits : 0m;
+            var unitCost = boxPresentation?.Cost > 0 ? (boxPresentation.Cost / boxFactor) : (sampleDetail.Product?.CurrentCost ?? 0m);
+
+            // 3. Obtener existencias disponibles en unidades base en la bodega (con fallback por Nombre de Producto si el ID exacto no tiene stock)
+            decimal baseStockAvailable = 0m;
+            if (remainingBaseStock.TryGetValue(g.Key.ProductId, out decimal idStock) && idStock > 0m)
+            {
+                baseStockAvailable = idStock;
+            }
+            else if (remainingNameStock.TryGetValue(g.Key.Name, out decimal nameStock) && nameStock > 0m)
+            {
+                baseStockAvailable = nameStock;
+            }
+
+            // 4. Deducir del inventario existente en unidades base
+            var deductedBaseUnits = Math.Min(totalQuantityBaseUnits, baseStockAvailable);
+            var netToOrderBaseUnits = Math.Max(0m, totalQuantityBaseUnits - deductedBaseUnits);
+
+            // Actualizar stock restante por ID y por Nombre
+            remainingBaseStock[g.Key.ProductId] = Math.Max(0m, baseStockAvailable - deductedBaseUnits);
+            if (remainingNameStock.ContainsKey(g.Key.Name))
+            {
+                remainingNameStock[g.Key.Name] = Math.Max(0m, baseStockAvailable - deductedBaseUnits);
+            }
+
+            // 5. CÁLCULO EXACTO DEL PEDIDO EN CAJAS AL PROVEEDOR (Redondeo Superior CEILING en Cajas)
+            // Ejemplo 1: 5.00 Cajas faltantes -> CEILING(5.00) = 5 CAJAS
+            // Ejemplo 2: 4.71 Cajas faltantes -> CEILING(4.71) = 5 CAJAS
+            // Ejemplo 3: 0.28 Cajas faltantes (10 unidades) -> CEILING(0.28) = 1 CAJA
+            decimal netToOrderInBoxes = netToOrderBaseUnits / boxFactor;
+            int suggestedBoxes = netToOrderBaseUnits > 0 ? (int)Math.Ceiling((double)netToOrderInBoxes) : 0;
+            decimal suggestedTotalUnits = suggestedBoxes * boxFactor;
+            decimal boxCost = unitCost * boxFactor;
+            decimal suggestedPurchaseCost = suggestedBoxes * boxCost;
+
+            // Cantidades para mostrar en la fila del consolidado en la UOM solicitada
+            var sampleFactor = sampleDetail.Product?.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == sampleDetail.UnitOfMeasureId)?.ConversionFactor ?? 1.0000m;
+            if (sampleFactor <= 0) sampleFactor = 1.0000m;
+
+            var displayTotalQty = totalQuantityBaseUnits / sampleFactor;
+            var displayDeducted = deductedBaseUnits / sampleFactor;
+            var displayNetToOrder = netToOrderBaseUnits / sampleFactor;
+            var displayAvailable = baseStockAvailable / sampleFactor;
+
+            // Totales Financieros
+            var grossPurchaseCost = totalQuantityBaseUnits * unitCost;
+            var inventoryDeductedPurchaseCost = deductedBaseUnits * unitCost;
+            var inventoryDeductedSalesAmount = deductedBaseUnits * unitPrice;
+            var netPurchaseCost = netToOrderBaseUnits * unitCost;
+            var netSalesAmount = netToOrderBaseUnits * unitPrice;
+            var profitMarginAmount = netSalesAmount - netPurchaseCost;
+            var profitMarginPercentage = netSalesAmount > 0 ? (profitMarginAmount / netSalesAmount) * 100m : 0m;
+
+            // Recopilar Observaciones Válidas de Vendedores
+            var sellerNotesList = orders
+                .Where(o => o.Details.Any(d => d.ProductId == g.Key.ProductId) && !string.IsNullOrWhiteSpace(o.Notes))
+                .Select(o => o.Notes!.Trim())
+                .Where(n => !n.StartsWith("[SOLICITUD ANULACIÓN]", StringComparison.OrdinalIgnoreCase))
+                .Distinct()
+                .ToList();
+
+            string sellerObs = sellerNotesList.Any() ? string.Join(" | ", sellerNotesList) : string.Empty;
+            string supplierName = "Distribuidora Jenny";
+
+            string obs;
+            if (deductedBaseUnits >= totalQuantityBaseUnits)
+            {
+                obs = "Carga completa lista para entrega";
+            }
+            else if (deductedBaseUnits > 0)
+            {
+                obs = $"Stock parcial ({displayAvailable:F2} disp.). Se deducen {displayDeducted:F2} pzas. Pedir {displayNetToOrder:F2}";
+            }
+            else
+            {
+                obs = "Sin stock en inventario. Pedir completo";
+            }
+
+            result.Add(new ConsolidatedProductDto(
+                ProductId: g.Key.ProductId,
+                ProductCode: g.Key.Code,
+                ProductName: g.Key.Name,
+                UnitOfMeasure: g.Key.Uom,
+                TotalQuantity: displayTotalQty,
+                AvailableStock: displayAvailable,
+                DeductedFromInventory: displayDeducted,
+                NetQuantityToOrder: displayNetToOrder,
+                UnitCost: unitCost,
+                UnitPrice: unitPrice,
+                GrossPurchaseCost: grossPurchaseCost,
+                GrossSalesAmount: grossSalesAmount,
+                InventoryDeductedPurchaseCost: inventoryDeductedPurchaseCost,
+                InventoryDeductedSalesAmount: inventoryDeductedSalesAmount,
+                TotalPurchaseCost: netPurchaseCost,
+                NetSalesAmount: netSalesAmount,
+                ProfitMarginAmount: profitMarginAmount,
+                ProfitMarginPercentage: profitMarginPercentage,
+                TotalNetAmount: grossSalesAmount,
+                TotalCost: netPurchaseCost,
+                Observation: obs,
+                SupplierName: supplierName,
+                PurchaseUnitName: purchaseUnitName,
+                UnitsPerCase: boxFactor,
+                SuggestedBoxesToOrder: suggestedBoxes,
+                SuggestedTotalUnitsToOrder: suggestedTotalUnits, // Total Unidades a recibir por cajas completas
+                BoxCost: boxCost,
+                SuggestedPurchaseCost: suggestedPurchaseCost,
+                SellerObservations: sellerObs
+            ));
+        }
+
+        return result.OrderBy(c => c.ProductName).ToList();
     }
 }

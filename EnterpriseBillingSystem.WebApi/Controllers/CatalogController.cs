@@ -85,6 +85,11 @@ public class CatalogController : ApiControllerBase
                         });
 
                     page.Content()
+<<<<<<< HEAD
+=======
+                        .PaddingHorizontal(50)
+                        .PaddingVertical(25) // Margen ajustado para dar máximo espacio vertical a la imagen
+>>>>>>> ffdd505 (Enhance PDF catalog generation: add automatic transparent background conversion for product images and increase max image height to 390pt for significantly larger visuals)
                         .Column(column =>
                         {
                             var categories = productsArray.GroupBy(p => p.CategoryName).ToArray();
@@ -94,6 +99,7 @@ public class CatalogController : ApiControllerBase
                                 var categoryGroup = categories[catIdx];
                                 var categoryName = categoryGroup.Key ?? "Otros";
                                 
+<<<<<<< HEAD
                                 // A) Category Divider Page (Safe height: 600)
                                 column.Item().Background("#0F172A").Height(600).AlignCenter().AlignMiddle().Column(catCol =>
                                 {
@@ -101,6 +107,15 @@ public class CatalogController : ApiControllerBase
                                         .Bold()
                                         .FontSize(42)
                                         .FontColor("#FFFFFF")
+=======
+                                // A) Categoría de Separación (Centrado sobre el fondo de dulces)
+                                column.Item().Height(420).AlignCenter().AlignMiddle().Column(catCol =>
+                                {
+                                    catCol.Item().Text(categoryName.ToUpper())
+                                        .Bold()
+                                        .FontSize(44)
+                                        .FontColor("#E11D48") // Color rosa dulce
+>>>>>>> ffdd505 (Enhance PDF catalog generation: add automatic transparent background conversion for product images and increase max image height to 390pt for significantly larger visuals)
                                         .AlignCenter();
                                         
                                     catCol.Item().PaddingTop(10).Text("CATÁLOGO DE PRODUCTOS")
@@ -128,7 +143,12 @@ public class CatalogController : ApiControllerBase
                                         ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
                                         : "N/A";
                                         
+<<<<<<< HEAD
                                     column.Item().AlignCenter().Text(x =>
+=======
+                                    // 2. Detalles (Centrado, SKU y U/E)
+                                    column.Item().AlignCenter().PaddingTop(6).Text(x =>
+>>>>>>> ffdd505 (Enhance PDF catalog generation: add automatic transparent background conversion for product images and increase max image height to 390pt for significantly larger visuals)
                                     {
                                         x.Span("CÓDIGO SKU: ").Bold().FontSize(14).FontColor("#334155");
                                         x.Span($"{product.InternalCode}   •   ").FontSize(14).FontColor("#475569");
@@ -138,9 +158,15 @@ public class CatalogController : ApiControllerBase
                                         x.Span($"{ueText}").FontSize(14).FontColor("#475569");
                                     });
 
+<<<<<<< HEAD
                                     column.Item().PaddingVertical(5).LineHorizontal(1f).LineColor("#CBD5E1");
 
                                     // 3. Image (Centered, MaxHeight 450)
+=======
+                                    column.Item().PaddingVertical(6).LineHorizontal(1f).LineColor("#F1F5F9");
+
+                                    // 3. Imagen del Producto (Centrada abajo, 100% transparente y tamaño grande)
+>>>>>>> ffdd505 (Enhance PDF catalog generation: add automatic transparent background conversion for product images and increase max image height to 390pt for significantly larger visuals)
                                     var imgPlaced = false;
                                     if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
                                     {
@@ -158,12 +184,11 @@ public class CatalogController : ApiControllerBase
                                         var localImagePath = Path.Combine(env.WebRootPath, relativePath.TrimStart('/'));
                                         if (System.IO.File.Exists(localImagePath))
                                         {
+                                            var transparentImageBytes = MakeBackgroundTransparent(localImagePath);
                                             column.Item()
                                                 .AlignCenter()
-                                                .MaxHeight(450)
-                                                .Border(0.5f)
-                                                .BorderColor("#E2E8F0")
-                                                .Image(localImagePath, ImageScaling.FitArea);
+                                                .MaxHeight(400) // Imagen significativamente más grande (hasta 400pt de alto)
+                                                .Image(transparentImageBytes, ImageScaling.FitArea);
                                                 
                                             imgPlaced = true;
                                         }
@@ -173,7 +198,7 @@ public class CatalogController : ApiControllerBase
                                     {
                                         column.Item()
                                             .AlignCenter()
-                                            .Height(120)
+                                            .Height(180)
                                             .Border(0.5f)
                                             .BorderColor("#E2E8F0")
                                             .Background("#F8FAFC")
@@ -218,6 +243,110 @@ public class CatalogController : ApiControllerBase
                 Message = ex.Message, 
                 InnerError = ex.InnerException?.ToString() 
             });
+        }
+    }
+
+    private static byte[] MakeBackgroundTransparent(string imagePath)
+    {
+        try
+        {
+            using var original = SkiaSharp.SKBitmap.Decode(imagePath);
+            if (original == null) return System.IO.File.ReadAllBytes(imagePath);
+
+            int width = original.Width;
+            int height = original.Height;
+
+            using var resultBitmap = new SkiaSharp.SKBitmap(width, height, SkiaSharp.SKColorType.Rgba8888, SkiaSharp.SKAlphaType.Premul);
+
+            using (var canvas = new SkiaSharp.SKCanvas(resultBitmap))
+            {
+                canvas.Clear(SkiaSharp.SKColors.Transparent);
+                canvas.DrawBitmap(original, 0, 0);
+            }
+
+            // Algoritmo de Flood-Fill desde el perímetro para eliminar fondos claros, oscuros y neutros
+            bool[,] visited = new bool[width, height];
+            var queue = new Queue<SkiaSharp.SKPointI>();
+
+            // Agregar todo el perímetro exterior a la cola de Flood-Fill
+            for (int x = 0; x < width; x++)
+            {
+                queue.Enqueue(new SkiaSharp.SKPointI(x, 0));
+                queue.Enqueue(new SkiaSharp.SKPointI(x, height - 1));
+            }
+            for (int y = 0; y < height; y++)
+            {
+                queue.Enqueue(new SkiaSharp.SKPointI(0, y));
+                queue.Enqueue(new SkiaSharp.SKPointI(width - 1, y));
+            }
+
+            // Criterio agresivo de detección de fondo:
+            // a) Fondos Blancos/Claros/Cremas (R >= 195 && G >= 195 && B >= 195)
+            // b) Fondos Negros/Oscuros (R <= 50 && G <= 50 && B <= 50)
+            // c) Fondos neutros monocromáticos (diferencia max de canales <= 25 && (R >= 170 || R <= 60))
+            static bool IsBackgroundColor(SkiaSharp.SKColor c)
+            {
+                bool isWhiteOrLight = c.Red >= 195 && c.Green >= 195 && c.Blue >= 195;
+                bool isBlackOrDark = c.Red <= 50 && c.Green <= 50 && c.Blue <= 50;
+                int maxDiff = Math.Max(Math.Abs(c.Red - c.Green), Math.Max(Math.Abs(c.Green - c.Blue), Math.Abs(c.Red - c.Blue)));
+                bool isMonochromeNeutral = maxDiff <= 25 && (c.Red >= 170 || c.Red <= 60);
+
+                return isWhiteOrLight || isBlackOrDark || isMonochromeNeutral;
+            }
+
+            while (queue.Count > 0)
+            {
+                var p = queue.Dequeue();
+                int px = p.X;
+                int py = p.Y;
+
+                if (px < 0 || px >= width || py < 0 || py >= height) continue;
+                if (visited[px, py]) continue;
+
+                visited[px, py] = true;
+
+                var pixelColor = resultBitmap.GetPixel(px, py);
+
+                if (IsBackgroundColor(pixelColor))
+                {
+                    resultBitmap.SetPixel(px, py, SkiaSharp.SKColors.Transparent);
+
+                    // Expandir a píxeles vecinos (4 direcciones)
+                    if (px > 0 && !visited[px - 1, py]) queue.Enqueue(new SkiaSharp.SKPointI(px - 1, py));
+                    if (px < width - 1 && !visited[px + 1, py]) queue.Enqueue(new SkiaSharp.SKPointI(px + 1, py));
+                    if (py > 0 && !visited[px, py - 1]) queue.Enqueue(new SkiaSharp.SKPointI(px, py - 1));
+                    if (py < height - 1 && !visited[px, py + 1]) queue.Enqueue(new SkiaSharp.SKPointI(px, py + 1));
+                }
+            }
+
+            // Segunda pasada: Limpieza agresiva de remanentes de bordes externos (12% del margen perimetral)
+            for (int y = 0; y < height; y++)
+            {
+                for (int x = 0; x < width; x++)
+                {
+                    var c = resultBitmap.GetPixel(x, y);
+                    if (c.Alpha > 0)
+                    {
+                        bool isLightBorder = c.Red >= 210 && c.Green >= 210 && c.Blue >= 210;
+                        bool isDarkBorder = c.Red <= 40 && c.Green <= 40 && c.Blue <= 40;
+                        if (isLightBorder || isDarkBorder)
+                        {
+                            if (x < width * 0.12 || x > width * 0.88 || y < height * 0.12 || y > height * 0.88)
+                            {
+                                resultBitmap.SetPixel(x, y, SkiaSharp.SKColors.Transparent);
+                            }
+                        }
+                    }
+                }
+            }
+
+            using var image = SkiaSharp.SKImage.FromBitmap(resultBitmap);
+            using var data = image.Encode(SkiaSharp.SKEncodedImageFormat.Png, 100);
+            return data.ToArray();
+        }
+        catch
+        {
+            return System.IO.File.ReadAllBytes(imagePath);
         }
     }
 }

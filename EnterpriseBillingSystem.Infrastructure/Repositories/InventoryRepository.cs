@@ -74,6 +74,48 @@ public class InventoryRepository : Repository<Inventory>, IInventoryRepository
         return lowStock.Select(x => (x.Product, x.CurrentStock));
     }
 
+    public async Task<Dictionary<Guid, decimal>> GetAvailableStockByProductIdsAsync(IEnumerable<Guid> productIds, CancellationToken cancellationToken = default)
+    {
+        var idsList = productIds.Distinct().ToList();
+        if (!idsList.Any()) return new Dictionary<Guid, decimal>();
+
+        var stockList = await _context.Inventories.AsNoTracking()
+            .Where(i => idsList.Contains(i.ProductId))
+            .GroupBy(i => i.ProductId)
+            .Select(g => new
+            {
+                ProductId = g.Key,
+                Available = g.Sum(i => (decimal?)i.PhysicalStock - i.ReservedStock - i.CommittedStock) ?? 0m
+            })
+            .ToListAsync(cancellationToken);
+
+        return stockList.ToDictionary(x => x.ProductId, x => Math.Max(0, x.Available));
+    }
+
+    public async Task<Dictionary<string, decimal>> GetAvailableStockByProductNamesAsync(IEnumerable<string> productNames, CancellationToken cancellationToken = default)
+    {
+        var normalizedNames = productNames
+            .Where(n => !string.IsNullOrWhiteSpace(n))
+            .Select(n => n.Trim().ToUpper())
+            .Distinct()
+            .ToList();
+
+        if (!normalizedNames.Any()) return new Dictionary<string, decimal>();
+
+        var stockList = await _context.Inventories.AsNoTracking()
+            .Include(i => i.Product)
+            .Where(i => i.Product != null && normalizedNames.Contains(i.Product.Name.Trim().ToUpper()))
+            .GroupBy(i => i.Product.Name.Trim().ToUpper())
+            .Select(g => new
+            {
+                ProductName = g.Key,
+                Available = g.Sum(i => (decimal?)i.PhysicalStock - i.ReservedStock - i.CommittedStock) ?? 0m
+            })
+            .ToListAsync(cancellationToken);
+
+        return stockList.ToDictionary(x => x.ProductName, x => Math.Max(0, x.Available), StringComparer.OrdinalIgnoreCase);
+    }
+
     public async Task<InventoryDashboardKpis> GetDashboardKpisAsync(Guid branchId, CancellationToken cancellationToken = default)
     {
         var totalProducts = await _context.Products.CountAsync(cancellationToken);

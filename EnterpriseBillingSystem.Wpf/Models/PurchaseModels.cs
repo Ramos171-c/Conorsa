@@ -81,3 +81,32 @@ public record PurchaseOrderDetailDto(
     DateTime CreatedOnUtc,
     List<PurchaseOrderDetailItemDto> Details
 );
+
+public record PurchaseReceiptDetailItemDto(
+    Guid Id,
+    Guid ProductId,
+    string ProductName,
+    string ProductCode,
+    Guid UnitOfMeasureId,
+    string UnitOfMeasure,
+    decimal Quantity,
+    decimal UnitPrice
+);
+
+public record PurchaseReceiptDetailDto(
+    Guid Id,
+    string ReceiptNumber,
+    Guid SupplierId,
+    string SupplierName,
+    Guid? PurchaseOrderId,
+    string? OrderNumber,
+    Guid BranchWarehouseId,
+    string BranchName,
+    string WarehouseName,
+    DateTime ReceiptDate,
+    string? ReferenceDocument,
+    string Status,
+    string? Notes,
+    DateTime CreatedOnUtc,
+    List<PurchaseReceiptDetailItemDto> Details
+);
