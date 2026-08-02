@@ -78,50 +78,22 @@
                              Margin="6,0,0,0" />
                 </Grid>
 
-                <!-- Row 4: Sale Prices (Three levels) -->
-                <TextBlock Text="Información de Precios de Venta" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" FontWeight="Bold" Margin="0,4,0,12" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                <!-- Row 4: Sale Price (Single price) -->
+                <TextBlock Text="Información de Precio de Venta" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" FontWeight="Bold" Margin="0,4,0,12" Foreground="{DynamicResource PrimaryHueMidBrush}" />
                 <Grid Margin="0,0,0,12">
-                    <Grid.RowDefinitions>
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                        <RowDefinition Height="Auto" />
-                    </Grid.RowDefinitions>
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="130" />
                         <ColumnDefinition Width="*" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
 
-                    <!-- Detalle -->
-                    <TextBlock Grid.Row="0" Grid.Column="0" Text="Detalle" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,12,12" />
-                    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding RetailPrice, UpdateSourceTrigger=PropertyChanged, Delay=300}" 
-                             materialDesign:HintAssist.Hint="Precio Detalle" 
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                             Margin="0,0,6,12" />
-                    <TextBox Grid.Row="0" Grid.Column="2" Text="{Binding RetailMargin, UpdateSourceTrigger=PropertyChanged, Delay=300}" 
-                             materialDesign:HintAssist.Hint="Margen Detalle %" 
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                             Margin="6,0,0,12" />
-
-                    <!-- Semimayorista -->
-                    <TextBlock Grid.Row="1" Grid.Column="0" Text="Semimayorista" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,12,12" />
-                    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding SemiWholesalePrice, UpdateSourceTrigger=PropertyChanged, Delay=300}" 
-                             materialDesign:HintAssist.Hint="Precio Semimayorista" 
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                             Margin="0,0,6,12" />
-                    <TextBox Grid.Row="1" Grid.Column="2" Text="{Binding SemiWholesaleMargin, UpdateSourceTrigger=PropertyChanged, Delay=300}" 
-                             materialDesign:HintAssist.Hint="Margen Semimayorista %" 
-                             Style="{StaticResource MaterialDesignOutlinedTextBox}" 
-                             Margin="6,0,0,12" />
-
-                    <!-- Mayorista -->
-                    <TextBlock Grid.Row="2" Grid.Column="0" Text="Mayorista" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,12,0" />
-                    <TextBox Grid.Row="2" Grid.Column="1" Text="{Binding WholesalePrice, UpdateSourceTrigger=PropertyChanged, Delay=300}" 
-                             materialDesign:HintAssist.Hint="Precio Mayorista" 
+                    <TextBlock Text="Precio" VerticalAlignment="Center" FontWeight="Bold" Margin="0,0,12,0" />
+                    <TextBox Grid.Column="1" Text="{Binding RetailPrice, UpdateSourceTrigger=PropertyChanged, Delay=300}" 
+                             materialDesign:HintAssist.Hint="Precio de Venta" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="0,0,6,0" />
-                    <TextBox Grid.Row="2" Grid.Column="2" Text="{Binding WholesaleMargin, UpdateSourceTrigger=PropertyChanged, Delay=300}" 
-                             materialDesign:HintAssist.Hint="Margen Mayorista %" 
+                    <TextBox Grid.Column="2" Text="{Binding RetailMargin, UpdateSourceTrigger=PropertyChanged, Delay=300}" 
+                             materialDesign:HintAssist.Hint="Margen %" 
                              Style="{StaticResource MaterialDesignOutlinedTextBox}" 
                              Margin="6,0,0,0" />
                 </Grid>

@@ -122,8 +122,10 @@ public partial class PresentationEditorViewModel : ViewModelBase
         try
         {
             RetailPrice = CalculatePrice(value, RetailMargin);
-            SemiWholesalePrice = CalculatePrice(value, SemiWholesaleMargin);
-            WholesalePrice = CalculatePrice(value, WholesaleMargin);
+            SemiWholesalePrice = RetailPrice;
+            SemiWholesaleMargin = RetailMargin;
+            WholesalePrice = RetailPrice;
+            WholesaleMargin = RetailMargin;
         }
         finally
         {
@@ -138,6 +140,10 @@ public partial class PresentationEditorViewModel : ViewModelBase
         try
         {
             RetailMargin = CalculateMargin(Cost, value);
+            SemiWholesalePrice = value;
+            SemiWholesaleMargin = RetailMargin;
+            WholesalePrice = value;
+            WholesaleMargin = RetailMargin;
         }
         finally
         {
@@ -152,6 +158,10 @@ public partial class PresentationEditorViewModel : ViewModelBase
         try
         {
             RetailPrice = CalculatePrice(Cost, value);
+            SemiWholesalePrice = RetailPrice;
+            SemiWholesaleMargin = value;
+            WholesalePrice = RetailPrice;
+            WholesaleMargin = value;
         }
         finally
         {
@@ -166,6 +176,10 @@ public partial class PresentationEditorViewModel : ViewModelBase
         try
         {
             SemiWholesaleMargin = CalculateMargin(Cost, value);
+            RetailPrice = value;
+            RetailMargin = SemiWholesaleMargin;
+            WholesalePrice = value;
+            WholesaleMargin = SemiWholesaleMargin;
         }
         finally
         {
@@ -180,6 +194,10 @@ public partial class PresentationEditorViewModel : ViewModelBase
         try
         {
             SemiWholesalePrice = CalculatePrice(Cost, value);
+            RetailPrice = SemiWholesalePrice;
+            RetailMargin = value;
+            WholesalePrice = SemiWholesalePrice;
+            WholesaleMargin = value;
         }
         finally
         {
@@ -194,6 +212,10 @@ public partial class PresentationEditorViewModel : ViewModelBase
         try
         {
             WholesaleMargin = CalculateMargin(Cost, value);
+            RetailPrice = value;
+            RetailMargin = WholesaleMargin;
+            SemiWholesalePrice = value;
+            SemiWholesaleMargin = WholesaleMargin;
         }
         finally
         {
@@ -208,6 +230,10 @@ public partial class PresentationEditorViewModel : ViewModelBase
         try
         {
             WholesalePrice = CalculatePrice(Cost, value);
+            RetailPrice = WholesalePrice;
+            RetailMargin = value;
+            SemiWholesalePrice = WholesalePrice;
+            SemiWholesaleMargin = value;
         }
         finally
         {

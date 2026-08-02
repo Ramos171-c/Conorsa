@@ -228,9 +228,7 @@
                                 <DataGridTextColumn Header="Factor" Binding="{Binding ConversionFactor, StringFormat=N2}" IsReadOnly="True" Width="60" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                                 <DataGridTextColumn Header="C. Barras" Binding="{Binding Barcode}" IsReadOnly="True" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                                 <DataGridTextColumn Header="Costo" Binding="{Binding Cost, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                <DataGridTextColumn Header="P. Retail" Binding="{Binding RetailPrice, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                <DataGridTextColumn Header="P. Semi" Binding="{Binding SemiWholesalePrice, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
-                                <DataGridTextColumn Header="P. Mayor" Binding="{Binding WholesalePrice, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                <DataGridTextColumn Header="Precio" Binding="{Binding RetailPrice, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                                 <DataGridCheckBoxColumn Header="Base" Binding="{Binding IsBaseUnit}" IsReadOnly="True" Width="50" />
                                 <DataGridCheckBoxColumn Header="Defecto" Binding="{Binding IsDefaultSalePresentation}" IsReadOnly="True" Width="60" />
                                 <DataGridCheckBoxColumn Header="Activo" Binding="{Binding IsActive}" IsReadOnly="True" Width="65" />
