@@ -19,7 +19,7 @@ class OfflineService {
 
     // Pre-cache product images in the background
     try {
-      final apiUrl = prefs.getString('api_base_url') ?? 'http://167.99.13.177:8080/api/v1';
+      final apiUrl = prefs.getString('api_base_url') ?? 'http://167.99.13.177:8081/api/v1';
       final uri = Uri.parse(apiUrl);
       final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ":${uri.port}" : ""}';
 

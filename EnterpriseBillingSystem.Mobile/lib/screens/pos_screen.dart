@@ -672,63 +672,23 @@ class _PosScreenState extends State<PosScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              PopupMenuButton<String>(
-                tooltip: 'Cambiar Nivel de Precios',
-                onSelected: (level) {
-                  posProv.setManualPricingLevelOverride(level);
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'DETALLE',
-                    child: Row(
-                      children: [
-                        Icon(Icons.star_border_rounded, color: Colors.green),
-                        SizedBox(width: 8),
-                        Text('Detalle'),
-                      ],
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                decoration: BoxDecoration(
+                  color: badgeColor.withOpacity(0.1),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(color: badgeColor, width: 1.2),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(badgeIcon, color: badgeColor, size: 13),
+                    const SizedBox(width: 4),
+                    Text(
+                      posProv.currentLevel,
+                      style: TextStyle(color: badgeColor, fontWeight: FontWeight.bold, fontSize: 10),
                     ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'SEMI MAYORISTA',
-                    child: Row(
-                      children: [
-                        Icon(Icons.star_half_rounded, color: Colors.orange),
-                        SizedBox(width: 8),
-                        Text('Semi Mayorista'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'MAYORISTA',
-                    child: Row(
-                      children: [
-                        Icon(Icons.stars_rounded, color: Colors.blue),
-                        SizedBox(width: 8),
-                        Text('Mayorista'),
-                      ],
-                    ),
-                  ),
-                ],
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                  decoration: BoxDecoration(
-                    color: badgeColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(20),
-                    border: Border.all(color: badgeColor, width: 1.2),
-                  ),
-                  child: Row(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      Icon(badgeIcon, color: badgeColor, size: 13),
-                      const SizedBox(width: 4),
-                      Text(
-                        posProv.currentLevel,
-                        style: TextStyle(color: badgeColor, fontWeight: FontWeight.bold, fontSize: 10),
-                      ),
-                      const SizedBox(width: 2),
-                      Icon(Icons.arrow_drop_down_rounded, color: badgeColor, size: 14),
-                    ],
-                  ),
+                  ],
                 ),
               ),
             ],

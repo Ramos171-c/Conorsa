@@ -84,7 +84,17 @@ class PosProvider extends ChangeNotifier {
   // Set selected customer
   void setCustomer(Customer? customer) {
     _selectedCustomer = customer;
-    _manualPricingLevelOverride = 'DETALLE';
+    if (customer != null) {
+      if (customer.customerPricingProfileType == 2) {
+        _manualPricingLevelOverride = 'MAYORISTA';
+      } else if (customer.customerPricingProfileType == 1) {
+        _manualPricingLevelOverride = 'SEMI MAYORISTA';
+      } else {
+        _manualPricingLevelOverride = 'DETALLE';
+      }
+    } else {
+      _manualPricingLevelOverride = 'DETALLE';
+    }
     _errorMessage = null;
     recalculatePricing();
   }
