@@ -8,8 +8,6 @@ services:
       dockerfile: Dockerfile
     container_name: launion-billing-api
     user: "root"
-    ports:
-      - "8081:8080" # Maps port 8081 on the host to 8080 inside the container for La Union
     extra_hosts:
       - "host.docker.internal:host-gateway" # Resolves the host IP to access the shared SQL Server database
     environment:
@@ -22,6 +20,18 @@ services:
       - JwtSettings__ExpiryMinutes=60
     volumes:
       - launion-uploads-data:/app/wwwroot/uploads
+    restart: always
+
+  webclient:
+    image: nginx:alpine
+    container_name: launion-web-client
+    ports:
+      - "8081:80" # Maps port 8081 on host to 80 in container (serving Nginx)
+    volumes:
+      - ./nginx.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./EnterpriseBillingSystem.Mobile/build/web:/usr/share/nginx/html:ro
+    depends_on:
+      - webapi
     restart: always
 
 volumes:
