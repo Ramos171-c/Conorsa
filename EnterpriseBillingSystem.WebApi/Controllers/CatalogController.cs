@@ -85,11 +85,8 @@ public class CatalogController : ApiControllerBase
                         });
 
                     page.Content()
-<<<<<<< HEAD
-=======
                         .PaddingHorizontal(50)
                         .PaddingVertical(25) // Margen ajustado para dar máximo espacio vertical a la imagen
->>>>>>> ffdd505 (Enhance PDF catalog generation: add automatic transparent background conversion for product images and increase max image height to 390pt for significantly larger visuals)
                         .Column(column =>
                         {
                             var categories = productsArray.GroupBy(p => p.CategoryName).ToArray();
@@ -99,15 +96,6 @@ public class CatalogController : ApiControllerBase
                                 var categoryGroup = categories[catIdx];
                                 var categoryName = categoryGroup.Key ?? "Otros";
                                 
-<<<<<<< HEAD
-                                // A) Category Divider Page (Safe height: 600)
-                                column.Item().Background("#0F172A").Height(600).AlignCenter().AlignMiddle().Column(catCol =>
-                                {
-                                    catCol.Item().Text(categoryName.ToUpper())
-                                        .Bold()
-                                        .FontSize(42)
-                                        .FontColor("#FFFFFF")
-=======
                                 // A) Categoría de Separación (Centrado sobre el fondo de dulces)
                                 column.Item().Height(420).AlignCenter().AlignMiddle().Column(catCol =>
                                 {
@@ -115,7 +103,6 @@ public class CatalogController : ApiControllerBase
                                         .Bold()
                                         .FontSize(44)
                                         .FontColor("#E11D48") // Color rosa dulce
->>>>>>> ffdd505 (Enhance PDF catalog generation: add automatic transparent background conversion for product images and increase max image height to 390pt for significantly larger visuals)
                                         .AlignCenter();
                                         
                                     catCol.Item().PaddingTop(10).Text("CATÁLOGO DE PRODUCTOS")
@@ -138,17 +125,12 @@ public class CatalogController : ApiControllerBase
                                         .FontSize(28)
                                         .FontColor("#1E3A8A");
                                         
-                                    // 2. Product Details (Centered)
+                                    // 2. Detalles (Centrado, SKU y U/E)
                                     var ueText = product.Description?.Contains("U/E: ") == true
                                         ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
                                         : "N/A";
                                         
-<<<<<<< HEAD
-                                    column.Item().AlignCenter().Text(x =>
-=======
-                                    // 2. Detalles (Centrado, SKU y U/E)
                                     column.Item().AlignCenter().PaddingTop(6).Text(x =>
->>>>>>> ffdd505 (Enhance PDF catalog generation: add automatic transparent background conversion for product images and increase max image height to 390pt for significantly larger visuals)
                                     {
                                         x.Span("CÓDIGO SKU: ").Bold().FontSize(14).FontColor("#334155");
                                         x.Span($"{product.InternalCode}   •   ").FontSize(14).FontColor("#475569");
@@ -158,15 +140,9 @@ public class CatalogController : ApiControllerBase
                                         x.Span($"{ueText}").FontSize(14).FontColor("#475569");
                                     });
 
-<<<<<<< HEAD
-                                    column.Item().PaddingVertical(5).LineHorizontal(1f).LineColor("#CBD5E1");
-
-                                    // 3. Image (Centered, MaxHeight 450)
-=======
                                     column.Item().PaddingVertical(6).LineHorizontal(1f).LineColor("#F1F5F9");
 
                                     // 3. Imagen del Producto (Centrada abajo, 100% transparente y tamaño grande)
->>>>>>> ffdd505 (Enhance PDF catalog generation: add automatic transparent background conversion for product images and increase max image height to 390pt for significantly larger visuals)
                                     var imgPlaced = false;
                                     if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
                                     {

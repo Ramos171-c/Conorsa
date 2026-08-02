@@ -14,8 +14,30 @@ public record ConsolidatedProductDto(
     string ProductName,
     string UnitOfMeasure,
     decimal TotalQuantity,
+    decimal AvailableStock,
+    decimal DeductedFromInventory,
+    decimal NetQuantityToOrder,
+    decimal UnitCost,
+    decimal UnitPrice,
+    decimal GrossPurchaseCost,
+    decimal GrossSalesAmount,
+    decimal InventoryDeductedPurchaseCost,
+    decimal InventoryDeductedSalesAmount,
+    decimal TotalPurchaseCost,
+    decimal NetSalesAmount,
+    decimal ProfitMarginAmount,
+    decimal ProfitMarginPercentage,
     decimal TotalNetAmount,
-    decimal TotalCost
+    decimal TotalCost,
+    string Observation,
+    string SupplierName,
+    string PurchaseUnitName,
+    decimal UnitsPerCase,
+    int SuggestedBoxesToOrder,
+    decimal SuggestedTotalUnitsToOrder,
+    decimal BoxCost,
+    decimal SuggestedPurchaseCost,
+    string SellerObservations
 );
 
 public record GetSalesOrderConsolidatedProductsQuery(
