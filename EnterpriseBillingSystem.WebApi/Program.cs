@@ -153,9 +153,11 @@ try
 
     app.UseCors("AllowAll");
 
-    // Permitir la descarga de archivos .apk de Android
+    // Permitir la descarga de archivos .apk de Android y archivos por defecto (index.html) para Flutter Web (/app/)
     var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
     provider.Mappings[".apk"] = "application/vnd.android.package-archive";
+
+    app.UseDefaultFiles();
 
     app.UseStaticFiles(new StaticFileOptions
     {
