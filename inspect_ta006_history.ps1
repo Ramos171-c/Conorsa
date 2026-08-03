@@ -1,5 +1,5 @@
-$server = "167.99.13.177,1433"
-$connectionString = "Server=$server;Database=EnterpriseBillingSystemDb;User Id=sa;Password=Perros..1;TrustServerCertificate=True;"
+﻿$server = "167.99.13.177,1433"
+$connectionString = "Server=$server;Database=EnterpriseBillingSystemDb_LaUnion;User Id=sa;Password=Perros..1;TrustServerCertificate=True;"
 
 $sqlScript = @"
 -- Check Inventory rows for TA006 or Papel Higienico in database
@@ -67,3 +67,4 @@ try {
 catch {
     Write-Host "Error:" $_.Exception.Message
 }
+

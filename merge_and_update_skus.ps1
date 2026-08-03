@@ -1,5 +1,5 @@
-$server = "167.99.13.177,1433"
-$connectionString = "Server=$server;Database=EnterpriseBillingSystemDb;User Id=sa;Password=Perros..1;TrustServerCertificate=True;"
+﻿$server = "167.99.13.177,1433"
+$connectionString = "Server=$server;Database=EnterpriseBillingSystemDb_LaUnion;User Id=sa;Password=Perros..1;TrustServerCertificate=True;"
 
 $sqlScript = @"
 -- Actualizar InternalCode de TO011, TO012, TO013 a TA011, TA012, TA013 donde no choque
@@ -34,3 +34,4 @@ try {
 catch {
     Write-Host "Error:" $_.Exception.Message
 }
+

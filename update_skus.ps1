@@ -1,5 +1,5 @@
-$server = "167.99.13.177,1433"
-$connectionString = "Server=$server;Database=EnterpriseBillingSystemDb;User Id=sa;Password=Perros..1;TrustServerCertificate=True;"
+﻿$server = "167.99.13.177,1433"
+$connectionString = "Server=$server;Database=EnterpriseBillingSystemDb_LaUnion;User Id=sa;Password=Perros..1;TrustServerCertificate=True;"
 
 $sqlScript = @"
 -- 1. Actualizar SKUs de TO011, TO012, TO013 a TA011, TA012, TA013 (y variantes TO001..TO010 a TA001..TA010 si existen)
@@ -30,3 +30,4 @@ try {
 catch {
     Write-Host "Error:" $_.Exception.Message
 }
+

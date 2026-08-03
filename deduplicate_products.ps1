@@ -1,5 +1,5 @@
-$server = "167.99.13.177,1433"
-$connectionString = "Server=$server;Database=EnterpriseBillingSystemDb;User Id=sa;Password=Perros..1;TrustServerCertificate=True;"
+﻿$server = "167.99.13.177,1433"
+$connectionString = "Server=$server;Database=EnterpriseBillingSystemDb_LaUnion;User Id=sa;Password=Perros..1;TrustServerCertificate=True;"
 
 $sqlScript = @"
 -- Para productos con código duplicado en Products, reasignar FKs a la primera fila y eliminar la duplicada
@@ -52,3 +52,4 @@ try {
 catch {
     Write-Host "Error:" $_.Exception.Message
 }
+
