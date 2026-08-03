@@ -90,6 +90,8 @@ class Product {
   final String categoryId;
   final String? categoryName;
 
+  String get displayName => (description != null && description!.trim().isNotEmpty) ? description! : name;
+
   Product({
     required this.id,
     required this.internalCode,

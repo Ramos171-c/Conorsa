@@ -136,7 +136,7 @@ class _PosScreenState extends State<PosScreen> {
 
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: Text('Agregar ${product.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
+              title: Text('Agregar ${product.displayName}', style: const TextStyle(fontWeight: FontWeight.bold)),
               content: SingleChildScrollView(
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
@@ -279,7 +279,7 @@ class _PosScreenState extends State<PosScreen> {
                     Navigator.pop(context);
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
-                        content: Text('Agregado ${product.name} al carrito'),
+                        content: Text('Agregado ${product.displayName} al carrito'),
                         duration: const Duration(seconds: 1),
                       ),
                     );
@@ -304,7 +304,7 @@ class _PosScreenState extends State<PosScreen> {
       builder: (context) {
         return AlertDialog(
           shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-          title: Text('Ajustar ${item.product.name}', style: const TextStyle(fontWeight: FontWeight.bold)),
+          title: Text('Ajustar ${item.product.displayName}', style: const TextStyle(fontWeight: FontWeight.bold)),
           content: SingleChildScrollView(
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -999,6 +999,7 @@ class _PosScreenState extends State<PosScreen> {
 
     if (query.isNotEmpty) {
       displayedProducts = displayedProducts.where((p) =>
+          p.displayName.toLowerCase().contains(query) ||
           p.name.toLowerCase().contains(query) ||
           p.internalCode.toLowerCase().contains(query)
       ).toList();
@@ -1189,7 +1190,7 @@ class _PosScreenState extends State<PosScreen> {
                                     ),
                                     const SizedBox(height: 8),
                                     Text(
-                                      p.name,
+                                      p.displayName,
                                       maxLines: 2,
                                       overflow: TextOverflow.ellipsis,
                                       style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 13, color: Color(0xFF1E293B)),
@@ -1271,8 +1272,8 @@ class _PosScreenState extends State<PosScreen> {
                                         children: [
                                           Expanded(
                                             child: Text(
-                                              item.product.name,
-                                              maxLines: 1,
+                                              item.product.displayName,
+                                              maxLines: 2,
                                               overflow: TextOverflow.ellipsis,
                                               style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12),
                                             ),
