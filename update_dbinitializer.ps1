@@ -1,4 +1,4 @@
-$filePath = "C:\Users\Isaac\.gemini\antigravity\scratch\frederman\EnterpriseBillingSystem.Infrastructure\Data\DbInitializer.cs"
+$filePath = Join-Path $PSScriptRoot "EnterpriseBillingSystem.Infrastructure\Data\DbInitializer.cs"
 $content = Get-Content $filePath -Raw
 
 # 1. Asegurar que TO011, TO012, TO013 se llamen TA011, TA012, TA013 en DbInitializer.cs
