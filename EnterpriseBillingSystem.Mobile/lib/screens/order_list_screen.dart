@@ -102,7 +102,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
 
     final StringBuffer ticketBuffer = StringBuffer();
     ticketBuffer.writeln('=================================');
-    ticketBuffer.writeln('       CONORZA - DISTRIBUIDORA   ');
+    ticketBuffer.writeln('       CONORTE - DISTRIBUIDORA   ');
     ticketBuffer.writeln('       VOUCHER DE ENTREGA        ');
     ticketBuffer.writeln('=================================');
     ticketBuffer.writeln('Pedido No: ${detail.orderNumber}');

@@ -1,11 +1,11 @@
 {
-    "name": "CONORZA POS Móvil",
-    "short_name": "CONORZA POS",
+    "name": "CONORTE POS Móvil",
+    "short_name": "CONORTE POS",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#673AB7",
     "theme_color": "#673AB7",
-    "description": "Sistema Móvil de Pedidos y Ventas CONORZA",
+    "description": "Sistema Móvil de Pedidos y Ventas CONORTE",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [
