@@ -23,10 +23,13 @@ public class CatalogController : ApiControllerBase
     public async Task<ActionResult<IEnumerable<ProductDto>>> GetCatalogProducts()
     {
         var result = await Mediator.Send(new GetCatalogProductsQuery());
+        var filteredResult = result.Where(p => p.Name != null && p.IsCatalogVisible && p.IsActive &&
+            !p.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
+            !(p.CategoryName != null && p.CategoryName.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)));
         
         // Build absolute URL for ImagePath
         var baseUri = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
-        var mapped = result.Select(p => p with
+        var mapped = filteredResult.Select(p => p with
         {
             ImagePath = string.IsNullOrWhiteSpace(p.ImagePath)
                 ? $"{baseUri}/uploads/products/default-product.png"
@@ -53,7 +56,10 @@ public class CatalogController : ApiControllerBase
             QuestPDF.Settings.EnableDebugging = true;
 
             var productsList = await Mediator.Send(new GetCatalogProductsQuery());
-            var products = productsList.AsEnumerable();
+            var products = productsList.AsEnumerable()
+                .Where(p => p.Name != null && p.IsCatalogVisible && p.IsActive &&
+                            !p.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
+                            !(p.CategoryName != null && p.CategoryName.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)));
             if (categoryId.HasValue)
             {
                 products = products.Where(p => p.CategoryId == categoryId.Value);
