@@ -76,9 +76,9 @@ try
     {
         options.SwaggerDoc("v1", new OpenApiInfo 
         { 
-            Title = "LA UNIÓN API", 
+            Title = "CONORTE API", 
             Version = "v1",
-            Description = "Base del API del Sistema de Facturación de LA UNIÓN (.NET 8 Clean Architecture / DDD)"
+            Description = "Base del API del Sistema de Facturación de CONORTE (.NET 8 Clean Architecture / DDD)"
         });
 
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -131,7 +131,7 @@ try
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "LA UNIÓN API v1");
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "CONORTE API v1");
         });
     }
 
