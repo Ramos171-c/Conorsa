@@ -59,7 +59,8 @@ public class CatalogController : ApiControllerBase
             var products = productsList.AsEnumerable()
                 .Where(p => p.Name != null && p.IsCatalogVisible && p.IsActive &&
                             !p.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
-                            !(p.CategoryName != null && p.CategoryName.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)));
+                            !(p.CategoryName != null && p.CategoryName.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)) &&
+                            HasValidImage(p, env));
                 
             if (categoryId.HasValue)
             {
@@ -69,7 +70,7 @@ public class CatalogController : ApiControllerBase
             var productsArray = products.ToArray();
             if (productsArray.Length == 0)
             {
-                return BadRequest(new { Message = "No hay productos en esta categoría para exportar." });
+                return BadRequest(new { Message = "No hay productos con imagen en esta categoría para exportar." });
             }
 
             var pdfStream = new MemoryStream();
@@ -82,8 +83,6 @@ public class CatalogController : ApiControllerBase
                 {
                     page.Size(PageSizes.A4.Landscape()); // Orientación horizontal (apaisado)
                     
-                    // IMPORTANTE: Definimos el margen en los contenidos, NO en la página entera,
-                    // para permitir que el fondo ocupe el 100% de la hoja (bleed edge-to-edge)
                     if (System.IO.File.Exists(bgImagePath))
                     {
                         page.Background().Image(bgImagePath, ImageScaling.Resize);
@@ -96,8 +95,8 @@ public class CatalogController : ApiControllerBase
                     page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(11).FontColor("#0F172A"));
 
                     page.Footer()
-                        .PaddingHorizontal(60)
-                        .PaddingBottom(20)
+                        .PaddingHorizontal(50)
+                        .PaddingBottom(15)
                         .AlignCenter()
                         .Text(x =>
                         {
@@ -106,8 +105,8 @@ public class CatalogController : ApiControllerBase
                         });
 
                     page.Content()
-                        .PaddingHorizontal(50)
-                        .PaddingVertical(25) // Margen ajustado para dar máximo espacio vertical a la imagen
+                        .PaddingHorizontal(40)
+                        .PaddingVertical(15) // Margen ajustado para dar máximo espacio vertical a la imagen
                         .Column(column =>
                         {
                             var categories = productsArray.GroupBy(p => p.CategoryName).ToArray();
@@ -144,7 +143,7 @@ public class CatalogController : ApiControllerBase
                                     // 1. Nombre del Producto (Centrado y Grande)
                                     column.Item().Text(product.Name.ToUpper())
                                         .Bold()
-                                        .FontSize(24)
+                                        .FontSize(30)
                                         .FontColor("#0F172A")
                                         .AlignCenter();
                                         
@@ -153,59 +152,37 @@ public class CatalogController : ApiControllerBase
                                         : "N/A";
                                         
                                     // 2. Detalles (Centrado, SKU y U/E)
-                                    column.Item().AlignCenter().PaddingTop(6).Text(x =>
+                                    column.Item().AlignCenter().PaddingTop(4).Text(x =>
                                     {
-                                        x.Span("CÓDIGO SKU: ").Bold().FontSize(13).FontColor("#E11D48");
-                                        x.Span($"{product.InternalCode}     •     ").FontSize(13).FontColor("#334155");
+                                        x.Span("CÓDIGO SKU: ").Bold().FontSize(16).FontColor("#E11D48");
+                                        x.Span($"{product.InternalCode}     •     ").FontSize(16).FontColor("#334155");
                                         
-                                        x.Span("U/E: ").Bold().FontSize(13).FontColor("#E11D48");
-                                        x.Span($"{ueText}").FontSize(13).FontColor("#334155");
+                                        x.Span("U/E: ").Bold().FontSize(16).FontColor("#E11D48");
+                                        x.Span($"{ueText}").FontSize(16).FontColor("#334155");
                                     });
 
-                                    column.Item().PaddingVertical(6).LineHorizontal(1f).LineColor("#F1F5F9");
+                                    column.Item().PaddingVertical(4).LineHorizontal(1f).LineColor("#F1F5F9");
 
-                                    // 3. Imagen del Producto (Centrada abajo, 100% transparente y tamaño grande)
-                                    var imgPlaced = false;
-                                    if (!string.IsNullOrWhiteSpace(product.ImagePath))
+                                    // 3. Imagen del Producto (Centrada abajo, 100% transparente y tamaño máximo)
+                                    var relativePath = product.ImagePath!;
+                                    if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                                     {
-                                        var relativePath = product.ImagePath;
-                                        if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                                        try
                                         {
-                                            try
-                                            {
-                                                var uri = new Uri(relativePath);
-                                                relativePath = uri.AbsolutePath;
-                                            }
-                                            catch { }
+                                            var uri = new Uri(relativePath);
+                                            relativePath = uri.AbsolutePath;
                                         }
-                                        
-                                        var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                                        var localImagePath = Path.Combine(webRoot, relativePath.TrimStart('/'));
-                                        if (System.IO.File.Exists(localImagePath))
-                                        {
-                                            var transparentImageBytes = MakeBackgroundTransparent(localImagePath);
-                                            column.Item()
-                                                .AlignCenter()
-                                                .MaxHeight(390) // Imagen significativamente más grande (hasta 390pt de alto)
-                                                .Image(transparentImageBytes, ImageScaling.FitArea);
-                                                
-                                            imgPlaced = true;
-                                        }
+                                        catch { }
                                     }
-
-                                    if (!imgPlaced)
-                                    {
-                                        column.Item()
-                                            .AlignCenter()
-                                            .Height(180)
-                                            .Border(0.5f)
-                                            .BorderColor("#E2E8F0")
-                                            .Background("#F8FAFC")
-                                            .AlignMiddle()
-                                            .Text("Sin Imagen")
-                                            .FontColor("#94A3B8")
-                                            .Italic();
-                                    }
+                                    
+                                    var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                                    var localImagePath = Path.Combine(webRoot, relativePath.TrimStart('/'));
+                                    
+                                    var transparentImageBytes = MakeBackgroundTransparent(localImagePath);
+                                    column.Item()
+                                        .AlignCenter()
+                                        .Height(430) // Imagen significativamente más grande (hasta 430pt de alto)
+                                        .Image(transparentImageBytes, ImageScaling.FitArea);
 
                                     if (prodIdx < prodArray.Length - 1 || catIdx < categories.Length - 1)
                                     {
@@ -339,5 +316,26 @@ public class CatalogController : ApiControllerBase
         {
             return System.IO.File.ReadAllBytes(imagePath);
         }
+    }
+
+    private static bool HasValidImage(ProductDto p, IWebHostEnvironment env)
+    {
+        if (string.IsNullOrWhiteSpace(p.ImagePath)) return false;
+        if (p.ImagePath.Contains("default-product.png", StringComparison.OrdinalIgnoreCase)) return false;
+
+        var relativePath = p.ImagePath;
+        if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var uri = new Uri(relativePath);
+                relativePath = uri.AbsolutePath;
+            }
+            catch { }
+        }
+
+        var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var localImagePath = Path.Combine(webRoot, relativePath.TrimStart('/'));
+        return System.IO.File.Exists(localImagePath);
     }
 }
