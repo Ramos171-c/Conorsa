@@ -1372,7 +1372,12 @@ public class DbInitializer : IDbInitializer
         decimal? CostBox = null,
         decimal? SemiFactor = null,
         string? SemiUe = null
-    );
+    )
+    {
+        public decimal? CostSemi { get; init; }
+        public decimal? PriceSemi { get; init; }
+        public decimal? PriceBox { get; init; }
+    }
 
     private async Task ResetAndSeedNewCatalogAsync(Guid branchId)
     {
@@ -1477,23 +1482,23 @@ public class DbInitializer : IDbInitializer
                     .FirstOrDefaultAsync(p => p.InternalCode == data.Code);
             }
 
-            var uomDetalle = uomUnd;
             var uomSemimayorista = await GetOrCreateUomAsync(data.SemiUe ?? "1x1");
             var uomMayorista = uomCaja;
 
-            ProductPresentation presDetalle;
             ProductPresentation presSemimayorista;
-            ProductPresentation presMayorista;
+            ProductPresentation? presMayorista = null;
 
-            var semiFactor = data.SemiFactor ?? 1m;
-            var boxFactor = (decimal)data.BoxFactor;
+            decimal semiFactor = data.SemiFactor ?? 1m;
+            decimal mayorFactor = semiFactor > 0 ? (decimal)data.BoxFactor / semiFactor : 1m;
 
-            var detailCost = data.CostUnit ?? (data.WholesaleUnit * 0.85m);
-            var detailPrice = data.RetailUnit;
-            var semiCost = detailCost * semiFactor;
-            var semiPrice = data.SemiUnit * semiFactor;
-            var mayorCost = data.CostBox ?? (detailCost * boxFactor);
-            var mayorPrice = data.WholesaleBox;
+            // Map prices/costs handling both embedded and new catalog models
+            decimal costSemi = data.CostSemi ?? ((data.CostUnit * semiFactor) ?? 0m);
+            decimal priceSemi = data.PriceSemi ?? (data.SemiUnit * semiFactor);
+            decimal costBox = data.CostBox ?? ((data.CostUnit * (decimal)data.BoxFactor) ?? 0m);
+            decimal priceBox = data.PriceBox ?? data.WholesaleBox;
+
+            // Solo crear Mayorista si tiene factor y precio DISTINTOS a Semimayorista
+            bool hasMayorista = mayorFactor > 1m && priceBox > 0 && priceBox != priceSemi;
 
             if (existingProduct != null)
             {
@@ -1502,34 +1507,12 @@ public class DbInitializer : IDbInitializer
                 existingProduct.CategoryId = cat.Id;
                 existingProduct.BrandId = brandGenerica.Id;
                 existingProduct.IsActive = true;
-                existingProduct.CurrentCost = detailCost;
-                existingProduct.DefaultUnitOfMeasureId = uomDetalle.Id;
+                existingProduct.CurrentCost = costSemi;
+                existingProduct.DefaultUnitOfMeasureId = uomSemimayorista.Id;
 
                 // Remove existing presentations
                 _context.ProductPresentations.RemoveRange(existingProduct.Presentations);
                 existingProduct.Presentations.Clear();
-
-                // Recreate Detalle
-                presDetalle = new ProductPresentation
-                {
-                    Id = Guid.NewGuid(),
-                    ProductId = existingProduct.Id,
-                    UnitOfMeasureId = uomDetalle.Id,
-                    Name = "Detalle",
-                    ConversionFactor = 1.0000m,
-                    Barcode = data.Code + "D",
-                    Cost = detailCost,
-                    RetailPrice = detailPrice,
-                    SemiWholesalePrice = detailPrice,
-                    WholesalePrice = detailPrice,
-                    IsBaseUnit = true,
-                    IsDefaultSalePresentation = true,
-                    AllowSale = detailPrice > 0,
-                    AllowPurchase = detailCost > 0,
-                    IsActive = true
-                };
-                existingProduct.Presentations.Add(presDetalle);
-                await _context.ProductPresentations.AddAsync(presDetalle);
 
                 // Recreate Semimayorista
                 presSemimayorista = new ProductPresentation
@@ -1538,42 +1521,45 @@ public class DbInitializer : IDbInitializer
                     ProductId = existingProduct.Id,
                     UnitOfMeasureId = uomSemimayorista.Id,
                     Name = "Semimayorista",
-                    ConversionFactor = semiFactor,
+                    ConversionFactor = 1.0000m,
                     Barcode = data.Code + "S",
-                    Cost = semiCost,
-                    RetailPrice = semiPrice,
-                    SemiWholesalePrice = semiPrice,
-                    WholesalePrice = semiPrice,
-                    IsBaseUnit = false,
-                    IsDefaultSalePresentation = false,
-                    AllowSale = semiPrice > 0,
-                    AllowPurchase = semiCost > 0,
+                    Cost = costSemi,
+                    RetailPrice = priceSemi,
+                    SemiWholesalePrice = priceSemi,
+                    WholesalePrice = priceSemi,
+                    IsBaseUnit = true,
+                    IsDefaultSalePresentation = true,
+                    AllowSale = priceSemi > 0,
+                    AllowPurchase = costSemi > 0,
                     IsActive = true
                 };
                 existingProduct.Presentations.Add(presSemimayorista);
                 await _context.ProductPresentations.AddAsync(presSemimayorista);
 
-                // Recreate Mayorista
-                presMayorista = new ProductPresentation
+                // Recrear Mayorista solo si es una presentación distinta
+                if (hasMayorista)
                 {
-                    Id = Guid.NewGuid(),
-                    ProductId = existingProduct.Id,
-                    UnitOfMeasureId = uomMayorista.Id,
-                    Name = "Mayorista",
-                    ConversionFactor = boxFactor,
-                    Barcode = data.Code + "M",
-                    Cost = mayorCost,
-                    RetailPrice = mayorPrice,
-                    SemiWholesalePrice = mayorPrice,
-                    WholesalePrice = mayorPrice,
-                    IsBaseUnit = false,
-                    IsDefaultSalePresentation = false,
-                    AllowSale = mayorPrice > 0,
-                    AllowPurchase = mayorCost > 0,
-                    IsActive = true
-                };
-                existingProduct.Presentations.Add(presMayorista);
-                await _context.ProductPresentations.AddAsync(presMayorista);
+                    presMayorista = new ProductPresentation
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = existingProduct.Id,
+                        UnitOfMeasureId = uomMayorista.Id,
+                        Name = "Mayorista",
+                        ConversionFactor = mayorFactor,
+                        Barcode = data.Code + "M",
+                        Cost = costBox,
+                        RetailPrice = priceBox,
+                        SemiWholesalePrice = priceBox,
+                        WholesalePrice = priceBox,
+                        IsBaseUnit = false,
+                        IsDefaultSalePresentation = false,
+                        AllowSale = priceBox > 0,
+                        AllowPurchase = costBox > 0,
+                        IsActive = true
+                    };
+                    existingProduct.Presentations.Add(presMayorista);
+                    await _context.ProductPresentations.AddAsync(presMayorista);
+                }
             }
             else
             {
@@ -1590,8 +1576,8 @@ public class DbInitializer : IDbInitializer
                     RequiresBatchControl = false,
                     CategoryId = cat.Id,
                     BrandId = brandGenerica.Id,
-                    DefaultUnitOfMeasureId = uomDetalle.Id,
-                    CurrentCost = detailCost,
+                    DefaultUnitOfMeasureId = uomSemimayorista.Id,
+                    CurrentCost = costSemi,
                     CreatedBy = "System",
                     CreatedOnUtc = DateTime.UtcNow,
                     TaxId = taxExento.Id,
@@ -1599,65 +1585,49 @@ public class DbInitializer : IDbInitializer
                     IsActive = true
                 };
 
-                presDetalle = new ProductPresentation
-                {
-                    Id = Guid.NewGuid(),
-                    ProductId = product.Id,
-                    UnitOfMeasureId = uomDetalle.Id,
-                    Name = "Detalle",
-                    ConversionFactor = 1.0000m,
-                    Barcode = data.Code + "D",
-                    Cost = detailCost,
-                    RetailPrice = detailPrice,
-                    SemiWholesalePrice = detailPrice,
-                    WholesalePrice = detailPrice,
-                    IsBaseUnit = true,
-                    IsDefaultSalePresentation = true,
-                    AllowSale = detailPrice > 0,
-                    AllowPurchase = detailCost > 0,
-                    IsActive = true
-                };
-                product.Presentations.Add(presDetalle);
-
                 presSemimayorista = new ProductPresentation
                 {
                     Id = Guid.NewGuid(),
                     ProductId = product.Id,
                     UnitOfMeasureId = uomSemimayorista.Id,
                     Name = "Semimayorista",
-                    ConversionFactor = semiFactor,
+                    ConversionFactor = 1.0000m,
                     Barcode = data.Code + "S",
-                    Cost = semiCost,
-                    RetailPrice = semiPrice,
-                    SemiWholesalePrice = semiPrice,
-                    WholesalePrice = semiPrice,
-                    IsBaseUnit = false,
-                    IsDefaultSalePresentation = false,
-                    AllowSale = semiPrice > 0,
-                    AllowPurchase = semiCost > 0,
+                    Cost = costSemi,
+                    RetailPrice = priceSemi,
+                    SemiWholesalePrice = priceSemi,
+                    WholesalePrice = priceSemi,
+                    IsBaseUnit = true,
+                    IsDefaultSalePresentation = true,
+                    AllowSale = priceSemi > 0,
+                    AllowPurchase = costSemi > 0,
                     IsActive = true
                 };
                 product.Presentations.Add(presSemimayorista);
 
-                presMayorista = new ProductPresentation
+                // Crear Mayorista solo si es una presentación distinta
+                if (hasMayorista)
                 {
-                    Id = Guid.NewGuid(),
-                    ProductId = product.Id,
-                    UnitOfMeasureId = uomMayorista.Id,
-                    Name = "Mayorista",
-                    ConversionFactor = boxFactor,
-                    Barcode = data.Code + "M",
-                    Cost = mayorCost,
-                    RetailPrice = mayorPrice,
-                    SemiWholesalePrice = mayorPrice,
-                    WholesalePrice = mayorPrice,
-                    IsBaseUnit = false,
-                    IsDefaultSalePresentation = false,
-                    AllowSale = mayorPrice > 0,
-                    AllowPurchase = mayorCost > 0,
-                    IsActive = true
-                };
-                product.Presentations.Add(presMayorista);
+                    presMayorista = new ProductPresentation
+                    {
+                        Id = Guid.NewGuid(),
+                        ProductId = product.Id,
+                        UnitOfMeasureId = uomMayorista.Id,
+                        Name = "Mayorista",
+                        ConversionFactor = mayorFactor,
+                        Barcode = data.Code + "M",
+                        Cost = costBox,
+                        RetailPrice = priceBox,
+                        SemiWholesalePrice = priceBox,
+                        WholesalePrice = priceBox,
+                        IsBaseUnit = false,
+                        IsDefaultSalePresentation = false,
+                        AllowSale = priceBox > 0,
+                        AllowPurchase = costBox > 0,
+                        IsActive = true
+                    };
+                    product.Presentations.Add(presMayorista);
+                }
 
                 await _context.Products.AddAsync(product);
 
@@ -1665,7 +1635,7 @@ public class DbInitializer : IDbInitializer
                 bool seedDemoData = _configuration.GetValue<bool>("DatabaseSeeding:SeedDemoData", false);
                 if (seedDemoData && bgCM != null)
                 {
-                    decimal initialStock = 100m * boxFactor;
+                    decimal initialStock = 100m * mayorFactor;
                     var inventory = new Inventory
                     {
                         Id = Guid.NewGuid(),
@@ -1698,9 +1668,9 @@ public class DbInitializer : IDbInitializer
                         Id = Guid.NewGuid(),
                         ProductId = product.Id,
                         Quantity = 100m,
-                        UnitOfMeasureId = uomMayorista.Id,
-                        ProductPresentationId = presMayorista.Id,
-                        ConversionFactor = boxFactor,
+                        UnitOfMeasureId = hasMayorista ? uomMayorista.Id : uomSemimayorista.Id,
+                        ProductPresentationId = hasMayorista ? presMayorista!.Id : presSemimayorista.Id,
+                        ConversionFactor = mayorFactor,
                         QuantityInBaseUnit = initialStock,
                         CreatedBy = "System",
                         CreatedOnUtc = DateTime.UtcNow

@@ -25,6 +25,7 @@
             <converters:BooleanToVisibilityConverter x:Key="BoolToVis" />
             <converters:BooleanToVisibilityConverter x:Key="InverseBoolToVis" Inverse="True" />
             <converters:InverseBooleanConverter x:Key="InverseBool" />
+            <converters:RelativeImageUrlConverter x:Key="RelativeImageUrlConverter" />
 
             <!-- Estilo Premium Global para todas las tablas (DataGrid) del sistema -->
             <Style x:Key="RightAlignedColumnStyle" TargetType="TextBlock" BasedOn="{StaticResource MaterialDesignDataGridTextColumnStyle}">

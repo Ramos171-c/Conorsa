@@ -83,7 +83,7 @@
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
                                     <Border CornerRadius="4" Width="48" Height="48" Margin="4" ClipToBounds="True" Background="#F0F0F0">
-                                        <Image Source="{Binding ImagePath}" Stretch="UniformToFill" />
+                                        <Image Source="{Binding ImagePath, Converter={StaticResource RelativeImageUrlConverter}}" Stretch="UniformToFill" />
                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>

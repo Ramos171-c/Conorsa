@@ -14,6 +14,7 @@ using EnterpriseBillingSystem.Wpf.ViewModels;
 using EnterpriseBillingSystem.Wpf.Views;
 using EnterpriseBillingSystem.Wpf.Views.Login;
 using EnterpriseBillingSystem.Wpf.Helpers;
+using EnterpriseBillingSystem.Wpf.Converters;
 
 namespace EnterpriseBillingSystem.Wpf;
 
@@ -54,6 +55,10 @@ public partial class App : Application
 
         // Register typed HttpClients
         var baseUrl = configuration.GetValue<string>("ApiSettings:BaseUrl") ?? "https://localhost:7228/api/v1/";
+
+        // Set the media base URL for image loading (host + port, no /api/v1 path)
+        var apiUri = new Uri(baseUrl);
+        RelativeImageUrlConverter.ApiImageBaseUrl = $"{apiUri.Scheme}://{apiUri.Authority}";
 
         services.AddHttpClient<AuthApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
         

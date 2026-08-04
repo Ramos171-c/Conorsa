@@ -44,7 +44,7 @@
                     <materialDesign:Card Width="180" Height="180" Padding="4" materialDesign:ElevationAssist.Elevation="Dp2" Margin="0,0,0,12" Background="#F5F5F5">
                         <Grid>
                             <!-- Image Preview -->
-                            <Image Source="{Binding ImagePath}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                            <Image Source="{Binding ImagePath, Converter={StaticResource RelativeImageUrlConverter}}" Stretch="UniformToFill" HorizontalAlignment="Center" VerticalAlignment="Center" />
                             
                             <!-- Placeholder if no image -->
                             <materialDesign:PackIcon Kind="ImageOutline" Width="64" Height="64" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center">
