@@ -146,10 +146,11 @@ try
         });
     }
 
-    if (!app.Environment.IsDevelopment())
-    {
-        app.UseHttpsRedirection();
-    }
+    // Deshabilitado redireccion forzada a HTTPS para permitir la conexion por HTTP directo en IP 167.99.13.177
+    // if (!app.Environment.IsDevelopment())
+    // {
+    //     app.UseHttpsRedirection();
+    // }
 
     app.UseCors("AllowAll");
 
