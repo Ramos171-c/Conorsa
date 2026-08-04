@@ -58,8 +58,8 @@ public class CatalogController : ApiControllerBase
             var productsList = await Mediator.Send(new GetCatalogProductsQuery());
             var products = productsList.AsEnumerable()
                 .Where(p => p.Name != null && p.IsCatalogVisible && p.IsActive &&
-                            !p.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
-                            !(p.CategoryName != null && p.CategoryName.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)));
+                            !(p.CategoryName != null && p.CategoryName.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)) &&
+                            HasValidImage(p, env));
             if (categoryId.HasValue)
             {
                 products = products.Where(p => p.CategoryId == categoryId.Value);
@@ -68,7 +68,7 @@ public class CatalogController : ApiControllerBase
             var productsArray = products.ToArray();
             if (productsArray.Length == 0)
             {
-                return BadRequest(new { Message = "No hay productos en esta categoría para exportar." });
+                return BadRequest(new { Message = "No hay productos con imagen en esta categoría para exportar." });
             }
 
             var pdfStream = new MemoryStream();
@@ -77,12 +77,31 @@ public class CatalogController : ApiControllerBase
             {
                 container.Page(page =>
                 {
+<<<<<<< HEAD
                     page.Size(PageSizes.A4); // Portrait A4
                     page.Margin(40);
                     page.PageColor("#FFFFFF");
                     page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(11).FontColor("#0F172A"));
 
                     page.Footer()
+=======
+                    page.Size(PageSizes.A4.Landscape()); // Orientación horizontal (apaisado)
+                    
+                    if (System.IO.File.Exists(bgImagePath))
+                    {
+                        page.Background().Image(bgImagePath, ImageScaling.Resize);
+                    }
+                    else
+                    {
+                        page.PageColor("#FFFFFF");
+                    }
+                    
+                    page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(11).FontColor("#0F172A"));
+
+                    page.Footer()
+                        .PaddingHorizontal(50)
+                        .PaddingBottom(15)
+>>>>>>> 9eba1b5 (fix: filtrar productos sin foto en catalogo PDF y aumentar tamano de imagenes/titulos a maximo espacio)
                         .AlignCenter()
                         .Text(x =>
                         {
@@ -91,8 +110,8 @@ public class CatalogController : ApiControllerBase
                         });
 
                     page.Content()
-                        .PaddingHorizontal(50)
-                        .PaddingVertical(25) // Margen ajustado para dar máximo espacio vertical a la imagen
+                        .PaddingHorizontal(40)
+                        .PaddingVertical(15) // Margen ajustado para dar máximo espacio vertical a la imagen
                         .Column(column =>
                         {
                             var categories = productsArray.GroupBy(p => p.CategoryName).ToArray();
@@ -128,14 +147,21 @@ public class CatalogController : ApiControllerBase
                                     // 1. Product Name (Centered)
                                     column.Item().AlignCenter().Text(product.Name.ToUpper())
                                         .Bold()
+<<<<<<< HEAD
                                         .FontSize(28)
                                         .FontColor("#1E3A8A");
+=======
+                                        .FontSize(30)
+                                        .FontColor("#0F172A")
+                                        .AlignCenter();
+>>>>>>> 9eba1b5 (fix: filtrar productos sin foto en catalogo PDF y aumentar tamano de imagenes/titulos a maximo espacio)
                                         
                                     // 2. Detalles (Centrado, SKU y U/E)
                                     var ueText = product.Description?.Contains("U/E: ") == true
                                         ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
                                         : "N/A";
                                         
+<<<<<<< HEAD
                                     column.Item().AlignCenter().PaddingTop(6).Text(x =>
                                     {
                                         x.Span("CÓDIGO SKU: ").Bold().FontSize(14).FontColor("#334155");
@@ -144,17 +170,33 @@ public class CatalogController : ApiControllerBase
                                         x.Span($"{product.DefaultUnitOfMeasureCode}   •   ").FontSize(14).FontColor("#475569");
                                         x.Span("U/E: ").Bold().FontSize(14).FontColor("#334155");
                                         x.Span($"{ueText}").FontSize(14).FontColor("#475569");
+=======
+                                    // 2. Detalles (Centrado, SKU y U/E)
+                                    column.Item().AlignCenter().PaddingTop(4).Text(x =>
+                                    {
+                                        x.Span("CÓDIGO SKU: ").Bold().FontSize(16).FontColor("#E11D48");
+                                        x.Span($"{product.InternalCode}     •     ").FontSize(16).FontColor("#334155");
+                                        
+                                        x.Span("U/E: ").Bold().FontSize(16).FontColor("#E11D48");
+                                        x.Span($"{ueText}").FontSize(16).FontColor("#334155");
+>>>>>>> 9eba1b5 (fix: filtrar productos sin foto en catalogo PDF y aumentar tamano de imagenes/titulos a maximo espacio)
                                     });
 
-                                    column.Item().PaddingVertical(6).LineHorizontal(1f).LineColor("#F1F5F9");
+                                    column.Item().PaddingVertical(4).LineHorizontal(1f).LineColor("#F1F5F9");
 
+<<<<<<< HEAD
                                     // 3. Imagen del Producto (Centrada abajo, 100% transparente y tamaño grande)
                                     var imgPlaced = false;
                                     if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
+=======
+                                    // 3. Imagen del Producto (Centrada abajo, 100% transparente y tamaño máximo)
+                                    var relativePath = product.ImagePath!;
+                                    if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+>>>>>>> 9eba1b5 (fix: filtrar productos sin foto en catalogo PDF y aumentar tamano de imagenes/titulos a maximo espacio)
                                     {
-                                        var relativePath = product.ImagePath;
-                                        if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+                                        try
                                         {
+<<<<<<< HEAD
                                             try
                                             {
                                                 var uri = new Uri(relativePath);
@@ -173,22 +215,22 @@ public class CatalogController : ApiControllerBase
                                                 .Image(transparentImageBytes, ImageScaling.FitArea);
                                                 
                                             imgPlaced = true;
+=======
+                                            var uri = new Uri(relativePath);
+                                            relativePath = uri.AbsolutePath;
+>>>>>>> 9eba1b5 (fix: filtrar productos sin foto en catalogo PDF y aumentar tamano de imagenes/titulos a maximo espacio)
                                         }
+                                        catch { }
                                     }
-
-                                    if (!imgPlaced)
-                                    {
-                                        column.Item()
-                                            .AlignCenter()
-                                            .Height(180)
-                                            .Border(0.5f)
-                                            .BorderColor("#E2E8F0")
-                                            .Background("#F8FAFC")
-                                            .AlignMiddle()
-                                            .Text("Sin Imagen")
-                                            .FontColor("#94A3B8")
-                                            .Italic();
-                                    }
+                                    
+                                    var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                                    var localImagePath = Path.Combine(webRoot, relativePath.TrimStart('/'));
+                                    
+                                    var transparentImageBytes = MakeBackgroundTransparent(localImagePath);
+                                    column.Item()
+                                        .AlignCenter()
+                                        .Height(430) // Imagen significativamente más grande (hasta 430pt de alto)
+                                        .Image(transparentImageBytes, ImageScaling.FitArea);
 
                                     // 4. Description (Centered)
                                     if (!string.IsNullOrWhiteSpace(product.Description))
@@ -330,5 +372,26 @@ public class CatalogController : ApiControllerBase
         {
             return System.IO.File.ReadAllBytes(imagePath);
         }
+    }
+
+    private static bool HasValidImage(ProductDto p, IWebHostEnvironment env)
+    {
+        if (string.IsNullOrWhiteSpace(p.ImagePath)) return false;
+        if (p.ImagePath.Contains("default-product.png", StringComparison.OrdinalIgnoreCase)) return false;
+
+        var relativePath = p.ImagePath;
+        if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
+        {
+            try
+            {
+                var uri = new Uri(relativePath);
+                relativePath = uri.AbsolutePath;
+            }
+            catch { }
+        }
+
+        var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+        var localImagePath = Path.Combine(webRoot, relativePath.TrimStart('/'));
+        return System.IO.File.Exists(localImagePath);
     }
 }
