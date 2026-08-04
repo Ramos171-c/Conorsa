@@ -22,6 +22,159 @@ class _OrderListScreenState extends State<OrderListScreen> {
     });
   }
 
+<<<<<<< HEAD
+=======
+  void _selectDateRange() async {
+    final now = DateTime.now();
+    final picked = await showDateRangePicker(
+      context: context,
+      firstDate: DateTime(2024, 1, 1),
+      lastDate: DateTime(now.year + 1, 12, 31),
+      initialDateRange: _fromDate != null && _toDate != null
+          ? DateTimeRange(start: _fromDate!, end: _toDate!)
+          : DateTimeRange(start: now.subtract(const Duration(days: 7)), end: now),
+    );
+
+    if (picked != null) {
+      setState(() {
+        _fromDate = DateTime(picked.start.year, picked.start.month, picked.start.day, 0, 0, 0);
+        _toDate = DateTime(picked.end.year, picked.end.month, picked.end.day, 23, 59, 59);
+        _dateFilterLabel = '${picked.start.day}/${picked.start.month} - ${picked.end.day}/${picked.end.month}';
+      });
+      Provider.of<OrderProvider>(context, listen: false).fetchOrders(
+        routeId: _selectedRouteId,
+        fromDate: _fromDate,
+        toDate: _toDate,
+      );
+    }
+  }
+
+  void _setDateFilterQuick(String filterType) {
+    final now = DateTime.now();
+    DateTime? start;
+    DateTime? end;
+    String label = 'Todas las fechas';
+
+    if (filterType == 'today') {
+      start = DateTime(now.year, now.month, now.day, 0, 0, 0);
+      end = DateTime(now.year, now.month, now.day, 23, 59, 59);
+      label = 'Hoy';
+    } else if (filterType == 'yesterday') {
+      final y = now.subtract(const Duration(days: 1));
+      start = DateTime(y.year, y.month, y.day, 0, 0, 0);
+      end = DateTime(y.year, y.month, y.day, 23, 59, 59);
+      label = 'Ayer';
+    } else if (filterType == 'month') {
+      start = DateTime(now.year, now.month, 1, 0, 0, 0);
+      end = DateTime(now.year, now.month + 1, 0, 23, 59, 59);
+      label = 'Este Mes';
+    }
+
+    setState(() {
+      _fromDate = start;
+      _toDate = end;
+      _dateFilterLabel = label;
+    });
+
+    Provider.of<OrderProvider>(context, listen: false).fetchOrders(
+      routeId: _selectedRouteId,
+      fromDate: _fromDate,
+      toDate: _toDate,
+    );
+  }
+
+  // Voucher Delivery Ticket Dialog
+  void _showDeliveryVoucher(BuildContext context, SalesOrderDetail detail) {
+    final formattedDate = '${detail.orderDate.day.toString().padLeft(2, '0')}/${detail.orderDate.month.toString().padLeft(2, '0')}/${detail.orderDate.year} ${detail.orderDate.hour.toString().padLeft(2, '0')}:${detail.orderDate.minute.toString().padLeft(2, '0')}';
+    final totalUsd = detail.totalAmount / 36.5;
+
+    final StringBuffer ticketBuffer = StringBuffer();
+    ticketBuffer.writeln('=================================');
+    ticketBuffer.writeln('       CONORTE - DISTRIBUIDORA   ');
+    ticketBuffer.writeln('       VOUCHER DE ENTREGA        ');
+    ticketBuffer.writeln('=================================');
+    ticketBuffer.writeln('Pedido No: ${detail.orderNumber}');
+    ticketBuffer.writeln('Fecha:     $formattedDate');
+    ticketBuffer.writeln('Cliente:   ${detail.customerName}');
+    ticketBuffer.writeln('Estado:    ${_getStatusText(detail.status)}');
+    ticketBuffer.writeln('---------------------------------');
+    ticketBuffer.writeln('PRODUCTOS:');
+    for (var item in detail.details) {
+      ticketBuffer.writeln('${item.productName}');
+      ticketBuffer.writeln('  ${item.quantity.toStringAsFixed(0)} ${item.unitOfMeasure} x C\$${item.unitPrice.toStringAsFixed(2)} = C\$${item.netAmount.toStringAsFixed(2)}');
+    }
+    ticketBuffer.writeln('---------------------------------');
+    ticketBuffer.writeln('SUBTOTAL:  C\$${detail.subTotal.toStringAsFixed(2)}');
+    if (detail.discountAmount > 0) {
+      ticketBuffer.writeln('DESCUENTO: -C\$${detail.discountAmount.toStringAsFixed(2)}');
+    }
+    ticketBuffer.writeln('IVA:       C\$${detail.taxAmount.toStringAsFixed(2)}');
+    ticketBuffer.writeln('TOTAL C\$: C\$${detail.totalAmount.toStringAsFixed(2)}');
+    ticketBuffer.writeln('TOTAL USD: \$${totalUsd.toStringAsFixed(2)}');
+    ticketBuffer.writeln('=================================');
+    if (detail.notes != null && detail.notes!.isNotEmpty) {
+      ticketBuffer.writeln('NOTAS: ${detail.notes}');
+      ticketBuffer.writeln('=================================');
+    }
+
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          title: Row(
+            children: [
+              const Icon(Icons.receipt_long_rounded, color: Color(0xFF1E3A8A)),
+              const SizedBox(width: 8),
+              const Text('Voucher de Entrega', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF8FAFC),
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: const Color(0xFFCBD5E1)),
+                  ),
+                  child: Text(
+                    ticketBuffer.toString(),
+                    style: const TextStyle(fontFamily: 'monospace', fontSize: 12, height: 1.3, color: Color(0xFF1E293B)),
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton.icon(
+              onPressed: () => Navigator.pop(context),
+              icon: const Icon(Icons.close),
+              label: const Text('Cerrar'),
+            ),
+            ElevatedButton.icon(
+              onPressed: () {
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  const SnackBar(content: Text('Voucher de entrega preparado para impresión.')),
+                );
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF1E3A8A),
+                foregroundColor: Colors.white,
+              ),
+              icon: const Icon(Icons.print_rounded),
+              label: const Text('Imprimir Voucher'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+>>>>>>> bf290c1 (fix: reemplazar todos los nombres y titulos de marca a CONORTE)
   // Get status color
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {

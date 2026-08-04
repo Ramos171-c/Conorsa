@@ -76,9 +76,9 @@ try
     {
         options.SwaggerDoc("v1", new OpenApiInfo 
         { 
-            Title = "LA UNIÓN API", 
+            Title = "CONORTE API", 
             Version = "v1",
-            Description = "Base del API del Sistema de Facturación de LA UNIÓN (.NET 8 Clean Architecture / DDD)"
+            Description = "Base del API del Sistema de Facturación de CONORTE (.NET 8 Clean Architecture / DDD)"
         });
 
         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
@@ -131,18 +131,28 @@ try
         app.UseSwagger();
         app.UseSwaggerUI(c =>
         {
-            c.SwaggerEndpoint("/swagger/v1/swagger.json", "LA UNIÓN API v1");
+            c.SwaggerEndpoint("/swagger/v1/swagger.json", "CONORTE API v1");
         });
     }
 
-    if (!app.Environment.IsDevelopment())
-    {
-        app.UseHttpsRedirection();
-    }
+    // Deshabilitado redireccion forzada a HTTPS para permitir la conexion por HTTP directo en IP 167.99.13.177
+    // if (!app.Environment.IsDevelopment())
+    // {
+    //     app.UseHttpsRedirection();
+    // }
 
     app.UseCors("AllowAll");
 
-    app.UseStaticFiles();
+    // Permitir la descarga de archivos .apk de Android y archivos por defecto (index.html) para Flutter Web (/app/)
+    var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
+    provider.Mappings[".apk"] = "application/vnd.android.package-archive";
+
+    app.UseDefaultFiles();
+
+    app.UseStaticFiles(new StaticFileOptions
+    {
+        ContentTypeProvider = provider
+    });
 
     app.UseAuthentication();
     app.UseAuthorization();

@@ -256,7 +256,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                                             child: ClipRRect(
                                               borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
                                               child: GestureDetector(
-                                                onTap: () => _showFullImageDialog(context, product.imageUrl, product.name),
+                                                onTap: () => _showFullImageDialog(context, product.imageUrl, product.displayName, product.internalCode),
                                                 child: CachedProductImage(
                                                   imageUrl: product.imageUrl,
                                                   width: double.infinity,
@@ -272,7 +272,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                                               crossAxisAlignment: CrossAxisAlignment.start,
                                               children: [
                                                 Text(
-                                                  product.name,
+                                                  product.displayName,
                                                   maxLines: 2,
                                                   overflow: TextOverflow.ellipsis,
                                                   style: const TextStyle(
