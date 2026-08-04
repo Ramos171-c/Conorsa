@@ -53,3 +53,11 @@ appsettings.Local.json
 
 # Publish output
 publish/
+publish_wpf/
+
+# Large binaries and temporary files
+*.apk
+catalog.json
+catalog_summary.txt
+inspect_catalog.py
+

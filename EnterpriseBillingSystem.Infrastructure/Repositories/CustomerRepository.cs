@@ -93,21 +93,28 @@ public class CustomerRepository : Repository<Customer>, ICustomerRepository
 
     public async Task<string> GenerateCustomerCodeAsync(CancellationToken cancellationToken = default)
     {
-        var maxCode = await _context.Customers
+        var codes = await _context.Customers
             .IgnoreQueryFilters()
+            .Where(c => c.CustomerCode.StartsWith("CUS-"))
             .Select(c => c.CustomerCode)
-            .OrderByDescending(c => c)
-            .FirstOrDefaultAsync(cancellationToken);
+            .ToListAsync(cancellationToken);
 
-        int nextNumber = 1;
-        if (!string.IsNullOrEmpty(maxCode) && maxCode.StartsWith("CUS-"))
+        int maxNumber = 0;
+        foreach (var code in codes)
         {
-            if (int.TryParse(maxCode.Substring(4), out int lastNumber))
+            if (code.Length > 4)
             {
-                nextNumber = lastNumber + 1;
+                var numericPart = code.Substring(4);
+                if (int.TryParse(numericPart, out int num))
+                {
+                    if (num > maxNumber)
+                    {
+                        maxNumber = num;
+                    }
+                }
             }
         }
 
-        return $"CUS-{nextNumber:D6}";
+        return $"CUS-{(maxNumber + 1):D6}";
     }
 }

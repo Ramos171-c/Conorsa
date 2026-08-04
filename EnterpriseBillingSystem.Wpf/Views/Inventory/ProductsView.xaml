@@ -82,9 +82,23 @@
                         <DataGridTemplateColumn Header="Imagen" Width="80">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <Border CornerRadius="4" Width="48" Height="48" Margin="4" ClipToBounds="True" Background="#F0F0F0">
-                                        <Image Source="{Binding ImagePath, Converter={StaticResource RelativeImageUrlConverter}}" Stretch="UniformToFill" />
-                                    </Border>
+                                     <Border CornerRadius="4" Width="48" Height="48" Margin="4" ClipToBounds="True" Background="#F0F0F0">
+                                         <Grid>
+                                             <Image Source="{Binding ImagePath, Converter={StaticResource RelativeImageUrlConverter}}" Stretch="UniformToFill" />
+                                             <materialDesign:PackIcon Kind="ImageOutline" Width="24" Height="24" Foreground="Gray" HorizontalAlignment="Center" VerticalAlignment="Center">
+                                                 <materialDesign:PackIcon.Style>
+                                                     <Style TargetType="materialDesign:PackIcon">
+                                                         <Setter Property="Visibility" Value="Collapsed" />
+                                                         <Style.Triggers>
+                                                             <DataTrigger Binding="{Binding ImagePath, Converter={StaticResource RelativeImageUrlConverter}}" Value="{x:Null}">
+                                                                 <Setter Property="Visibility" Value="Visible" />
+                                                             </DataTrigger>
+                                                         </Style.Triggers>
+                                                     </Style>
+                                                 </materialDesign:PackIcon.Style>
+                                             </materialDesign:PackIcon>
+                                         </Grid>
+                                     </Border>
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

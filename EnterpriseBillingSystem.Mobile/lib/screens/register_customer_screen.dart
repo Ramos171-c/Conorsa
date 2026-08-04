@@ -82,15 +82,15 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
       loadedCategories = await offlineService.getCachedCustomerCategories();
       loadedProfiles = await offlineService.getCachedPricingProfiles();
 
-      // Default values if cache is empty
+      // Default values with valid Guid strings if cache is empty
       if (loadedCategories.isEmpty) {
         loadedCategories = [
-          {'id': 'cat-default', 'name': 'Categoría General'}
+          {'id': '00000000-0000-0000-0000-000000000001', 'name': 'Categoría General'}
         ];
       }
       if (loadedProfiles.isEmpty) {
         loadedProfiles = [
-          {'id': 'prof-default', 'name': 'Lista Detalle', 'type': 1}
+          {'id': '00000000-0000-0000-0000-000000000002', 'name': 'Lista Detalle', 'type': 1}
         ];
       }
     }
@@ -231,7 +231,32 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
         String msg = 'No se pudo crear el cliente.';
         try {
           final errData = jsonDecode(response.body);
-          msg = errData['message'] ?? errData['error'] ?? msg;
+          if (errData is Map) {
+            if (errData['errors'] != null) {
+              final errs = errData['errors'];
+              if (errs is Map) {
+                final list = <String>[];
+                errs.forEach((k, v) {
+                  if (v is List) {
+                    list.addAll(v.map((e) => e.toString()));
+                  } else {
+                    list.add(v.toString());
+                  }
+                });
+                if (list.isNotEmpty) msg = list.join('\n');
+              } else if (errs is List) {
+                msg = errs.map((e) => e.toString()).join('\n');
+              }
+            } else if (errData['message'] != null) {
+              msg = errData['message'].toString();
+            } else if (errData['detail'] != null) {
+              msg = errData['detail'].toString();
+            } else if (errData['title'] != null) {
+              msg = errData['title'].toString();
+            } else if (errData['error'] != null) {
+              msg = errData['error'].toString();
+            }
+          }
         } catch (_) {}
         setState(() {
           _errorMessage = msg;

@@ -31,9 +31,9 @@ public class CatalogController : ApiControllerBase
         var baseUri = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
         var mapped = filteredResult.Select(p => p with
         {
-            ImagePath = string.IsNullOrWhiteSpace(p.ImagePath)
-                ? $"{baseUri}/uploads/products/default-product.png"
-                : $"{baseUri}{p.ImagePath}"
+            ImagePath = string.IsNullOrWhiteSpace(p.ImagePath) || p.ImagePath.EndsWith("default-product.png", StringComparison.OrdinalIgnoreCase)
+                ? null
+                : (Uri.TryCreate(p.ImagePath, UriKind.Absolute, out _) ? p.ImagePath : $"{baseUri}{(p.ImagePath.StartsWith('/') ? p.ImagePath : $"/{p.ImagePath}")}")
         }).ToList();
 
         return Ok(mapped);

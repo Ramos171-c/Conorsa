@@ -9,6 +9,7 @@ import 'order_list_screen.dart';
 import 'catalog_screen.dart';
 import 'register_customer_screen.dart';
 import 'goals_screen.dart';
+import 'dashboard_screen.dart';
 
 class HomeScreen extends StatelessWidget {
   const HomeScreen({super.key});
@@ -230,6 +231,23 @@ class HomeScreen extends StatelessWidget {
                       Navigator.push(
                         context,
                         MaterialPageRoute(builder: (context) => const GoalsScreen()),
+                      );
+                    },
+                  ),
+                  const SizedBox(height: 16),
+
+                  // Menu Option: Dashboard
+                  _buildMenuCard(
+                    context,
+                    title: 'Dashboard de Operaciones',
+                    subtitle: 'Ventas de hoy, pedidos, margen y desempeño de vendedores',
+                    icon: Icons.space_dashboard_rounded,
+                    iconBg: const Color(0xFFE0F2FE),
+                    iconColor: const Color(0xFF0284C7),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const DashboardScreen()),
                       );
                     },
                   ),

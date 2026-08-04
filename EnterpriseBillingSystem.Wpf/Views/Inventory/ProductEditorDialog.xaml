@@ -52,10 +52,7 @@
                                     <Style TargetType="materialDesign:PackIcon">
                                         <Setter Property="Visibility" Value="Collapsed" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding ImagePath}" Value="{x:Null}">
-                                                <Setter Property="Visibility" Value="Visible" />
-                                            </DataTrigger>
-                                            <DataTrigger Binding="{Binding ImagePath}" Value="">
+                                            <DataTrigger Binding="{Binding ImagePath, Converter={StaticResource RelativeImageUrlConverter}}" Value="{x:Null}">
                                                 <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
                                         </Style.Triggers>

@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/config_provider.dart';
@@ -26,6 +27,7 @@ class CachedProductImage extends StatefulWidget {
 
 class _CachedProductImageState extends State<CachedProductImage> {
   String? _base64Data;
+  String? _resolvedUrl;
   bool _isLoading = true;
 
   @override
@@ -52,23 +54,41 @@ class _CachedProductImageState extends State<CachedProductImage> {
       if (mounted) {
         setState(() {
           _base64Data = null;
+          _resolvedUrl = null;
           _isLoading = false;
         });
       }
       return;
     }
 
-    // Convert relative path to absolute URL if necessary
-    if (!url.startsWith('http')) {
-      try {
-        final config = Provider.of<ConfigProvider>(context, listen: false);
-        final uri = Uri.parse(config.apiUrl);
-        final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ":${uri.port}" : ""}';
-        url = '$base${url.startsWith('/') ? "" : "/"}$url';
-      } catch (_) {}
+    // Resolve URL to match the current active API base URL (handling localhost, 127.0.0.1, relative paths, port mismatches)
+    try {
+      final config = Provider.of<ConfigProvider>(context, listen: false);
+      final apiUri = Uri.parse(config.apiUrl);
+      final apiBase = '${apiUri.scheme}://${apiUri.host}${apiUri.hasPort ? ":${apiUri.port}" : ""}';
+
+      if (!url.startsWith('http')) {
+        url = '$apiBase${url.startsWith('/') ? "" : "/"}$url';
+      } else {
+        final parsedUrl = Uri.parse(url);
+        if (parsedUrl.host != apiUri.host || (apiUri.hasPort && parsedUrl.port != apiUri.port)) {
+          url = '$apiBase${parsedUrl.path}${parsedUrl.hasQuery ? "?${parsedUrl.query}" : ""}';
+        }
+      }
+    } catch (_) {}
+
+    // On Flutter Web, use browser native network loading and caching directly
+    if (kIsWeb) {
+      if (mounted) {
+        setState(() {
+          _resolvedUrl = url;
+          _isLoading = false;
+        });
+      }
+      return;
     }
 
-    // 1. Check local cache first
+    // 1. Check local cache first on native platforms
     final cached = await ImageCacheService.getCachedImageBase64(url);
     if (cached != null) {
       if (mounted) {
@@ -80,7 +100,7 @@ class _CachedProductImageState extends State<CachedProductImage> {
       return;
     }
 
-    // 2. Download and cache on-the-fly
+    // 2. Download and cache on-the-fly on native platforms
     final downloaded = await ImageCacheService.downloadAndCacheOnTheFly(url);
     if (mounted) {
       setState(() {
@@ -107,6 +127,16 @@ class _CachedProductImageState extends State<CachedProductImage> {
             ),
           ),
         ),
+      );
+    }
+
+    if (kIsWeb && _resolvedUrl != null && _resolvedUrl!.isNotEmpty) {
+      return Image.network(
+        _resolvedUrl!,
+        width: widget.width,
+        height: widget.height,
+        fit: widget.fit,
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
       );
     }
 

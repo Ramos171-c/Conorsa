@@ -261,12 +261,20 @@ public class ProductsController : ApiControllerBase
         canvas.DrawBitmap(bitmap, 0, 0);
         return rotated;
     }
-    private string GetAbsoluteUrl(string? relativePath)
+    private string? GetAbsoluteUrl(string? relativePath)
     {
+        if (string.IsNullOrWhiteSpace(relativePath) || relativePath.EndsWith("default-product.png", StringComparison.OrdinalIgnoreCase))
+        {
+            return null;
+        }
+
+        if (Uri.TryCreate(relativePath, UriKind.Absolute, out _))
+        {
+            return relativePath;
+        }
+
         var baseUri = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
-        var path = string.IsNullOrWhiteSpace(relativePath)
-            ? "/uploads/products/default-product.png"
-            : relativePath;
+        var path = relativePath.StartsWith('/') ? relativePath : $"/{relativePath}";
         return $"{baseUri}{path}";
     }
 }

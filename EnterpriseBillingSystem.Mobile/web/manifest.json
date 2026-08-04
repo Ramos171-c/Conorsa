@@ -1,11 +1,11 @@
 {
-    "name": "CONORTE POS Móvil",
-    "short_name": "CONORTE POS",
+    "name": "LA UNIÓN POS Móvil",
+    "short_name": "LA UNIÓN POS",
     "start_url": ".",
-    "display": "standalone",
+    "display": "browser",
     "background_color": "#673AB7",
     "theme_color": "#673AB7",
-    "description": "Sistema Móvil de Pedidos y Ventas CONORTE",
+    "description": "Sistema Móvil de Pedidos y Ventas LA UNIÓN",
     "orientation": "portrait-primary",
     "prefer_related_applications": false,
     "icons": [

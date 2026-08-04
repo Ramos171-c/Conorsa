@@ -1,4 +1,5 @@
 using System;
+using System.IO;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
@@ -24,15 +25,44 @@ public class RelativeImageUrlConverter : IValueConverter
         if (value is not string path || string.IsNullOrWhiteSpace(path))
             return null;
 
+        // If path is default-product.png, treat as null (no image uploaded yet)
+        if (path.EndsWith("default-product.png", StringComparison.OrdinalIgnoreCase))
+            return null;
+
         try
         {
-            // If it's already an absolute URI use it directly
-            if (Uri.TryCreate(path, UriKind.Absolute, out var absoluteUri))
-                return new BitmapImage(absoluteUri);
+            // If local file path (e.g. previewing an image selected from disk before saving)
+            if (File.Exists(path))
+            {
+                var bmp = new BitmapImage();
+                bmp.BeginInit();
+                bmp.UriSource = new Uri(path, UriKind.Absolute);
+                bmp.CacheOption = BitmapCacheOption.OnLoad;
+                bmp.CreateOptions = BitmapCreateOptions.IgnoreImageCache;
+                bmp.EndInit();
+                return bmp;
+            }
 
-            // It's a relative path — prepend the configured media base
-            var baseUrl = ApiImageBaseUrl.TrimEnd('/');
-            var fullUrl = $"{baseUrl}/{path.TrimStart('/')}";
+            string fullUrl;
+            if (Uri.TryCreate(path, UriKind.Absolute, out var uriResult))
+            {
+                // If it's an absolute URL, replace authority if it points to internal docker name or localhost
+                var baseUrl = ApiImageBaseUrl.TrimEnd('/');
+                if (!string.IsNullOrEmpty(baseUrl))
+                {
+                    fullUrl = $"{baseUrl}{uriResult.AbsolutePath}";
+                }
+                else
+                {
+                    fullUrl = path;
+                }
+            }
+            else
+            {
+                // Relative path — prepend configured media base
+                var baseUrl = ApiImageBaseUrl.TrimEnd('/');
+                fullUrl = $"{baseUrl}/{path.TrimStart('/')}";
+            }
 
             if (Uri.TryCreate(fullUrl, UriKind.Absolute, out var fullUri))
             {
@@ -47,7 +77,7 @@ public class RelativeImageUrlConverter : IValueConverter
         }
         catch
         {
-            // Any failure (network, bad URL, etc.) → return null to show placeholder
+            // Any failure (network, bad URL, 404, etc.) → return null to show placeholder icon
         }
 
         return null;

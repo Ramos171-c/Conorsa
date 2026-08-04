@@ -14,6 +14,11 @@ class OrderListScreen extends StatefulWidget {
 }
 
 class _OrderListScreenState extends State<OrderListScreen> {
+  String? _selectedRouteId;
+  DateTime? _fromDate;
+  DateTime? _toDate;
+  String _dateFilterLabel = 'Todas las fechas';
+
   @override
   void initState() {
     super.initState();
@@ -22,8 +27,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
     });
   }
 
-<<<<<<< HEAD
-=======
   void _selectDateRange() async {
     final now = DateTime.now();
     final picked = await showDateRangePicker(
@@ -90,7 +93,7 @@ class _OrderListScreenState extends State<OrderListScreen> {
 
     final StringBuffer ticketBuffer = StringBuffer();
     ticketBuffer.writeln('=================================');
-    ticketBuffer.writeln('       CONORTE - DISTRIBUIDORA   ');
+    ticketBuffer.writeln('       LA UNIÓN - DISTRIBUIDORA   ');
     ticketBuffer.writeln('       VOUCHER DE ENTREGA        ');
     ticketBuffer.writeln('=================================');
     ticketBuffer.writeln('Pedido No: ${detail.orderNumber}');
@@ -174,7 +177,6 @@ class _OrderListScreenState extends State<OrderListScreen> {
     );
   }
 
->>>>>>> bf290c1 (fix: reemplazar todos los nombres y titulos de marca a CONORTE)
   // Get status color
   Color _getStatusColor(String status) {
     switch (status.toLowerCase()) {

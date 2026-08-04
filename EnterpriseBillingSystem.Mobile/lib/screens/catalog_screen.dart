@@ -333,7 +333,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
     );
   }
 
-  void _showFullImageDialog(BuildContext context, String? imageUrl, String productName) {
+  void _showFullImageDialog(BuildContext context, String? imageUrl, String productName, [String? internalCode]) {
     showDialog(
       context: context,
       barrierDismissible: true,
@@ -373,6 +373,13 @@ class _CatalogScreenState extends State<CatalogScreen> {
                         color: Color(0xFF0F172A),
                       ),
                     ),
+                    if (internalCode != null && internalCode.isNotEmpty) ...[
+                      const SizedBox(height: 2),
+                      Text(
+                        'Código: $internalCode',
+                        style: const TextStyle(fontSize: 13, color: Colors.grey),
+                      ),
+                    ],
                     const SizedBox(height: 4),
                   ],
                 ),
