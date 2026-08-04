@@ -77,31 +77,12 @@ public class CatalogController : ApiControllerBase
             {
                 container.Page(page =>
                 {
-<<<<<<< HEAD
                     page.Size(PageSizes.A4); // Portrait A4
                     page.Margin(40);
                     page.PageColor("#FFFFFF");
                     page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(11).FontColor("#0F172A"));
 
                     page.Footer()
-=======
-                    page.Size(PageSizes.A4.Landscape()); // Orientación horizontal (apaisado)
-                    
-                    if (System.IO.File.Exists(bgImagePath))
-                    {
-                        page.Background().Image(bgImagePath, ImageScaling.Resize);
-                    }
-                    else
-                    {
-                        page.PageColor("#FFFFFF");
-                    }
-                    
-                    page.DefaultTextStyle(x => x.FontFamily("Arial").FontSize(11).FontColor("#0F172A"));
-
-                    page.Footer()
-                        .PaddingHorizontal(50)
-                        .PaddingBottom(15)
->>>>>>> 9eba1b5 (fix: filtrar productos sin foto en catalogo PDF y aumentar tamano de imagenes/titulos a maximo espacio)
                         .AlignCenter()
                         .Text(x =>
                         {
@@ -147,31 +128,15 @@ public class CatalogController : ApiControllerBase
                                     // 1. Product Name (Centered)
                                     column.Item().AlignCenter().Text(product.Name.ToUpper())
                                         .Bold()
-<<<<<<< HEAD
-                                        .FontSize(28)
-                                        .FontColor("#1E3A8A");
-=======
                                         .FontSize(30)
                                         .FontColor("#0F172A")
                                         .AlignCenter();
->>>>>>> 9eba1b5 (fix: filtrar productos sin foto en catalogo PDF y aumentar tamano de imagenes/titulos a maximo espacio)
                                         
                                     // 2. Detalles (Centrado, SKU y U/E)
                                     var ueText = product.Description?.Contains("U/E: ") == true
                                         ? product.Description.Split("U/E: ").LastOrDefault()?.Trim(')')
                                         : "N/A";
                                         
-<<<<<<< HEAD
-                                    column.Item().AlignCenter().PaddingTop(6).Text(x =>
-                                    {
-                                        x.Span("CÓDIGO SKU: ").Bold().FontSize(14).FontColor("#334155");
-                                        x.Span($"{product.InternalCode}   •   ").FontSize(14).FontColor("#475569");
-                                        x.Span("MEDIDA: ").Bold().FontSize(14).FontColor("#334155");
-                                        x.Span($"{product.DefaultUnitOfMeasureCode}   •   ").FontSize(14).FontColor("#475569");
-                                        x.Span("U/E: ").Bold().FontSize(14).FontColor("#334155");
-                                        x.Span($"{ueText}").FontSize(14).FontColor("#475569");
-=======
-                                    // 2. Detalles (Centrado, SKU y U/E)
                                     column.Item().AlignCenter().PaddingTop(4).Text(x =>
                                     {
                                         x.Span("CÓDIGO SKU: ").Bold().FontSize(16).FontColor("#E11D48");
@@ -179,58 +144,41 @@ public class CatalogController : ApiControllerBase
                                         
                                         x.Span("U/E: ").Bold().FontSize(16).FontColor("#E11D48");
                                         x.Span($"{ueText}").FontSize(16).FontColor("#334155");
->>>>>>> 9eba1b5 (fix: filtrar productos sin foto en catalogo PDF y aumentar tamano de imagenes/titulos a maximo espacio)
                                     });
 
                                     column.Item().PaddingVertical(4).LineHorizontal(1f).LineColor("#F1F5F9");
 
-<<<<<<< HEAD
-                                    // 3. Imagen del Producto (Centrada abajo, 100% transparente y tamaño grande)
+                                    // 3. Imagen del Producto
                                     var imgPlaced = false;
-                                    if (!string.IsNullOrWhiteSpace(product.ImagePath) && env.WebRootPath != null)
-=======
-                                    // 3. Imagen del Producto (Centrada abajo, 100% transparente y tamaño máximo)
-                                    var relativePath = product.ImagePath!;
-                                    if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
->>>>>>> 9eba1b5 (fix: filtrar productos sin foto en catalogo PDF y aumentar tamano de imagenes/titulos a maximo espacio)
+                                    if (!string.IsNullOrWhiteSpace(product.ImagePath))
                                     {
                                         try
                                         {
-<<<<<<< HEAD
-                                            try
+                                            var relativePath = product.ImagePath;
+                                            if (relativePath.StartsWith("http", StringComparison.OrdinalIgnoreCase))
                                             {
-                                                var uri = new Uri(relativePath);
-                                                relativePath = uri.AbsolutePath;
+                                                try
+                                                {
+                                                    var uri = new Uri(relativePath);
+                                                    relativePath = uri.AbsolutePath;
+                                                }
+                                                catch { }
                                             }
-                                            catch { }
-                                        }
-                                        
-                                        var localImagePath = Path.Combine(env.WebRootPath, relativePath.TrimStart('/'));
-                                        if (System.IO.File.Exists(localImagePath))
-                                        {
-                                            var transparentImageBytes = MakeBackgroundTransparent(localImagePath);
-                                            column.Item()
-                                                .AlignCenter()
-                                                .MaxHeight(400) // Imagen significativamente más grande (hasta 400pt de alto)
-                                                .Image(transparentImageBytes, ImageScaling.FitArea);
-                                                
-                                            imgPlaced = true;
-=======
-                                            var uri = new Uri(relativePath);
-                                            relativePath = uri.AbsolutePath;
->>>>>>> 9eba1b5 (fix: filtrar productos sin foto en catalogo PDF y aumentar tamano de imagenes/titulos a maximo espacio)
+                                            
+                                            var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+                                            var localImagePath = Path.Combine(webRoot, relativePath.TrimStart('/'));
+                                            if (System.IO.File.Exists(localImagePath))
+                                            {
+                                                var transparentImageBytes = MakeBackgroundTransparent(localImagePath);
+                                                column.Item()
+                                                    .AlignCenter()
+                                                    .MaxHeight(430)
+                                                    .Image(transparentImageBytes, ImageScaling.FitArea);
+                                                imgPlaced = true;
+                                            }
                                         }
                                         catch { }
                                     }
-                                    
-                                    var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
-                                    var localImagePath = Path.Combine(webRoot, relativePath.TrimStart('/'));
-                                    
-                                    var transparentImageBytes = MakeBackgroundTransparent(localImagePath);
-                                    column.Item()
-                                        .AlignCenter()
-                                        .Height(430) // Imagen significativamente más grande (hasta 430pt de alto)
-                                        .Image(transparentImageBytes, ImageScaling.FitArea);
 
                                     // 4. Description (Centered)
                                     if (!string.IsNullOrWhiteSpace(product.Description))
