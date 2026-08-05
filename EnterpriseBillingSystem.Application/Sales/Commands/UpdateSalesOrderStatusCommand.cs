@@ -50,8 +50,8 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         if (order == null)
             throw new ArgumentException($"El pedido con Id '{request.SalesOrderId}' no existe.");
 
-        // Deduct from inventory when transitioning to "EnCamino"
-        if (request.Status == SalesOrderStatus.EnCamino && order.Status != SalesOrderStatus.EnCamino)
+        // Deduct from inventory when transitioning from Recibido to EnProceso or EnCamino
+        if ((request.Status == SalesOrderStatus.EnProceso || request.Status == SalesOrderStatus.EnCamino) && order.Status == SalesOrderStatus.Recibido)
         {
             // Explicitly search for "Bodega Exhibición" by querying Warehouse table
             BranchWarehouse? warehouse = null;
