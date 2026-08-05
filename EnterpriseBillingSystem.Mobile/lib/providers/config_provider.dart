@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -13,12 +14,26 @@ class ConfigProvider extends ChangeNotifier {
 
   ConfigProvider();
 
+  static String get _dynamicDefaultUrl {
+    if (kIsWeb) {
+      try {
+        final base = Uri.base;
+        final portPart = base.hasPort && base.port != 80 && base.port != 443
+            ? ':${base.port}'
+            : '';
+        return '${base.scheme}://${base.host}$portPart/api/v1';
+      } catch (_) {}
+    }
+    return defaultUrl;
+  }
+
   Future<void> loadConfig() async {
+    final fallbackUrl = _dynamicDefaultUrl;
     try {
       final prefs = await SharedPreferences.getInstance();
-      _apiUrl = prefs.getString(_keyApiUrl) ?? defaultUrl;
+      _apiUrl = prefs.getString(_keyApiUrl) ?? fallbackUrl;
     } catch (e) {
-      _apiUrl = defaultUrl;
+      _apiUrl = fallbackUrl;
     } finally {
       _isInitialized = true;
       notifyListeners();
