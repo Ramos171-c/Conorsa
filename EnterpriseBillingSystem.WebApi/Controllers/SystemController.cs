@@ -59,4 +59,30 @@ public class SystemController : ApiControllerBase
     {
         throw new InvalidOperationException("Esta es una excepción de prueba lanzada intencionalmente.");
     }
+
+    [HttpGet("backup")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<IActionResult> DownloadDatabaseBackup([FromServices] EnterpriseBillingSystem.Infrastructure.Data.ApplicationDbContext dbContext)
+    {
+        try
+        {
+            var isLinux = System.Runtime.InteropServices.RuntimeInformation.IsOSPlatform(System.Runtime.InteropServices.OSPlatform.Linux);
+            var backupPath = isLinux ? "/var/opt/mssql/data/Conorte_Produccion.bak" : @"C:\Users\Public\Conorte_Produccion.bak";
+            
+            var sql = $"BACKUP DATABASE EnterpriseBillingSystemDb TO DISK = '{backupPath}' WITH FORMAT, MEDIANAME = 'ConorteBackup', NAME = 'Full Backup';";
+            await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(dbContext.Database, sql);
+
+            if (!System.IO.File.Exists(backupPath))
+            {
+                return NotFound(new { Message = "No se pudo generar el archivo de respaldo." });
+            }
+
+            var fileStream = new System.IO.FileStream(backupPath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read);
+            return File(fileStream, "application/octet-stream", "Conorte_Produccion.bak");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = $"Error al generar respaldo: {ex.Message}" });
+        }
+    }
 }
