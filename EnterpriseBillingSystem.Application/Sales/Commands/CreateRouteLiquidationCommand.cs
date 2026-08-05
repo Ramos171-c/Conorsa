@@ -35,6 +35,7 @@ public class CreateRouteLiquidationCommandHandler : IRequestHandler<CreateRouteL
     private readonly IInventoryMovementRepository _movementRepository;
     private readonly IWarehouseRepository _warehouseRepository;
     private readonly IProductRepository _productRepository;
+    private readonly ISalesOrderRepository _salesOrderRepository;
     private readonly IUnitOfWork _unitOfWork;
 
     public CreateRouteLiquidationCommandHandler(
@@ -43,6 +44,7 @@ public class CreateRouteLiquidationCommandHandler : IRequestHandler<CreateRouteL
         IInventoryMovementRepository movementRepository,
         IWarehouseRepository warehouseRepository,
         IProductRepository productRepository,
+        ISalesOrderRepository salesOrderRepository,
         IUnitOfWork unitOfWork)
     {
         _liquidationRepository = liquidationRepository;
@@ -50,6 +52,7 @@ public class CreateRouteLiquidationCommandHandler : IRequestHandler<CreateRouteL
         _movementRepository = movementRepository;
         _warehouseRepository = warehouseRepository;
         _productRepository = productRepository;
+        _salesOrderRepository = salesOrderRepository;
         _unitOfWork = unitOfWork;
     }
 
@@ -205,6 +208,70 @@ public class CreateRouteLiquidationCommandHandler : IRequestHandler<CreateRouteL
                     });
                 }
             }
+        }
+
+        // Actualizar pedidos y facturas de la ruta para restar la devolución de la venta y agregar comentarios
+        var routeOrders = await _salesOrderRepository.GetFilteredWithDetailsAsync(
+            customerId: null,
+            status: null,
+            fromDate: null,
+            toDate: null,
+            routeId: request.RouteId,
+            cancellationToken: cancellationToken);
+
+        var activeOrders = routeOrders.Where(o => o.Status != SalesOrderStatus.Anulado).ToList();
+
+        foreach (var d in request.Details.Where(x => x.QuantityReturned > 0))
+        {
+            decimal remainingToDeduct = d.QuantityReturned;
+
+            foreach (var order in activeOrders)
+            {
+                if (remainingToDeduct <= 0) break;
+
+                var orderDetail = order.Details.FirstOrDefault(dt => dt.ProductId == d.ProductId && dt.Quantity > 0);
+                if (orderDetail != null)
+                {
+                    decimal deductQty = Math.Min(remainingToDeduct, orderDetail.Quantity);
+                    orderDetail.Quantity -= deductQty;
+                    remainingToDeduct -= deductQty;
+
+                    // Recalcular detalle
+                    var grossAmount = orderDetail.Quantity * orderDetail.UnitPrice;
+                    orderDetail.DiscountAmount = grossAmount * (orderDetail.DiscountPercentage / 100);
+                    var taxableAmount = grossAmount - orderDetail.DiscountAmount;
+                    orderDetail.TaxAmount = taxableAmount * (orderDetail.TaxPercentage / 100);
+                    orderDetail.NetAmount = taxableAmount + orderDetail.TaxAmount;
+
+                    // Recalcular totales del pedido
+                    order.SubTotal = order.Details.Sum(dt => dt.Quantity * dt.UnitPrice);
+                    order.DiscountAmount = order.Details.Sum(dt => dt.Quantity * dt.UnitPrice * (dt.DiscountPercentage / 100));
+                    order.TaxAmount = order.Details.Sum(dt => dt.TaxAmount);
+                    order.TotalAmount = order.SubTotal - order.DiscountAmount + order.TaxAmount;
+
+                    if (order.TotalAmount <= 0)
+                    {
+                        order.Status = SalesOrderStatus.Anulado;
+                    }
+                    else
+                    {
+                        order.Status = SalesOrderStatus.Completado;
+                    }
+
+                    var timeStr = DateTime.UtcNow.AddHours(-6).ToString("dd/MM/yyyy HH:mm");
+                    var obsText = !string.IsNullOrWhiteSpace(request.Observations) ? $" Observaciones: {request.Observations}." : "";
+                    var prodName = orderDetail.Product?.Name ?? "Producto";
+                    order.Notes = $"{order.Notes}\n[LIQUIDACIÓN RUTA {liquidationNumber}]: Se procesó devolución de {deductQty} und de '{prodName}' el {timeStr}. Venta restada.{obsText}".Trim();
+                }
+            }
+        }
+
+        // Marcar el resto de pedidos activos de la ruta como completados si no se ingresaron devoluciones para ellos
+        foreach (var order in activeOrders.Where(o => o.Status == SalesOrderStatus.EnCamino || o.Status == SalesOrderStatus.EnProceso))
+        {
+            order.Status = SalesOrderStatus.Completado;
+            var timeStr = DateTime.UtcNow.AddHours(-6).ToString("dd/MM/yyyy HH:mm");
+            order.Notes = $"{order.Notes}\n[LIQUIDACIÓN RUTA {liquidationNumber}]: Pedido entregado y liquidado el {timeStr}.".Trim();
         }
 
         liquidation.TotalQuantitySent = totalSent;
