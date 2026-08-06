@@ -131,37 +131,19 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 // Get inventory record in Bodega Exhibición
                 var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
 
-                // If no stock or zero stock in Bodega Exhibición, remove line from order
-                if (inventory == null || inventory.PhysicalStock <= 0.0000m)
+                if (inventory != null && inventory.PhysicalStock > 0.0000m)
                 {
-                    detailsToRemove.Add(detail);
-                    continue;
-                }
-
-                decimal requestedInBaseUnit = detail.Quantity * conversionFactor;
-                decimal dispatchedInBaseUnit = Math.Min(requestedInBaseUnit, inventory.PhysicalStock);
-                decimal dispatchedQty = conversionFactor > 0 ? Math.Min(detail.Quantity, dispatchedInBaseUnit / conversionFactor) : 0;
-
-                dispatchedInBaseUnit = Math.Round(dispatchedInBaseUnit, 4);
-                dispatchedQty = Math.Round(dispatchedQty, 4);
-
-                if (dispatchedQty <= 0.0000m)
-                {
-                    detailsToRemove.Add(detail);
-                }
-                else
-                {
-                    detail.Quantity = dispatchedQty;
-                    detail.DiscountAmount = Math.Round((detail.Quantity * detail.UnitPrice) * (detail.DiscountPercentage / 100m), 4);
-                    
-                    decimal lineSubtotal = (detail.Quantity * detail.UnitPrice) - detail.DiscountAmount;
-                    detail.TaxAmount = Math.Round(lineSubtotal * (detail.TaxPercentage / 100m), 4);
-                    detail.NetAmount = Math.Round(lineSubtotal + detail.TaxAmount, 4);
+                    decimal requestedInBaseUnit = detail.Quantity * conversionFactor;
+                    decimal dispatchedInBaseUnit = Math.Min(requestedInBaseUnit, inventory.PhysicalStock);
+                    dispatchedInBaseUnit = Math.Round(dispatchedInBaseUnit, 4);
 
                     if (dispatchedInBaseUnit > 0.0000m)
                     {
                         inventory.PhysicalStock -= dispatchedInBaseUnit;
                         _inventoryRepository.Update(inventory);
+
+                        decimal dispatchedQty = conversionFactor > 0 ? (dispatchedInBaseUnit / conversionFactor) : detail.Quantity;
+                        dispatchedQty = Math.Round(dispatchedQty, 4);
 
                         movement.Details.Add(new InventoryMovementDetail
                         {
@@ -181,12 +163,6 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                         requiresMovement = true;
                     }
                 }
-            }
-
-            // Remove zero-quantity or missing detail lines from order
-            foreach (var d in detailsToRemove)
-            {
-                order.Details.Remove(d);
             }
 
             if (requiresMovement)
