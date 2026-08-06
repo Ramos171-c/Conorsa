@@ -5,6 +5,9 @@ using EnterpriseBillingSystem.WebApi.Authorization;
 using EnterpriseBillingSystem.Application.Sales.Commands;
 using EnterpriseBillingSystem.Application.Sales.Queries;
 using EnterpriseBillingSystem.Application.Common.Models;
+using QuestPDF.Fluent;
+using QuestPDF.Helpers;
+using QuestPDF.Infrastructure;
 using Serilog;
 
 namespace EnterpriseBillingSystem.WebApi.Controllers;
