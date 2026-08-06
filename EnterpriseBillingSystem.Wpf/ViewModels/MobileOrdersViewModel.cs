@@ -330,6 +330,24 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void OpenReturnsReport()
+    {
+        try
+        {
+            var pdfUrl = "http://167.99.13.177:8080/api/v1/route-liquidations/returns-report/pdf";
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = pdfUrl,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al abrir el reporte de devoluciones: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
     private async Task BatchPrintDeliveryTicketsAsync()
     {
         IsLoading = true;

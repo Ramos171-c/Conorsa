@@ -614,6 +614,16 @@
                                     <TextBlock Text="Liquidación / Devolución Masiva" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
+
+                            <Button Command="{Binding OpenReturnsReportCommand}" 
+                                    Style="{StaticResource MaterialDesignRaisedButton}" 
+                                    Background="#0284C7" BorderBrush="#0284C7" Margin="12,0,0,0"
+                                    ToolTip="Generar e imprimir reporte de productos devueltos y faltantes">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="FileDocumentRemove" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Reporte de Faltantes y Devoluciones" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
                         </StackPanel>
                     </Grid>
                 </Grid>
