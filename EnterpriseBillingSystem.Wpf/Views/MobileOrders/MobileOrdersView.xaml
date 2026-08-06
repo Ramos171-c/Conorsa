@@ -419,6 +419,29 @@
                                     <TextBlock Text="Convalidar y Despachar Pedidos" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
+<<<<<<< HEAD
+=======
+
+                            <Button Command="{Binding OpenRouteLiquidationDialogCommand}" 
+                                    IsEnabled="{Binding CanOpenRouteLiquidation}"
+                                    Style="{StaticResource MaterialDesignRaisedButton}" 
+                                    Background="#8E24AA" BorderBrush="#8E24AA" Margin="12,0,0,0">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="TruckCheck" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Liquidación / Devolución Masiva" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Command="{Binding OpenReturnsReportCommand}" 
+                                    Style="{StaticResource MaterialDesignRaisedButton}" 
+                                    Background="#0284C7" BorderBrush="#0284C7" Margin="12,0,0,0"
+                                    ToolTip="Generar e imprimir reporte de productos devueltos y faltantes">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="FileDocumentRemove" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Reporte de Faltantes y Devoluciones" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+>>>>>>> 783bd91 (feat: agregar reporte auditado de devoluciones y faltantes con exportacion a PDF y boton WPF)
                         </StackPanel>
                     </Grid>
                 </Grid>

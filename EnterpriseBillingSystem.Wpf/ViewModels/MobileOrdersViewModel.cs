@@ -286,7 +286,218 @@ public partial class MobileOrdersViewModel : ViewModelBase
     [RelayCommand]
     private async Task ViewOrderDetailsAsync(SalesOrderListItemDto order)
     {
+<<<<<<< HEAD
         if (order == null) return;
+=======
+        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _customerApiClient, _notificationService, "EnProceso")
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+        var result = dialog.ShowDialog();
+        if (result == true)
+        {
+            await LoadOrdersAsync();
+        }
+    }
+
+    [RelayCommand]
+    private async Task OpenRouteConsolidationEnCaminoAsync()
+    {
+        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _customerApiClient, _notificationService, "EnCamino")
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+        dialog.ShowDialog();
+    }
+
+    [RelayCommand]
+    private void OpenReturnsReport()
+    {
+        try
+        {
+            var pdfUrl = "http://167.99.13.177:8080/api/v1/route-liquidations/returns-report/pdf";
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = pdfUrl,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al abrir el reporte de devoluciones: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private async Task BatchPrintDeliveryTicketsAsync()
+    {
+        IsLoading = true;
+        try
+        {
+            // 1. Execute database cleanup of any zero stock items on EnCamino orders
+            await _salesApiClient.CleanupEnCaminoZeroStockOrdersAsync();
+
+            Guid? routeFilter = (SelectedRoute == null || SelectedRoute.Id == Guid.Empty) ? null : SelectedRoute.Id;
+            
+            // Get all orders in status EnCamino (status filter = "EnCamino")
+            var pagedResult = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, routeFilter, "EnCamino", FromDate, ToDate);
+            if (pagedResult?.Items == null || !pagedResult.Items.Any())
+            {
+                _notificationService.ShowWarning("No se encontraron pedidos en estado 'En Camino' para imprimir.");
+                return;
+            }
+
+            var confirm = System.Windows.MessageBox.Show(
+                $"Se van a generar e imprimir masivamente {pagedResult.Items.Count()} factura(s) / ticket(s) de entrega en estado 'En Camino'.\n\n¿Desea continuar?",
+                "Impresión Masiva de Entregas",
+                System.Windows.MessageBoxButton.YesNo,
+                System.Windows.MessageBoxImage.Question);
+
+            if (confirm != System.Windows.MessageBoxResult.Yes) return;
+
+            var printDialog = new System.Windows.Controls.PrintDialog();
+            if (printDialog.ShowDialog() != true) return;
+
+            var flowDoc = new System.Windows.Documents.FlowDocument
+            {
+                PagePadding = new System.Windows.Thickness(5, 5, 5, 5),
+                ColumnWidth = double.PositiveInfinity,
+                FontFamily = new System.Windows.Media.FontFamily("Courier New"),
+                FontSize = 11,
+                TextAlignment = System.Windows.TextAlignment.Left
+            };
+
+            int totalLineCount = 0;
+
+            foreach (var itemHeader in pagedResult.Items)
+            {
+                var fullOrder = await _salesApiClient.GetSalesOrderByIdAsync(itemHeader.Id);
+                if (fullOrder == null || fullOrder.Details == null || !fullOrder.Details.Any()) continue;
+
+                var validDetails = fullOrder.Details.Where(d => d.Quantity > 0).ToList();
+                if (!validDetails.Any()) continue;
+
+                totalLineCount += 14 + (validDetails.Count * 2);
+
+                CustomerDto? customer = null;
+                try
+                {
+                    customer = await _customerApiClient.GetCustomerByIdAsync(fullOrder.CustomerId);
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error fetching customer in batch print: {ex.Message}");
+                }
+
+                var sec = new System.Windows.Documents.Section
+                {
+                    BreakPageBefore = flowDoc.Blocks.Any()
+                };
+
+                // Title Header
+                var headerPara = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("Dulce y caramelos\n"))
+                {
+                    FontSize = 18,
+                    FontWeight = System.Windows.FontWeights.Bold,
+                    TextAlignment = System.Windows.TextAlignment.Center
+                };
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("FACTURA / TICKET DE ENTREGA (EN CAMINO)\n"));
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
+                sec.Blocks.Add(headerPara);
+
+                // Customer Details
+                var custPara = new System.Windows.Documents.Paragraph();
+                custPara.Inlines.Add(new System.Windows.Documents.Run($"Pedido No:   {fullOrder.OrderNumber}\n"));
+                custPara.Inlines.Add(new System.Windows.Documents.Run($"Fecha:       {fullOrder.OrderDate:dd/MM/yyyy HH:mm}\n"));
+                custPara.Inlines.Add(new System.Windows.Documents.Run($"Cliente:     {fullOrder.CustomerName} ({fullOrder.CustomerCode})\n"));
+                
+                if (customer != null)
+                {
+                    custPara.Inlines.Add(new System.Windows.Documents.Run($"Ruta:        {customer.RouteName ?? "No asignada"}\n"));
+                    var address = customer.Addresses?.FirstOrDefault(a => a.IsDefault) ?? customer.Addresses?.FirstOrDefault();
+                    if (address != null)
+                    {
+                        custPara.Inlines.Add(new System.Windows.Documents.Run($"Dirección:   {address.AddressLine1}, {address.City}\n"));
+                    }
+                    var phone = customer.Phones?.FirstOrDefault()?.PhoneNumber;
+                    if (!string.IsNullOrEmpty(phone))
+                    {
+                        custPara.Inlines.Add(new System.Windows.Documents.Run($"Teléfono:    {phone}\n"));
+                    }
+                }
+                custPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
+                sec.Blocks.Add(custPara);
+
+                // Order Lines (Only items with Quantity > 0)
+                decimal orderSubtotal = 0;
+                decimal orderDiscount = 0;
+                decimal orderTax = 0;
+
+                var itemsPara = new System.Windows.Documents.Paragraph();
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run("PRODUCTOS CARGADOS A ENTREGAR\n"));
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n"));
+                
+                foreach (var detail in validDetails)
+                {
+                    decimal lineDiscount = detail.DiscountAmount;
+                    decimal lineTax = detail.TaxAmount;
+                    decimal lineNet = detail.NetAmount;
+
+                    orderSubtotal += detail.Quantity * detail.UnitPrice;
+                    orderDiscount += lineDiscount;
+                    orderTax += lineTax;
+
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"{detail.ProductName}\n"));
+                    string qtyUom = $"{detail.Quantity:N2} {detail.UnitOfMeasure}";
+                    string net = $"C${lineNet:N2}";
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   {qtyUom.PadRight(22)} {net.PadLeft(14)}\n"));
+                }
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n"));
+                sec.Blocks.Add(itemsPara);
+
+                // Totals
+                decimal orderTotal = orderSubtotal - orderDiscount + orderTax;
+                var totalsPara = new System.Windows.Documents.Paragraph { TextAlignment = System.Windows.TextAlignment.Right };
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Subtotal:     C${orderSubtotal:N2}\n"));
+                if (orderDiscount > 0)
+                {
+                    totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Descuento:   -C${orderDiscount:N2}\n"));
+                }
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL:        C${orderTotal:N2}\n"));
+                
+                decimal totalUsd = orderTotal / 36.5m;
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL USD:     ${totalUsd:N2}\n"));
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
+                sec.Blocks.Add(totalsPara);
+
+                flowDoc.Blocks.Add(sec);
+            }
+
+            flowDoc.PageWidth = printDialog.PrintableAreaWidth > 0 ? printDialog.PrintableAreaWidth : 280;
+            // Set dynamic height so thermal printers do NOT feed standard 11-inch letter paper height!
+            double calculatedHeight = (totalLineCount * 18) + 40;
+            flowDoc.PageHeight = Math.Max(100, calculatedHeight);
+            
+            var documentPaginator = ((System.Windows.Documents.IDocumentPaginatorSource)flowDoc).DocumentPaginator;
+            printDialog.PrintDocument(documentPaginator, $"Facturas_Entrega_Masivas_EnCamino_{DateTime.Now:yyyyMMdd}");
+
+            _notificationService.ShowSuccess($"Impresión masiva completada. {pagedResult.Items.Count()} facturas de entrega enviadas a la impresora.");
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error en la impresión masiva: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task ViewOrderDetailsAsync(object? parameter)
+    {
+        if (parameter is not SalesOrderListItemDto order) return;
+>>>>>>> 783bd91 (feat: agregar reporte auditado de devoluciones y faltantes con exportacion a PDF y boton WPF)
 
         IsLoading = true;
         try
