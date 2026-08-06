@@ -438,7 +438,17 @@
                                     ToolTip="Generar e imprimir reporte de productos devueltos y faltantes">
                                 <StackPanel Orientation="Horizontal">
                                     <materialDesign:PackIcon Kind="FileDocumentRemove" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
-                                    <TextBlock Text="Reporte de Faltantes y Devoluciones" VerticalAlignment="Center" />
+                                    <TextBlock Text="Reporte de Faltantes" VerticalAlignment="Center" />
+                                </StackPanel>
+                            </Button>
+
+                            <Button Command="{Binding OpenSellerReportCommand}" 
+                                    Style="{StaticResource MaterialDesignRaisedButton}" 
+                                    Background="#15803D" BorderBrush="#15803D" Margin="12,0,0,0"
+                                    ToolTip="Reporte por Vendedor: Preventa solicitada vs Total entregado al cliente">
+                                <StackPanel Orientation="Horizontal">
+                                    <materialDesign:PackIcon Kind="AccountGroup" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                                    <TextBlock Text="Reporte por Vendedor (Preventa vs Entrega)" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
 >>>>>>> 783bd91 (feat: agregar reporte auditado de devoluciones y faltantes con exportacion a PDF y boton WPF)
