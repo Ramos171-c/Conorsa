@@ -85,4 +85,31 @@ public class SystemController : ApiControllerBase
             return StatusCode(500, new { Message = $"Error al generar respaldo: {ex.Message}" });
         }
     }
+
+    [HttpGet("fix-stock")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<IActionResult> FixStock([FromServices] EnterpriseBillingSystem.Infrastructure.Data.ApplicationDbContext dbContext)
+    {
+        try
+        {
+            var sql = @"
+UPDATE inv
+SET inv.PhysicalStock = inv.PhysicalStock + ISNULL(d.TotalQty, 0)
+FROM Inventories inv
+INNER JOIN (
+    SELECT sod.ProductId, SUM(sod.Quantity) AS TotalQty
+    FROM SalesOrderDetails sod
+    INNER JOIN SalesOrders so ON sod.SalesOrderId = so.Id
+    WHERE so.Status = 1
+    GROUP BY sod.ProductId
+) d ON inv.ProductId = d.ProductId;";
+
+            int rowsAffected = await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(dbContext.Database, sql);
+            return Ok(new { Message = "Stock de inventario corregido y restaurado con éxito.", RowsAffected = rowsAffected });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = $"Error al restaurar stock: {ex.Message}" });
+        }
+    }
 }
