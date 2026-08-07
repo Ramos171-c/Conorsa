@@ -260,7 +260,6 @@ INNER JOIN (
                         totalAmountSubtracted += deduct * detail.UnitPrice;
                         var obsText = $" [Devolución RC-00000010]: Devueltas {deduct} unds de {product.Name}. Monto restado.";
                         order.Notes = $"{order.Notes}\n{obsText}".Trim();
-                        salesOrderRepository.Update(order);
                     }
                 }
 
@@ -293,7 +292,6 @@ INNER JOIN (
                     order.Status = EnterpriseBillingSystem.Domain.Enums.SalesOrderStatus.Completado;
                     order.LastModifiedBy = "LiquidationSystem";
                     order.LastModifiedOnUtc = DateTime.UtcNow;
-                    salesOrderRepository.Update(order);
                     updatedOrdersCount++;
                 }
             }
@@ -436,7 +434,6 @@ INNER JOIN (
                         totalAmountSubtracted += deduct * detail.UnitPrice;
                         var obsText = $" [Devolución RC-00000009]: Devueltas {deduct} unds de {product.Name}. Monto restado.";
                         order.Notes = $"{order.Notes}\n{obsText}".Trim();
-                        salesOrderRepository.Update(order);
                     }
                 }
 
@@ -469,7 +466,6 @@ INNER JOIN (
                     order.Status = EnterpriseBillingSystem.Domain.Enums.SalesOrderStatus.Completado;
                     order.LastModifiedBy = "LiquidationSystem";
                     order.LastModifiedOnUtc = DateTime.UtcNow;
-                    salesOrderRepository.Update(order);
                     updatedOrdersCount++;
                 }
             }
