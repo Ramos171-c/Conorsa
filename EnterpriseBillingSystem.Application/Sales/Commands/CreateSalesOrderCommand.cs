@@ -129,6 +129,7 @@ public class CreateSalesOrderCommandHandler : IRequestHandler<CreateSalesOrderCo
                 ProductId = req.ProductId,
                 UnitOfMeasureId = req.UnitOfMeasureId,
                 Quantity = req.Quantity,
+                OriginalPresaleQuantity = req.Quantity,
                 UnitPrice = req.UnitPrice,
                 DiscountPercentage = req.DiscountPercentage,
                 DiscountAmount = discountAmount,
