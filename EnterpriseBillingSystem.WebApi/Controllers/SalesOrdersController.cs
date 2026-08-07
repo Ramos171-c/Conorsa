@@ -42,7 +42,7 @@ public class SalesOrdersController : ApiControllerBase
     /// Listar pedidos de venta con paginación y filtros.
     /// </summary>
     [HttpGet]
-    [HasPermission("sales.view")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     public async Task<ActionResult<PagedResult<SalesOrderListItemDto>>> GetPaged(
         [FromQuery] Guid? customerId = null,
         [FromQuery] string? status = null,
