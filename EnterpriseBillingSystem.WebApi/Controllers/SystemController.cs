@@ -113,6 +113,28 @@ INNER JOIN (
         }
     }
 
+    [HttpGet("force-complete-july-orders")]
+    [HttpPost("force-complete-july-orders")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<IActionResult> ForceCompleteJulyOrders([FromServices] EnterpriseBillingSystem.Infrastructure.Data.ApplicationDbContext dbContext)
+    {
+        try
+        {
+            var sql = @"
+UPDATE SalesOrders
+SET Status = 3, LastModifiedBy = 'System-Complete', LastModifiedOnUtc = GETUTCDATE()
+WHERE Status <> 4 AND (OrderDate >= '2026-07-19' AND OrderDate <= '2026-07-28');";
+
+            int rows = await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(dbContext.Database, sql);
+            return Ok(new { Message = "Pedidos del 20 al 26 de Julio pasados a Completado exitosamente.", RowsAffected = rows });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = $"Error al completar pedidos: {ex.Message}" });
+        }
+    }
+
+    [HttpGet("process-july-ruta3-liquidation")]
     [HttpPost("process-july-ruta3-liquidation")]
     [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     public async Task<IActionResult> ProcessJulyRuta3Liquidation(
@@ -283,6 +305,7 @@ INNER JOIN (
         }
     }
 
+    [HttpGet("process-july-ruta1-liquidation")]
     [HttpPost("process-july-ruta1-liquidation")]
     [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     public async Task<IActionResult> ProcessJulyRuta1Liquidation(
