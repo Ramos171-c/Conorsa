@@ -158,6 +158,21 @@ INNER JOIN (
     {
         try
         {
+            var ensureColsSql = @"
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('RouteLiquidations') AND name = 'TotalCostSold')
+BEGIN
+    ALTER TABLE [dbo].[RouteLiquidations] ADD [TotalCostSold] DECIMAL(18,4) NOT NULL DEFAULT 0;
+END;
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('RouteLiquidations') AND name = 'EstimatedProfit')
+BEGIN
+    ALTER TABLE [dbo].[RouteLiquidations] ADD [EstimatedProfit] DECIMAL(18,4) NOT NULL DEFAULT 0;
+END;
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('RouteLiquidationDetails') AND name = 'BranchId')
+BEGIN
+    ALTER TABLE [dbo].[RouteLiquidationDetails] ADD [BranchId] UNIQUEIDENTIFIER NULL;
+END;";
+            await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(dbContext.Database, ensureColsSql);
+
             var defaultUom = dbContext.UnitsOfMeasure.FirstOrDefault();
             var defaultUomId = defaultUom?.Id ?? Guid.NewGuid();
 
@@ -333,6 +348,21 @@ INNER JOIN (
     {
         try
         {
+            var ensureColsSql = @"
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('RouteLiquidations') AND name = 'TotalCostSold')
+BEGIN
+    ALTER TABLE [dbo].[RouteLiquidations] ADD [TotalCostSold] DECIMAL(18,4) NOT NULL DEFAULT 0;
+END;
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('RouteLiquidations') AND name = 'EstimatedProfit')
+BEGIN
+    ALTER TABLE [dbo].[RouteLiquidations] ADD [EstimatedProfit] DECIMAL(18,4) NOT NULL DEFAULT 0;
+END;
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('RouteLiquidationDetails') AND name = 'BranchId')
+BEGIN
+    ALTER TABLE [dbo].[RouteLiquidationDetails] ADD [BranchId] UNIQUEIDENTIFIER NULL;
+END;";
+            await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(dbContext.Database, ensureColsSql);
+
             var defaultUom = dbContext.UnitsOfMeasure.FirstOrDefault();
             var defaultUomId = defaultUom?.Id ?? Guid.NewGuid();
 

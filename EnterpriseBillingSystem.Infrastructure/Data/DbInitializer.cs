@@ -86,6 +86,21 @@ BEGIN
         [IsDeleted] BIT NOT NULL DEFAULT 0
     );
 END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('RouteLiquidations') AND name = 'TotalCostSold')
+BEGIN
+    ALTER TABLE [dbo].[RouteLiquidations] ADD [TotalCostSold] DECIMAL(18,4) NOT NULL DEFAULT 0;
+END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('RouteLiquidations') AND name = 'EstimatedProfit')
+BEGIN
+    ALTER TABLE [dbo].[RouteLiquidations] ADD [EstimatedProfit] DECIMAL(18,4) NOT NULL DEFAULT 0;
+END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('RouteLiquidationDetails') AND name = 'BranchId')
+BEGIN
+    ALTER TABLE [dbo].[RouteLiquidationDetails] ADD [BranchId] UNIQUEIDENTIFIER NULL;
+END
 ";
         await _context.Database.ExecuteSqlRawAsync(createTablesSql);
 
