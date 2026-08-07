@@ -19,8 +19,7 @@ public class RouteLiquidationConfiguration : IEntityTypeConfiguration<RouteLiqui
             .HasMaxLength(30);
 
         builder.Property(rl => rl.Status)
-            .HasConversion<string>()
-            .HasMaxLength(20);
+            .IsRequired();
 
         builder.Property(rl => rl.TotalQuantitySent)
             .HasPrecision(18, 4);
