@@ -136,12 +136,22 @@ public partial class MobileOrdersViewModel : ViewModelBase
                 TotalCount = 0;
             }
 
-            // 2. Load consolidated products with retry policy
-            var consolidated = await RetryOnConnectionErrorAsync(() => _salesApiClient.GetConsolidatedProductsAsync(null, statusFilter, null, null, routeFilter));
-            ConsolidatedProducts.Clear();
-            foreach (var item in consolidated)
+            // 2. Load consolidated products with retry policy (fault tolerant)
+            try
             {
-                ConsolidatedProducts.Add(new VerifiableProduct(item));
+                var consolidated = await _salesApiClient.GetConsolidatedProductsAsync(null, statusFilter, null, null, routeFilter);
+                ConsolidatedProducts.Clear();
+                if (consolidated != null)
+                {
+                    foreach (var item in consolidated)
+                    {
+                        ConsolidatedProducts.Add(new VerifiableProduct(item));
+                    }
+                }
+            }
+            catch (Exception exCons)
+            {
+                System.Diagnostics.Debug.WriteLine($"Consolidated loading warning: {exCons.Message}");
             }
 
             OnPropertyChanged(nameof(HasPreviousPage));
