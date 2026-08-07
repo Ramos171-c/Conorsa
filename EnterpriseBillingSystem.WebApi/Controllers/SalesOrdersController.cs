@@ -288,5 +288,109 @@ public class SalesOrdersController : ApiControllerBase
 
         return File(pdfBytes, "application/pdf", "Reporte_Vendedor_Preventa_vs_Entrega.pdf");
     }
+<<<<<<< HEAD
 >>>>>>> 821aed7 (feat: agregar endpoints seller-report y seller-report/pdf en SalesOrdersController)
+=======
+
+    /// <summary>
+    /// Obtener el reporte de faltantes y perdida por productos no entregados en preventa.
+    /// </summary>
+    [HttpGet("shortages-report")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<ActionResult<PresaleShortagesReportDto>> GetShortagesReport(
+        [FromQuery] DateTime? fromDate = null,
+        [FromQuery] DateTime? toDate = null,
+        [FromQuery] Guid? routeId = null)
+    {
+        var result = await Mediator.Send(new GetPresaleShortagesReportQuery(fromDate, toDate, routeId));
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Generar PDF del reporte de faltantes y perdida por productos no despachados.
+    /// </summary>
+    [HttpGet("shortages-report/pdf")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<IActionResult> GetShortagesReportPdf(
+        [FromQuery] DateTime? fromDate = null,
+        [FromQuery] DateTime? toDate = null,
+        [FromQuery] Guid? routeId = null)
+    {
+        QuestPDF.Settings.License = LicenseType.Community;
+        var reportData = await Mediator.Send(new GetPresaleShortagesReportQuery(fromDate, toDate, routeId));
+
+        var pdfBytes = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(20);
+                page.PageColor(Colors.White);
+
+                page.Header().Row(row =>
+                {
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("REPORTE DE FALTANTES Y PÉRDIDA POR PRODUCTOS NO ENTREGADOS").FontSize(16).Bold().FontColor(Colors.Red.Darken2);
+                        col.Item().Text("Detalle de Mercadería Solicitada en Preventa vs No Llegó al Cliente").FontSize(10).Italic().FontColor(Colors.Grey.Medium);
+                        col.Item().Text($"Rango: {(fromDate.HasValue ? fromDate.Value.ToString("dd/MM/yyyy") : "Inicio")} - {(toDate.HasValue ? toDate.Value.ToString("dd/MM/yyyy") : "Hoy")} | Pérdida Total Estimada: C$ {reportData.TotalPresaleLossAmount:N2}").FontSize(10).Bold();
+                    });
+                    row.ConstantItem(120).AlignRight().Text($"Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(9);
+                });
+
+                page.Content().PaddingVertical(10).Column(col =>
+                {
+                    col.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(cols =>
+                        {
+                            cols.RelativeColumn(1.5f); // Código
+                            cols.RelativeColumn(3.5f); // Producto
+                            cols.RelativeColumn(1);    // UOM
+                            cols.RelativeColumn(2);    // Solicitado
+                            cols.RelativeColumn(2);    // Entregado
+                            cols.RelativeColumn(2);    // Faltante
+                            cols.RelativeColumn(2);    // Precio
+                            cols.RelativeColumn(2);    // Pérdida C$
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Background(Colors.Red.Darken3).Padding(5).Text("CÓDIGO").Bold().FontColor(Colors.White).FontSize(9);
+                            header.Cell().Background(Colors.Red.Darken3).Padding(5).Text("PRODUCTO").Bold().FontColor(Colors.White).FontSize(9);
+                            header.Cell().Background(Colors.Red.Darken3).Padding(5).Text("UOM").Bold().FontColor(Colors.White).FontSize(9);
+                            header.Cell().Background(Colors.Red.Darken3).Padding(5).AlignRight().Text("PREVENTA").Bold().FontColor(Colors.White).FontSize(9);
+                            header.Cell().Background(Colors.Red.Darken3).Padding(5).AlignRight().Text("ENTREGADO").Bold().FontColor(Colors.White).FontSize(9);
+                            header.Cell().Background(Colors.Red.Darken3).Padding(5).AlignRight().Text("FALTANTE").Bold().FontColor(Colors.White).FontSize(9);
+                            header.Cell().Background(Colors.Red.Darken3).Padding(5).AlignRight().Text("PRECIO").Bold().FontColor(Colors.White).FontSize(9);
+                            header.Cell().Background(Colors.Red.Darken3).Padding(5).AlignRight().Text("PÉRDIDA C$").Bold().FontColor(Colors.White).FontSize(9);
+                        });
+
+                        foreach (var item in reportData.Items)
+                        {
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).Text(item.ProductCode).FontSize(9);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).Text(item.ProductName).FontSize(9);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).Text(item.UnitOfMeasureCode).FontSize(9);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignRight().Text($"{item.RequestedQuantity:N0}").FontSize(9);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignRight().Text($"{item.DeliveredQuantity:N0}").FontSize(9);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignRight().Text($"{item.ShortageQuantity:N0}").Bold().FontColor(Colors.Red.Medium).FontSize(9);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignRight().Text($"C$ {item.UnitPrice:N2}").FontSize(9);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(4).AlignRight().Text($"C$ {item.TotalLossAmount:N2}").Bold().FontColor(Colors.Red.Darken3).FontSize(9);
+                        }
+                    });
+                });
+
+                page.Footer().AlignCenter().Text(x =>
+                {
+                    x.Span("Página ");
+                    x.CurrentPageNumber();
+                    x.Span(" de ");
+                    x.TotalPages();
+                });
+            });
+        }).GeneratePdf();
+
+        return File(pdfBytes, "application/pdf", "Reporte_Faltantes_y_Perdidas_Preventa.pdf");
+    }
+>>>>>>> 4d7933a (feat: agregar reporte de faltantes y perdida por productos no entregados en preventa (JSON y PDF))
 }
