@@ -121,6 +121,9 @@ public partial class MainViewModel : ViewModelBase
     private void NavigateToMobileOrders() => _navigationService.Navigate<MobileOrdersViewModel>();
 
     [RelayCommand]
+    private void NavigateToReportsDashboard() => _navigationService.Navigate<ReportsDashboardViewModel>();
+
+    [RelayCommand]
     private void NavigateToPurchases() => _navigationService.Navigate<PurchasesViewModel>();
 
     [RelayCommand]

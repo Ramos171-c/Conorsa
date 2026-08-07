@@ -117,6 +117,7 @@ public partial class App : Application
         services.AddTransient<UsersViewModel>();
         services.AddTransient<MobileOrdersViewModel>();
         services.AddTransient<MobileOrderDetailViewModel>();
+        services.AddTransient<ReportsDashboardViewModel>();
 
         // Register Windows/Views
         services.AddTransient<LoginWindow>();
@@ -138,6 +139,7 @@ public partial class App : Application
         services.AddTransient<Views.MobileOrders.MobileOrdersView>();
         services.AddTransient<Views.MobileOrders.MobileOrderDetailDialog>();
         services.AddTransient<Views.MobileOrders.RecentOrdersReportDialog>();
+        services.AddTransient<Views.Reports.ReportsDashboardView>();
         services.AddTransient<Views.Dialogs.CustomMessageBox>();
         services.AddTransient<Views.Dialogs.CustomInputDialog>();
         services.AddTransient<Views.Purchases.PurchasesView>();
