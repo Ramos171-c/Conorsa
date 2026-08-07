@@ -52,29 +52,28 @@ public class SalesOrdersController : ApiControllerBase
         [FromQuery] int pageSize = 20,
         [FromQuery] Guid? routeId = null)
     {
-        // Extract role claim using multiple possible claim types (standard and raw JWT)
-        var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value 
-                        ?? User.FindFirst("role")?.Value 
-                        ?? User.FindFirst("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
-
-        var isAdmin = string.Equals(roleClaim, "SUPER_ADMIN", StringComparison.OrdinalIgnoreCase) || 
-                      string.Equals(roleClaim, "ADMINISTRADOR", StringComparison.OrdinalIgnoreCase) ||
-                      User.IsInRole("SUPER_ADMIN") || 
-                      User.IsInRole("ADMINISTRADOR");
-
-        string? createdByFilter = null;
-        if (!isAdmin)
-        {
-            // Extract user ID using multiple possible claim types
-            createdByFilter = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-                              ?? User.FindFirst("sub")?.Value
-                              ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
-        }
-
         try
         {
-            Log.Information("[DEBUG-ORDERS] User: '{User}', RoleClaim: '{RoleClaim}', IsAdmin: {IsAdmin}, Filter: '{Filter}', RouteId: '{RouteId}', Status: '{Status}'", 
-                User.Identity?.Name, roleClaim, isAdmin, createdByFilter, routeId, status);
+            string? createdByFilter = null;
+
+            if (User?.Identity?.IsAuthenticated == true)
+            {
+                var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value 
+                                ?? User.FindFirst("role")?.Value 
+                                ?? User.FindFirst("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
+
+                var isAdmin = string.Equals(roleClaim, "SUPER_ADMIN", StringComparison.OrdinalIgnoreCase) || 
+                              string.Equals(roleClaim, "ADMINISTRADOR", StringComparison.OrdinalIgnoreCase) ||
+                              string.Equals(roleClaim, "ADMIN", StringComparison.OrdinalIgnoreCase);
+
+                if (!isAdmin)
+                {
+                    createdByFilter = User.Identity.Name;
+                }
+            }
+
+            Log.Information("[DEBUG-ORDERS] User: '{User}', IsAdminFilter: '{Filter}', RouteId: '{RouteId}', Status: '{Status}'", 
+                User?.Identity?.Name, createdByFilter, routeId, status);
 
             var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize, createdByFilter, routeId));
             return Ok(result);
@@ -82,7 +81,7 @@ public class SalesOrdersController : ApiControllerBase
         catch (Exception ex)
         {
             Log.Error(ex, "[ERROR-ORDERS] Error al listar pedidos de venta: {Message}", ex.Message);
-            return StatusCode(500, new { Message = $"Error al obtener pedidos: {ex.Message} | Detalle: {ex.InnerException?.Message}" });
+            return StatusCode(500, new { Message = $"Error al obtener pedidos: {ex.Message} | Detalle: {ex.InnerException?.Message ?? ex.Message}" });
         }
     }
 
