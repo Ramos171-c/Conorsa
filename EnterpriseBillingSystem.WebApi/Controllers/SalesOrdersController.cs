@@ -71,11 +71,19 @@ public class SalesOrdersController : ApiControllerBase
                               ?? User.FindFirst("http://schemas.xmlsoap.org/ws/2005/05/identity/claims/nameidentifier")?.Value;
         }
 
-        Log.Information("[DEBUG-ORDERS] User: '{User}', RoleClaim: '{RoleClaim}', IsAdmin: {IsAdmin}, Filter: '{Filter}', RouteId: '{RouteId}'", 
-            User.Identity?.Name, roleClaim, isAdmin, createdByFilter, routeId);
+        try
+        {
+            Log.Information("[DEBUG-ORDERS] User: '{User}', RoleClaim: '{RoleClaim}', IsAdmin: {IsAdmin}, Filter: '{Filter}', RouteId: '{RouteId}', Status: '{Status}'", 
+                User.Identity?.Name, roleClaim, isAdmin, createdByFilter, routeId, status);
 
-        var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize, createdByFilter, routeId));
-        return Ok(result);
+            var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize, createdByFilter, routeId));
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "[ERROR-ORDERS] Error al listar pedidos de venta: {Message}", ex.Message);
+            return StatusCode(500, new { Message = $"Error al obtener pedidos: {ex.Message} | Detalle: {ex.InnerException?.Message}" });
+        }
     }
 
     /// <summary>
