@@ -18,9 +18,9 @@ public record AdjustInventoryCommand(
     Guid ProductId,
     decimal Quantity,
     bool IsPositive,
-    Guid ProductPresentationId,
-    string? ReferenceDocument,
-    string? Notes
+    Guid? ProductPresentationId = null,
+    string? ReferenceDocument = null,
+    string? Notes = null
 ) : IRequest<Guid>;
 
 public class AdjustInventoryCommandValidator : AbstractValidator<AdjustInventoryCommand>
@@ -35,9 +35,6 @@ public class AdjustInventoryCommandValidator : AbstractValidator<AdjustInventory
 
         RuleFor(x => x.Quantity)
             .GreaterThan(0).WithMessage("La cantidad a ajustar debe ser mayor a 0.");
-
-        RuleFor(x => x.ProductPresentationId)
-            .NotEmpty().WithMessage("La presentación del producto es requerida.");
     }
 }
 
@@ -90,7 +87,13 @@ public class AdjustInventoryCommandHandler : IRequestHandler<AdjustInventoryComm
             throw new InvalidOperationException("El producto especificado no maneja control de inventario.");
 
         // 3. Obtener presentación
+<<<<<<< HEAD
         var presentation = product.Presentations.FirstOrDefault(p => p.Id == request.ProductPresentationId);
+=======
+        var presentation = product.Presentations.FirstOrDefault(p => request.ProductPresentationId.HasValue && request.ProductPresentationId.Value != Guid.Empty && p.Id == request.ProductPresentationId.Value)
+            ?? product.Presentations.FirstOrDefault(p => p.IsDefaultSalePresentation)
+            ?? product.Presentations.FirstOrDefault();
+>>>>>>> b0610d4 (fix: hacer opcional ProductPresentationId en AdjustInventoryCommand para evitar error 400 Bad Request)
         if (presentation == null)
             throw new ArgumentException("La presentación especificada no existe para este producto.");
         if (!presentation.IsActive)

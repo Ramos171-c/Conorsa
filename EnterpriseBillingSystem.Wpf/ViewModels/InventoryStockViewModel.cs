@@ -166,6 +166,62 @@ public partial class InventoryStockViewModel : ViewModelBase
     }
 
     [RelayCommand]
+<<<<<<< HEAD
+=======
+    private async Task EditStockAsync(InventoryDto item)
+    {
+        if (item == null) return;
+
+        var (isConfirmed, inputText) = Views.Dialogs.CustomInputDialog.Show(
+            $"Ingrese la cantidad física real en bodega para:\n{item.ProductInternalCode} - {item.ProductName}\n\nCantidad actual: {item.PhysicalStock:N2} {item.UnitOfMeasure}",
+            "Ajustar Existencia Física",
+            item.PhysicalStock.ToString("N2"));
+
+        if (!isConfirmed || string.IsNullOrWhiteSpace(inputText)) return;
+
+        if (!decimal.TryParse(inputText, out decimal newStock) || newStock < 0)
+        {
+            _notificationService.ShowError("Debe ingresar un valor numérico válido mayor o igual a 0.");
+            return;
+        }
+
+        decimal diff = newStock - item.PhysicalStock;
+        if (diff == 0)
+        {
+            _notificationService.ShowSuccess("La cantidad ingresada es igual a la existencia actual. No se realizaron cambios.");
+            return;
+        }
+
+        IsLoading = true;
+        try
+        {
+            var command = new
+            {
+                BranchWarehouseId = item.BranchWarehouseId,
+                ProductId = item.ProductId,
+                Quantity = Math.Abs(diff),
+                IsPositive = diff > 0,
+                ProductPresentationId = (Guid?)null,
+                ReferenceDocument = "Ajuste Directo Conteo Físico",
+                Notes = $"Ajuste manual directo de {item.PhysicalStock:N2} a {newStock:N2} {item.UnitOfMeasure}"
+            };
+
+            await _inventoryApiClient.AdjustInventoryAsync(command);
+            _notificationService.ShowSuccess($"Existencia de {item.ProductInternalCode} actualizada a {newStock:N2} {item.UnitOfMeasure} exitosamente.");
+            await LoadStockAsync();
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al ajustar existencia: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+>>>>>>> b0610d4 (fix: hacer opcional ProductPresentationId en AdjustInventoryCommand para evitar error 400 Bad Request)
     private async Task NextPageAsync()
     {
         if (HasNextPage)
