@@ -32,4 +32,10 @@ public interface ISalesOrderRepository : IRepository<SalesOrder>
         DateTime? toDate,
         Guid? routeId = null,
         CancellationToken cancellationToken = default);
+
+    Task<IEnumerable<SalesOrderDetail>> GetOrderDetailsIncludingDeletedAsync(
+        DateTime fromDate,
+        DateTime toDate,
+        Guid? routeId = null,
+        CancellationToken cancellationToken = default);
 }

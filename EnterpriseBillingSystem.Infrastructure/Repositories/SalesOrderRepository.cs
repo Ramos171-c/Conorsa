@@ -164,4 +164,28 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
 
         return await query.ToListAsync(cancellationToken);
     }
+
+    public async Task<IEnumerable<SalesOrderDetail>> GetOrderDetailsIncludingDeletedAsync(
+        DateTime fromDate,
+        DateTime toDate,
+        Guid? routeId = null,
+        CancellationToken cancellationToken = default)
+    {
+        var endOfDay = toDate.TimeOfDay == TimeSpan.Zero ? toDate.Date.AddDays(1).AddTicks(-1) : toDate;
+
+        var query = _context.SalesOrderDetails
+            .IgnoreQueryFilters()
+            .Include(d => d.Product)
+            .Include(d => d.UnitOfMeasure)
+            .Include(d => d.SalesOrder)
+            .Where(d => d.SalesOrder.OrderDate >= fromDate && d.SalesOrder.OrderDate <= endOfDay && d.SalesOrder.Status != SalesOrderStatus.Anulado)
+            .AsNoTracking();
+
+        if (routeId.HasValue)
+        {
+            query = query.Where(d => d.SalesOrder.Customer != null && d.SalesOrder.Customer.RouteId == routeId.Value);
+        }
+
+        return await query.ToListAsync(cancellationToken);
+    }
 }

@@ -56,17 +56,7 @@ public class GetPresaleShortagesReportQueryHandler : IRequestHandler<GetPresaleS
             var fromDate = request.FromDate ?? new DateTime(2026, 7, 19, 0, 0, 0, DateTimeKind.Utc);
             var toDate = request.ToDate ?? DateTime.UtcNow;
 
-            var orders = await _salesOrderRepository.GetFilteredWithDetailsAsync(
-                customerId: null,
-                status: null,
-                fromDate: fromDate,
-                toDate: toDate,
-                routeId: request.RouteId,
-                cancellationToken: cancellationToken);
-
-            var validOrders = orders.Where(o => o.Status != SalesOrderStatus.Anulado).ToList();
-
-            // 1. Obtener liquidaciones de ruta del periodo para extraer devoluciones reales
+            // 1. Obtener devoluciones de liquidaciones de ruta
             var (liquidations, _) = await _liquidationRepository.GetPagedAsync(
                 fromDate, toDate, request.RouteId, status: null, pageNumber: 1, pageSize: 1000, cancellationToken);
 
@@ -87,37 +77,41 @@ public class GetPresaleShortagesReportQueryHandler : IRequestHandler<GetPresaleS
                 }
             }
 
-            // 2. Agrupar entrega real y preventa original por producto
-            var productGroup = new Dictionary<Guid, (string Code, string Name, string Uom, decimal Delivered, decimal Price)>();
+            // 2. Obtener TODOS los detalles de pedidos incluyendo lineas eliminadas (IsDeleted = true)
+            var allDetails = await _salesOrderRepository.GetOrderDetailsIncludingDeletedAsync(
+                fromDate, toDate, request.RouteId, cancellationToken);
 
-            foreach (var order in validOrders)
+            var productData = new Dictionary<Guid, (string Code, string Name, string Uom, decimal Delivered, decimal DeletedShortage, decimal Price)>();
+
+            foreach (var detail in allDetails)
             {
-                if (order.Details == null) continue;
+                if (detail.Product == null) continue;
+                var prodId = detail.ProductId;
+                var code = detail.Product.InternalCode ?? "S/K";
+                var name = detail.Product.Name ?? "Producto";
+                var uom = detail.UnitOfMeasure?.Code ?? "UND";
+                var price = detail.UnitPrice;
 
-                foreach (var detail in order.Details)
+                if (!productData.ContainsKey(prodId))
                 {
-                    if (detail.Product == null) continue;
-                    var prodId = detail.ProductId;
-                    var code = detail.Product.InternalCode ?? "S/K";
-                    var name = detail.Product.Name ?? "Producto";
-                    var uom = detail.UnitOfMeasure?.Code ?? "UND";
-                    var price = detail.UnitPrice;
-                    decimal deliv = detail.Quantity;
+                    productData[prodId] = (code, name, uom, 0, 0, price);
+                }
 
-                    if (!productGroup.ContainsKey(prodId))
-                    {
-                        productGroup[prodId] = (code, name, uom, 0, price);
-                    }
-
-                    var cur = productGroup[prodId];
-                    productGroup[prodId] = (code, name, uom, cur.Delivered + deliv, price);
+                var cur = productData[prodId];
+                if (detail.IsDeleted)
+                {
+                    // Linea eliminada por falta de existencias en preventa
+                    productData[prodId] = (code, name, uom, cur.Delivered, cur.DeletedShortage + detail.Quantity, price);
+                }
+                else
+                {
+                    // Linea entregada
+                    productData[prodId] = (code, name, uom, cur.Delivered + detail.Quantity, cur.DeletedShortage, price);
                 }
             }
 
             var items = new List<PresaleShortageItemDto>();
-
-            // Unir productos de facturas y devoluciones
-            var allProductIds = productGroup.Keys.Union(returnsByProduct.Keys).Distinct();
+            var allProductIds = productData.Keys.Union(returnsByProduct.Keys).Distinct();
 
             foreach (var prodId in allProductIds)
             {
@@ -126,37 +120,44 @@ public class GetPresaleShortagesReportQueryHandler : IRequestHandler<GetPresaleS
                 string uom = "UND";
                 decimal price = 0;
                 decimal delivered = 0;
+                decimal deletedShortage = 0;
 
-                if (productGroup.ContainsKey(prodId))
+                if (productData.ContainsKey(prodId))
                 {
-                    var p = productGroup[prodId];
+                    var p = productData[prodId];
                     code = p.Code;
                     name = p.Name;
                     uom = p.Uom;
                     price = p.Price;
                     delivered = p.Delivered;
+                    deletedShortage = p.DeletedShortage;
                 }
 
-                decimal shortage = returnsByProduct.ContainsKey(prodId) ? returnsByProduct[prodId].Qty : 0;
-                decimal lossAmount = returnsByProduct.ContainsKey(prodId) ? returnsByProduct[prodId].Amount : 0;
-                decimal requested = delivered + shortage;
+                decimal routeShortage = returnsByProduct.ContainsKey(prodId) ? returnsByProduct[prodId].Qty : 0;
+                decimal totalShortage = deletedShortage + routeShortage;
+                decimal lossAmount = totalShortage * price;
+                decimal requested = delivered + totalShortage;
 
-                // Si no habia precio cargado, calcular
-                if (price == 0 && shortage > 0 && lossAmount > 0)
+                if (price == 0 && returnsByProduct.ContainsKey(prodId))
                 {
-                    price = Math.Round(lossAmount / shortage, 2);
+                    var ret = returnsByProduct[prodId];
+                    if (ret.Qty > 0) price = Math.Round(ret.Amount / ret.Qty, 2);
+                    lossAmount = ret.Amount;
                 }
 
-                items.Add(new PresaleShortageItemDto(
-                    ProductCode: code,
-                    ProductName: name,
-                    UnitOfMeasureCode: uom,
-                    RequestedQuantity: requested,
-                    DeliveredQuantity: delivered,
-                    ShortageQuantity: shortage,
-                    UnitPrice: price,
-                    TotalLossAmount: Math.Round(lossAmount, 2)
-                ));
+                if (totalShortage > 0 || requested > delivered)
+                {
+                    items.Add(new PresaleShortageItemDto(
+                        ProductCode: code,
+                        ProductName: name,
+                        UnitOfMeasureCode: uom,
+                        RequestedQuantity: requested,
+                        DeliveredQuantity: delivered,
+                        ShortageQuantity: totalShortage,
+                        UnitPrice: price,
+                        TotalLossAmount: Math.Round(lossAmount, 2)
+                    ));
+                }
             }
 
             // Ordenar de mayor a menor perdida
