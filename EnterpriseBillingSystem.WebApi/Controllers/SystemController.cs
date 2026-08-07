@@ -521,4 +521,26 @@ END;";
             return StatusCode(500, new { Message = $"Error al procesar liquidación: {ex.Message} | Detalle: {innerMessage}" });
         }
     }
+
+    [HttpGet("restore-deleted-presale-lines")]
+    [HttpPost("restore-deleted-presale-lines")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<IActionResult> RestoreDeletedPresaleLines([FromServices] EnterpriseBillingSystem.Infrastructure.Data.ApplicationDbContext dbContext)
+    {
+        try
+        {
+            var sql = @"
+UPDATE SalesOrderDetails
+SET IsDeleted = 0
+WHERE IsDeleted = 1 AND SalesOrderId IN (
+    SELECT Id FROM SalesOrders WHERE OrderDate >= '2026-07-19' AND Status <> 4
+);";
+            int restoredCount = await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(dbContext.Database, sql);
+            return Ok(new { Message = "Líneas de producto eliminadas en preventa restauradas exitosamente en las facturas.", RestoredLinesCount = restoredCount });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = $"Error al restaurar líneas: {ex.Message}" });
+        }
+    }
 }
