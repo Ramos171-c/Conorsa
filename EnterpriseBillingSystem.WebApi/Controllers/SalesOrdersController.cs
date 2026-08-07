@@ -213,4 +213,98 @@ public class SalesOrdersController : ApiControllerBase
         var result = await Mediator.Send(new ResetInventoryAndOrdersCommand());
         return Ok(new { Message = result });
     }
+
+    /// <summary>
+    /// Obtener reporte de ventas por vendedor (Preventa vs Entrega Efectiva y Devoluciones).
+    /// </summary>
+    [HttpGet("seller-report")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<ActionResult<SellerSalesReportDto>> GetSellerReport(
+        [FromQuery] DateTime? fromDate = null,
+        [FromQuery] DateTime? toDate = null,
+        [FromQuery] Guid? routeId = null,
+        [FromQuery] string? sellerName = null)
+    {
+        var result = await Mediator.Send(new GetSellerSalesReportQuery(fromDate, toDate, routeId, sellerName));
+        return Ok(result);
+    }
+
+    /// <summary>
+    /// Generar reporte PDF de ventas por vendedor (Preventa vs Entrega Efectiva).
+    /// </summary>
+    [HttpGet("seller-report/pdf")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<IActionResult> GetSellerReportPdf(
+        [FromQuery] DateTime? fromDate = null,
+        [FromQuery] DateTime? toDate = null,
+        [FromQuery] Guid? routeId = null,
+        [FromQuery] string? sellerName = null)
+    {
+        QuestPDF.Settings.License = LicenseType.Community;
+        var reportData = await Mediator.Send(new GetSellerSalesReportQuery(fromDate, toDate, routeId, sellerName));
+
+        var pdfBytes = Document.Create(container =>
+        {
+            container.Page(page =>
+            {
+                page.Size(PageSizes.A4.Landscape());
+                page.Margin(20);
+                page.PageColor(Colors.White);
+
+                page.Header().Row(row =>
+                {
+                    row.RelativeItem().Column(col =>
+                    {
+                        col.Item().Text("REPORTE DE VENTAS POR VENDEDOR").FontSize(18).Bold().FontColor(Colors.Blue.Darken3);
+                        col.Item().Text("Preventa vs Entrega Efectiva y Devoluciones").FontSize(11).Italic().FontColor(Colors.Grey.Medium);
+                        col.Item().Text($"Rango: {(fromDate.HasValue ? fromDate.Value.ToString("dd/MM/yyyy") : "Inicio")} - {(toDate.HasValue ? toDate.Value.ToString("dd/MM/yyyy") : "Hoy")}").FontSize(10);
+                    });
+                    row.ConstantItem(120).AlignRight().Text($"Fecha: {DateTime.Now:dd/MM/yyyy HH:mm}").FontSize(9);
+                });
+
+                page.Content().PaddingVertical(10).Column(col =>
+                {
+                    col.Item().Table(table =>
+                    {
+                        table.ColumnsDefinition(cols =>
+                        {
+                            cols.RelativeColumn(3); // Vendedor
+                            cols.RelativeColumn(2); // Preventa
+                            cols.RelativeColumn(2); // Llegó al Cliente
+                            cols.RelativeColumn(2); // Devuelto / Faltante
+                            cols.RelativeColumn(2); // % Efectividad
+                        });
+
+                        table.Header(header =>
+                        {
+                            header.Cell().Background(Colors.Blue.Darken2).Padding(5).Text("VENDEDOR").Bold().FontColor(Colors.White).FontSize(10);
+                            header.Cell().Background(Colors.Blue.Darken2).Padding(5).AlignRight().Text("TOTAL PREVENTA").Bold().FontColor(Colors.White).FontSize(10);
+                            header.Cell().Background(Colors.Blue.Darken2).Padding(5).AlignRight().Text("LLEGÓ AL CLIENTE").Bold().FontColor(Colors.White).FontSize(10);
+                            header.Cell().Background(Colors.Blue.Darken2).Padding(5).AlignRight().Text("DEVUELTO / FALTÓ").Bold().FontColor(Colors.White).FontSize(10);
+                            header.Cell().Background(Colors.Blue.Darken2).Padding(5).AlignRight().Text("% EFECTIVIDAD").Bold().FontColor(Colors.White).FontSize(10);
+                        });
+
+                        foreach (var item in reportData.Sellers)
+                        {
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).Text(item.SellerName).FontSize(10);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).AlignRight().Text($"C$ {item.TotalPresaleAmount:N2}").FontSize(10);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).AlignRight().Text($"C$ {item.TotalDeliveredAmount:N2}").Bold().FontColor(Colors.Green.Darken2).FontSize(10);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).AlignRight().Text($"C$ {item.TotalReturnedAmount:N2}").FontColor(Colors.Red.Medium).FontSize(10);
+                            table.Cell().BorderBottom(1).BorderColor(Colors.Grey.Lighten2).Padding(5).AlignRight().Text($"{item.DeliveryEffectivenessPercentage:N1}%").Bold().FontSize(10);
+                        }
+                    });
+                });
+
+                page.Footer().AlignCenter().Text(x =>
+                {
+                    x.Span("Página ");
+                    x.CurrentPageNumber();
+                    x.Span(" de ");
+                    x.TotalPages();
+                });
+            });
+        }).GeneratePdf();
+
+        return File(pdfBytes, "application/pdf", "Reporte_Vendedor_Preventa_vs_Entrega.pdf");
+    }
 }
