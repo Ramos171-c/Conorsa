@@ -147,6 +147,7 @@ INNER JOIN (
     [HttpPost("process-july-ruta3-liquidation")]
     [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     public async Task<IActionResult> ProcessJulyRuta3Liquidation(
+        [FromServices] EnterpriseBillingSystem.Infrastructure.Data.ApplicationDbContext dbContext,
         [FromServices] EnterpriseBillingSystem.Domain.Repositories.ISalesOrderRepository salesOrderRepository,
         [FromServices] EnterpriseBillingSystem.Domain.Repositories.IRepository<EnterpriseBillingSystem.Domain.Entities.Route> routeRepository,
         [FromServices] EnterpriseBillingSystem.Domain.Repositories.IProductRepository productRepository,
@@ -157,6 +158,9 @@ INNER JOIN (
     {
         try
         {
+            var defaultUom = dbContext.UnitsOfMeasure.FirstOrDefault();
+            var defaultUomId = defaultUom?.Id ?? Guid.NewGuid();
+
             var routes = await routeRepository.GetAllAsync();
             var ruta3 = routes.FirstOrDefault(r => r.Code == "R04" || r.Name.Contains("Ruta 3") || r.Name.Contains("Ruta03")) ?? routes.FirstOrDefault();
             if (ruta3 == null) return BadRequest("No se encontró la Ruta 3.");
@@ -260,12 +264,13 @@ INNER JOIN (
                     }
                 }
 
+                var uomId = (product.DefaultUnitOfMeasureId != Guid.Empty) ? product.DefaultUnitOfMeasureId : defaultUomId;
                 liquidation.Details.Add(new EnterpriseBillingSystem.Domain.Entities.RouteLiquidationDetail
                 {
                     Id = Guid.NewGuid(),
                     RouteLiquidationId = liquidation.Id,
                     ProductId = product.Id,
-                    UnitOfMeasureId = product.DefaultUnitOfMeasureId,
+                    UnitOfMeasureId = uomId,
                     QuantitySent = qtyReturned,
                     QuantityReturned = qtyReturned,
                     QuantitySold = 0,
@@ -310,7 +315,8 @@ INNER JOIN (
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = $"Error al procesar liquidación: {ex.Message}" });
+            var innerMessage = ex.InnerException?.Message ?? ex.Message;
+            return StatusCode(500, new { Message = $"Error al procesar liquidación: {ex.Message} | Detalle: {innerMessage}" });
         }
     }
 
@@ -318,6 +324,7 @@ INNER JOIN (
     [HttpPost("process-july-ruta1-liquidation")]
     [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     public async Task<IActionResult> ProcessJulyRuta1Liquidation(
+        [FromServices] EnterpriseBillingSystem.Infrastructure.Data.ApplicationDbContext dbContext,
         [FromServices] EnterpriseBillingSystem.Domain.Repositories.ISalesOrderRepository salesOrderRepository,
         [FromServices] EnterpriseBillingSystem.Domain.Repositories.IRepository<EnterpriseBillingSystem.Domain.Entities.Route> routeRepository,
         [FromServices] EnterpriseBillingSystem.Domain.Repositories.IProductRepository productRepository,
@@ -328,6 +335,9 @@ INNER JOIN (
     {
         try
         {
+            var defaultUom = dbContext.UnitsOfMeasure.FirstOrDefault();
+            var defaultUomId = defaultUom?.Id ?? Guid.NewGuid();
+
             var routes = await routeRepository.GetAllAsync();
             var ruta1 = routes.FirstOrDefault(r => r.Code == "R01" || r.Name.Contains("Ruta 1") || r.Name.Contains("Ruta01") || r.Name.Contains("Ruta02")) ?? routes.FirstOrDefault();
             if (ruta1 == null) return BadRequest("No se encontró la Ruta 1.");
@@ -430,12 +440,13 @@ INNER JOIN (
                     }
                 }
 
+                var uomId = (product.DefaultUnitOfMeasureId != Guid.Empty) ? product.DefaultUnitOfMeasureId : defaultUomId;
                 liquidation.Details.Add(new EnterpriseBillingSystem.Domain.Entities.RouteLiquidationDetail
                 {
                     Id = Guid.NewGuid(),
                     RouteLiquidationId = liquidation.Id,
                     ProductId = product.Id,
-                    UnitOfMeasureId = product.DefaultUnitOfMeasureId,
+                    UnitOfMeasureId = uomId,
                     QuantitySent = qtyReturned,
                     QuantityReturned = qtyReturned,
                     QuantitySold = 0,
@@ -480,7 +491,8 @@ INNER JOIN (
         }
         catch (Exception ex)
         {
-            return StatusCode(500, new { Message = $"Error al procesar liquidación: {ex.Message}" });
+            var innerMessage = ex.InnerException?.Message ?? ex.Message;
+            return StatusCode(500, new { Message = $"Error al procesar liquidación: {ex.Message} | Detalle: {innerMessage}" });
         }
     }
 }
