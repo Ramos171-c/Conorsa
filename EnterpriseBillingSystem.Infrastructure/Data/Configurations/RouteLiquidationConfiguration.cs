@@ -12,6 +12,8 @@ public class RouteLiquidationConfiguration : IEntityTypeConfiguration<RouteLiqui
 
         builder.HasKey(rl => rl.Id);
 
+        builder.Ignore(rl => rl.BranchId);
+
         builder.Property(rl => rl.LiquidationNumber)
             .IsRequired()
             .HasMaxLength(30);
