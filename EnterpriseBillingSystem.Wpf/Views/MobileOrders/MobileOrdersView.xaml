@@ -150,6 +150,9 @@
 
                             <!-- Main DataGrid -->
                             <DataGrid ItemsSource="{Binding Orders}" AutoGenerateColumns="False" IsReadOnly="True" HeadersVisibility="Column"
+                                      EnableRowVirtualization="True" EnableColumnVirtualization="True"
+                                      VirtualizingPanel.IsVirtualizing="True" VirtualizingPanel.VirtualizationMode="Recycling"
+                                      ScrollViewer.CanContentScroll="True"
                                       Visibility="{Binding ConnectionFailed, Converter={StaticResource InverseBoolToVis}}">
                                 <DataGrid.Columns>
                                     <DataGridTemplateColumn Header="Nro. Pedido" Width="120">

@@ -71,9 +71,7 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
         Guid? routeId = null,
         CancellationToken cancellationToken = default)
     {
-        var query = _context.SalesOrders
-            .Include(so => so.Customer)
-            .AsNoTracking();
+        var query = _context.SalesOrders.AsNoTracking();
 
         if (customerId.HasValue)
             query = query.Where(so => so.CustomerId == customerId.Value);
@@ -109,6 +107,7 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
         int totalCount = await query.CountAsync(cancellationToken);
 
         var items = await query
+            .Include(so => so.Customer)
             .OrderByDescending(so => so.OrderDate)
             .Skip((pageNumber - 1) * pageSize)
             .Take(pageSize)
