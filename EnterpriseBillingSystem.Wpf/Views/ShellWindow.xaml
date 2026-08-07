@@ -275,8 +275,8 @@
                                 Height="48" Margin="8,2" HorizontalContentAlignment="Left"
                                 materialDesign:ButtonAssist.CornerRadius="8">
                             <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="ChartBar" Width="20" Height="20" Margin="0,0,16,0" VerticalAlignment="Center" Foreground="#4F46E5" />
-                                <TextBlock Text="📊 Analytics &amp; Reportes" VerticalAlignment="Center" FontWeight="Bold" Foreground="#4F46E5" />
+                                <materialDesign:PackIcon Kind="ChartBar" Width="20" Height="20" Margin="0,0,16,0" VerticalAlignment="Center" />
+                                <TextBlock Text="Analytics &amp; Reportes" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 
