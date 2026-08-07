@@ -120,13 +120,22 @@ INNER JOIN (
     {
         try
         {
-            var sql = @"
-UPDATE SalesOrders
-SET Status = 3, LastModifiedBy = 'System-Complete', LastModifiedOnUtc = GETUTCDATE()
-WHERE Status <> 4 AND (OrderDate >= '2026-07-19' AND OrderDate <= '2026-07-28');";
+            var fromDate = new DateTime(2026, 7, 19, 0, 0, 0, DateTimeKind.Utc);
+            var toDate = new DateTime(2026, 7, 28, 23, 59, 59, DateTimeKind.Utc);
 
-            int rows = await Microsoft.EntityFrameworkCore.RelationalDatabaseFacadeExtensions.ExecuteSqlRawAsync(dbContext.Database, sql);
-            return Ok(new { Message = "Pedidos del 20 al 26 de Julio pasados a Completado exitosamente.", RowsAffected = rows });
+            var orders = dbContext.SalesOrders
+                .Where(o => o.OrderDate >= fromDate && o.OrderDate <= toDate && o.Status != EnterpriseBillingSystem.Domain.Enums.SalesOrderStatus.Anulado)
+                .ToList();
+
+            foreach (var order in orders)
+            {
+                order.Status = EnterpriseBillingSystem.Domain.Enums.SalesOrderStatus.Completado;
+                order.LastModifiedBy = "System-Complete";
+                order.LastModifiedOnUtc = DateTime.UtcNow;
+            }
+
+            int rows = await dbContext.SaveChangesAsync();
+            return Ok(new { Message = "Pedidos del 20 al 26 de Julio pasados a Completado exitosamente.", RowsAffected = rows, TotalOrders = orders.Count });
         }
         catch (Exception ex)
         {
