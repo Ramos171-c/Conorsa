@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -33,6 +33,61 @@ public class DbInitializer : IDbInitializer
         {
             await _context.Database.MigrateAsync();
         }
+
+        // Garantizar existencia de tablas RouteLiquidations y RouteLiquidationDetails
+        var createTablesSql = @"
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'RouteLiquidations')
+BEGIN
+    CREATE TABLE [dbo].[RouteLiquidations] (
+        [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+        [LiquidationNumber] NVARCHAR(50) NOT NULL,
+        [RouteId] UNIQUEIDENTIFIER NOT NULL,
+        [DriverId] UNIQUEIDENTIFIER NULL,
+        [LiquidationDate] DATETIME2 NOT NULL,
+        [Status] INT NOT NULL,
+        [TotalAmountSent] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [TotalAmountSold] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [TotalAmountReturned] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [TotalQuantitySent] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [TotalQuantitySold] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [TotalQuantityReturned] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [Observations] NVARCHAR(MAX) NULL,
+        [CreatedBy] NVARCHAR(256) NULL,
+        [CreatedOnUtc] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        [LastModifiedBy] NVARCHAR(256) NULL,
+        [LastModifiedOnUtc] DATETIME2 NULL,
+        [IsDeleted] BIT NOT NULL DEFAULT 0
+    );
+END
+
+IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'RouteLiquidationDetails')
+BEGIN
+    CREATE TABLE [dbo].[RouteLiquidationDetails] (
+        [Id] UNIQUEIDENTIFIER NOT NULL PRIMARY KEY,
+        [RouteLiquidationId] UNIQUEIDENTIFIER NOT NULL,
+        [ProductId] UNIQUEIDENTIFIER NOT NULL,
+        [UnitOfMeasureId] UNIQUEIDENTIFIER NOT NULL,
+        [ProductPresentationId] UNIQUEIDENTIFIER NULL,
+        [QuantitySent] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [QuantityReturned] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [QuantitySold] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [BaseQuantitySent] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [BaseQuantityReturned] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [BaseQuantitySold] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [SalePrice] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [Cost] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [SubtotalSold] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [SubtotalReturned] DECIMAL(18,4) NOT NULL DEFAULT 0,
+        [Notes] NVARCHAR(MAX) NULL,
+        [CreatedBy] NVARCHAR(256) NULL,
+        [CreatedOnUtc] DATETIME2 NOT NULL DEFAULT GETUTCDATE(),
+        [LastModifiedBy] NVARCHAR(256) NULL,
+        [LastModifiedOnUtc] DATETIME2 NULL,
+        [IsDeleted] BIT NOT NULL DEFAULT 0
+    );
+END
+";
+        await _context.Database.ExecuteSqlRawAsync(createTablesSql);
 
 
         // 1.5. Sembrar Rutas por Defecto
