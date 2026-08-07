@@ -98,7 +98,13 @@ public class GetPresaleShortagesReportQueryHandler : IRequestHandler<GetPresaleS
                 }
 
                 var cur = productData[prodId];
-                if (detail.IsDeleted)
+                if (detail.OriginalPresaleQuantity.HasValue && detail.OriginalPresaleQuantity.Value > detail.Quantity)
+                {
+                    decimal origReqShortage = detail.OriginalPresaleQuantity.Value - detail.Quantity;
+                    decimal delivQty = detail.IsDeleted ? 0 : detail.Quantity;
+                    productData[prodId] = (code, name, uom, cur.Delivered + delivQty, cur.DeletedShortage + origReqShortage, price);
+                }
+                else if (detail.IsDeleted)
                 {
                     // Linea eliminada por falta de existencias en preventa
                     productData[prodId] = (code, name, uom, cur.Delivered, cur.DeletedShortage + detail.Quantity, price);

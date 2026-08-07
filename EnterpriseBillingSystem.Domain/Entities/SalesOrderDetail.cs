@@ -15,6 +15,10 @@ public class SalesOrderDetail : BaseEntity
     public virtual UnitOfMeasure UnitOfMeasure { get; set; } = null!;
 
     public decimal Quantity { get; set; }
+
+    /// <summary>Cantidad solicitada originalmente en preventa (Guardada de forma permanente para reportes de faltantes)</summary>
+    public decimal? OriginalPresaleQuantity { get; set; }
+
     public decimal UnitPrice { get; set; }
     public decimal DiscountPercentage { get; set; }
     public decimal DiscountAmount { get; set; }

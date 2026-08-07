@@ -15,6 +15,10 @@ public class SalesOrderDetailConfiguration : IEntityTypeConfiguration<SalesOrder
         builder.Property(d => d.Quantity)
             .HasPrecision(18, 4);
 
+        builder.Property(d => d.OriginalPresaleQuantity)
+            .HasPrecision(18, 4)
+            .IsRequired(false);
+
         builder.Property(d => d.UnitPrice)
             .HasPrecision(18, 4);
 
