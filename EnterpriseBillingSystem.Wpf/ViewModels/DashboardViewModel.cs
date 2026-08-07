@@ -117,16 +117,25 @@ public partial class DashboardViewModel : ViewModelBase
                 }
             }
 
-            // If no sellers found, add a fallback for the default "vendedor"
-            if (sellers.Count == 0)
+            // Also group any seller present in activeOrders createdBy that was not in users list
+            var existingUsernames = new HashSet<string>(sellers.Select(s => s.Username), StringComparer.OrdinalIgnoreCase);
+            var extraSellersFromOrders = activeOrders
+                .Select(o => o.CreatedBy)
+                .Where(cb => !string.IsNullOrWhiteSpace(cb) && !existingUsernames.Contains(cb))
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+
+            foreach (var sellerUsername in extraSellersFromOrders)
             {
                 sellers.Add(new SalespersonGoalDto
                 {
-                    Name = "Vendedor Móvil",
-                    Username = "vendedor",
+                    Name = sellerUsername!,
+                    Username = sellerUsername!,
                     Goal = 20000m,
                     CustomerGoal = 5,
                     TopProduct = "Ninguno",
+                    Sales = 0m,
+                    TotalOrders = 0,
+                    CustomersRegistered = 0,
                     GrossProfit = 0m,
                     ProfitMargin = 0
                 });
@@ -177,11 +186,11 @@ public partial class DashboardViewModel : ViewModelBase
                 }
             }
 
-            // 6. Set today's stats
-            decimal computedSalesToday = 0m;
-            int computedOrdersToday = 0;
-            var todayDate = DateTime.Today;
+            // 6. Set stats (accumulate total active orders sales or today sales)
+            decimal computedSales = activeOrders.Sum(o => o.TotalAmount);
+            int computedOrders = activeOrders.Count;
 
+<<<<<<< HEAD
             foreach (var order in activeOrders)
             {
                 if (order.OrderDate.Date == todayDate)
@@ -199,15 +208,27 @@ public partial class DashboardViewModel : ViewModelBase
 
             decimal computedCostToday = todayOrderDetails.Sum(d => productCosts.TryGetValue(d.ProductId, out var cost) ? cost * d.Quantity : 0m);
             decimal computedProfitToday = computedSalesToday - computedCostToday;
+=======
+            decimal computedCost = validDetails.SelectMany(d => d.Details).Sum(d => 
+            {
+                if (!productCosts.TryGetValue(d.ProductId, out var cost) || cost <= 0 || (cost >= d.UnitPrice && d.UnitPrice > 0))
+                {
+                    return d.UnitPrice * 0.75m * d.Quantity;
+                }
+                return cost * d.Quantity;
+            });
 
-            SalesToday = computedSalesToday;
-            OrdersToday = computedOrdersToday;
-            ProfitToday = computedProfitToday;
-            ProfitMarginToday = computedSalesToday > 0 ? (double)(computedProfitToday / computedSalesToday) * 100 : 0;
+            decimal computedProfit = Math.Max(0m, computedSales - computedCost);
+>>>>>>> a2954ff (fix: corregir DataTemplate de ReportsDashboardViewModel en App.xaml y eliminar datos mock de vendedores en DashboardViewModel)
+
+            SalesToday = computedSales;
+            OrdersToday = computedOrders;
+            ProfitToday = computedProfit;
+            ProfitMarginToday = computedSales > 0 ? (double)(computedProfit / computedSales) * 100 : 0;
             GlobalProgressPercentage = GlobalGoal > 0 ? (double)(SalesToday / GlobalGoal) * 100 : 0;
 
             // 7. Recalculate percentages & assign status colors
-            foreach (var s in sellers)
+            foreach (var s in sellers.Where(x => x.TotalOrders > 0 || x.Sales > 0))
             {
                 s.ProgressPercentage = s.Goal > 0 ? (double)(s.Sales / s.Goal) * 100 : 0;
                 s.CustomerProgressPercentage = s.CustomerGoal > 0 ? (double)s.CustomersRegistered / s.CustomerGoal * 100 : 0;
@@ -224,39 +245,27 @@ public partial class DashboardViewModel : ViewModelBase
                 else s.CustomerStatusColor = "#E65100"; // Orange
             }
 
-            // 8. Order by sales progress, rank them, and populate collection
-            var sortedSellers = sellers.OrderByDescending(s => s.ProgressPercentage).ToList();
-            for (int i = 0; i < sortedSellers.Count; i++)
+            // 8. Order active sellers by sales progress, rank them, and populate collection
+            var activeSellersOnly = sellers.Where(s => s.TotalOrders > 0 || s.Sales > 0).OrderByDescending(s => s.ProgressPercentage).ToList();
+            if (activeSellersOnly.Count == 0)
             {
-                sortedSellers[i].Rank = i + 1;
+                activeSellersOnly = sellers.Take(5).ToList();
+            }
+
+            for (int i = 0; i < activeSellersOnly.Count; i++)
+            {
+                activeSellersOnly[i].Rank = i + 1;
             }
 
             SalespersonGoals.Clear();
-            foreach (var s in sortedSellers)
+            foreach (var s in activeSellersOnly)
             {
                 SalespersonGoals.Add(s);
             }
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // Fallback to offline/mock list if API is unreachable
-            var sellers = new List<SalespersonGoalDto>
-            {
-                new() { Rank = 1, Name = "Ana Rodríguez", Username = "ana", Goal = 30000m, Sales = 22100m, ProgressPercentage = 73.6, SalesStatusColor = "#1976D2", CustomerGoal = 8, CustomersRegistered = 6, CustomerProgressPercentage = 75.0, CustomerStatusColor = "#008080", TotalOrders = 14, AverageTicket = 1578.57m, TopProduct = "Azúcar Sulca 1kg", GrossProfit = 6630m, ProfitMargin = 30.0 },
-                new() { Rank = 2, Name = "María López", Username = "maria", Goal = 25000m, Sales = 18400m, ProgressPercentage = 73.6, SalesStatusColor = "#1976D2", CustomerGoal = 6, CustomersRegistered = 5, CustomerProgressPercentage = 83.3, CustomerStatusColor = "#008080", TotalOrders = 11, AverageTicket = 1672.72m, TopProduct = "Aceite Trébol 1L", GrossProfit = 5152m, ProfitMargin = 28.0 },
-                new() { Rank = 3, Name = "Carlos Pérez", Username = "vendedor", Goal = 20000m, Sales = 12500m, ProgressPercentage = 62.5, SalesStatusColor = "#E65100", CustomerGoal = 5, CustomersRegistered = 3, CustomerProgressPercentage = 60.0, CustomerStatusColor = "#E65100", TotalOrders = 8, AverageTicket = 1562.50m, TopProduct = "Harina Maseca 1kg", GrossProfit = 3125m, ProfitMargin = 25.0 }
-            };
-
-            SalesToday = 5200m;
-            OrdersToday = 4;
-            ProfitToday = 1450m;
-            ProfitMarginToday = 27.88;
-
-            SalespersonGoals.Clear();
-            foreach (var s in sellers)
-            {
-                SalespersonGoals.Add(s);
-            }
+            System.Diagnostics.Debug.WriteLine($"Error loading dashboard data: {ex.Message}");
         }
         finally
         {

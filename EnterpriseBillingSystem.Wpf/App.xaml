@@ -11,6 +11,7 @@
              xmlns:vpu="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Purchases"
              xmlns:vc="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Customers"
              xmlns:vs="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Suppliers"
+             xmlns:vr="clr-namespace:EnterpriseBillingSystem.Wpf.Views.Reports"
              xmlns:vm="clr-namespace:EnterpriseBillingSystem.Wpf.ViewModels"
              xmlns:converters="clr-namespace:EnterpriseBillingSystem.Wpf.Converters"
              xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes">
@@ -156,6 +157,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:MobileOrdersViewModel}">
                 <vo:MobileOrdersView />
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ReportsDashboardViewModel}">
+                <vr:ReportsDashboardView />
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:SalesViewModel}">
                 <v:SalesView />
