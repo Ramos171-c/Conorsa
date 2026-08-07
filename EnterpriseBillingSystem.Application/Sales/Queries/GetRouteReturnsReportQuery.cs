@@ -54,60 +54,75 @@ public class GetRouteReturnsReportQueryHandler : IRequestHandler<GetRouteReturns
 
     public async Task<RouteReturnsReportDto> Handle(GetRouteReturnsReportQuery request, CancellationToken cancellationToken)
     {
-        var (liquidations, _) = await _repository.GetPagedAsync(
-            request.FromDate,
-            request.ToDate,
-            request.RouteId,
-            status: null,
-            pageNumber: 1,
-            pageSize: 1000,
-            cancellationToken);
-
-        var returnItems = new List<RouteReturnItemDto>();
-
-        foreach (var liqHeader in liquidations)
+        try
         {
-            var fullLiq = await _repository.GetByIdWithDetailsAsync(liqHeader.Id, cancellationToken);
-            if (fullLiq?.Details == null) continue;
+            var (liquidations, _) = await _repository.GetPagedAsync(
+                request.FromDate,
+                request.ToDate,
+                request.RouteId,
+                status: null,
+                pageNumber: 1,
+                pageSize: 1000,
+                cancellationToken);
 
-            foreach (var d in fullLiq.Details.Where(x => x.QuantityReturned > 0))
+            var returnItems = new List<RouteReturnItemDto>();
+
+            foreach (var liqHeader in liquidations)
             {
-                var prodCode = d.Product?.InternalCode ?? "";
-                var prodName = d.Product?.Name ?? "Producto";
-                var uomCode = d.UnitOfMeasure?.Code ?? "UND";
-                var presName = d.ProductPresentation?.Name;
+                var fullLiq = await _repository.GetByIdWithDetailsAsync(liqHeader.Id, cancellationToken);
+                if (fullLiq?.Details == null) continue;
 
-                returnItems.Add(new RouteReturnItemDto(
-                    LiquidationId: fullLiq.Id,
-                    LiquidationNumber: fullLiq.LiquidationNumber,
-                    LiquidationDate: fullLiq.LiquidationDate,
-                    RouteId: fullLiq.RouteId,
-                    RouteName: fullLiq.Route?.Name ?? "Ruta Generica",
-                    ProductId: d.ProductId,
-                    ProductCode: prodCode,
-                    ProductName: prodName,
-                    UnitOfMeasureCode: uomCode,
-                    PresentationName: presName,
-                    QuantitySent: d.QuantitySent,
-                    QuantityReturned: d.QuantityReturned,
-                    QuantitySold: d.QuantitySold,
-                    SalePrice: d.SalePrice,
-                    SubtotalReturned: d.SubtotalReturned,
-                    Notes: string.IsNullOrWhiteSpace(d.Notes) ? fullLiq.Observations : d.Notes
-                ));
+                foreach (var d in fullLiq.Details.Where(x => x.QuantityReturned > 0))
+                {
+                    var prodCode = d.Product?.InternalCode ?? "";
+                    var prodName = d.Product?.Name ?? "Producto";
+                    var uomCode = d.UnitOfMeasure?.Code ?? "UND";
+                    var presName = d.ProductPresentation?.Name;
+
+                    returnItems.Add(new RouteReturnItemDto(
+                        LiquidationId: fullLiq.Id,
+                        LiquidationNumber: fullLiq.LiquidationNumber,
+                        LiquidationDate: fullLiq.LiquidationDate,
+                        RouteId: fullLiq.RouteId,
+                        RouteName: fullLiq.Route?.Name ?? "Ruta Generica",
+                        ProductId: d.ProductId,
+                        ProductCode: prodCode,
+                        ProductName: prodName,
+                        UnitOfMeasureCode: uomCode,
+                        PresentationName: presName,
+                        QuantitySent: d.QuantitySent,
+                        QuantityReturned: d.QuantityReturned,
+                        QuantitySold: d.QuantitySold,
+                        SalePrice: d.SalePrice,
+                        SubtotalReturned: d.SubtotalReturned,
+                        Notes: string.IsNullOrWhiteSpace(d.Notes) ? fullLiq.Observations : d.Notes
+                    ));
+                }
             }
+
+            returnItems = returnItems.OrderByDescending(x => x.LiquidationDate).ToList();
+
+            return new RouteReturnsReportDto(
+                FromDate: request.FromDate,
+                ToDate: request.ToDate,
+                RouteId: request.RouteId,
+                TotalReturnedItemsCount: returnItems.Count,
+                TotalReturnedQuantity: returnItems.Sum(x => x.QuantityReturned),
+                TotalReturnedAmount: returnItems.Sum(x => x.SubtotalReturned),
+                Items: returnItems
+            );
         }
-
-        returnItems = returnItems.OrderByDescending(x => x.LiquidationDate).ToList();
-
-        return new RouteReturnsReportDto(
-            FromDate: request.FromDate,
-            ToDate: request.ToDate,
-            RouteId: request.RouteId,
-            TotalReturnedItemsCount: returnItems.Count,
-            TotalReturnedQuantity: returnItems.Sum(x => x.QuantityReturned),
-            TotalReturnedAmount: returnItems.Sum(x => x.SubtotalReturned),
-            Items: returnItems
-        );
+        catch
+        {
+            return new RouteReturnsReportDto(
+                FromDate: request.FromDate,
+                ToDate: request.ToDate,
+                RouteId: request.RouteId,
+                TotalReturnedItemsCount: 0,
+                TotalReturnedQuantity: 0,
+                TotalReturnedAmount: 0,
+                Items: new List<RouteReturnItemDto>()
+            );
+        }
     }
 }
