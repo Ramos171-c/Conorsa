@@ -222,7 +222,7 @@ public partial class InventoryStockViewModel : ViewModelBase
                 ProductId = item.ProductId,
                 Quantity = Math.Abs(diff),
                 IsPositive = diff > 0,
-                ProductPresentationId = Guid.Empty,
+                ProductPresentationId = (Guid?)null,
                 ReferenceDocument = "Ajuste Directo Conteo Físico",
                 Notes = $"Ajuste manual directo de {item.PhysicalStock:N2} a {newStock:N2} {item.UnitOfMeasure}"
             };
