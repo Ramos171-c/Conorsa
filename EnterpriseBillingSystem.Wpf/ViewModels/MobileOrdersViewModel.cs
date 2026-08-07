@@ -366,6 +366,24 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private void OpenShortagesReport()
+    {
+        try
+        {
+            var pdfUrl = "http://167.99.13.177:8080/api/v1/sales-orders/shortages-report/pdf";
+            System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo
+            {
+                FileName = pdfUrl,
+                UseShellExecute = true
+            });
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al abrir el reporte de faltantes y pérdidas: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
     private async Task BatchPrintDeliveryTicketsAsync()
     {
         IsLoading = true;
