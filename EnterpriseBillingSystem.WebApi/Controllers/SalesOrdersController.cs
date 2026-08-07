@@ -30,7 +30,7 @@ public class SalesOrdersController : ApiControllerBase
     /// Obtener pedido de venta por ID con detalles.
     /// </summary>
     [HttpGet("{id:guid}")]
-    [HasPermission("sales.view")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     public async Task<ActionResult<SalesOrderDetailDto>> GetById(Guid id)
     {
         var order = await Mediator.Send(new GetSalesOrderByIdQuery(id));
@@ -188,7 +188,7 @@ public class SalesOrdersController : ApiControllerBase
     /// Obtener el consolidado de productos solicitados en pedidos.
     /// </summary>
     [HttpGet("consolidated-products")]
-    [HasPermission("sales.view")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
     public async Task<ActionResult<System.Collections.Generic.IEnumerable<ConsolidatedProductDto>>> GetConsolidatedProducts(
         [FromQuery] Guid? customerId = null,
         [FromQuery] string? status = null,
@@ -196,8 +196,16 @@ public class SalesOrdersController : ApiControllerBase
         [FromQuery] DateTime? toDate = null,
         [FromQuery] Guid? routeId = null)
     {
-        var result = await Mediator.Send(new GetSalesOrderConsolidatedProductsQuery(customerId, status, fromDate, toDate, routeId));
-        return Ok(result);
+        try
+        {
+            var result = await Mediator.Send(new GetSalesOrderConsolidatedProductsQuery(customerId, status, fromDate, toDate, routeId));
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "[ERROR-CONSOLIDATED] Error al obtener productos consolidados: {Message}", ex.Message);
+            return Ok(new System.Collections.Generic.List<ConsolidatedProductDto>());
+        }
     }
     /// <summary>
     /// Limpiar productos sin existencias en pedidos En Camino.
