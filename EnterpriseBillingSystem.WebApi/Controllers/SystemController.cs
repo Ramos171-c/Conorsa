@@ -543,4 +543,20 @@ WHERE IsDeleted = 1 AND SalesOrderId IN (
             return StatusCode(500, new { Message = $"Error al restaurar líneas: {ex.Message}" });
         }
     }
+
+    [HttpGet("ensure-database-schema")]
+    [HttpPost("ensure-database-schema")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<IActionResult> EnsureDatabaseSchema([FromServices] EnterpriseBillingSystem.Application.Common.Interfaces.IDbInitializer dbInitializer)
+    {
+        try
+        {
+            await dbInitializer.InitializeAsync();
+            return Ok(new { Message = "Estructura de la base de datos verificada y actualizada correctamente." });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = $"Error al actualizar esquema: {ex.Message} | Detalle: {ex.InnerException?.Message}" });
+        }
+    }
 }
