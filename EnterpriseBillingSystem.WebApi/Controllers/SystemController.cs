@@ -282,4 +282,173 @@ INNER JOIN (
             return StatusCode(500, new { Message = $"Error al procesar liquidación: {ex.Message}" });
         }
     }
+
+    [HttpPost("process-july-ruta1-liquidation")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<IActionResult> ProcessJulyRuta1Liquidation(
+        [FromServices] EnterpriseBillingSystem.Domain.Repositories.ISalesOrderRepository salesOrderRepository,
+        [FromServices] EnterpriseBillingSystem.Domain.Repositories.IRepository<EnterpriseBillingSystem.Domain.Entities.Route> routeRepository,
+        [FromServices] EnterpriseBillingSystem.Domain.Repositories.IProductRepository productRepository,
+        [FromServices] EnterpriseBillingSystem.Domain.Repositories.IInventoryRepository inventoryRepository,
+        [FromServices] EnterpriseBillingSystem.Domain.Repositories.IWarehouseRepository warehouseRepository,
+        [FromServices] EnterpriseBillingSystem.Domain.Repositories.IRouteLiquidationRepository liquidationRepository,
+        [FromServices] EnterpriseBillingSystem.Domain.Repositories.IUnitOfWork unitOfWork)
+    {
+        try
+        {
+            var routes = await routeRepository.GetAllAsync();
+            var ruta1 = routes.FirstOrDefault(r => r.Code == "R01" || r.Name.Contains("Ruta 1") || r.Name.Contains("Ruta01") || r.Name.Contains("Ruta02")) ?? routes.FirstOrDefault();
+            if (ruta1 == null) return BadRequest("No se encontró la Ruta 1.");
+
+            var fromDate = new DateTime(2026, 7, 20, 0, 0, 0, DateTimeKind.Utc);
+            var toDate = new DateTime(2026, 7, 26, 23, 59, 59, DateTimeKind.Utc);
+
+            var orders = (await salesOrderRepository.GetFilteredWithDetailsAsync(
+                customerId: null,
+                status: null,
+                fromDate: fromDate,
+                toDate: toDate,
+                routeId: ruta1.Id)).ToList();
+
+            // Lista de 10 productos devueltos en RC-00000009 (Total 21 piezas)
+            var returnedItemsInput = new Dictionary<string, decimal>
+            {
+                { "MA001", 1m },
+                { "CA005", 1m },
+                { "CA024", 1m },
+                { "CA038", 2m },
+                { "GA005", 1m },
+                { "CA016", 1m },
+                { "TA001", 8m },
+                { "TA006", 2m },
+                { "GA006", 2m },
+                { "CA010", 2m }
+            };
+
+            var allProducts = await productRepository.GetAllAsync();
+
+            var liquidationNumber = await liquidationRepository.GenerateNextLiquidationNumberAsync();
+            var liquidation = new EnterpriseBillingSystem.Domain.Entities.RouteLiquidation
+            {
+                Id = Guid.NewGuid(),
+                LiquidationNumber = liquidationNumber,
+                RouteId = ruta1.Id,
+                LiquidationDate = new DateTime(2026, 7, 26, 18, 0, 0, DateTimeKind.Utc),
+                Status = EnterpriseBillingSystem.Domain.Enums.RouteLiquidationStatus.Confirmada,
+                Observations = "Devolución Ruta 1 (Semana 20 al 26 de Julio). Recepción RC-00000009 (21 piezas devueltas).",
+                CreatedBy = "System",
+                CreatedOnUtc = DateTime.UtcNow
+            };
+
+            var allWarehouses = await warehouseRepository.GetAllAsync();
+            var targetWarehouse = allWarehouses.FirstOrDefault(w => w.Name.Contains("Exhibici")) ?? allWarehouses.FirstOrDefault();
+            var branchWarehouseId = targetWarehouse?.BranchWarehouses?.FirstOrDefault()?.Id;
+
+            int updatedOrdersCount = 0;
+            decimal totalAmountSubtracted = 0;
+
+            foreach (var kvp in returnedItemsInput)
+            {
+                var sku = kvp.Key;
+                var qtyReturned = kvp.Value;
+                var product = allProducts.FirstOrDefault(p => (p.InternalCode ?? "").Equals(sku, StringComparison.OrdinalIgnoreCase));
+                if (product == null) continue;
+
+                decimal remainingToDeduct = qtyReturned;
+
+                // Reingresar stock a bodega
+                if (branchWarehouseId.HasValue)
+                {
+                    var invRecord = await inventoryRepository.GetByWarehouseAndProductAsync(branchWarehouseId.Value, product.Id);
+                    if (invRecord != null)
+                    {
+                        invRecord.PhysicalStock += qtyReturned;
+                        invRecord.LastModifiedBy = "LiquidationSystem";
+                        invRecord.LastModifiedOnUtc = DateTime.UtcNow;
+                    }
+                }
+
+                // Deducir de pedidos
+                foreach (var order in orders.Where(o => o.Status != EnterpriseBillingSystem.Domain.Enums.SalesOrderStatus.Anulado))
+                {
+                    if (remainingToDeduct <= 0) break;
+                    var detail = order.Details.FirstOrDefault(d => d.ProductId == product.Id && d.Quantity > 0);
+                    if (detail != null)
+                    {
+                        decimal deduct = Math.Min(remainingToDeduct, detail.Quantity);
+                        detail.Quantity -= deduct;
+                        remainingToDeduct -= deduct;
+
+                        var lineDiscount = detail.Quantity * detail.UnitPrice * (detail.DiscountPercentage / 100m);
+                        var lineBase = detail.Quantity * detail.UnitPrice - lineDiscount;
+                        var lineTax = lineBase * (detail.TaxPercentage / 100m);
+                        detail.DiscountAmount = lineDiscount;
+                        detail.TaxAmount = lineTax;
+                        detail.NetAmount = lineBase + lineTax;
+
+                        order.SubTotal = order.Details.Sum(d => d.Quantity * d.UnitPrice);
+                        order.DiscountAmount = order.Details.Sum(d => d.DiscountAmount);
+                        order.TaxAmount = order.Details.Sum(d => d.TaxAmount);
+                        order.TotalAmount = order.SubTotal - order.DiscountAmount + order.TaxAmount;
+
+                        totalAmountSubtracted += deduct * detail.UnitPrice;
+                        var obsText = $" [Devolución RC-00000009]: Devueltas {deduct} unds de {product.Name}. Monto restado.";
+                        order.Notes = $"{order.Notes}\n{obsText}".Trim();
+                        salesOrderRepository.Update(order);
+                    }
+                }
+
+                liquidation.Details.Add(new EnterpriseBillingSystem.Domain.Entities.RouteLiquidationDetail
+                {
+                    Id = Guid.NewGuid(),
+                    RouteLiquidationId = liquidation.Id,
+                    ProductId = product.Id,
+                    UnitOfMeasureId = product.DefaultUnitOfMeasureId,
+                    QuantitySent = qtyReturned,
+                    QuantityReturned = qtyReturned,
+                    QuantitySold = 0,
+                    BaseQuantitySent = qtyReturned,
+                    BaseQuantityReturned = qtyReturned,
+                    BaseQuantitySold = 0,
+                    SalePrice = product.CurrentCost,
+                    Cost = product.CurrentCost,
+                    SubtotalSold = 0,
+                    SubtotalReturned = qtyReturned * product.CurrentCost,
+                    Notes = $"Devolución de 21 pzas RC-00000009 - Ruta 1"
+                });
+            }
+
+            // Marcar todos los pedidos de esta ruta del 20 al 26 de Julio como Completados
+            foreach (var order in orders)
+            {
+                if (order.Status != EnterpriseBillingSystem.Domain.Enums.SalesOrderStatus.Anulado)
+                {
+                    order.Status = EnterpriseBillingSystem.Domain.Enums.SalesOrderStatus.Completado;
+                    order.LastModifiedBy = "LiquidationSystem";
+                    order.LastModifiedOnUtc = DateTime.UtcNow;
+                    salesOrderRepository.Update(order);
+                    updatedOrdersCount++;
+                }
+            }
+
+            liquidation.TotalQuantityReturned = 21;
+            liquidation.TotalAmountReturned = totalAmountSubtracted;
+            await liquidationRepository.AddAsync(liquidation);
+
+            await unitOfWork.SaveChangesAsync();
+
+            return Ok(new
+            {
+                Message = $"Liquidación y devolución completada con éxito para Ruta 1 del 20 al 26 de Julio.",
+                LiquidationNumber = liquidationNumber,
+                TotalReturnedPieces = 21,
+                TotalOrdersUpdatedToCompleted = updatedOrdersCount,
+                TotalSalesSubtracted = totalAmountSubtracted
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Message = $"Error al procesar liquidación: {ex.Message}" });
+        }
+    }
 }
