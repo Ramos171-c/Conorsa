@@ -107,6 +107,11 @@ IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('RouteLiqui
 BEGIN
     ALTER TABLE [dbo].[RouteLiquidationDetails] ADD [BranchId] UNIQUEIDENTIFIER NULL;
 END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('SalesOrderDetails') AND name = 'OriginalPresaleQuantity')
+BEGIN
+    ALTER TABLE [dbo].[SalesOrderDetails] ADD [OriginalPresaleQuantity] DECIMAL(18,4) NULL;
+END
 ";
         await _context.Database.ExecuteSqlRawAsync(createTablesSql);
 
