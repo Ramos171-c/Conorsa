@@ -23,6 +23,15 @@ public partial class CustomInputDialog : Window
         }
     }
 
+    private void CustomInputDialog_Loaded(object sender, RoutedEventArgs e)
+    {
+        InputTextBox.Focus();
+        if (!string.IsNullOrEmpty(InputTextBox.Text))
+        {
+            InputTextBox.SelectAll();
+        }
+    }
+
     private void BtnOk_Click(object sender, RoutedEventArgs e)
     {
         ConfirmAndClose();

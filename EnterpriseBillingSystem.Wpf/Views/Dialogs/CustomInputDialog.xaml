@@ -5,28 +5,29 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
         mc:Ignorable="d"
-        Title="Entrada de Datos" Height="220" Width="460"
+        Title="Entrada de Datos" SizeToContent="Height" Width="480" MinHeight="260" MaxHeight="450"
         WindowStartupLocation="CenterOwner"
         ShowInTaskbar="False"
         ResizeMode="NoResize"
         WindowStyle="None"
         AllowsTransparency="True"
         Background="Transparent"
+        Loaded="CustomInputDialog_Loaded"
         FontFamily="{materialDesign:MaterialDesignFont}">
 
     <Border CornerRadius="12" Background="{DynamicResource MaterialDesignPaper}" BorderBrush="{DynamicResource PrimaryHueLightBrush}" BorderThickness="1.5">
         <Border.Effect>
             <DropShadowEffect BlurRadius="15" ShadowDepth="2" Direction="270" Color="#44000000" />
         </Border.Effect>
-        <Grid Margin="16">
+        <Grid Margin="20">
             <Grid.RowDefinitions>
                 <RowDefinition Height="Auto" />
-                <RowDefinition Height="*" />
+                <RowDefinition Height="Auto" />
                 <RowDefinition Height="Auto" />
             </Grid.RowDefinitions>
 
             <!-- Header / Title Bar -->
-            <Grid Grid.Row="0" Margin="0,0,0,12">
+            <Grid Grid.Row="0" Margin="0,0,0,16">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
@@ -38,13 +39,13 @@
             </Grid>
 
             <!-- Content Area -->
-            <StackPanel Grid.Row="1" Margin="0,0,0,16">
-                <TextBlock x:Name="PromptTextBlock" FontSize="13.5" Margin="0,0,0,10" FontWeight="SemiBold" TextWrapping="Wrap" />
-                <TextBox x:Name="InputTextBox" Style="{StaticResource MaterialDesignOutlinedTextBox}" Height="42" VerticalContentAlignment="Center" KeyDown="InputTextBox_KeyDown" />
+            <StackPanel Grid.Row="1" Margin="0,0,0,20">
+                <TextBlock x:Name="PromptTextBlock" FontSize="13.5" Margin="0,0,0,14" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBox x:Name="InputTextBox" Style="{StaticResource MaterialDesignOutlinedTextBox}" Height="46" FontSize="15" VerticalContentAlignment="Center" KeyDown="InputTextBox_KeyDown" />
             </StackPanel>
 
             <!-- Action Buttons Area -->
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,8,0,0">
                 <Button x:Name="BtnCancel" Content="Cancelar" Style="{StaticResource MaterialDesignFlatButton}" Click="BtnCancel_Click" Margin="0,0,8,0" Width="100" Height="36" />
                 <Button x:Name="BtnOk" Content="Aceptar" Style="{StaticResource MaterialDesignRaisedButton}" Click="BtnOk_Click" Width="100" Height="36" />
             </StackPanel>
