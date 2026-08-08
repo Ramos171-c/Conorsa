@@ -29,12 +29,24 @@
                 <TextBlock Text="Consulte los niveles de stock físico, reservado y disponible en todas las bodegas de la sucursal." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.7" />
             </StackPanel>
 
-            <Button Grid.Column="1" Command="{Binding RefreshCommand}" Style="{StaticResource MaterialDesignFlatButton}" VerticalAlignment="Center">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
-                    <TextBlock Text="Actualizar" VerticalAlignment="Center" />
-                </StackPanel>
-            </Button>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Command="{Binding OpenBulkAdjustmentCommand}" 
+                        Style="{StaticResource MaterialDesignRaisedButton}" 
+                        Background="#7C3AED" BorderBrush="#7C3AED"
+                        Margin="0,0,8,0">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ClipboardListOutline" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="📋 Saneo Masivo de Inventario" VerticalAlignment="Center" FontWeight="Bold" />
+                    </StackPanel>
+                </Button>
+
+                <Button Command="{Binding RefreshCommand}" Style="{StaticResource MaterialDesignFlatButton}">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Actualizar" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <!-- Filters -->

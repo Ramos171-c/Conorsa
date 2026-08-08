@@ -189,6 +189,27 @@ public partial class InventoryStockViewModel : ViewModelBase
     }
 
     [RelayCommand]
+    private async Task OpenBulkAdjustmentAsync()
+    {
+        if (!SelectedWarehouseId.HasValue || SelectedWarehouseId.Value == Guid.Empty)
+        {
+            _notificationService.ShowWarning("Seleccione una bodega para realizar el saneo masivo de inventario.");
+            return;
+        }
+
+        var dialog = new Views.Inventory.BulkInventoryAdjustmentDialog(_inventoryApiClient, _productApiClient, _notificationService, SelectedWarehouseId.Value)
+        {
+            Owner = System.Windows.Application.Current.MainWindow
+        };
+
+        var result = dialog.ShowDialog();
+        if (result == true || dialog.WasSaved)
+        {
+            await LoadStockAsync();
+        }
+    }
+
+    [RelayCommand]
     private async Task EditStockAsync(InventoryDto item)
     {
         if (item == null) return;

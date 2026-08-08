@@ -50,100 +50,111 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         if (order == null)
             throw new ArgumentException($"El pedido con Id '{request.SalesOrderId}' no existe.");
 
-        // Deduct from inventory ONLY when transitioning to "EnCamino"
+        // Deduct from inventory ONLY when transitioning to "EnCamino" for the first time
         if (request.Status == SalesOrderStatus.EnCamino && order.Status != SalesOrderStatus.EnCamino)
         {
-            // Explicitly search for "Bodega Exhibición" by querying Warehouse table
-            BranchWarehouse? warehouse = null;
-            var targetWarehouses = await _warehouseRepository.FindAsync(w => w.Name.Contains("Exhibici"));
-            var targetWarehouse = targetWarehouses.FirstOrDefault();
-
-            if (targetWarehouse != null)
+            // Idempotency check: Verify if an Exit movement already exists for this order
+            var existingMovements = await _movementRepository.FindAsync(m => m.ReferenceDocument == order.OrderNumber && m.MovementType == MovementType.Exit);
+            if (!existingMovements.Any())
             {
-                var bws = await _branchWarehouseRepository.FindAsync(bw => bw.WarehouseId == targetWarehouse.Id && bw.IsActive);
-                warehouse = bws.FirstOrDefault();
-            }
+                // Explicitly search for "Bodega Exhibición" by querying Warehouse table
+                BranchWarehouse? warehouse = null;
+                var targetWarehouses = await _warehouseRepository.FindAsync(w => w.Name.Contains("Exhibici"));
+                var targetWarehouse = targetWarehouses.FirstOrDefault();
 
-            if (warehouse == null)
-            {
-                var allActive = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
-                warehouse = allActive.FirstOrDefault(bw => bw.IsDefault) ?? allActive.FirstOrDefault();
-            }
-
-            if (warehouse == null)
-                throw new InvalidOperationException("No hay bodegas activas configuradas en el sistema para realizar el despacho.");
-
-            var movementNumber = await _movementRepository.GenerateMovementNumberAsync(cancellationToken);
-            var movement = new InventoryMovement
-            {
-                Id = Guid.NewGuid(),
-                BranchId = warehouse.BranchId,
-                MovementNumber = movementNumber,
-                MovementType = MovementType.Exit,
-                FromBranchWarehouseId = warehouse.Id,
-                ToBranchWarehouseId = null,
-                ReferenceDocument = order.OrderNumber,
-                Notes = $"Salida por despacho de Pedido {order.OrderNumber}",
-                MovementDate = DateTime.UtcNow,
-                CreatedBy = _currentUserService.UserId ?? "System",
-                CreatedOnUtc = DateTime.UtcNow
-            };
-
-            bool requiresMovement = false;
-            var detailsToRemove = new List<SalesOrderDetail>();
-
-            foreach (var detail in order.Details)
-            {
-                var product = await _productRepository.GetByIdWithDetailsAsync(detail.ProductId, cancellationToken);
-                if (product == null)
-                    continue;
-
-                // If service or inventory tracking disabled, skip
-                if (product.ProductType == ProductType.Service || !product.TrackInventory)
-                    continue;
-
-                // Find corresponding presentation
-                var presentation = product.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == detail.UnitOfMeasureId)
-                    ?? product.Presentations?.FirstOrDefault();
-
-                if (presentation == null)
+                if (targetWarehouse != null)
                 {
-                    presentation = new ProductPresentation
-                    {
-                        Id = Guid.NewGuid(),
-                        ProductId = product.Id,
-                        Name = product.Name,
-                        UnitOfMeasureId = detail.UnitOfMeasureId,
-                        ConversionFactor = 1.0000m,
-                        Cost = product.CurrentCost,
-                        RetailPrice = detail.UnitPrice,
-                        IsBaseUnit = true,
-                        IsDefaultSalePresentation = true,
-                        IsActive = true
-                    };
-                    if (product.Presentations == null) product.Presentations = new List<ProductPresentation>();
-                    product.Presentations.Add(presentation);
+                    var bws = await _branchWarehouseRepository.FindAsync(bw => bw.WarehouseId == targetWarehouse.Id && bw.IsActive);
+                    warehouse = bws.FirstOrDefault();
                 }
 
-                decimal conversionFactor = presentation.ConversionFactor > 0 ? presentation.ConversionFactor : 1.0000m;
-                Guid presentationId = presentation.Id;
-
-                // Get inventory record in Bodega Exhibición
-                var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
-
-                if (inventory != null && inventory.PhysicalStock > 0.0000m)
+                if (warehouse == null)
                 {
-                    decimal requestedInBaseUnit = detail.Quantity * conversionFactor;
-                    decimal dispatchedInBaseUnit = Math.Min(requestedInBaseUnit, inventory.PhysicalStock);
-                    dispatchedInBaseUnit = Math.Round(dispatchedInBaseUnit, 4);
+                    var allActive = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
+                    warehouse = allActive.FirstOrDefault(bw => bw.IsDefault) ?? allActive.FirstOrDefault();
+                }
 
-                    if (dispatchedInBaseUnit > 0.0000m)
+                if (warehouse == null)
+                    throw new InvalidOperationException("No hay bodegas activas configuradas en el sistema para realizar el despacho.");
+
+                var movementNumber = await _movementRepository.GenerateMovementNumberAsync(cancellationToken);
+                var movement = new InventoryMovement
+                {
+                    Id = Guid.NewGuid(),
+                    BranchId = warehouse.BranchId,
+                    MovementNumber = movementNumber,
+                    MovementType = MovementType.Exit,
+                    FromBranchWarehouseId = warehouse.Id,
+                    ToBranchWarehouseId = null,
+                    ReferenceDocument = order.OrderNumber,
+                    Notes = $"Salida por despacho de Pedido {order.OrderNumber}",
+                    MovementDate = DateTime.UtcNow,
+                    CreatedBy = _currentUserService.UserId ?? "System",
+                    CreatedOnUtc = DateTime.UtcNow
+                };
+
+                bool requiresMovement = false;
+
+                foreach (var detail in order.Details)
+                {
+                    var product = await _productRepository.GetByIdWithDetailsAsync(detail.ProductId, cancellationToken);
+                    if (product == null)
+                        continue;
+
+                    // If service or inventory tracking disabled, skip
+                    if (product.ProductType == ProductType.Service || !product.TrackInventory)
+                        continue;
+
+                    // Find corresponding presentation
+                    var presentation = product.Presentations?.FirstOrDefault(p => p.UnitOfMeasureId == detail.UnitOfMeasureId)
+                        ?? product.Presentations?.FirstOrDefault();
+
+                    if (presentation == null)
                     {
-                        inventory.PhysicalStock -= dispatchedInBaseUnit;
-                        _inventoryRepository.Update(inventory);
+                        presentation = new ProductPresentation
+                        {
+                            Id = Guid.NewGuid(),
+                            ProductId = product.Id,
+                            Name = product.Name,
+                            UnitOfMeasureId = detail.UnitOfMeasureId,
+                            ConversionFactor = 1.0000m,
+                            Cost = product.CurrentCost,
+                            RetailPrice = detail.UnitPrice,
+                            IsBaseUnit = true,
+                            IsDefaultSalePresentation = true,
+                            IsActive = true
+                        };
+                        if (product.Presentations == null) product.Presentations = new List<ProductPresentation>();
+                        product.Presentations.Add(presentation);
+                    }
 
-                        decimal dispatchedQty = conversionFactor > 0 ? (dispatchedInBaseUnit / conversionFactor) : detail.Quantity;
-                        dispatchedQty = Math.Round(dispatchedQty, 4);
+                    decimal conversionFactor = presentation.ConversionFactor > 0 ? presentation.ConversionFactor : 1.0000m;
+                    Guid presentationId = presentation.Id;
+                    decimal requestedInBaseUnit = Math.Round(detail.Quantity * conversionFactor, 4);
+
+                    if (requestedInBaseUnit > 0.0000m)
+                    {
+                        // Get inventory record in Bodega Exhibición
+                        var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
+
+                        if (inventory == null)
+                        {
+                            inventory = new Domain.Entities.Inventory
+                            {
+                                Id = Guid.NewGuid(),
+                                BranchWarehouseId = warehouse.Id,
+                                ProductId = detail.ProductId,
+                                PhysicalStock = 0,
+                                ReservedStock = 0,
+                                CommittedStock = 0,
+                                CreatedBy = _currentUserService.UserId ?? "System",
+                                CreatedOnUtc = DateTime.UtcNow
+                            };
+                            await _inventoryRepository.AddAsync(inventory);
+                        }
+
+                        inventory.PhysicalStock -= requestedInBaseUnit;
+                        _inventoryRepository.Update(inventory);
 
                         movement.Details.Add(new InventoryMovementDetail
                         {
@@ -151,11 +162,11 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                             InventoryMovementId = movement.Id,
                             BranchId = warehouse.BranchId,
                             ProductId = detail.ProductId,
-                            Quantity = dispatchedQty,
+                            Quantity = detail.Quantity,
                             UnitOfMeasureId = detail.UnitOfMeasureId,
                             ProductPresentationId = presentationId,
                             ConversionFactor = conversionFactor,
-                            QuantityInBaseUnit = dispatchedInBaseUnit,
+                            QuantityInBaseUnit = requestedInBaseUnit,
                             CreatedBy = _currentUserService.UserId ?? "System",
                             CreatedOnUtc = DateTime.UtcNow
                         });
@@ -163,11 +174,11 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                         requiresMovement = true;
                     }
                 }
-            }
 
-            if (requiresMovement)
-            {
-                await _movementRepository.AddAsync(movement);
+                if (requiresMovement)
+                {
+                    await _movementRepository.AddAsync(movement);
+                }
             }
 
             order.SubTotal = order.Details.Sum(d => d.Quantity * d.UnitPrice);

@@ -87,6 +87,13 @@ public class InventoryApiClient
         return await response.Content.ReadFromJsonAsync<Guid>();
     }
 
+    public async Task<int> BulkAdjustInventoryAsync(object command)
+    {
+        var response = await _httpClient.PostAsJsonAsync("Inventory/bulk-adjust", command);
+        response.EnsureSuccessStatusCode();
+        return await response.Content.ReadFromJsonAsync<int>();
+    }
+
     public async Task<Guid> TransferInventoryAsync(object command)
     {
         var response = await _httpClient.PostAsJsonAsync("Inventory/transfer", command);

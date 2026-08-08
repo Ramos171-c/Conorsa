@@ -31,6 +31,7 @@ public class PostSalesInvoiceCommandValidator : AbstractValidator<PostSalesInvoi
 public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCommand, Unit>
 {
     private readonly ISalesInvoiceRepository _salesInvoiceRepository;
+    private readonly ISalesOrderRepository _salesOrderRepository;
     private readonly ICustomerRepository _customerRepository;
     private readonly IProductRepository _productRepository;
     private readonly IInventoryRepository _inventoryRepository;
@@ -46,6 +47,7 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
 
     public PostSalesInvoiceCommandHandler(
         ISalesInvoiceRepository salesInvoiceRepository,
+        ISalesOrderRepository salesOrderRepository,
         ICustomerRepository customerRepository,
         IProductRepository productRepository,
         IInventoryRepository inventoryRepository,
@@ -60,6 +62,7 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
         IUnitOfWork unitOfWork)
     {
         _salesInvoiceRepository = salesInvoiceRepository;
+        _salesOrderRepository = salesOrderRepository;
         _customerRepository = customerRepository;
         _productRepository = productRepository;
         _inventoryRepository = inventoryRepository;
@@ -138,125 +141,151 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
             }
         }
 
-        // 4. Procesar inventario
-        var movementNumber = await _movementRepository.GenerateMovementNumberAsync(cancellationToken);
-        var movement = new InventoryMovement
-        {
-            Id = Guid.NewGuid(),
-            MovementNumber = movementNumber,
-            MovementType = MovementType.Sale,
-            FromBranchWarehouseId = invoice.BranchWarehouseId,
-            ToBranchWarehouseId = null,
-            ReferenceDocument = invoice.InvoiceNumber,
-            Notes = $"Salida por venta Factura {invoice.InvoiceNumber}",
-            MovementDate = invoice.InvoiceDate,
-            CreatedBy = _currentUserService.UserId ?? "System",
-            CreatedOnUtc = DateTime.UtcNow
-        };
-
-        bool requiresMovement = false;
+        // 4. Procesar inventario (Solo si NO ha sido descontado previamente por el Pedido en estado EnCamino)
+        bool alreadyDeducted = false;
         decimal totalCost = 0;
-        var affectedProducts = new Dictionary<Guid, Product>();
-        var warehouse = await _branchWarehouseRepository.GetByIdAsync(invoice.BranchWarehouseId);
 
-        foreach (var detail in invoice.Details)
+        if (invoice.SalesOrderId.HasValue)
         {
-            var product = await _productRepository.GetByIdWithDetailsAsync(detail.ProductId, cancellationToken);
-            if (product == null)
-                throw new ArgumentException($"El producto con Id '{detail.ProductId}' no existe.");
-            if (!product.IsActive)
-                throw new InvalidOperationException($"El producto '{product.Name}' no está activo.");
-
-            // Si el producto es servicio o no se trackea inventario, no afecta stock
-            if (product.ProductType == ProductType.Service || !product.TrackInventory)
-                continue;
-
-            if (!affectedProducts.ContainsKey(product.Id))
+            var linkedOrder = await _salesOrderRepository.GetByIdAsync(invoice.SalesOrderId.Value);
+            if (linkedOrder != null)
             {
-                affectedProducts.Add(product.Id, product);
-            }
-
-            // Obtener presentación
-            var presentation = product.Presentations.FirstOrDefault(p => p.Id == detail.ProductPresentationId);
-            if (presentation == null)
-                throw new ArgumentException($"La presentación especificada no existe para el producto '{product.Name}'.");
-
-            decimal conversionFactor = presentation.ConversionFactor;
-            decimal quantityInBaseUnit = detail.Quantity * conversionFactor;
-
-            // Obtener stock actual
-            var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(invoice.BranchWarehouseId, detail.ProductId, cancellationToken);
-            if (inventory == null)
-            {
-                if (warehouse == null || !warehouse.AllowNegativeInventory)
+                var existingOrderMovements = await _movementRepository.FindAsync(m => m.ReferenceDocument == linkedOrder.OrderNumber && m.MovementType == MovementType.Exit);
+                if (existingOrderMovements.Any() || linkedOrder.Status == SalesOrderStatus.EnCamino || linkedOrder.Status == SalesOrderStatus.Completado)
                 {
-                    throw new InvalidOperationException($"Stock insuficiente para el producto '{product.Name}' en la bodega de salida. Disponible: 0, Requerido: {quantityInBaseUnit} (en unidad base).");
+                    alreadyDeducted = true;
+                    _logger.LogInformation("El inventario para la factura {InvoiceNumber} ya fue descontado previamente por el pedido {OrderNumber} en estado EnCamino.", invoice.InvoiceNumber, linkedOrder.OrderNumber);
                 }
-                inventory = new Domain.Entities.Inventory
-                {
-                    Id = Guid.NewGuid(),
-                    BranchWarehouseId = invoice.BranchWarehouseId,
-                    ProductId = detail.ProductId,
-                    PhysicalStock = 0,
-                    ReservedStock = 0,
-                    CommittedStock = 0,
-                    CreatedBy = _currentUserService.UserId ?? "System",
-                    CreatedOnUtc = DateTime.UtcNow
-                };
-                await _inventoryRepository.AddAsync(inventory);
             }
-            else if (warehouse == null || (!warehouse.AllowNegativeInventory && inventory.AvailableStock < quantityInBaseUnit))
-            {
-                throw new InvalidOperationException($"Stock insuficiente para el producto '{product.Name}' en la bodega de salida. Disponible: {inventory.AvailableStock}, Requerido: {quantityInBaseUnit} (en unidad base).");
-            }
+        }
 
-            // Descontar del inventario
-            inventory.PhysicalStock -= quantityInBaseUnit;
-            _inventoryRepository.Update(inventory);
+        var existingInvoiceMovements = await _movementRepository.FindAsync(m => m.ReferenceDocument == invoice.InvoiceNumber && m.MovementType == MovementType.Sale);
+        if (existingInvoiceMovements.Any())
+        {
+            alreadyDeducted = true;
+        }
 
-            // Detalle del movimiento Kardex
-            movement.Details.Add(new InventoryMovementDetail
+        if (!alreadyDeducted)
+        {
+            var movementNumber = await _movementRepository.GenerateMovementNumberAsync(cancellationToken);
+            var movement = new InventoryMovement
             {
                 Id = Guid.NewGuid(),
-                ProductId = detail.ProductId,
-                Quantity = detail.Quantity,
-                UnitOfMeasureId = detail.UnitOfMeasureId,
-                ProductPresentationId = detail.ProductPresentationId,
-                ConversionFactor = conversionFactor,
-                QuantityInBaseUnit = quantityInBaseUnit,
+                MovementNumber = movementNumber,
+                MovementType = MovementType.Sale,
+                FromBranchWarehouseId = invoice.BranchWarehouseId,
+                ToBranchWarehouseId = null,
+                ReferenceDocument = invoice.InvoiceNumber,
+                Notes = $"Salida por venta Factura {invoice.InvoiceNumber}",
+                MovementDate = invoice.InvoiceDate,
                 CreatedBy = _currentUserService.UserId ?? "System",
                 CreatedOnUtc = DateTime.UtcNow
-            });
+            };
 
-            totalCost += quantityInBaseUnit * product.CurrentCost;
-            requiresMovement = true;
-        }
+            bool requiresMovement = false;
+            totalCost = 0;
+            var affectedProducts = new Dictionary<Guid, Product>();
+            var warehouse = await _branchWarehouseRepository.GetByIdAsync(invoice.BranchWarehouseId);
 
-        if (requiresMovement)
-        {
-            await _movementRepository.AddAsync(movement);
-        }
-
-        // 4.5 AutoMarkSoldOut
-        foreach (var prod in affectedProducts.Values)
-        {
-            if (prod.AutoMarkSoldOut)
+            foreach (var detail in invoice.Details)
             {
-                var activeWarehouses = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
-                var activeWarehouseIds = activeWarehouses.Select(w => w.Id).ToList();
-                var inventories = await _inventoryRepository.FindAsync(i => i.ProductId == prod.Id);
-                
-                var totalPhysicalStock = inventories
-                    .Where(i => activeWarehouseIds.Contains(i.BranchWarehouseId))
-                    .Sum(i => i.PhysicalStock);
+                var product = await _productRepository.GetByIdWithDetailsAsync(detail.ProductId, cancellationToken);
+                if (product == null)
+                    throw new ArgumentException($"El producto con Id '{detail.ProductId}' no existe.");
+                if (!product.IsActive)
+                    throw new InvalidOperationException($"El producto '{product.Name}' no está activo.");
 
-                var newIsSoldOut = totalPhysicalStock <= 0;
-                if (prod.IsSoldOut != newIsSoldOut)
+                // Si el producto es servicio o no se trackea inventario, no afecta stock
+                if (product.ProductType == ProductType.Service || !product.TrackInventory)
+                    continue;
+
+                if (!affectedProducts.ContainsKey(product.Id))
                 {
-                    prod.IsSoldOut = newIsSoldOut;
-                    prod.SoldOutAt = newIsSoldOut ? DateTime.UtcNow : null;
-                    prod.SoldOutBy = newIsSoldOut ? (_currentUserService.UserId ?? "System") : null;
-                    _productRepository.Update(prod);
+                    affectedProducts.Add(product.Id, product);
+                }
+
+                // Obtener presentación
+                var presentation = product.Presentations.FirstOrDefault(p => p.Id == detail.ProductPresentationId);
+                if (presentation == null)
+                    throw new ArgumentException($"La presentación especificada no existe para el producto '{product.Name}'.");
+
+                decimal conversionFactor = presentation.ConversionFactor;
+                decimal quantityInBaseUnit = detail.Quantity * conversionFactor;
+
+                // Obtener stock actual
+                var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(invoice.BranchWarehouseId, detail.ProductId, cancellationToken);
+                if (inventory == null)
+                {
+                    if (warehouse == null || !warehouse.AllowNegativeInventory)
+                    {
+                        throw new InvalidOperationException($"Stock insuficiente para el producto '{product.Name}' en la bodega de salida. Disponible: 0, Requerido: {quantityInBaseUnit} (en unidad base).");
+                    }
+                    inventory = new Domain.Entities.Inventory
+                    {
+                        Id = Guid.NewGuid(),
+                        BranchWarehouseId = invoice.BranchWarehouseId,
+                        ProductId = detail.ProductId,
+                        PhysicalStock = 0,
+                        ReservedStock = 0,
+                        CommittedStock = 0,
+                        CreatedBy = _currentUserService.UserId ?? "System",
+                        CreatedOnUtc = DateTime.UtcNow
+                    };
+                    await _inventoryRepository.AddAsync(inventory);
+                }
+                else if (warehouse == null || (!warehouse.AllowNegativeInventory && inventory.AvailableStock < quantityInBaseUnit))
+                {
+                    throw new InvalidOperationException($"Stock insuficiente para el producto '{product.Name}' en la bodega de salida. Disponible: {inventory.AvailableStock}, Requerido: {quantityInBaseUnit} (en unidad base).");
+                }
+
+                // Descontar del inventario
+                inventory.PhysicalStock -= quantityInBaseUnit;
+                _inventoryRepository.Update(inventory);
+
+                // Detalle del movimiento Kardex
+                movement.Details.Add(new InventoryMovementDetail
+                {
+                    Id = Guid.NewGuid(),
+                    ProductId = detail.ProductId,
+                    Quantity = detail.Quantity,
+                    UnitOfMeasureId = detail.UnitOfMeasureId,
+                    ProductPresentationId = detail.ProductPresentationId,
+                    ConversionFactor = conversionFactor,
+                    QuantityInBaseUnit = quantityInBaseUnit,
+                    CreatedBy = _currentUserService.UserId ?? "System",
+                    CreatedOnUtc = DateTime.UtcNow
+                });
+
+                totalCost += quantityInBaseUnit * product.CurrentCost;
+                requiresMovement = true;
+            }
+
+            if (requiresMovement)
+            {
+                await _movementRepository.AddAsync(movement);
+            }
+
+            // 4.5 AutoMarkSoldOut
+            foreach (var prod in affectedProducts.Values)
+            {
+                if (prod.AutoMarkSoldOut)
+                {
+                    var activeWarehouses = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
+                    var activeWarehouseIds = activeWarehouses.Select(w => w.Id).ToList();
+                    var inventories = await _inventoryRepository.FindAsync(i => i.ProductId == prod.Id);
+                    
+                    var totalPhysicalStock = inventories
+                        .Where(i => activeWarehouseIds.Contains(i.BranchWarehouseId))
+                        .Sum(i => i.PhysicalStock);
+
+                    var newIsSoldOut = totalPhysicalStock <= 0;
+                    if (prod.IsSoldOut != newIsSoldOut)
+                    {
+                        prod.IsSoldOut = newIsSoldOut;
+                        prod.SoldOutAt = newIsSoldOut ? DateTime.UtcNow : null;
+                        prod.SoldOutBy = newIsSoldOut ? (_currentUserService.UserId ?? "System") : null;
+                        _productRepository.Update(prod);
+                    }
                 }
             }
         }
