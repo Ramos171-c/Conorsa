@@ -252,4 +252,27 @@ public class SalesApiClient
         using var jsonDoc = System.Text.Json.JsonDocument.Parse(await response.Content.ReadAsStringAsync());
         return jsonDoc.RootElement.GetProperty("message").GetString() ?? "Reinicio completado.";
     }
+
+    public async Task<DashboardSummaryResponseDto?> GetDashboardSummaryAsync(DateTime? fromDate = null, DateTime? toDate = null)
+    {
+        var url = "dashboard/summary?";
+        if (fromDate.HasValue) url += $"fromDate={fromDate.Value:yyyy-MM-ddTHH:mm:ss}&";
+        if (toDate.HasValue) url += $"toDate={toDate.Value:yyyy-MM-ddTHH:mm:ss}&";
+        url = url.TrimEnd('&', '?');
+
+        return await _httpClient.GetFromJsonAsync<DashboardSummaryResponseDto>(url);
+    }
+}
+
+public class DashboardSummaryResponseDto
+{
+    public DateTime FromDate { get; set; }
+    public DateTime ToDate { get; set; }
+    public decimal SalesToday { get; set; }
+    public int OrdersToday { get; set; }
+    public decimal ProfitToday { get; set; }
+    public double ProfitMarginToday { get; set; }
+    public decimal GlobalGoal { get; set; }
+    public double GlobalProgressPercentage { get; set; }
+    public List<SalespersonGoalDto> SalespersonGoals { get; set; } = new();
 }

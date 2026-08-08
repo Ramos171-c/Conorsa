@@ -21,4 +21,17 @@ public class DashboardController : ApiControllerBase
         var result = await Mediator.Send(new GetDashboardAnalyticsQuery(fromDate, toDate, routeId));
         return Ok(result);
     }
+
+    /// <summary>
+    /// Obtener resumen ultra-rápido consolidado del Dashboard (Ventas de hoy, Ganancia Bruta real y Ranking).
+    /// </summary>
+    [HttpGet("summary")]
+    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
+    public async Task<ActionResult<DashboardSummaryDto>> GetSummary(
+        [FromQuery] DateTime? fromDate = null,
+        [FromQuery] DateTime? toDate = null)
+    {
+        var result = await Mediator.Send(new GetDashboardSummaryQuery(fromDate, toDate));
+        return Ok(result);
+    }
 }
