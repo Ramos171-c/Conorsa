@@ -224,7 +224,7 @@ public class CreateSalesInvoiceCommandHandler : IRequestHandler<CreateSalesInvoi
                 NetAmount = netAmount,
                 // Snapshots históricos
                 ProductCodeSnapshot = product.InternalCode,
-                ProductNameSnapshot = product.Name,
+                ProductNameSnapshot = !string.IsNullOrWhiteSpace(product.Description) ? product.Description : product.Name,
                 UnitOfMeasureSnapshot = uom.Name
             });
         }
