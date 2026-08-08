@@ -4,6 +4,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using EnterpriseBillingSystem.Domain.Entities;
 using EnterpriseBillingSystem.Domain.Repositories;
 using EnterpriseBillingSystem.Domain.Enums;
 
@@ -67,13 +68,16 @@ public class GetDashboardAnalyticsQueryHandler : IRequestHandler<GetDashboardAna
 {
     private readonly ISalesOrderRepository _salesOrderRepository;
     private readonly IRouteLiquidationRepository _liquidationRepository;
+    private readonly IRepository<ApplicationUser> _userRepository;
 
     public GetDashboardAnalyticsQueryHandler(
         ISalesOrderRepository salesOrderRepository,
-        IRouteLiquidationRepository liquidationRepository)
+        IRouteLiquidationRepository liquidationRepository,
+        IRepository<ApplicationUser> userRepository)
     {
         _salesOrderRepository = salesOrderRepository;
         _liquidationRepository = liquidationRepository;
+        _userRepository = userRepository;
     }
 
     public async Task<DashboardAnalyticsDto> Handle(GetDashboardAnalyticsQuery request, CancellationToken cancellationToken)
@@ -89,6 +93,17 @@ public class GetDashboardAnalyticsQueryHandler : IRequestHandler<GetDashboardAna
             routeId: request.RouteId,
             cancellationToken: cancellationToken);
 
+        var users = await _userRepository.GetAllAsync();
+        var userMap = users.ToDictionary(
+            u => u.Id.ToString(),
+            u => string.IsNullOrWhiteSpace(u.FirstName) ? (u.UserName ?? "Vendedor") : $"{u.FirstName} {u.LastName}".Trim(),
+            StringComparer.OrdinalIgnoreCase);
+
+        var usernameMap = users.ToDictionary(
+            u => u.UserName ?? string.Empty,
+            u => string.IsNullOrWhiteSpace(u.FirstName) ? (u.UserName ?? "Vendedor") : $"{u.FirstName} {u.LastName}".Trim(),
+            StringComparer.OrdinalIgnoreCase);
+
         var validOrders = orders.Where(o => o.Status != SalesOrderStatus.Anulado).ToList();
 
         decimal totalPresale = 0;
@@ -99,7 +114,10 @@ public class GetDashboardAnalyticsQueryHandler : IRequestHandler<GetDashboardAna
 
         foreach (var order in validOrders)
         {
-            var sellerName = string.IsNullOrWhiteSpace(order.CreatedBy) ? "Vendedor General" : order.CreatedBy;
+            var rawCreator = order.CreatedBy ?? "Vendedor General";
+            var sellerName = userMap.TryGetValue(rawCreator, out var name1) ? name1
+                : (usernameMap.TryGetValue(rawCreator, out var name2) ? name2 : rawCreator);
+
             var dateKey = order.OrderDate.Date;
 
             decimal presale = order.TotalAmount;

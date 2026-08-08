@@ -80,7 +80,27 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
             query = query.Where(so => so.Customer != null && so.Customer.RouteId == routeId.Value);
 
         if (!string.IsNullOrWhiteSpace(createdBy))
-            query = query.Where(so => so.CreatedBy == createdBy);
+        {
+            var targetUser = await _context.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.UserName == createdBy || u.Id.ToString() == createdBy || u.Email == createdBy, cancellationToken);
+
+            if (targetUser != null)
+            {
+                var userIdStr = targetUser.Id.ToString();
+                var userNameStr = targetUser.UserName;
+                var emailStr = targetUser.Email;
+
+                query = query.Where(so => so.CreatedBy == createdBy ||
+                                          so.CreatedBy == userIdStr ||
+                                          (userNameStr != null && so.CreatedBy == userNameStr) ||
+                                          (emailStr != null && so.CreatedBy == emailStr));
+            }
+            else
+            {
+                query = query.Where(so => so.CreatedBy == createdBy);
+            }
+        }
 
         if (!string.IsNullOrWhiteSpace(status))
         {
