@@ -16,6 +16,12 @@ public class BooleanToVisibilityConverter : IValueConverter
             var result = Inverse ? !boolValue : boolValue;
             return result ? Visibility.Visible : Visibility.Collapsed;
         }
+        if (value is string strValue)
+        {
+            var hasText = !string.IsNullOrWhiteSpace(strValue);
+            var result = Inverse ? !hasText : hasText;
+            return result ? Visibility.Visible : Visibility.Collapsed;
+        }
         return Visibility.Collapsed;
     }
 

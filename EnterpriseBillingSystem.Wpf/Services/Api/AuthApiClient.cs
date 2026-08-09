@@ -24,7 +24,11 @@ public class AuthApiClient
         }
         catch (HttpRequestException ex)
         {
-            throw new Exception("No se pudo conectar al servidor. Verifique que la aplicación WebApi esté iniciada y el servicio SQL Server esté activo.", ex);
+            throw new Exception($"No se pudo conectar al servidor ({_httpClient.BaseAddress}). Verifique su conexión de red. Detalle: {ex.Message}", ex);
+        }
+        catch (Exception ex)
+        {
+            throw new Exception($"Error de conexión al autenticar: {ex.Message}", ex);
         }
 
         if (response.IsSuccessStatusCode)
@@ -32,12 +36,32 @@ public class AuthApiClient
             return await response.Content.ReadFromJsonAsync<LoginResponse>();
         }
 
-        if (response.StatusCode == System.Net.HttpStatusCode.Unauthorized || response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+        var content = await response.Content.ReadAsStringAsync();
+        var cleanMessage = content;
+
+        try
         {
-            throw new UnauthorizedAccessException("Usuario o contraseña incorrectos.");
+            if (!string.IsNullOrWhiteSpace(content) && content.Contains("{"))
+            {
+                using var doc = System.Text.Json.JsonDocument.Parse(content.Substring(content.IndexOf('{')));
+                if (doc.RootElement.TryGetProperty("message", out var msgProp) || doc.RootElement.TryGetProperty("Message", out msgProp))
+                {
+                    cleanMessage = msgProp.GetString() ?? content;
+                }
+                else if (doc.RootElement.TryGetProperty("detail", out var detailProp))
+                {
+                    cleanMessage = detailProp.GetString() ?? content;
+                }
+            }
+        }
+        catch { /* Keep raw content if JSON parsing fails */ }
+
+        if (string.IsNullOrWhiteSpace(cleanMessage))
+        {
+            cleanMessage = response.ReasonPhrase ?? "Respuesta vacía del servidor";
         }
 
-        throw new Exception($"Error del servidor: {(int)response.StatusCode} ({response.ReasonPhrase}). Verifique la conexión con la base de datos.");
+        throw new Exception($"[(HTTP {(int)response.StatusCode})] {cleanMessage}");
     }
 
     public async Task<CurrentUserDto?> GetMeAsync()
