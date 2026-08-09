@@ -178,10 +178,15 @@ try
     app.MapControllers();
 
     // Sembrar la base de datos al inicio
-    using (var scope = app.Services.CreateScope())
+    try
     {
+        using var scope = app.Services.CreateScope();
         var dbInitializer = scope.ServiceProvider.GetRequiredService<IDbInitializer>();
         await dbInitializer.InitializeAsync();
+    }
+    catch (Exception ex)
+    {
+        Log.Error(ex, "Ocurrió un error durante la inicialización de la base de datos en el arranque.");
     }
 
     app.Run();
