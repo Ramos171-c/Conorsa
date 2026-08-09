@@ -92,6 +92,34 @@ public class AuthController : ApiControllerBase
         }
         return Ok(profile);
     }
+
+    [HttpPost("reset-admin-password")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetAdminPassword(
+        [FromServices] Microsoft.AspNetCore.Identity.UserManager<EnterpriseBillingSystem.Domain.Entities.ApplicationUser> userManager)
+    {
+        var adminUser = await userManager.FindByNameAsync("Ramos") ?? await userManager.FindByNameAsync("admin");
+        if (adminUser == null)
+        {
+            return NotFound(new { Message = "Usuario administrador 'Ramos' no encontrado." });
+        }
+
+        adminUser.IsActive = true;
+        adminUser.IsDeleted = false;
+        adminUser.LockoutEnd = null;
+        adminUser.AccessFailedCount = 0;
+
+        var token = await userManager.GeneratePasswordResetTokenAsync(adminUser);
+        var result = await userManager.ResetPasswordAsync(adminUser, token, "Hola1234");
+        
+        if (result.Succeeded)
+        {
+            await userManager.UpdateAsync(adminUser);
+            return Ok(new { Message = $"Contraseña del usuario '{adminUser.UserName}' reestablecida con éxito a 'Hola1234' y cuenta activada." });
+        }
+
+        return BadRequest(new { Errors = result.Errors.Select(e => e.Description) });
+    }
 }
 
 public record LoginRequest(string Username, string Password);

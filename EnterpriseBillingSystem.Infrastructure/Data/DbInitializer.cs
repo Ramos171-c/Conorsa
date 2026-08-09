@@ -299,6 +299,19 @@ END
                 await _context.SaveChangesAsync();
             }
         }
+        else
+        {
+            // Garantizar que esté activo y desbloqueado
+            adminUser.IsActive = true;
+            adminUser.IsDeleted = false;
+            adminUser.LockoutEnd = null;
+            adminUser.AccessFailedCount = 0;
+            if (adminUser.DefaultBranchId == Guid.Empty)
+            {
+                adminUser.DefaultBranchId = casaMatriz.Id;
+            }
+            await _userManager.UpdateAsync(adminUser);
+        }
 
         // 7. Sembrar/Actualizar Datos del Catálogo Real de Productos (Sincronización de Precios)
         bool seedCatalog = _configuration.GetValue<bool>("DatabaseSeeding:SeedCatalog", true);
