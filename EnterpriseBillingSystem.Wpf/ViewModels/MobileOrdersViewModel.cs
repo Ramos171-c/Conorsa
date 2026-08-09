@@ -294,12 +294,9 @@ public partial class MobileOrdersViewModel : ViewModelBase
     }
 
     [RelayCommand]
-    private async Task ViewOrderDetailsAsync(SalesOrderListItemDto order)
+    private async Task OpenRouteConsolidationEnProcesoAsync()
     {
-<<<<<<< HEAD
-        if (order == null) return;
-=======
-        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _customerApiClient, _notificationService, "EnProceso")
+        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _notificationService)
         {
             Owner = System.Windows.Application.Current.MainWindow
         };
@@ -313,7 +310,7 @@ public partial class MobileOrdersViewModel : ViewModelBase
     [RelayCommand]
     private async Task OpenRouteConsolidationEnCaminoAsync()
     {
-        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _customerApiClient, _notificationService, "EnCamino")
+        var dialog = new Views.MobileOrders.RecentOrdersReportDialog(_salesApiClient, _notificationService)
         {
             Owner = System.Windows.Application.Current.MainWindow
         };
@@ -380,13 +377,10 @@ public partial class MobileOrdersViewModel : ViewModelBase
         IsLoading = true;
         try
         {
-            // 1. Execute database cleanup of any zero stock items on EnCamino orders
-            await _salesApiClient.CleanupEnCaminoZeroStockOrdersAsync();
-
             Guid? routeFilter = (SelectedRoute == null || SelectedRoute.Id == Guid.Empty) ? null : SelectedRoute.Id;
             
             // Get all orders in status EnCamino (status filter = "EnCamino")
-            var pagedResult = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, routeFilter, "EnCamino", FromDate, ToDate);
+            var pagedResult = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, routeFilter, "EnCamino");
             if (pagedResult?.Items == null || !pagedResult.Items.Any())
             {
                 _notificationService.ShowWarning("No se encontraron pedidos en estado 'En Camino' para imprimir.");
@@ -423,7 +417,7 @@ public partial class MobileOrdersViewModel : ViewModelBase
                 var validDetails = fullOrder.Details.Where(d => d.Quantity > 0).ToList();
                 if (!validDetails.Any()) continue;
 
-                totalLineCount += 14 + (validDetails.Count * 2);
+                totalLineCount += 14 + (validDetails.Count() * 2);
 
                 CustomerDto? customer = null;
                 try
@@ -543,7 +537,6 @@ public partial class MobileOrdersViewModel : ViewModelBase
     private async Task ViewOrderDetailsAsync(object? parameter)
     {
         if (parameter is not SalesOrderListItemDto order) return;
->>>>>>> 783bd91 (feat: agregar reporte auditado de devoluciones y faltantes con exportacion a PDF y boton WPF)
 
         IsLoading = true;
         try

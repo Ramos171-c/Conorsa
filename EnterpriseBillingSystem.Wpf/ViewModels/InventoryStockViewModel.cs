@@ -166,14 +166,12 @@ public partial class InventoryStockViewModel : ViewModelBase
     }
 
     [RelayCommand]
-<<<<<<< HEAD
-=======
     private async Task EditStockAsync(InventoryDto item)
     {
         if (item == null) return;
 
         var (isConfirmed, inputText) = Views.Dialogs.CustomInputDialog.Show(
-            $"Ingrese la cantidad física real en bodega para:\n{item.ProductInternalCode} - {item.ProductName}\n\nCantidad actual: {item.PhysicalStock:N2} {item.UnitOfMeasure}",
+            $"Ingrese la cantidad física real en bodega para:\n{item.ProductInternalCode} - {item.ProductName}\n\nCantidad actual: {item.PhysicalStock:N2}",
             "Ajustar Existencia Física",
             item.PhysicalStock.ToString("N2"));
 
@@ -203,11 +201,11 @@ public partial class InventoryStockViewModel : ViewModelBase
                 IsPositive = diff > 0,
                 ProductPresentationId = (Guid?)null,
                 ReferenceDocument = "Ajuste Directo Conteo Físico",
-                Notes = $"Ajuste manual directo de {item.PhysicalStock:N2} a {newStock:N2} {item.UnitOfMeasure}"
+                Notes = $"Ajuste manual directo de {item.PhysicalStock:N2} a {newStock:N2}"
             };
 
             await _inventoryApiClient.AdjustInventoryAsync(command);
-            _notificationService.ShowSuccess($"Existencia de {item.ProductInternalCode} actualizada a {newStock:N2} {item.UnitOfMeasure} exitosamente.");
+            _notificationService.ShowSuccess($"Existencia de {item.ProductInternalCode} actualizada a {newStock:N2} exitosamente.");
             await LoadStockAsync();
         }
         catch (Exception ex)
@@ -221,7 +219,6 @@ public partial class InventoryStockViewModel : ViewModelBase
     }
 
     [RelayCommand]
->>>>>>> b0610d4 (fix: hacer opcional ProductPresentationId en AdjustInventoryCommand para evitar error 400 Bad Request)
     private async Task NextPageAsync()
     {
         if (HasNextPage)

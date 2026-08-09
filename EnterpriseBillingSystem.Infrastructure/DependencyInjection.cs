@@ -71,6 +71,7 @@ public static class DependencyInjection
         // Registrar Repositorios Personalizados (Módulo Ventas / Facturación)
         services.AddScoped<ISalesOrderRepository, SalesOrderRepository>();
         services.AddScoped<ISalesInvoiceRepository, SalesInvoiceRepository>();
+        services.AddScoped<IRouteLiquidationRepository, RouteLiquidationRepository>();
 
         // Registrar Repositorios Personalizados (Módulo Caja)
         services.AddScoped<ICashRegisterRepository, CashRegisterRepository>();

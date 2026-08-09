@@ -422,9 +422,6 @@
                                     <TextBlock Text="Convalidar y Despachar Pedidos" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
-<<<<<<< HEAD
-=======
-
                             <Button Command="{Binding OpenRouteLiquidationDialogCommand}" 
                                     IsEnabled="{Binding CanOpenRouteLiquidation}"
                                     Style="{StaticResource MaterialDesignRaisedButton}" 
@@ -454,7 +451,6 @@
                                     <TextBlock Text="Reporte por Vendedor (Preventa vs Entrega)" VerticalAlignment="Center" />
                                 </StackPanel>
                             </Button>
->>>>>>> 783bd91 (feat: agregar reporte auditado de devoluciones y faltantes con exportacion a PDF y boton WPF)
                         </StackPanel>
                     </Grid>
                 </Grid>

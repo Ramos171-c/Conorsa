@@ -186,8 +186,7 @@ public class SalesOrdersController : ApiControllerBase
             return Ok(new System.Collections.Generic.List<ConsolidatedProductDto>());
         }
     }
-<<<<<<< HEAD
-=======
+
     /// <summary>
     /// Limpiar productos sin existencias en pedidos En Camino.
     /// </summary>
@@ -197,17 +196,6 @@ public class SalesOrdersController : ApiControllerBase
     {
         var count = await Mediator.Send(new CleanupZeroStockEnCaminoOrdersCommand());
         return Ok(count);
-    }
-
-    /// <summary>
-    /// Reiniciar existencias de inventario a 0.00, eliminar pedidos <= 18 Julio y poner recientes en Recibido.
-    /// </summary>
-    [HttpPost("admin-reset-and-cleanup")]
-    [Microsoft.AspNetCore.Authorization.AllowAnonymous]
-    public async Task<ActionResult<object>> ResetInventoryAndOrders()
-    {
-        var result = await Mediator.Send(new ResetInventoryAndOrdersCommand());
-        return Ok(new { Message = result });
     }
 
     /// <summary>
@@ -303,9 +291,6 @@ public class SalesOrdersController : ApiControllerBase
 
         return File(pdfBytes, "application/pdf", "Reporte_Vendedor_Preventa_vs_Entrega.pdf");
     }
-<<<<<<< HEAD
->>>>>>> 821aed7 (feat: agregar endpoints seller-report y seller-report/pdf en SalesOrdersController)
-=======
 
     /// <summary>
     /// Obtener el reporte de faltantes y perdida por productos no entregados en preventa.
@@ -407,5 +392,4 @@ public class SalesOrdersController : ApiControllerBase
 
         return File(pdfBytes, "application/pdf", "Reporte_Faltantes_y_Perdidas_Preventa.pdf");
     }
->>>>>>> 4d7933a (feat: agregar reporte de faltantes y perdida por productos no entregados en preventa (JSON y PDF))
 }

@@ -38,8 +38,6 @@ public class DbInitializer : IDbInitializer
             await _context.Database.MigrateAsync();
         }
 
-<<<<<<< HEAD
-=======
         // Garantizar existencia de tablas RouteLiquidations y RouteLiquidationDetails
         var createTablesSql = @"
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'RouteLiquidations')
@@ -114,9 +112,6 @@ BEGIN
 END
 ";
         await _context.Database.ExecuteSqlRawAsync(createTablesSql);
-
-
->>>>>>> 0cbf8c8 (fix: crear automaticamente las tablas RouteLiquidations y RouteLiquidationDetails al iniciar servidor)
         // 1.5. Sembrar Rutas por Defecto
         if (!await _context.Routes.AnyAsync())
         {

@@ -116,7 +116,6 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 inventory.PhysicalStock -= quantityInBaseUnit;
                 _inventoryRepository.Update(inventory);
 
-<<<<<<< HEAD
                 // Add Kardex movement detail
                 movement.Details.Add(new InventoryMovementDetail
                 {
@@ -144,49 +143,14 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                     var totalPhysicalStock = inventories
                         .Where(i => activeWarehouseIds.Contains(i.BranchWarehouseId))
                         .Sum(i => i.PhysicalStock);
-=======
-                // Get inventory record in Bodega Exhibición
-                var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
-
-                if (inventory != null && inventory.PhysicalStock > 0.0000m)
-                {
-                    decimal requestedInBaseUnit = detail.Quantity * conversionFactor;
-                    decimal dispatchedInBaseUnit = Math.Min(requestedInBaseUnit, inventory.PhysicalStock);
-                    dispatchedInBaseUnit = Math.Round(dispatchedInBaseUnit, 4);
->>>>>>> 996a493 (fix: eliminar borrado automatico de detalles de pedidos al cambiar estado a EnCamino)
 
                     var newIsSoldOut = totalPhysicalStock <= 0;
                     if (product.IsSoldOut != newIsSoldOut)
                     {
-<<<<<<< HEAD
                         product.IsSoldOut = newIsSoldOut;
                         product.SoldOutAt = newIsSoldOut ? DateTime.UtcNow : null;
                         product.SoldOutBy = newIsSoldOut ? (_currentUserService.UserId ?? "System") : null;
                         _productRepository.Update(product);
-=======
-                        inventory.PhysicalStock -= dispatchedInBaseUnit;
-                        _inventoryRepository.Update(inventory);
-
-                        decimal dispatchedQty = conversionFactor > 0 ? (dispatchedInBaseUnit / conversionFactor) : detail.Quantity;
-                        dispatchedQty = Math.Round(dispatchedQty, 4);
-
-                        movement.Details.Add(new InventoryMovementDetail
-                        {
-                            Id = Guid.NewGuid(),
-                            InventoryMovementId = movement.Id,
-                            BranchId = warehouse.BranchId,
-                            ProductId = detail.ProductId,
-                            Quantity = dispatchedQty,
-                            UnitOfMeasureId = detail.UnitOfMeasureId,
-                            ProductPresentationId = presentationId,
-                            ConversionFactor = conversionFactor,
-                            QuantityInBaseUnit = dispatchedInBaseUnit,
-                            CreatedBy = _currentUserService.UserId ?? "System",
-                            CreatedOnUtc = DateTime.UtcNow
-                        });
-
-                        requiresMovement = true;
->>>>>>> 996a493 (fix: eliminar borrado automatico de detalles de pedidos al cambiar estado a EnCamino)
                     }
                 }
             }

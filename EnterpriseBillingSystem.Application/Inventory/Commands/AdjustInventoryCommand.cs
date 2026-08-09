@@ -86,14 +86,9 @@ public class AdjustInventoryCommandHandler : IRequestHandler<AdjustInventoryComm
         if (!product.TrackInventory)
             throw new InvalidOperationException("El producto especificado no maneja control de inventario.");
 
-        // 3. Obtener presentación
-<<<<<<< HEAD
-        var presentation = product.Presentations.FirstOrDefault(p => p.Id == request.ProductPresentationId);
-=======
         var presentation = product.Presentations.FirstOrDefault(p => request.ProductPresentationId.HasValue && request.ProductPresentationId.Value != Guid.Empty && p.Id == request.ProductPresentationId.Value)
             ?? product.Presentations.FirstOrDefault(p => p.IsDefaultSalePresentation)
             ?? product.Presentations.FirstOrDefault();
->>>>>>> b0610d4 (fix: hacer opcional ProductPresentationId en AdjustInventoryCommand para evitar error 400 Bad Request)
         if (presentation == null)
             throw new ArgumentException("La presentación especificada no existe para este producto.");
         if (!presentation.IsActive)

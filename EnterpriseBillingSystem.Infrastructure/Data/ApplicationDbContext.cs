@@ -65,6 +65,8 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
     public DbSet<SalesOrderDetail> SalesOrderDetails => Set<SalesOrderDetail>();
     public DbSet<SalesInvoice> SalesInvoices => Set<SalesInvoice>();
     public DbSet<SalesInvoiceDetail> SalesInvoiceDetails => Set<SalesInvoiceDetail>();
+    public DbSet<RouteLiquidation> RouteLiquidations => Set<RouteLiquidation>();
+    public DbSet<RouteLiquidationDetail> RouteLiquidationDetails => Set<RouteLiquidationDetail>();
     public DbSet<SystemParameter> SystemParameters => Set<SystemParameter>();
 
     // Módulo Caja

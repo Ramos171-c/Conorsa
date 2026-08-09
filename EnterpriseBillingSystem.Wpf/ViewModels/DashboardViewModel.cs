@@ -190,25 +190,6 @@ public partial class DashboardViewModel : ViewModelBase
             decimal computedSales = activeOrders.Sum(o => o.TotalAmount);
             int computedOrders = activeOrders.Count;
 
-<<<<<<< HEAD
-            foreach (var order in activeOrders)
-            {
-                if (order.OrderDate.Date == todayDate)
-                {
-                    computedSalesToday += order.TotalAmount;
-                    computedOrdersToday++;
-                }
-            }
-
-            // Get details of orders made today
-            var todayOrderDetails = validDetails
-                .Where(d => d.OrderDate.Date == todayDate)
-                .SelectMany(d => d.Details)
-                .ToList();
-
-            decimal computedCostToday = todayOrderDetails.Sum(d => productCosts.TryGetValue(d.ProductId, out var cost) ? cost * d.Quantity : 0m);
-            decimal computedProfitToday = computedSalesToday - computedCostToday;
-=======
             decimal computedCost = validDetails.SelectMany(d => d.Details).Sum(d => 
             {
                 if (!productCosts.TryGetValue(d.ProductId, out var cost) || cost <= 0 || (cost >= d.UnitPrice && d.UnitPrice > 0))
@@ -219,7 +200,6 @@ public partial class DashboardViewModel : ViewModelBase
             });
 
             decimal computedProfit = Math.Max(0m, computedSales - computedCost);
->>>>>>> a2954ff (fix: corregir DataTemplate de ReportsDashboardViewModel en App.xaml y eliminar datos mock de vendedores en DashboardViewModel)
 
             SalesToday = computedSales;
             OrdersToday = computedOrders;
