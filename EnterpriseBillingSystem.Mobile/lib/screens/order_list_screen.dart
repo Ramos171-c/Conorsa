@@ -514,6 +514,8 @@ class _OrderListScreenState extends State<OrderListScreen> {
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<OrderProvider>(context);
+    final auth = Provider.of<AuthProvider>(context);
+    final isAdmin = auth.userProfile?.isAdmin ?? false;
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
@@ -553,14 +555,20 @@ class _OrderListScreenState extends State<OrderListScreen> {
                       final statusColor = _getStatusColor(order.status);
                       final formattedDate = '${order.orderDate.day}/${order.orderDate.month}/${order.orderDate.year}';
 
-                      // 10 minute rule for editing
+                      // 10 minute rule for editing, exempt for Administrators
                       final difference = DateTime.now().difference(order.orderDate.toLocal());
                       final statusLower = order.status.toLowerCase();
-                      final canCancel = statusLower == 'recibido' ||
-                          statusLower == '2' ||
-                          statusLower == 'enproceso' ||
-                          statusLower == '4';
-                      final canEdit = difference.inMinutes < 10 && canCancel;
+                      final isCancelled = statusLower == 'anulado' ||
+                          statusLower == 'cancelled' ||
+                          statusLower == '5';
+                      final canCancel = !isCancelled &&
+                          (isAdmin ||
+                              statusLower == 'recibido' ||
+                              statusLower == '1' ||
+                              statusLower == '2' ||
+                              statusLower == 'enproceso' ||
+                              statusLower == '4');
+                      final canEdit = !isCancelled && (isAdmin || (canCancel && difference.inMinutes < 10));
 
                       return Card(
                         shape: RoundedRectangleBorder(

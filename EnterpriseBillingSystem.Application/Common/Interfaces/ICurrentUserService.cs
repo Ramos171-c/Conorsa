@@ -6,4 +6,5 @@ public interface ICurrentUserService
 {
     string? UserId { get; }
     Guid? BranchId { get; }
+    bool IsAdmin { get; }
 }

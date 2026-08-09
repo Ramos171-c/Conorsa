@@ -68,6 +68,19 @@ try
         };
     });
 
+    // Configurar límites de tamaño de solicitud para subida de archivos (50 MB)
+    builder.Services.Configure<Microsoft.AspNetCore.Http.Features.FormOptions>(options =>
+    {
+        options.MultipartBodyLengthLimit = 52_428_800; // 50 MB
+        options.ValueLengthLimit = 52_428_800;
+        options.MultipartHeadersLengthLimit = 52_428_800;
+    });
+
+    builder.WebHost.ConfigureKestrel(options =>
+    {
+        options.Limits.MaxRequestBodySize = 52_428_800; // 50 MB
+    });
+
     builder.Services.AddControllers();
     builder.Services.AddEndpointsApiExplorer();
 

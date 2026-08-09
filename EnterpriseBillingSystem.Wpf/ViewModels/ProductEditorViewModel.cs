@@ -408,14 +408,81 @@ public partial class ProductEditorViewModel : ViewModelBase
         {
             try
             {
-                SelectedImageBytes = File.ReadAllBytes(openFileDialog.FileName);
-                SelectedImageFileName = openFileDialog.SafeFileName;
-                ImagePath = openFileDialog.FileName; // Temporary preview local path
+                var rawBytes = File.ReadAllBytes(openFileDialog.FileName);
+                var (optimizedBytes, optimizedFileName) = OptimizeImage(rawBytes, openFileDialog.SafeFileName);
+
+                SelectedImageBytes = optimizedBytes;
+                SelectedImageFileName = optimizedFileName;
+
+                var tempFile = Path.Combine(Path.GetTempPath(), $"preview_{Guid.NewGuid()}_{optimizedFileName}");
+                File.WriteAllBytes(tempFile, optimizedBytes);
+                ImagePath = tempFile;
             }
             catch (Exception ex)
             {
                 _notificationService.ShowError($"Error al leer el archivo: {ex.Message}");
             }
+        }
+    }
+
+    private (byte[] Bytes, string FileName) OptimizeImage(byte[] rawBytes, string originalFileName, int maxDimension = 1200)
+    {
+        try
+        {
+            using var ms = new MemoryStream(rawBytes);
+            var decoder = System.Windows.Media.Imaging.BitmapDecoder.Create(
+                ms,
+                System.Windows.Media.Imaging.BitmapCreateOptions.None,
+                System.Windows.Media.Imaging.BitmapCacheOption.OnLoad);
+
+            if (decoder.Frames.Count == 0) return (rawBytes, originalFileName);
+
+            var frame = decoder.Frames[0];
+            double width = frame.PixelWidth;
+            double height = frame.PixelHeight;
+
+            if (width <= maxDimension && height <= maxDimension && rawBytes.Length <= 500 * 1024)
+            {
+                return (rawBytes, originalFileName);
+            }
+
+            double scale = 1.0;
+            if (width > maxDimension || height > maxDimension)
+            {
+                scale = Math.Min((double)maxDimension / width, (double)maxDimension / height);
+            }
+
+            int targetWidth = Math.Max(1, (int)(width * scale));
+            int targetHeight = Math.Max(1, (int)(height * scale));
+
+            var resized = new System.Windows.Media.Imaging.TransformedBitmap(
+                frame,
+                new System.Windows.Media.ScaleTransform(
+                    (double)targetWidth / width,
+                    (double)targetHeight / height));
+
+            var ext = Path.GetExtension(originalFileName).ToLowerInvariant();
+            using var outMs = new MemoryStream();
+
+            if (ext == ".png")
+            {
+                var encoder = new System.Windows.Media.Imaging.PngBitmapEncoder();
+                encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(resized));
+                encoder.Save(outMs);
+                return (outMs.ToArray(), originalFileName);
+            }
+            else
+            {
+                var encoder = new System.Windows.Media.Imaging.JpegBitmapEncoder { QualityLevel = 85 };
+                encoder.Frames.Add(System.Windows.Media.Imaging.BitmapFrame.Create(resized));
+                encoder.Save(outMs);
+                var newFileName = Path.ChangeExtension(originalFileName, ".jpg");
+                return (outMs.ToArray(), newFileName);
+            }
+        }
+        catch
+        {
+            return (rawBytes, originalFileName);
         }
     }
 

@@ -76,6 +76,7 @@ public class ProductsController : ApiControllerBase
 
     [HttpPost("{id}/image")]
     [HasPermission("products.edit")]
+    [RequestSizeLimit(52_428_800)]
     public async Task<ActionResult<string>> UploadImage(Guid id, IFormFile file)
     {
         if (file == null || file.Length == 0)

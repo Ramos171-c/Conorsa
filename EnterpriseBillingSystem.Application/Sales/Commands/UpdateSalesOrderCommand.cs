@@ -8,17 +8,27 @@ using FluentValidation;
 using EnterpriseBillingSystem.Domain.Entities;
 using EnterpriseBillingSystem.Domain.Enums;
 using EnterpriseBillingSystem.Domain.Repositories;
+using EnterpriseBillingSystem.Application.Common.Interfaces;
 
 namespace EnterpriseBillingSystem.Application.Sales.Commands;
 
 // ─── Command ──────────────────────────────────────────────────────────────────
+
+public record UpdateSalesOrderItemInput(
+    Guid ProductId,
+    Guid UnitOfMeasureId,
+    decimal Quantity,
+    decimal UnitPrice,
+    decimal DiscountPercentage,
+    decimal TaxPercentage
+);
 
 public record UpdateSalesOrderCommand(
     Guid Id,
     Guid CustomerId,
     DateTime OrderDate,
     string? Notes,
-    List<SalesOrderDetailRequest> Details
+    List<UpdateSalesOrderItemInput> Details
 ) : IRequest<Unit>;
 
 // ─── Validator ────────────────────────────────────────────────────────────────
@@ -33,26 +43,26 @@ public class UpdateSalesOrderCommandValidator : AbstractValidator<UpdateSalesOrd
         RuleFor(x => x.CustomerId)
             .NotEmpty().WithMessage("El cliente es requerido.");
 
-        RuleFor(x => x.OrderDate)
-            .NotEmpty().WithMessage("La fecha del pedido es requerida.");
-
         RuleFor(x => x.Details)
-            .NotEmpty().WithMessage("El pedido debe tener al menos un detalle.");
+            .NotEmpty().WithMessage("El pedido debe contener al menos un producto.")
+            .Must(details => details != null && details.Count > 0).WithMessage("El pedido debe contener al menos un producto.");
 
-        RuleForEach(x => x.Details).ChildRules(d =>
+        RuleForEach(x => x.Details).ChildRules(detail =>
         {
-            d.RuleFor(x => x.ProductId)
+            detail.RuleFor(d => d.ProductId)
                 .NotEmpty().WithMessage("El producto es requerido.");
-            d.RuleFor(x => x.UnitOfMeasureId)
+
+            detail.RuleFor(d => d.UnitOfMeasureId)
                 .NotEmpty().WithMessage("La unidad de medida es requerida.");
-            d.RuleFor(x => x.Quantity)
-                .GreaterThan(0).WithMessage("La cantidad debe ser mayor a 0.");
-            d.RuleFor(x => x.UnitPrice)
-                .GreaterThanOrEqualTo(0).WithMessage("El precio unitario no puede ser negativo.");
-            d.RuleFor(x => x.DiscountPercentage)
-                .InclusiveBetween(0, 100).WithMessage("El descuento debe estar entre 0 y 100%.");
-            d.RuleFor(x => x.TaxPercentage)
-                .GreaterThanOrEqualTo(0).WithMessage("El impuesto no puede ser negativo.");
+
+            detail.RuleFor(d => d.Quantity)
+                .GreaterThan(0).WithMessage("La cantidad debe ser mayor a cero.");
+
+            detail.RuleFor(d => d.UnitPrice)
+                .GreaterThanOrEqualTo(0).WithMessage("El precio unitario debe ser mayor o igual a cero.");
+
+            detail.RuleFor(d => d.DiscountPercentage)
+                .InclusiveBetween(0m, 100m).WithMessage("El descuento debe estar entre 0% y 100%.");
         });
     }
 }
@@ -66,6 +76,7 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
     private readonly IProductRepository _productRepository;
     private readonly IRepository<SystemParameter> _systemParameterRepository;
     private readonly IRepository<SalesOrderDetail> _salesOrderDetailRepository;
+    private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
     public UpdateSalesOrderCommandHandler(
@@ -74,6 +85,7 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         IProductRepository productRepository,
         IRepository<SystemParameter> systemParameterRepository,
         IRepository<SalesOrderDetail> salesOrderDetailRepository,
+        ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
         _salesOrderRepository = salesOrderRepository;
@@ -81,6 +93,7 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         _productRepository = productRepository;
         _systemParameterRepository = systemParameterRepository;
         _salesOrderDetailRepository = salesOrderDetailRepository;
+        _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }
 
@@ -94,8 +107,9 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         if (order.Status == SalesOrderStatus.Anulado || order.Status == SalesOrderStatus.Completado)
             throw new InvalidOperationException($"No se puede editar un pedido en estado {order.Status}.");
 
-        // Regla de 10 minutos
-        if (order.CreatedOnUtc.AddMinutes(10) < DateTime.UtcNow)
+        // Regla de 10 minutos (Exención para Administradores)
+        bool isAdmin = _currentUserService.IsAdmin;
+        if (!isAdmin && order.CreatedOnUtc.AddMinutes(10) < DateTime.UtcNow)
             throw new InvalidOperationException("El pedido ya no se puede editar porque han transcurrido más de 10 minutos desde su creación.");
 
         // Verificar que no tenga facturas confirmadas

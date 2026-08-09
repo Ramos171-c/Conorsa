@@ -24,4 +24,16 @@ public class CurrentUserService : ICurrentUserService
             return branchIdClaim != null ? Guid.Parse(branchIdClaim) : null;
         }
     }
+
+    public bool IsAdmin
+    {
+        get
+        {
+            var user = _httpContextAccessor.HttpContext?.User;
+            if (user == null) return false;
+            var role = user.FindFirstValue(ClaimTypes.Role) ?? user.FindFirstValue("role") ?? "";
+            return role.Equals("SUPER_ADMIN", StringComparison.OrdinalIgnoreCase) ||
+                   role.Equals("ADMINISTRADOR", StringComparison.OrdinalIgnoreCase);
+        }
+    }
 }
