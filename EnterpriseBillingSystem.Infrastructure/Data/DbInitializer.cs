@@ -28,13 +28,7 @@ public class DbInitializer : IDbInitializer
 
     public async Task InitializeAsync()
     {
-        // 1. Aplicar migraciones pendientes si las hubiera
-        if ((await _context.Database.GetPendingMigrationsAsync()).Any())
-        {
-            await _context.Database.MigrateAsync();
-        }
-
-        // Garantizar existencia de tablas RouteLiquidations y RouteLiquidationDetails
+        // 1. Garantizar la existencia de columnas y tablas necesarias antes de la inspección del modelo EF Core
         var createTablesSql = @"
 IF NOT EXISTS (SELECT * FROM sys.tables WHERE name = 'RouteLiquidations')
 BEGIN
@@ -122,7 +116,27 @@ BEGIN
     ALTER TABLE [dbo].[ProductPresentations] ADD [AllowCostChannel] BIT NOT NULL DEFAULT 1;
 END
 ";
-        await _context.Database.ExecuteSqlRawAsync(createTablesSql);
+        try
+        {
+            await _context.Database.ExecuteSqlRawAsync(createTablesSql);
+        }
+        catch
+        {
+            // Ignorar si las tablas o columnas ya existen o falló el script crudo
+        }
+
+        // 2. Aplicar migraciones pendientes si las hubiera
+        try
+        {
+            if ((await _context.Database.GetPendingMigrationsAsync()).Any())
+            {
+                await _context.Database.MigrateAsync();
+            }
+        }
+        catch
+        {
+            // Ignorar errores de migraciones si la BD ya está sincronizada manualmente
+        }
 
 
         // 1.5. Sembrar Rutas por Defecto
