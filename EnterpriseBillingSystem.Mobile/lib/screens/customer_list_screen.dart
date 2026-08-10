@@ -158,10 +158,17 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
       backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset('assets/images/logo.png', height: 30, width: 30),
             const SizedBox(width: 10),
-            const Text('CONORTE — Clientes'),
+            const Flexible(
+              child: Text(
+                'CONORTE — Clientes',
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
           ],
         ),
         backgroundColor: const Color(0xFF0F172A),

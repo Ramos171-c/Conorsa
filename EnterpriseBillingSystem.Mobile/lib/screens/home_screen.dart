@@ -28,10 +28,17 @@ class HomeScreen extends StatelessWidget {
       backgroundColor: const Color(0xFFF1F5F9), // Light grey
       appBar: AppBar(
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset('assets/images/logo.png', height: 30, width: 30),
             const SizedBox(width: 10),
-            const Text('CONORTE — Panel de Control'),
+            const Flexible(
+              child: Text(
+                'CONORTE — Panel',
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
           ],
         ),
         backgroundColor: const Color(0xFF0F172A),

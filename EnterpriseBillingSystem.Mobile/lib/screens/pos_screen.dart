@@ -905,10 +905,17 @@ class _PosScreenState extends State<PosScreen> {
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
         title: Row(
+          mainAxisSize: MainAxisSize.min,
           children: [
             Image.asset('assets/images/logo.png', height: 30, width: 30),
             const SizedBox(width: 10),
-            Text(posProv.editingOrderId != null ? 'CONORTE — Editar Pedido' : 'CONORTE — Crear Pedido'),
+            Flexible(
+              child: Text(
+                posProv.editingOrderId != null ? 'CONORTE — Editar Pedido' : 'CONORTE — Crear Pedido',
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+              ),
+            ),
           ],
         ),
         backgroundColor: const Color(0xFF0F172A),
