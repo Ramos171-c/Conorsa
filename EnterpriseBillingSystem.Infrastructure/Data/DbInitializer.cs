@@ -1416,7 +1416,8 @@ END
         decimal WholesaleUnit,
         decimal WholesaleBox,
         decimal? CostUnit = null,
-        decimal? CostBox = null
+        decimal? CostBox = null,
+        bool IsCostOnly = false
     );
 
     private async Task ResetAndSeedNewCatalogAsync(Guid branchId)
@@ -1623,6 +1624,16 @@ END
             new("CA050", "KISS ALLOW CANDY", "Caramelos", "1*12*30", 12, 191.57m, 2298.85m, 191.57m, 2298.85m, 191.57m, 2298.85m, 166.67m, 2000.00m),
             new("CA051", "FRUIT ICE CREAM", "Caramelos", "1*8*30", 8, 172.41m, 1379.31m, 172.41m, 1379.31m, 172.41m, 1379.31m, 150.00m, 1200.00m),
 
+            // Caramelos exclusivos Canal Costo (CA052-CA059)
+            new("CA052", "COCKTAIL JELLY", "Caramelos", "1*8*20", 8, 162.50m, 1300.00m, 162.50m, 1300.00m, 162.50m, 1300.00m, CostUnit: 162.50m, CostBox: 1300.00m, IsCostOnly: true),
+            new("CA053", "PALETA LUZ LOLLOPOP", "Caramelos", "1*24*30", 24, 105.00m, 2520.00m, 105.00m, 2520.00m, 105.00m, 2520.00m, CostUnit: 105.00m, CostBox: 2520.00m, IsCostOnly: true),
+            new("CA054", "BUCK TEETH CANDY", "Caramelos", "1*20*30", 20, 133.50m, 2670.00m, 133.50m, 2670.00m, 133.50m, 2670.00m, CostUnit: 133.50m, CostBox: 2670.00m, IsCostOnly: true),
+            new("CA055", "HIGH BURGER", "Caramelos", "1*10*60", 10, 250.00m, 2500.00m, 250.00m, 2500.00m, 250.00m, 2500.00m, CostUnit: 250.00m, CostBox: 2500.00m, IsCostOnly: true),
+            new("CA056", "CHICLE ROCCKER", "Caramelos", "1*12*50", 12, 183.33m, 2200.00m, 183.33m, 2200.00m, 183.33m, 2200.00m, CostUnit: 183.33m, CostBox: 2200.00m, IsCostOnly: true),
+            new("CA057", "BOLSO DE GELATINA", "Caramelos", "1*30*20", 30, 40.00m, 1200.00m, 40.00m, 1200.00m, 40.00m, 1200.00m, CostUnit: 40.00m, CostBox: 1200.00m, IsCostOnly: true),
+            new("CA058", "CANDY MACHINE", "Caramelos", "1*24*30", 24, 125.00m, 3000.00m, 125.00m, 3000.00m, 125.00m, 3000.00m, CostUnit: 125.00m, CostBox: 3000.00m, IsCostOnly: true),
+            new("CA059", "SONIA FRESH OLIVE GUM BUBBLE GUM", "Caramelos", "1*12*150", 12, 121.67m, 1460.00m, 121.67m, 1460.00m, 121.67m, 1460.00m, CostUnit: 121.67m, CostBox: 1460.00m, IsCostOnly: true),
+
             // Malvaviscos (15)
             new("MA001", "BOLSA CANDY SUPLAYER MALVAVISCO SUPER MINI MINO", "Malvaviscos", "1*8*70", 8, 252.00m, 2016.00m, 205.88m, 1647.06m, 214.77m, 1718.18m, 175.00m, 1400.00m),
             new("MA002", "BOLSA MALVAVISCO MALVA MUFFIN", "Malvaviscos", "1*12*24", 12, 132.00m, 1584.00m, 107.84m, 1294.12m, 112.50m, 1350.00m, 91.67m, 1100.00m),
@@ -1639,6 +1650,12 @@ END
             new("MA013", "MARSHMALLOW CANDY LOKA", "Malvaviscos", "1*24*30", 24, 154.90m, 3717.65m, 154.90m, 3717.65m, 154.90m, 3717.65m, 131.67m, 3160.00m),
             new("MA014", "MARSHMALLOW", "Malvaviscos", "1*24*30", 24, 92.16m, 2211.76m, 92.16m, 2211.76m, 92.16m, 2211.76m, 78.33m, 1880.00m),
             new("MA015", "GUITAR SHAPED MARSMALLOW", "Malvaviscos", "1*24*30", 24, 124.51m, 2988.24m, 124.51m, 2988.24m, 124.51m, 2988.24m, 105.83m, 2540.00m),
+
+            // Malvaviscos exclusivos Canal Costo (MA016-MA019)
+            new("MA016", "TOTY MALVAVICO DIFERENTES SABORES GUITA", "Malvaviscos", "1*24*30", 24, 105.83m, 2540.00m, 105.83m, 2540.00m, 105.83m, 2540.00m, CostUnit: 105.83m, CostBox: 2540.00m, IsCostOnly: true),
+            new("MA017", "MY MAGICAL UNICORN", "Malvaviscos", "1*24*24", 24, 125.00m, 3000.00m, 125.00m, 3000.00m, 125.00m, 3000.00m, CostUnit: 125.00m, CostBox: 3000.00m, IsCostOnly: true),
+            new("MA018", "CARTON MARSHMALLOW", "Malvaviscos", "1*8*50", 8, 331.25m, 2650.00m, 331.25m, 2650.00m, 331.25m, 2650.00m, CostUnit: 331.25m, CostBox: 2650.00m, IsCostOnly: true),
+            new("MA019", "MARSHMALLOW HOT DOG", "Malvaviscos", "1*12*24", 12, 161.67m, 1940.00m, 161.67m, 1940.00m, 161.67m, 1940.00m, CostUnit: 161.67m, CostBox: 1940.00m, IsCostOnly: true),
 
             // Toallas y Otros (13)
             new("TA001", "TOALLAS HUMEDAS FAMILYS ROBELLY CELESTE 96 HOJAS", "Toallas y Otros", "1*12", 12, 63.53m, 762.35m, 57.47m, 689.66m, 61.36m, 736.36m, 50.00m, 600.00m),
@@ -1762,6 +1779,8 @@ END
                     WholesalePrice = data.WholesaleUnit,
                     IsBaseUnit = true,
                     IsDefaultSalePresentation = true,
+                    AllowDetailChannel = !data.IsCostOnly,
+                    AllowCostChannel = true,
                     IsActive = true
                 };
                 product.Presentations.Add(presentationUnit);
@@ -1780,6 +1799,8 @@ END
                     WholesalePrice = data.WholesaleBox,
                     IsBaseUnit = false,
                     IsDefaultSalePresentation = false,
+                    AllowDetailChannel = !data.IsCostOnly,
+                    AllowCostChannel = true,
                     IsActive = true
                 };
                 product.Presentations.Add(presentationBox);
