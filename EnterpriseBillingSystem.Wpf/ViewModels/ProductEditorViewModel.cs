@@ -112,6 +112,20 @@ public class ProductPresentationViewModel : ObservableObject
         set => SetProperty(ref _allowSale, value);
     }
 
+    private bool _allowDetailChannel = true;
+    public bool AllowDetailChannel
+    {
+        get => _allowDetailChannel;
+        set => SetProperty(ref _allowDetailChannel, value);
+    }
+
+    private bool _allowCostChannel = true;
+    public bool AllowCostChannel
+    {
+        get => _allowCostChannel;
+        set => SetProperty(ref _allowCostChannel, value);
+    }
+
     private bool _isActive = true;
     public bool IsActive
     {
@@ -373,6 +387,8 @@ public partial class ProductEditorViewModel : ViewModelBase
                         IsDefaultSalePresentation = pres.IsDefaultSalePresentation,
                         AllowPurchase = pres.AllowPurchase,
                         AllowSale = pres.AllowSale,
+                        AllowDetailChannel = pres.AllowDetailChannel,
+                        AllowCostChannel = pres.AllowCostChannel,
                         IsActive = pres.IsActive
                     });
                 }
@@ -510,6 +526,8 @@ public partial class ProductEditorViewModel : ViewModelBase
                 IsDefaultSalePresentation = vm.IsDefaultSalePresentation,
                 AllowPurchase = vm.AllowPurchase,
                 AllowSale = vm.AllowSale,
+                AllowDetailChannel = vm.AllowDetailChannel,
+                AllowCostChannel = vm.AllowCostChannel,
                 IsActive = vm.IsActive
             };
 
@@ -554,6 +572,8 @@ public partial class ProductEditorViewModel : ViewModelBase
             presentation.IsDefaultSalePresentation = vm.IsDefaultSalePresentation;
             presentation.AllowPurchase = vm.AllowPurchase;
             presentation.AllowSale = vm.AllowSale;
+            presentation.AllowDetailChannel = vm.AllowDetailChannel;
+            presentation.AllowCostChannel = vm.AllowCostChannel;
             presentation.IsActive = vm.IsActive;
 
             if (presentation.IsBaseUnit)
@@ -661,6 +681,8 @@ public partial class ProductEditorViewModel : ViewModelBase
                     p.IsDefaultSalePresentation,
                     p.AllowPurchase,
                     p.AllowSale,
+                    p.AllowDetailChannel,
+                    p.AllowCostChannel,
                     p.IsActive
                 )).ToList();
 

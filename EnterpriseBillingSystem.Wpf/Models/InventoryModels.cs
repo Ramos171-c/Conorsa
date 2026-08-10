@@ -53,6 +53,8 @@ public record ProductPresentationDto(
     bool IsDefaultSalePresentation,
     bool AllowPurchase,
     bool AllowSale,
+    bool AllowDetailChannel,
+    bool AllowCostChannel,
     bool IsActive
 );
 
@@ -70,6 +72,8 @@ public record ProductPresentationInputDto(
     bool IsDefaultSalePresentation,
     bool AllowPurchase,
     bool AllowSale,
+    bool AllowDetailChannel,
+    bool AllowCostChannel,
     bool IsActive
 );
 

@@ -240,6 +240,8 @@
                                 <DataGridTextColumn Header="P. Mayor" Binding="{Binding WholesalePrice, StringFormat=C}" IsReadOnly="True" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                                 <DataGridCheckBoxColumn Header="Base" Binding="{Binding IsBaseUnit}" IsReadOnly="True" Width="50" />
                                 <DataGridCheckBoxColumn Header="Defecto" Binding="{Binding IsDefaultSalePresentation}" IsReadOnly="True" Width="60" />
+                                <DataGridCheckBoxColumn Header="Detalle" Binding="{Binding AllowDetailChannel}" IsReadOnly="True" Width="60" />
+                                <DataGridCheckBoxColumn Header="Costo" Binding="{Binding AllowCostChannel}" IsReadOnly="True" Width="55" />
                                 <DataGridCheckBoxColumn Header="Activo" Binding="{Binding IsActive}" IsReadOnly="True" Width="65" />
                                 <DataGridTemplateColumn Width="90">
                                     <DataGridTemplateColumn.CellTemplate>

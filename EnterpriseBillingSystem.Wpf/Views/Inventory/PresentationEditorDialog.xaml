@@ -104,13 +104,15 @@
                 </Grid>
 
                 <!-- Row 6: Boolean States -->
-                <StackPanel Orientation="Horizontal" Margin="0,8,0,8">
-                    <CheckBox Content="Es Unidad de Medida Base" IsChecked="{Binding IsBaseUnit}" Margin="0,0,12,0" />
-                    <CheckBox Content="Predeterminada para Venta" IsChecked="{Binding IsDefaultSalePresentation}" Margin="0,0,12,0" />
-                    <CheckBox Content="Permitir Compra" IsChecked="{Binding AllowPurchase}" Margin="0,0,12,0" />
-                    <CheckBox Content="Permitir Venta" IsChecked="{Binding AllowSale}" Margin="0,0,12,0" />
-                    <CheckBox Content="Activo" IsChecked="{Binding IsActive}" />
-                </StackPanel>
+                <WrapPanel Margin="0,8,0,8">
+                    <CheckBox Content="Es Unidad Base" IsChecked="{Binding IsBaseUnit}" Margin="0,0,16,8" />
+                    <CheckBox Content="Predef. Venta" IsChecked="{Binding IsDefaultSalePresentation}" Margin="0,0,16,8" />
+                    <CheckBox Content="Permitir Compra" IsChecked="{Binding AllowPurchase}" Margin="0,0,16,8" />
+                    <CheckBox Content="Permitir Venta" IsChecked="{Binding AllowSale}" Margin="0,0,16,8" />
+                    <CheckBox Content="Permitir Detalle" IsChecked="{Binding AllowDetailChannel}" Margin="0,0,16,8" Foreground="{DynamicResource PrimaryHueMidBrush}" />
+                    <CheckBox Content="Permitir Costo" IsChecked="{Binding AllowCostChannel}" Margin="0,0,16,8" Foreground="Purple" />
+                    <CheckBox Content="Activo" IsChecked="{Binding IsActive}" Margin="0,0,16,8" />
+                </WrapPanel>
             </StackPanel>
         </ScrollViewer>
 

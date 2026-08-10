@@ -48,6 +48,12 @@ public partial class PresentationEditorViewModel : ViewModelBase
     private bool _allowSale = true;
 
     [ObservableProperty]
+    private bool _allowDetailChannel = true;
+
+    [ObservableProperty]
+    private bool _allowCostChannel = true;
+
+    [ObservableProperty]
     private bool _isActive = true;
 
     [ObservableProperty]
@@ -78,6 +84,8 @@ public partial class PresentationEditorViewModel : ViewModelBase
             IsDefaultSalePresentation = presentation.IsDefaultSalePresentation;
             AllowPurchase = presentation.AllowPurchase;
             AllowSale = presentation.AllowSale;
+            AllowDetailChannel = presentation.AllowDetailChannel;
+            AllowCostChannel = presentation.AllowCostChannel;
             IsActive = presentation.IsActive;
         }
         else if (unitsOfMeasure.Count > 0)
