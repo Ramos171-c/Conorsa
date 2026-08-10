@@ -1653,7 +1653,7 @@ END
 
             // Malvaviscos exclusivos Canal Costo (MA016-MA019)
             new("MA016", "TOTY MALVAVICO DIFERENTES SABORES GUITA", "Malvaviscos", "1*24*30", 24, 105.83m, 2540.00m, 105.83m, 2540.00m, 105.83m, 2540.00m, CostUnit: 105.83m, CostBox: 2540.00m, IsCostOnly: true),
-            new("MA017", "MY MAGICAL UNICORN", "Malvaviscos", "1*24*24", 24, 125.00m, 3000.00m, 125.00m, 3000.00m, 125.00m, 3000.00m, CostUnit: 125.00m, CostBox: 3000.00m, IsCostOnly: true),
+            new("MA017", "MY MAGICAL UNICORN", "Malvaviscos", "1*12*24", 12, 125.00m, 1500.00m, 125.00m, 1500.00m, 125.00m, 1500.00m, CostUnit: 125.00m, CostBox: 1500.00m, IsCostOnly: true),
             new("MA018", "CARTON MARSHMALLOW", "Malvaviscos", "1*8*50", 8, 331.25m, 2650.00m, 331.25m, 2650.00m, 331.25m, 2650.00m, CostUnit: 331.25m, CostBox: 2650.00m, IsCostOnly: true),
             new("MA019", "MARSHMALLOW HOT DOG", "Malvaviscos", "1*12*24", 12, 161.67m, 1940.00m, 161.67m, 1940.00m, 161.67m, 1940.00m, CostUnit: 161.67m, CostBox: 1940.00m, IsCostOnly: true),
 
