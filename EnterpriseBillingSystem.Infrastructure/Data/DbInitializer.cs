@@ -101,9 +101,9 @@ BEGIN
     ALTER TABLE [dbo].[SalesOrderDetails] ADD [OriginalPresaleQuantity] DECIMAL(18,4) NULL;
 END
 
-IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('AspNetUsers') AND name = 'SellerCategory')
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('Users') AND name = 'SellerCategory')
 BEGIN
-    ALTER TABLE [dbo].[AspNetUsers] ADD [SellerCategory] INT NOT NULL DEFAULT 0;
+    ALTER TABLE [dbo].[Users] ADD [SellerCategory] INT NOT NULL DEFAULT 0;
 END
 
 IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('ProductPresentations') AND name = 'AllowDetailChannel')
