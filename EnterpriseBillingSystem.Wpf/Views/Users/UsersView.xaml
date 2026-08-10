@@ -81,6 +81,17 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
+                        <!-- Categoría Vendedor Badge -->
+                        <DataGridTemplateColumn Header="Categoría" Width="120">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <Border CornerRadius="10" Padding="8,2" Background="{DynamicResource SecondaryHueLightBrush}" HorizontalAlignment="Center">
+                                        <TextBlock Text="{Binding SellerCategoryName}" FontWeight="SemiBold" FontSize="11" Foreground="{DynamicResource SecondaryHueMidForegroundBrush}" />
+                                    </Border>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+
                         <DataGridTextColumn Header="Sucursal" Binding="{Binding DefaultBranchName}" Width="120" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />
                         <DataGridTextColumn Header="Teléfono" Binding="{Binding PhoneNumber}" Width="100" ElementStyle="{StaticResource CenterAlignedColumnStyle}" />
                         <DataGridTextColumn Header="Ciudad" Binding="{Binding City}" Width="100" ElementStyle="{StaticResource MaterialDesignDataGridTextColumnStyle}" />

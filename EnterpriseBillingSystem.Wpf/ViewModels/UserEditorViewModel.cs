@@ -75,9 +75,13 @@ public partial class UserEditorViewModel : ViewModelBase
     [ObservableProperty]
     private bool _isSaving;
 
+    [ObservableProperty]
+    private int _selectedSellerCategoryIndex = 0;
+
     public ObservableCollection<BranchLookupDto> Branches { get; } = new();
     public ObservableCollection<RouteLookupDto> Routes { get; } = new();
     public List<string> Roles { get; } = new() { "ADMINISTRADOR", "SUPERVISOR", "CAJERO", "VENDEDOR", "CONTADOR", "TESORERO" };
+    public List<string> SellerCategories { get; } = new() { "Vendedor Detalle", "Vendedor Costo" };
 
     public UserEditorViewModel(UserApiClient userApiClient, INotificationService notificationService, UserDto? userToEdit = null)
     {
@@ -104,6 +108,7 @@ public partial class UserEditorViewModel : ViewModelBase
             EmergencyContactPhone = userToEdit.EmergencyContactPhone;
             SelectedRouteId = userToEdit.RouteId;
             IsEmployeeActive = userToEdit.IsEmployeeActive;
+            SelectedSellerCategoryIndex = userToEdit.SellerCategory;
         }
     }
 
@@ -213,7 +218,8 @@ public partial class UserEditorViewModel : ViewModelBase
                     EmergencyContactName: EmergencyContactName,
                     EmergencyContactPhone: EmergencyContactPhone,
                     RouteId: SelectedRouteId,
-                    IsEmployeeActive: IsEmployeeActive
+                    IsEmployeeActive: IsEmployeeActive,
+                    SellerCategory: SelectedSellerCategoryIndex
                 );
                 var success = await _userApiClient.UpdateUserAsync(_userToEdit.Id, cmd);
                 if (success)
@@ -244,7 +250,8 @@ public partial class UserEditorViewModel : ViewModelBase
                     EmergencyContactName: EmergencyContactName,
                     EmergencyContactPhone: EmergencyContactPhone,
                     RouteId: SelectedRouteId,
-                    IsEmployeeActive: IsEmployeeActive
+                    IsEmployeeActive: IsEmployeeActive,
+                    SellerCategory: SelectedSellerCategoryIndex
                 );
                 var id = await _userApiClient.CreateUserAsync(cmd);
                 if (id != Guid.Empty)

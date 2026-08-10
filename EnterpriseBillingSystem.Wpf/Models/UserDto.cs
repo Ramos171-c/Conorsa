@@ -21,10 +21,12 @@ public record UserDto(
     string? EmergencyContactPhone,
     Guid? RouteId,
     string? Route,
-    bool IsEmployeeActive
+    bool IsEmployeeActive,
+    int SellerCategory = 0
 )
 {
     public string FullName => $"{FirstName} {LastName}".Trim();
+    public string SellerCategoryName => SellerCategory == 1 ? "Vendedor Costo" : "Vendedor Detalle";
 }
 
 public record CreateUserCommandDto(
@@ -43,7 +45,8 @@ public record CreateUserCommandDto(
     string? EmergencyContactName = null,
     string? EmergencyContactPhone = null,
     Guid? RouteId = null,
-    bool IsEmployeeActive = true
+    bool IsEmployeeActive = true,
+    int SellerCategory = 0
 );
 
 public record UpdateUserCommandDto(
@@ -63,7 +66,8 @@ public record UpdateUserCommandDto(
     string? EmergencyContactName = null,
     string? EmergencyContactPhone = null,
     Guid? RouteId = null,
-    bool IsEmployeeActive = true
+    bool IsEmployeeActive = true,
+    int SellerCategory = 0
 );
 
 public record RouteDto(Guid Id, string Code, string Name, bool IsActive);

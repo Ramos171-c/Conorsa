@@ -159,7 +159,7 @@
                 <TextBlock Text="Configuración de Seguridad y Acceso" Style="{StaticResource MaterialDesignSubtitle1TextBlock}" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,12,0,4" />
                 <Separator Margin="0,0,0,12" Background="{DynamicResource PrimaryHueLightBrush}" Height="1.5" />
 
-                <!-- Sucursal y Rol -->
+                <!-- Sucursal, Rol y Categoría de Vendedor -->
                 <Grid Margin="0,0,0,12">
                     <Grid.ColumnDefinitions>
                         <ColumnDefinition Width="*" />
@@ -178,6 +178,13 @@
                               Style="{StaticResource MaterialDesignOutlinedComboBox}" 
                               Margin="6,0,0,0" />
                 </Grid>
+
+                <!-- Categoría de Vendedor (Para vendedores) -->
+                <ComboBox ItemsSource="{Binding SellerCategories}" 
+                          SelectedIndex="{Binding SelectedSellerCategoryIndex}" 
+                          materialDesign:HintAssist.Hint="Categoría de Vendedor (Solo Vendedores) *"
+                          Style="{StaticResource MaterialDesignOutlinedComboBox}" 
+                          Margin="0,0,0,12" />
 
                 <!-- Contraseña (requerida para nuevo, opcional para editar) -->
                 <TextBox Text="{Binding Password, UpdateSourceTrigger=PropertyChanged}" 
