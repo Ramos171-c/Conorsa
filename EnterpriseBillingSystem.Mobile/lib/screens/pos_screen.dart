@@ -127,7 +127,9 @@ class _PosScreenState extends State<PosScreen> {
     // Calculate initial price based on level and category
     double initialPrice = isCostSeller ? selectedPresentation.cost : selectedPresentation.retailPrice;
     if (!isCostSeller) {
-      if (posProv.currentLevel == 'MAYORISTA') {
+      if (posProv.currentLevel == 'COSTO') {
+        initialPrice = selectedPresentation.cost;
+      } else if (posProv.currentLevel == 'MAYORISTA') {
         initialPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
       } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
         initialPrice = selectedPresentation.semiWholesalePrice > 0 ? selectedPresentation.semiWholesalePrice : selectedPresentation.retailPrice;
@@ -178,7 +180,9 @@ class _PosScreenState extends State<PosScreen> {
                           // Recalculate price
                           double newPrice = isCostSeller ? selectedPresentation.cost : selectedPresentation.retailPrice;
                           if (!isCostSeller) {
-                            if (posProv.currentLevel == 'MAYORISTA') {
+                            if (posProv.currentLevel == 'COSTO') {
+                              newPrice = selectedPresentation.cost;
+                            } else if (posProv.currentLevel == 'MAYORISTA') {
                               newPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
                             } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
                               newPrice = selectedPresentation.semiWholesalePrice > 0 ? selectedPresentation.semiWholesalePrice : selectedPresentation.retailPrice;
@@ -799,6 +803,16 @@ class _PosScreenState extends State<PosScreen> {
                           Icon(Icons.stars_rounded, color: Colors.blue),
                           SizedBox(width: 8),
                           Text('Mayorista'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'COSTO',
+                      child: Row(
+                        children: [
+                          Icon(Icons.monetization_on_rounded, color: Colors.purple),
+                          SizedBox(width: 8),
+                          Text('Costo'),
                         ],
                       ),
                     ),
