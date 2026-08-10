@@ -1671,6 +1671,7 @@ END
             new("TA011", "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6XL", "Toallas y Otros", "1*4*50", 4, 594.51m, 2378.05m, 560.34m, 2241.38m, 541.67m, 2166.67m, 487.50m, 1950.00m),
             new("TA012", "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL", "Toallas y Otros", "1*4*50", 4, 304.88m, 1219.51m, 287.36m, 1149.43m, 277.78m, 1111.11m, 250.00m, 1000.00m),
             new("TA013", "PAPEL HIGIENICO ROBELLY 1620 HOJAS", "Toallas y Otros", "1*12", 12, 23.82m, 285.88m, 21.55m, 258.62m, 23.01m, 276.12m, 18.75m, 225.00m),
+            new("TA014", "TOALLAS HUMEDAS FAMILYS ROBELLY 120 HOJAS", "Toallas y Otros", "1*12", 12, 74.12m, 889.41m, 67.05m, 804.60m, 71.59m, 859.09m, CostUnit: 58.33m, CostBox: 700.00m),
         };
 
         foreach (var data in productsData)
