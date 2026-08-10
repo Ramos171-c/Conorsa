@@ -29,8 +29,13 @@ class _PosScreenState extends State<PosScreen> {
     super.initState();
     
     WidgetsBinding.instance.addPostFrameCallback((_) async {
+      final auth = Provider.of<AuthProvider>(context, listen: false);
       final posProv = Provider.of<PosProvider>(context, listen: false);
       final orderProv = Provider.of<OrderProvider>(context, listen: false);
+
+      if (auth.userProfile != null) {
+        posProv.setIsCostSeller(auth.userProfile!.isCostSeller);
+      }
 
       if (posProv.editingOrderId == null) {
         posProv.clearCart();
@@ -108,7 +113,10 @@ class _PosScreenState extends State<PosScreen> {
       return;
     }
 
+    final auth = Provider.of<AuthProvider>(context, listen: false);
     final posProv = Provider.of<PosProvider>(context, listen: false);
+    final isCostSeller = auth.userProfile?.isCostSeller == true || posProv.isCostSeller;
+
     ProductPresentation selectedPresentation = product.presentations.firstWhere(
       (p) => p.isDefaultSalePresentation,
       orElse: () => product.presentations.first,
@@ -116,12 +124,14 @@ class _PosScreenState extends State<PosScreen> {
     double quantity = 1.0;
     final qtyController = TextEditingController(text: '1');
 
-    // Calculate initial price based on level
-    double initialPrice = selectedPresentation.retailPrice;
-    if (posProv.currentLevel == 'MAYORISTA') {
-      initialPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
-    } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
-      initialPrice = selectedPresentation.semiWholesalePrice > 0 ? selectedPresentation.semiWholesalePrice : selectedPresentation.retailPrice;
+    // Calculate initial price based on level and category
+    double initialPrice = isCostSeller ? selectedPresentation.cost : selectedPresentation.retailPrice;
+    if (!isCostSeller) {
+      if (posProv.currentLevel == 'MAYORISTA') {
+        initialPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
+      } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
+        initialPrice = selectedPresentation.semiWholesalePrice > 0 ? selectedPresentation.semiWholesalePrice : selectedPresentation.retailPrice;
+      }
     }
     final priceController = TextEditingController(text: initialPrice.toStringAsFixed(2));
 
@@ -166,11 +176,13 @@ class _PosScreenState extends State<PosScreen> {
                           selectedPresentation = val;
                           
                           // Recalculate price
-                          double newPrice = selectedPresentation.retailPrice;
-                          if (posProv.currentLevel == 'MAYORISTA') {
-                            newPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
-                          } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
-                            newPrice = selectedPresentation.semiWholesalePrice > 0 ? selectedPresentation.semiWholesalePrice : selectedPresentation.retailPrice;
+                          double newPrice = isCostSeller ? selectedPresentation.cost : selectedPresentation.retailPrice;
+                          if (!isCostSeller) {
+                            if (posProv.currentLevel == 'MAYORISTA') {
+                              newPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
+                            } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
+                              newPrice = selectedPresentation.semiWholesalePrice > 0 ? selectedPresentation.semiWholesalePrice : selectedPresentation.retailPrice;
+                            }
                           }
                           priceController.text = newPrice.toStringAsFixed(2);
                         });
@@ -689,9 +701,14 @@ class _PosScreenState extends State<PosScreen> {
   }
 
   Widget _buildHeaderPanel(PosProvider posProv, AuthProvider auth) {
+    final isCostSeller = auth.userProfile?.isCostSeller == true || posProv.isCostSeller;
+
     Color badgeColor = Colors.green;
     IconData badgeIcon = Icons.star_border_rounded;
-    if (posProv.currentLevel == 'MAYORISTA') {
+    if (isCostSeller || posProv.currentLevel == 'COSTO') {
+      badgeColor = Colors.purple.shade700;
+      badgeIcon = Icons.monetization_on_rounded;
+    } else if (posProv.currentLevel == 'MAYORISTA') {
       badgeColor = Colors.blue.shade700;
       badgeIcon = Icons.stars_rounded;
     } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
@@ -728,65 +745,86 @@ class _PosScreenState extends State<PosScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              PopupMenuButton<String>(
-                tooltip: 'Cambiar Nivel de Precios',
-                onSelected: (level) {
-                  posProv.setManualPricingLevelOverride(level);
-                },
-                itemBuilder: (context) => [
-                  const PopupMenuItem(
-                    value: 'DETALLE',
-                    child: Row(
-                      children: [
-                        Icon(Icons.star_border_rounded, color: Colors.green),
-                        SizedBox(width: 8),
-                        Text('Detalle'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'SEMI MAYORISTA',
-                    child: Row(
-                      children: [
-                        Icon(Icons.star_half_rounded, color: Colors.orange),
-                        SizedBox(width: 8),
-                        Text('Semi Mayorista'),
-                      ],
-                    ),
-                  ),
-                  const PopupMenuItem(
-                    value: 'MAYORISTA',
-                    child: Row(
-                      children: [
-                        Icon(Icons.stars_rounded, color: Colors.blue),
-                        SizedBox(width: 8),
-                        Text('Mayorista'),
-                      ],
-                    ),
-                  ),
-                ],
-                child: Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+              if (isCostSeller)
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
-                    color: badgeColor.withOpacity(0.1),
+                    color: badgeColor.withOpacity(0.12),
                     borderRadius: BorderRadius.circular(20),
                     border: Border.all(color: badgeColor, width: 1.2),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Icon(badgeIcon, color: badgeColor, size: 13),
+                      Icon(badgeIcon, color: badgeColor, size: 14),
                       const SizedBox(width: 4),
                       Text(
-                        posProv.currentLevel,
-                        style: TextStyle(color: badgeColor, fontWeight: FontWeight.bold, fontSize: 10),
+                        'COSTO',
+                        style: TextStyle(color: badgeColor, fontWeight: FontWeight.bold, fontSize: 11),
                       ),
-                      const SizedBox(width: 2),
-                      Icon(Icons.arrow_drop_down_rounded, color: badgeColor, size: 14),
                     ],
                   ),
+                )
+              else
+                PopupMenuButton<String>(
+                  tooltip: 'Cambiar Nivel de Precios',
+                  onSelected: (level) {
+                    posProv.setManualPricingLevelOverride(level);
+                  },
+                  itemBuilder: (context) => [
+                    const PopupMenuItem(
+                      value: 'DETALLE',
+                      child: Row(
+                        children: [
+                          Icon(Icons.star_border_rounded, color: Colors.green),
+                          SizedBox(width: 8),
+                          Text('Detalle'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'SEMI MAYORISTA',
+                      child: Row(
+                        children: [
+                          Icon(Icons.star_half_rounded, color: Colors.orange),
+                          SizedBox(width: 8),
+                          Text('Semi Mayorista'),
+                        ],
+                      ),
+                    ),
+                    const PopupMenuItem(
+                      value: 'MAYORISTA',
+                      child: Row(
+                        children: [
+                          Icon(Icons.stars_rounded, color: Colors.blue),
+                          SizedBox(width: 8),
+                          Text('Mayorista'),
+                        ],
+                      ),
+                    ),
+                  ],
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                    decoration: BoxDecoration(
+                      color: badgeColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: badgeColor, width: 1.2),
+                    ),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(badgeIcon, color: badgeColor, size: 13),
+                        const SizedBox(width: 4),
+                        Text(
+                          posProv.currentLevel,
+                          style: TextStyle(color: badgeColor, fontWeight: FontWeight.bold, fontSize: 10),
+                        ),
+                        const SizedBox(width: 2),
+                        Icon(Icons.arrow_drop_down_rounded, color: badgeColor, size: 14),
+                      ],
+                    ),
+                  ),
                 ),
-              ),
             ],
           ),
           const SizedBox(height: 6),
@@ -1433,14 +1471,16 @@ class _PosScreenState extends State<PosScreen> {
 
   double _getProductPriceForLevel(Product product, String level) {
     if (product.presentations.isEmpty) {
-      return product.defaultSalePrice;
+      return level == 'COSTO' ? 0.0 : product.defaultSalePrice;
     }
     final presentation = product.presentations.firstWhere(
       (pres) => pres.isDefaultSalePresentation,
       orElse: () => product.presentations.first,
     );
 
-    if (level == 'MAYORISTA') {
+    if (level == 'COSTO') {
+      return presentation.cost;
+    } else if (level == 'MAYORISTA') {
       return presentation.wholesalePrice > 0 
           ? presentation.wholesalePrice 
           : presentation.retailPrice;

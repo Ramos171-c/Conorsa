@@ -8,6 +8,7 @@ class UserProfile {
   final String role;
   final List<String> permissions;
   final String? routeId;
+  final int sellerCategory; // 0 = Detail, 1 = Cost
 
   UserProfile({
     required this.id,
@@ -19,6 +20,7 @@ class UserProfile {
     required this.role,
     required this.permissions,
     this.routeId,
+    this.sellerCategory = 0,
   });
 
   String get fullName => '$firstName $lastName'.trim().isNotEmpty 
@@ -27,6 +29,9 @@ class UserProfile {
 
   /// Administrators (SUPER_ADMIN, ADMINISTRADOR) can access all routes
   bool get isAdmin => role == 'SUPER_ADMIN' || role == 'ADMINISTRADOR';
+
+  /// Check if current user is a Cost Seller (Vendedor Costo)
+  bool get isCostSeller => sellerCategory == 1;
 
   /// Returns null for admins so they see all customers from every route
   String? get effectiveRouteId => isAdmin ? null : routeId;
@@ -45,6 +50,7 @@ class UserProfile {
               .toList() ?? 
           [],
       routeId: json['routeId'] as String?,
+      sellerCategory: (json['sellerCategory'] as num?)?.toInt() ?? 0,
     );
   }
 
@@ -59,6 +65,7 @@ class UserProfile {
       'role': role,
       'permissions': permissions,
       'routeId': routeId,
+      'sellerCategory': sellerCategory,
     };
   }
 }

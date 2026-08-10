@@ -141,7 +141,8 @@ class ProductDetailScreen extends StatelessWidget {
                 ElevatedButton(
                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A)),
                   onPressed: () {
-                    provider.addToCart(product, selectedPresentation, quantity);
+                    final auth = Provider.of<AuthProvider>(context, listen: false);
+                    provider.addToCart(product, selectedPresentation, quantity, isCostSeller: auth.userProfile?.isCostSeller == true);
                     Navigator.pop(context); // Close dialog
                     Navigator.pop(context); // Close detail screen
                     

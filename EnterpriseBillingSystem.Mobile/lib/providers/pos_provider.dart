@@ -261,17 +261,49 @@ class PosProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  bool _isCostSeller = false;
+  bool get isCostSeller => _isCostSeller;
+
+  void setIsCostSeller(bool isCostSeller) {
+    if (_isCostSeller != isCostSeller) {
+      _isCostSeller = isCostSeller;
+      if (_isCostSeller) {
+        _manualPricingLevelOverride = 'COSTO';
+      }
+      recalculatePricing();
+    }
+  }
+
   // Motor de Precios Dinámicos
   void recalculatePricing() {
+    if (_isCostSeller || _manualPricingLevelOverride == 'COSTO') {
+      _currentLevel = 'COSTO';
+      _subtotalBase = 0.0;
+      _subtotalCommercial = 0.0;
+
+      for (var item in _cart) {
+        double price = item.manualPriceOverride ?? item.presentation.cost;
+        item.unitPriceDisplayed = price;
+        item.discountPercentage = 0.0;
+        item.lineTotal = price * item.quantity;
+        _subtotalBase += item.lineTotal;
+        _subtotalCommercial += item.lineTotal;
+      }
+
+      _nextLevel = '';
+      _missingToNextLevel = 0.0;
+      _progressToNextLevel = 1.0;
+      notifyListeners();
+      return;
+    }
+
     // 1. Calculate Subtotal Base (always quantity * retailPrice)
     _subtotalBase = 0.0;
     for (var item in _cart) {
       _subtotalBase += item.quantity * item.presentation.retailPrice;
     }
 
-    // 2. Determine Cart Level using manual override (defaults to 'DETALLE')
-
-    // 3. Determine Level using manual override (defaults to 'DETALLE')
+    // 2. Determine Level using manual override (defaults to 'DETALLE')
     int finalLevel = 0;
     if (_manualPricingLevelOverride == 'MAYORISTA') {
       finalLevel = 2;
@@ -279,7 +311,7 @@ class PosProvider extends ChangeNotifier {
       finalLevel = 1;
     }
 
-    // 5. Map final level and update unitPriceDisplayed/lineTotal on all items
+    // 3. Map final level and update unitPriceDisplayed/lineTotal on all items
     _subtotalCommercial = 0.0;
     _currentLevel = finalLevel == 2 
         ? 'MAYORISTA' 
@@ -307,7 +339,7 @@ class PosProvider extends ChangeNotifier {
       _subtotalCommercial += item.lineTotal;
     }
 
-    // 6. Update progress to next level
+    // 4. Update progress to next level
     if (finalLevel == 0) {
       _nextLevel = 'SEMI MAYORISTA';
       _missingToNextLevel = (_semiWholesaleThreshold + 1.0) - _subtotalBase;

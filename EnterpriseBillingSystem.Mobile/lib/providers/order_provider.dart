@@ -314,8 +314,13 @@ class OrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // Add item to draft order (cart)
-  void addToCart(Product product, ProductPresentation presentation, double quantity) {
+  // Add item to cart
+  void addToCart(Product product, ProductPresentation presentation, double quantity, {bool isCostSeller = false}) {
+    addOrUpdateProduct(product, presentation, quantity, isCostSeller: isCostSeller);
+  }
+
+  // Add or update item in draft order
+  void addOrUpdateProduct(Product product, ProductPresentation presentation, double quantity, {bool isCostSeller = false}) {
     if (_draftOrder.customerId == null) {
       _errorMessage = 'Debe seleccionar un cliente antes de agregar productos.';
       notifyListeners();
@@ -333,6 +338,10 @@ class OrderProvider extends ChangeNotifier {
       final newQty = existingItem.quantity + quantity;
       updateQuantity(product.id, presentation.unitOfMeasureId, newQty);
     } else {
+      double calculatedPrice = isCostSeller 
+          ? presentation.cost 
+          : (presentation.retailPrice > 0 ? presentation.retailPrice : product.defaultSalePrice);
+
       // Add new item
       _draftOrder.details.add(DraftOrderDetail(
         productId: product.id,
@@ -341,7 +350,7 @@ class OrderProvider extends ChangeNotifier {
         unitOfMeasureId: presentation.unitOfMeasureId,
         unitOfMeasureCode: presentation.unitOfMeasureCode,
         quantity: quantity,
-        unitPrice: presentation.retailPrice > 0 ? presentation.retailPrice : product.defaultSalePrice,
+        unitPrice: calculatedPrice,
         taxPercentage: presentation.taxPercentage,
         discountPercentage: _draftOrder.customerDefaultDiscount,
       ));
