@@ -62,13 +62,18 @@ public partial class LoginViewModel : ViewModelBase
             }
             else
             {
-                ErrorMessage = "Credenciales incorrectas.";
+                ErrorMessage = "Credenciales incorrectas o usuario no encontrado.";
                 _notificationService.ShowError(ErrorMessage);
             }
         }
+        catch (System.Net.Http.HttpRequestException ex)
+        {
+            ErrorMessage = string.IsNullOrWhiteSpace(ex.Message) ? "Error al autenticar con el servidor." : ex.Message;
+            _notificationService.ShowError(ErrorMessage);
+        }
         catch (Exception ex)
         {
-            ErrorMessage = $"Error: {ex.Message}";
+            ErrorMessage = $"Error de conexión con el servidor: {ex.Message}";
             _notificationService.ShowError(ErrorMessage);
         }
         finally
