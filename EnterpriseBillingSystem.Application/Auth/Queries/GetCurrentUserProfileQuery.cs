@@ -43,7 +43,8 @@ public class GetCurrentUserProfileQueryHandler : IRequestHandler<GetCurrentUserP
             DefaultBranchId: user.DefaultBranchId,
             Role: roleName,
             Permissions: permissions,
-            RouteId: user.RouteId
+            RouteId: user.RouteId,
+            SellerCategory: user.SellerCategory
         );
     }
 }

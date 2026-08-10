@@ -9,6 +9,8 @@ using Microsoft.EntityFrameworkCore;
 using EnterpriseBillingSystem.Domain.Entities;
 using EnterpriseBillingSystem.Application.Common.Models;
 
+using EnterpriseBillingSystem.Domain.Enums;
+
 namespace EnterpriseBillingSystem.Application.Auth.Queries;
 
 public record UserDto(
@@ -30,6 +32,7 @@ public record UserDto(
     string? EmergencyContactPhone,
     Guid? RouteId,
     string? Route,
+    SellerCategory SellerCategory,
     bool IsEmployeeActive
 );
 
@@ -97,6 +100,7 @@ public class GetUsersQueryHandler : IRequestHandler<GetUsersQuery, PagedResult<U
                 EmergencyContactPhone: user.EmergencyContactPhone,
                 RouteId: user.RouteId,
                 Route: user.Route?.Name,
+                SellerCategory: user.SellerCategory,
                 IsEmployeeActive: user.IsEmployeeActive
             ));
         }

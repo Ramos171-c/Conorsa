@@ -23,5 +23,7 @@ public class ProductPresentation : BaseEntity
     public bool IsDefaultSalePresentation { get; set; }
     public bool AllowPurchase { get; set; } = true;
     public bool AllowSale { get; set; } = true;
+    public bool AllowDetailChannel { get; set; } = true;
+    public bool AllowCostChannel { get; set; } = true;
     public bool IsActive { get; set; } = true;
 }

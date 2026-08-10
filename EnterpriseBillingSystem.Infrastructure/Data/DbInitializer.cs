@@ -106,6 +106,21 @@ IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('SalesOrder
 BEGIN
     ALTER TABLE [dbo].[SalesOrderDetails] ADD [OriginalPresaleQuantity] DECIMAL(18,4) NULL;
 END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('AspNetUsers') AND name = 'SellerCategory')
+BEGIN
+    ALTER TABLE [dbo].[AspNetUsers] ADD [SellerCategory] INT NOT NULL DEFAULT 0;
+END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('ProductPresentations') AND name = 'AllowDetailChannel')
+BEGIN
+    ALTER TABLE [dbo].[ProductPresentations] ADD [AllowDetailChannel] BIT NOT NULL DEFAULT 1;
+END
+
+IF NOT EXISTS (SELECT * FROM sys.columns WHERE object_id = OBJECT_ID('ProductPresentations') AND name = 'AllowCostChannel')
+BEGIN
+    ALTER TABLE [dbo].[ProductPresentations] ADD [AllowCostChannel] BIT NOT NULL DEFAULT 1;
+END
 ";
         await _context.Database.ExecuteSqlRawAsync(createTablesSql);
 

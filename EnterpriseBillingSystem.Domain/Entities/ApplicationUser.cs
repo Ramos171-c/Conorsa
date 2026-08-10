@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using Microsoft.AspNetCore.Identity;
 using EnterpriseBillingSystem.Domain.Common;
+using EnterpriseBillingSystem.Domain.Enums;
 
 namespace EnterpriseBillingSystem.Domain.Entities;
 
@@ -17,6 +18,7 @@ public class ApplicationUser : IdentityUser<Guid>, IAuditable, ISoftDelete
     public string? EmergencyContactPhone { get; set; }
     public Guid? RouteId { get; set; }
     public virtual Route? Route { get; set; }
+    public SellerCategory SellerCategory { get; set; } = SellerCategory.Detail;
     public bool IsEmployeeActive { get; set; } = true;
     public bool IsActive { get; set; } = true;
     public DateTime? LastLoginAt { get; set; }

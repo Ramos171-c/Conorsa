@@ -318,6 +318,8 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand,
                     IsDefaultSalePresentation = pres.IsDefaultSalePresentation,
                     AllowPurchase = pres.AllowPurchase,
                     AllowSale = pres.AllowSale,
+                    AllowDetailChannel = pres.AllowDetailChannel,
+                    AllowCostChannel = pres.AllowCostChannel,
                     IsActive = pres.IsActive
                 });
             }

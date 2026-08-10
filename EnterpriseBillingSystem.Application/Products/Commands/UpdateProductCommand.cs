@@ -409,6 +409,8 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
                     existing.IsDefaultSalePresentation = presDto.IsDefaultSalePresentation;
                     existing.AllowPurchase = presDto.AllowPurchase;
                     existing.AllowSale = presDto.AllowSale;
+                    existing.AllowDetailChannel = presDto.AllowDetailChannel;
+                    existing.AllowCostChannel = presDto.AllowCostChannel;
                     existing.IsActive = presDto.IsActive;
 
                     presentationsToKeep.Add(existing.Id);
@@ -457,6 +459,8 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
                     IsDefaultSalePresentation = presDto.IsDefaultSalePresentation,
                     AllowPurchase = presDto.AllowPurchase,
                     AllowSale = presDto.AllowSale,
+                    AllowDetailChannel = presDto.AllowDetailChannel,
+                    AllowCostChannel = presDto.AllowCostChannel,
                     IsActive = presDto.IsActive
                 };
                 product.Presentations.Add(newPres);

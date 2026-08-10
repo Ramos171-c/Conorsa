@@ -16,5 +16,7 @@ public record ProductPresentationInputDto(
     bool IsDefaultSalePresentation,
     bool AllowPurchase,
     bool AllowSale,
-    bool IsActive
+    bool AllowDetailChannel = true,
+    bool AllowCostChannel = true,
+    bool IsActive = true
 );

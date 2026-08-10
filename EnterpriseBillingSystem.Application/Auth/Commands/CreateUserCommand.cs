@@ -7,6 +7,7 @@ using FluentValidation;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using EnterpriseBillingSystem.Domain.Entities;
+using EnterpriseBillingSystem.Domain.Enums;
 using EnterpriseBillingSystem.Domain.Repositories;
 
 namespace EnterpriseBillingSystem.Application.Auth.Commands;
@@ -27,6 +28,7 @@ public record CreateUserCommand(
     string? EmergencyContactName = null,
     string? EmergencyContactPhone = null,
     Guid? RouteId = null,
+    SellerCategory SellerCategory = SellerCategory.Detail,
     bool IsEmployeeActive = true
 ) : IRequest<Guid>;
 
@@ -149,6 +151,7 @@ public class CreateUserCommandHandler : IRequestHandler<CreateUserCommand, Guid>
             EmergencyContactName = string.IsNullOrWhiteSpace(request.EmergencyContactName) ? null : request.EmergencyContactName.Trim(),
             EmergencyContactPhone = string.IsNullOrWhiteSpace(request.EmergencyContactPhone) ? null : request.EmergencyContactPhone.Trim(),
             RouteId = request.RouteId,
+            SellerCategory = request.SellerCategory,
             IsEmployeeActive = request.IsEmployeeActive,
             DefaultBranchId = request.DefaultBranchId,
             IsActive = true,

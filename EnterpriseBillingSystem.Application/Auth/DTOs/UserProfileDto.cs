@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using EnterpriseBillingSystem.Domain.Enums;
 
 namespace EnterpriseBillingSystem.Application.Auth.DTOs;
 
@@ -12,5 +13,6 @@ public record UserProfileDto(
     Guid DefaultBranchId,
     string Role,
     IEnumerable<string> Permissions,
-    Guid? RouteId
+    Guid? RouteId,
+    SellerCategory SellerCategory = SellerCategory.Detail
 );

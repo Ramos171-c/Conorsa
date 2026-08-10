@@ -18,6 +18,8 @@ public static class DependencyInjection
 
         services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
+        services.AddScoped<EnterpriseBillingSystem.Application.Common.Interfaces.IPriceResolverService, EnterpriseBillingSystem.Application.Common.Services.PriceResolverService>();
+
         return services;
     }
 }
