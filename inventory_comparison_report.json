@@ -1,0 +1,652 @@
+[
+  {
+    "code": "GA041",
+    "name": "BL COOKIE LOLIPO CON LUZ",
+    "counted_text": "16 Unidades",
+    "box_factor": 24,
+    "total_counted": 16,
+    "db_stock": 19,
+    "diff": -3,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA010",
+    "name": "BOLSA CANDY MINI GELATINA BOLSA GRANDE 1.5 KG.",
+    "counted_text": "11 Unidades",
+    "box_factor": 8,
+    "total_counted": 11,
+    "db_stock": 2,
+    "diff": 9,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA005",
+    "name": "GALLETAS TRIO 4 CANDY FRESA",
+    "counted_text": "1 caja 19 Unidades",
+    "box_factor": 24,
+    "total_counted": 43,
+    "db_stock": 0,
+    "diff": 43,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA006",
+    "name": "GALLETAS TRIO 4 CANDY LIMON",
+    "counted_text": "19 Unidades",
+    "box_factor": 24,
+    "total_counted": 19,
+    "db_stock": 1,
+    "diff": 18,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA011",
+    "name": "TWINNIES CHOCO CHOCO",
+    "counted_text": "12 Unidades",
+    "box_factor": 24,
+    "total_counted": 12,
+    "db_stock": 0,
+    "diff": 12,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA010",
+    "name": "TWINNIES VAINILLA",
+    "counted_text": "13 Unidades",
+    "box_factor": 24,
+    "total_counted": 13,
+    "db_stock": 0,
+    "diff": 13,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA008",
+    "name": "TWINNIES CHOCO VAINILLA",
+    "counted_text": "17 Unidades",
+    "box_factor": 24,
+    "total_counted": 17,
+    "db_stock": 0,
+    "diff": 17,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA024",
+    "name": "GALLETA KIDMAX VAINILLA",
+    "counted_text": "20 Unidades",
+    "box_factor": 24,
+    "total_counted": 20,
+    "db_stock": 0,
+    "diff": 20,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA025",
+    "name": "GALLETA KIDMAX CHOCOLATE",
+    "counted_text": "22 Unidades",
+    "box_factor": 24,
+    "total_counted": 22,
+    "db_stock": 0,
+    "diff": 22,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA016",
+    "name": "GALLETA AMORIS REDONDA 125GR. FRESA",
+    "counted_text": "29 Unidades",
+    "box_factor": 36,
+    "total_counted": 29,
+    "db_stock": 27,
+    "diff": 2,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA017",
+    "name": "GALLETA AMORIS REDONDA 125GR. CHOCOLATE",
+    "counted_text": "41 Unidades",
+    "box_factor": 36,
+    "total_counted": 41,
+    "db_stock": 0,
+    "diff": 41,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA018",
+    "name": "GALLETA AMORIS REDONDA 125GR. ESCURETO",
+    "counted_text": "1 Unidades",
+    "box_factor": 36,
+    "total_counted": 1,
+    "db_stock": 0,
+    "diff": 1,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA002",
+    "name": "GALLETAS WAFFER AMORIS FRESA",
+    "counted_text": "59 Unidades",
+    "box_factor": 30,
+    "total_counted": 59,
+    "db_stock": 3,
+    "diff": 56,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA001",
+    "name": "GALLETAS WAFFER AMORIS CHOCOLATE",
+    "counted_text": "3 Unidades",
+    "box_factor": 30,
+    "total_counted": 3,
+    "db_stock": 3,
+    "diff": 0,
+    "status": "COINCIDE"
+  },
+  {
+    "code": "GA013",
+    "name": "GALLETA CANDY GLUCOSA CREMELO FRESA",
+    "counted_text": "1 caja",
+    "box_factor": 24,
+    "total_counted": 24,
+    "db_stock": 41,
+    "diff": -17,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA014",
+    "name": "GALLETA CANDY GLUCOSA CREMELO COCO",
+    "counted_text": "1 caja + 1 unidad",
+    "box_factor": 24,
+    "total_counted": 25,
+    "db_stock": 41,
+    "diff": -16,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA015",
+    "name": "GALLETA CANDY GLUCOSA CREMELO LECHE",
+    "counted_text": "5 unidades",
+    "box_factor": 24,
+    "total_counted": 5,
+    "db_stock": 15,
+    "diff": -10,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA022",
+    "name": "GALLETA JUMBO CHOCOLATE",
+    "counted_text": "4 Unidades",
+    "box_factor": 10,
+    "total_counted": 4,
+    "db_stock": 0,
+    "diff": 4,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA021",
+    "name": "GALLETA JUMBO VAINILLA",
+    "counted_text": "8 Unidades",
+    "box_factor": 10,
+    "total_counted": 8,
+    "db_stock": 0,
+    "diff": 8,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA020",
+    "name": "GALLETA JUMBO FRESA",
+    "counted_text": "6 Unidades",
+    "box_factor": 10,
+    "total_counted": 6,
+    "db_stock": 0,
+    "diff": 6,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA011",
+    "name": "BOLSA CANDY MINI GELATINA LAS DELICIA PEQUEÑA",
+    "counted_text": "1 caja + 1 Unidades",
+    "box_factor": 40,
+    "total_counted": 41,
+    "db_stock": 0,
+    "diff": 41,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "MA006",
+    "name": "BOLSA MALVAVISCO RELLENO TRI PACK",
+    "counted_text": "14 Unidades",
+    "box_factor": 15,
+    "total_counted": 14,
+    "db_stock": 0,
+    "diff": 14,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "MA007",
+    "name": "BOLSA MALVAVISCO 3D",
+    "counted_text": "10 Unidades",
+    "box_factor": 16,
+    "total_counted": 10,
+    "db_stock": 1,
+    "diff": 9,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "MA003",
+    "name": "BOLSA MALVAVISCO ICE CREAM PLUS",
+    "counted_text": "10 Unidades",
+    "box_factor": 12,
+    "total_counted": 10,
+    "db_stock": 0,
+    "diff": 10,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "MA002",
+    "name": "BOLSA MALVAVISCO MALVA MUFFIN",
+    "counted_text": "7 Unidades",
+    "box_factor": 12,
+    "total_counted": 7,
+    "db_stock": 1,
+    "diff": 6,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA024",
+    "name": "BOLSA MD NR 47 CARAMELO MIX 10 LIBRAS",
+    "counted_text": "4 Unidades",
+    "box_factor": 4,
+    "total_counted": 4,
+    "db_stock": 1,
+    "diff": 3,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA022",
+    "name": "BOLSA MD NR 47 CARAMELO MIX 3 LIBRAS",
+    "counted_text": "3 Unidades",
+    "box_factor": 6,
+    "total_counted": 3,
+    "db_stock": 12,
+    "diff": -9,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA005",
+    "name": "BOLSA DE BON TON",
+    "counted_text": "1 caja y 4 unidades",
+    "box_factor": 12,
+    "total_counted": 16,
+    "db_stock": 8,
+    "diff": 8,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA021",
+    "name": "DISPENSADOR PECCIN CHICLE BLONG NAPOLITANO",
+    "counted_text": "12 Unidades",
+    "box_factor": 24,
+    "total_counted": 12,
+    "db_stock": 0,
+    "diff": 12,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA039",
+    "name": "BOLSA JUICE BURST",
+    "counted_text": "7 Unidades",
+    "box_factor": 12,
+    "total_counted": 7,
+    "db_stock": 0,
+    "diff": 7,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA001",
+    "name": "DISPENSADOR CANDY CHISQUETAZO",
+    "counted_text": "7 Unidades",
+    "box_factor": 12,
+    "total_counted": 7,
+    "db_stock": 0,
+    "diff": 7,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA015",
+    "name": "DISPENSADOR MD 233 KING EGG HUEVO EN CHOCOLATE",
+    "counted_text": "6 Unidades",
+    "box_factor": 12,
+    "total_counted": 6,
+    "db_stock": 0,
+    "diff": 6,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA014",
+    "name": "DISPENSADOR CANDY CHOCO CRUCH CONO",
+    "counted_text": "7 Unidades",
+    "box_factor": 12,
+    "total_counted": 7,
+    "db_stock": 0,
+    "diff": 7,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA012",
+    "name": "DISPENSADOR CHOCO GALLETIN CRISPY",
+    "counted_text": "3 Unidades",
+    "box_factor": 24,
+    "total_counted": 3,
+    "db_stock": 0,
+    "diff": 3,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "MA001",
+    "name": "BOLSA CANDY SUPLAYER MALVAVISCO SUPER MINI MINO",
+    "counted_text": "1 Unidades",
+    "box_factor": 8,
+    "total_counted": 1,
+    "db_stock": 1,
+    "diff": 0,
+    "status": "COINCIDE"
+  },
+  {
+    "code": "CA038",
+    "name": "CARAMELO CRYSTAL",
+    "counted_text": "4 Unidades",
+    "box_factor": 8,
+    "total_counted": 4,
+    "db_stock": 50,
+    "diff": -46,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA040",
+    "name": "YOHAN BALL BUBBLEGUM",
+    "counted_text": "8 Unidades",
+    "box_factor": 12,
+    "total_counted": 8,
+    "db_stock": 0,
+    "diff": 8,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA035",
+    "name": "TARRO RUGBY BALL BUBBLE GUM",
+    "counted_text": "18 Unidades",
+    "box_factor": 24,
+    "total_counted": 18,
+    "db_stock": 0,
+    "diff": 18,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA016",
+    "name": "TARRO CANDY SUPLAY MINI CHICLE TATOO",
+    "counted_text": "22 Unidades",
+    "box_factor": 24,
+    "total_counted": 22,
+    "db_stock": 241,
+    "diff": -219,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA034",
+    "name": "TARRO FRESH OLIVE BALL BUBBLEGUM",
+    "counted_text": "13 Unidades",
+    "box_factor": 12,
+    "total_counted": 13,
+    "db_stock": 0,
+    "diff": 13,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA030",
+    "name": "UNIDADES MD NR 168 CHOCOLATE MILKSTAR PANA",
+    "counted_text": "2 Unidades",
+    "box_factor": 12,
+    "total_counted": 2,
+    "db_stock": 0,
+    "diff": 2,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA006",
+    "name": "BOLSA TEDDY BEAR 4",
+    "counted_text": "11 Unidades",
+    "box_factor": 12,
+    "total_counted": 11,
+    "db_stock": 0,
+    "diff": 11,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "GA023",
+    "name": "GALLETA KIDMAX FRESA",
+    "counted_text": "21 Unidades",
+    "box_factor": 24,
+    "total_counted": 21,
+    "db_stock": 22,
+    "diff": -1,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA049",
+    "name": "FRUIT JELLY GELATINA",
+    "counted_text": "9 Unidades",
+    "box_factor": 16,
+    "total_counted": 9,
+    "db_stock": 12,
+    "diff": -3,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA048",
+    "name": "BUBBLE CREAM-CHICLE LIQUIDO",
+    "counted_text": "17 Unidades",
+    "box_factor": 20,
+    "total_counted": 17,
+    "db_stock": 18,
+    "diff": -1,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA004",
+    "name": "DISPENSADOR BON TON ROLL",
+    "counted_text": "17 Unidades",
+    "box_factor": 24,
+    "total_counted": 17,
+    "db_stock": 20,
+    "diff": -3,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA047",
+    "name": "MAGIC JELLY STICK",
+    "counted_text": "14 Unidades",
+    "box_factor": 20,
+    "total_counted": 14,
+    "db_stock": 14,
+    "diff": 0,
+    "status": "COINCIDE"
+  },
+  {
+    "code": "CA036",
+    "name": "TARRO SUPER TARZAN BUBBLE GUM",
+    "counted_text": "1 Unidades",
+    "box_factor": 12,
+    "total_counted": 1,
+    "db_stock": 1,
+    "diff": 0,
+    "status": "COINCIDE"
+  },
+  {
+    "code": "CA033",
+    "name": "TARRO MD NTC-321 OJO EN TARRO CON TRONADOR",
+    "counted_text": "2 cajas 6 unidades",
+    "box_factor": 8,
+    "total_counted": 22,
+    "db_stock": 0,
+    "diff": 22,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA028/CA029",
+    "name": "CANDY MINI BOLO SURTIDO (NIÑA / NIÑO)",
+    "counted_text": "175 Unidades",
+    "box_factor": 1,
+    "total_counted": 175,
+    "db_stock": 165.0,
+    "diff": 10.0,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA002",
+    "name": "DISPENSADOR CANDY SUPLAY CANDY BRUSH",
+    "counted_text": "1 caja 1 Unidades",
+    "box_factor": 12,
+    "total_counted": 13,
+    "db_stock": 0,
+    "diff": 13,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA012",
+    "name": "DISPENSADOR CANDY SUPLAY CHUPON LUZ",
+    "counted_text": "10 Unidades",
+    "box_factor": 12,
+    "total_counted": 10,
+    "db_stock": 0,
+    "diff": 10,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA013",
+    "name": "DISPENSADOR CANDY SUPLAY PALETA LUZ ANILLO",
+    "counted_text": "8 Unidades",
+    "box_factor": 12,
+    "total_counted": 8,
+    "db_stock": 0,
+    "diff": 8,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA043",
+    "name": "BOTELLA DE CHICLE SURTIDO",
+    "counted_text": "1 caja y 16 Unidades",
+    "box_factor": 20,
+    "total_counted": 36,
+    "db_stock": 0,
+    "diff": 36,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA017",
+    "name": "BOLSA CANDY SUPLAY MINI CHICLE TATOO",
+    "counted_text": "2 Unidades",
+    "box_factor": 24,
+    "total_counted": 2,
+    "db_stock": 0,
+    "diff": 2,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "TA010",
+    "name": "TALCO SURTIDO MIDDY BEAR 635GR.",
+    "counted_text": "2 Unidades",
+    "box_factor": 12,
+    "total_counted": 2,
+    "db_stock": 1,
+    "diff": 1,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA027",
+    "name": "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO LECHE CAJA AZUL",
+    "counted_text": "16 Unidades",
+    "box_factor": 20,
+    "total_counted": 16,
+    "db_stock": 0,
+    "diff": 16,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA025",
+    "name": "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO CHOCOLATE CAJA ANARANJADA",
+    "counted_text": "18 Unidades",
+    "box_factor": 20,
+    "total_counted": 18,
+    "db_stock": 0,
+    "diff": 18,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "CA026",
+    "name": "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO FRESA CAJA ROSADA",
+    "counted_text": "15 Unidades",
+    "box_factor": 20,
+    "total_counted": 15,
+    "db_stock": 0,
+    "diff": 15,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "TA005",
+    "name": "TOALLA HUMEDA SIPPACK MIDDY BEAR",
+    "counted_text": "5 Unidades",
+    "box_factor": 20,
+    "total_counted": 5,
+    "db_stock": 5,
+    "diff": 0,
+    "status": "COINCIDE"
+  },
+  {
+    "code": "TA004",
+    "name": "UNIDAD JN203 TOALLITA COMPRIMIDA MIDDY BEAR",
+    "counted_text": "22 Unidades",
+    "box_factor": 30,
+    "total_counted": 22,
+    "db_stock": 0,
+    "diff": 22,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "TA001",
+    "name": "TOALLAS HUMEDAS FAMILYS ROBELLY CELESTE 96 HOJAS",
+    "counted_text": "11 caja",
+    "box_factor": 12,
+    "total_counted": 132,
+    "db_stock": 289,
+    "diff": -157,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "TA002",
+    "name": "TOALLAS HUMEDAS MIDDY BEAR 80 HOJAS",
+    "counted_text": "9 Unidades",
+    "box_factor": 12,
+    "total_counted": 9,
+    "db_stock": 9,
+    "diff": 0,
+    "status": "COINCIDE"
+  },
+  {
+    "code": "TA003",
+    "name": "PAQUETE DE TOALLITA HUMEDA MIDDY BEAR 120 HOJAS",
+    "counted_text": "4 Unidades",
+    "box_factor": 12,
+    "total_counted": 4,
+    "db_stock": 0,
+    "diff": 4,
+    "status": "DIFERENCIA"
+  },
+  {
+    "code": "TA006",
+    "name": "PAPEL HIGIENICO ROBELLY 1620 HOJAS",
+    "counted_text": "23 cajas y 8 Unidades",
+    "box_factor": 24,
+    "total_counted": 560,
+    "db_stock": 156,
+    "diff": 404,
+    "status": "DIFERENCIA"
+  }
+]

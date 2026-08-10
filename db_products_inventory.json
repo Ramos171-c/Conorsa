@@ -1,0 +1,849 @@
+﻿[
+    {
+        "Id":  "deee9d74-1416-4f6b-8317-cd9034b4b98a",
+        "InternalCode":  "CA001",
+        "ProductName":  "DISPENSADOR CANDY CHISQUETAZO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 12.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "ecd86756-582a-4e99-9abf-ae69129d7f64",
+        "InternalCode":  "CA002",
+        "ProductName":  "DISPENSADOR CANDY SUPLAY CANDY BRUSH",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "811dbdf4-dad0-4b64-94b6-83bf128b3f61",
+        "InternalCode":  "CA003",
+        "ProductName":  "DISPENSADOR YUGL GOMITA GUITARRA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "73c793e3-75f6-45e9-bdc8-32a520ae517b",
+        "InternalCode":  "CA004",
+        "ProductName":  "DISPENSADOR BON TON ROLL",
+        "CurrentPhysicalStock":  20.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "0d7fa9fd-6b2c-45c3-a156-321031917a95",
+        "InternalCode":  "CA005",
+        "ProductName":  "BOLSA DE BON TON",
+        "CurrentPhysicalStock":  8.0000,
+        "Presentations":  "Caja (Factor: 12.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "07a33b19-19e1-4114-8b71-0f23853adb0f",
+        "InternalCode":  "CA006",
+        "ProductName":  "BOLSA TEDDY BEAR 4",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 12.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "bb22ee17-34e0-4d71-90cc-a22c93e89cb9",
+        "InternalCode":  "CA007",
+        "ProductName":  "TARROS NR 112 MIX TERMO CARAMELO",
+        "CurrentPhysicalStock":  10.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 6.0000, Base: 0)"
+    },
+    {
+        "Id":  "70179f8d-1155-4b5d-bcb6-7526824cb196",
+        "InternalCode":  "CA008",
+        "ProductName":  "DISPENSADOR SORPRESA DEL MUNDIAL 3D",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 20.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "33853bfb-f357-4eb1-9e8b-504a24d8bc9a",
+        "InternalCode":  "CA009",
+        "ProductName":  "HERMETICO MD 198C KING EGG CHOCOLATE HERMETICO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 6.0000, Base: 0)"
+    },
+    {
+        "Id":  "339d9aea-f150-465d-ad40-12123348d465",
+        "InternalCode":  "CA010",
+        "ProductName":  "BOLSA CANDY MINI GELATINA BOLSA GRANDE 1.5 KG.",
+        "CurrentPhysicalStock":  2.0000,
+        "Presentations":  "Caja (Factor: 8.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "9cceafe6-e33a-48f9-82b3-a2998c1fd4d4",
+        "InternalCode":  "CA011",
+        "ProductName":  "BOLSA CANDY MINI GELATINA LAS DELICIA PEQUEÑA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 40.0000, Base: 0)"
+    },
+    {
+        "Id":  "f7434b2a-104d-47f7-b580-3c149a432460",
+        "InternalCode":  "CA012",
+        "ProductName":  "DISPENSADOR CANDY SUPLAY CHUPON LUZ",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "1fa065f2-9c85-4f47-bb04-4e180fc266a4",
+        "InternalCode":  "CA013",
+        "ProductName":  "DISPENSADOR CANDY SUPLAY PALETA LUZ ANILLO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "79fb7704-768f-4fc6-ab3e-49539488fc9d",
+        "InternalCode":  "CA014",
+        "ProductName":  "DISPENSADOR CANDY CHOCO CRUCH CONO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "0c5f1db6-45c3-4ede-92ef-1b1a587baeb5",
+        "InternalCode":  "CA015",
+        "ProductName":  "DISPENSADOR MD 233 KING EGG HUEVO EN CHOCOLATE",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "18256042-ff4a-4599-b0f1-5b8520b52df9",
+        "InternalCode":  "CA016",
+        "ProductName":  "TARRO CANDY SUPLAY MINI CHICLE TATOO",
+        "CurrentPhysicalStock":  241.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "1fc1a5a4-de2d-44db-a109-43882d415ae2",
+        "InternalCode":  "CA017",
+        "ProductName":  "BOLSA CANDY SUPLAY MINI CHICLE TATOO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "e849ed4a-98d3-4e79-b633-b3b4f538cdf0",
+        "InternalCode":  "CA018",
+        "ProductName":  "DISPENSADOR MD RF 2155-3 SLAY STITCH",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 16.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "c91bedf7-2c0f-4b2b-8c16-3a4693c56b97",
+        "InternalCode":  "CA019",
+        "ProductName":  "TARRO MD MINI KRIZZY HUEVO CELESTE",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 12.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "e262f173-7da3-4922-8ec1-60eb3d837ed9",
+        "InternalCode":  "CA020",
+        "ProductName":  "TARRO MD MINI KRIZZY HUEVO ROJO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "813c5bf7-5d13-44c5-be1b-6c6f3c2edaaf",
+        "InternalCode":  "CA021",
+        "ProductName":  "DISPENSADOR PECCIN CHICLE BLONG NAPOLITANO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "8638cb55-11a0-4570-b146-5490a0219870",
+        "InternalCode":  "CA022",
+        "ProductName":  "BOLSA MD NR 47 CARAMELO MIX 3 LIBRAS",
+        "CurrentPhysicalStock":  12.0000,
+        "Presentations":  "Caja (Factor: 6.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "645d6ee6-d763-4dee-a051-322b117f85f6",
+        "InternalCode":  "CA023",
+        "ProductName":  "BOLSA MD NR 47 CARAMELO MIX 5 LIBRAS",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 6.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "7706f047-b551-4bf3-b4a4-e1c789d7850d",
+        "InternalCode":  "CA024",
+        "ProductName":  "BOLSA MD NR 47 CARAMELO MIX 10 LIBRAS",
+        "CurrentPhysicalStock":  1.0000,
+        "Presentations":  "Caja (Factor: 4.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "78ada2d4-e567-47b5-bcc2-4516bc260505",
+        "InternalCode":  "CA025",
+        "ProductName":  "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO CHOCOLATE CAJA ANARANJADA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 20.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "9c1cd76e-1e27-40c0-b7e3-ae8742e0675c",
+        "InternalCode":  "CA026",
+        "ProductName":  "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO FRESA CAJA ROSADA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 20.0000, Base: 0)"
+    },
+    {
+        "Id":  "3596d748-50de-484c-9177-a73a31cf0a9d",
+        "InternalCode":  "CA027",
+        "ProductName":  "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO LECHE CAJA AZUL",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 20.0000, Base: 0)"
+    },
+    {
+        "Id":  "d29b3b8a-06a0-4a35-b838-a2d6379aa8b3",
+        "InternalCode":  "CA028",
+        "ProductName":  "UNIDADES CANDY MINI BOLO SURTIDO NIÑA",
+        "CurrentPhysicalStock":  80.0000,
+        "Presentations":  "Caja (Factor: 100.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "cd9f8869-cf43-4514-83fa-0c08c77d5b25",
+        "InternalCode":  "CA029",
+        "ProductName":  "UNIDADES CANDY MINI BOLO SURTIDO NIÑO",
+        "CurrentPhysicalStock":  85.0000,
+        "Presentations":  "Caja (Factor: 100.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "32c107bf-fce9-4781-8255-cb8ac25b3d95",
+        "InternalCode":  "CA030",
+        "ProductName":  "UNIDADES MD NR 168 CHOCOLATE MILKSTAR PANA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 12.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "5a771a52-4cee-48b4-8784-68668b80c192",
+        "InternalCode":  "CA031",
+        "ProductName":  "UNIDADES MD NR 168 CHOCOLATE MIL STAR PANA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 6.0000, Base: 0)"
+    },
+    {
+        "Id":  "453f0d29-3a69-4ef6-8015-0a06b54f3c29",
+        "InternalCode":  "CA032",
+        "ProductName":  "MD 423 SOUR CANDY SUPER ESTIMULANTE EXTREMO ACIDO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 20.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "4b86fd98-3688-467e-a8a6-7ede606ba9ab",
+        "InternalCode":  "CA033",
+        "ProductName":  "TARRO MD NTC-321 OJO EN TARRO CON TRONADOR",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 8.0000, Base: 0)"
+    },
+    {
+        "Id":  "bfd9b45a-078a-4626-8ff2-7d421d230d6d",
+        "InternalCode":  "CA034",
+        "ProductName":  "TARRO FRESH OLIVE BALL BUBBLEGUM",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "a62e95fc-0253-4afe-a527-f178b30d3f61",
+        "InternalCode":  "CA035",
+        "ProductName":  "TARRO RUGBY BALL BUBBLE GUM",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "2ce6b1eb-9cfc-4e4c-b8cb-a82eb67e2237",
+        "InternalCode":  "CA036",
+        "ProductName":  "TARRO SUPER TARZAN BUBBLE GUM",
+        "CurrentPhysicalStock":  1.0000,
+        "Presentations":  "Caja (Factor: 12.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "7d5d1b0b-4b6a-4d99-bee1-1b896cd8a4e2",
+        "InternalCode":  "CA037",
+        "ProductName":  "KOBA TARRO FRESH OLIVE BALL BUBBLEGUM",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "d724c72a-81f4-4833-bd04-84a8c4d9277d",
+        "InternalCode":  "CA038",
+        "ProductName":  "CARAMELO CRYSTAL",
+        "CurrentPhysicalStock":  50.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 8.0000, Base: 0)"
+    },
+    {
+        "Id":  "087ab335-5664-4224-ab96-d97cb021b583",
+        "InternalCode":  "CA039",
+        "ProductName":  "BOLSA JUICE BURST",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "c178b41c-737d-4b9c-a02d-499e70a86148",
+        "InternalCode":  "CA040",
+        "ProductName":  "YOHAN BALL BUBBLEGUM",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 12.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "f4aac96e-1bfe-4cd0-b264-2e26a2d75c60",
+        "InternalCode":  "CA041",
+        "ProductName":  "BOLSA FRUTZUCOS",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 30.0000, Base: 0)"
+    },
+    {
+        "Id":  "fafa3bd1-8139-45f9-b0ef-a577d4a453c4",
+        "InternalCode":  "CA042",
+        "ProductName":  "ROLLY TWIN",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "f2fb2790-e240-4c0b-85ab-bb2eb7f410f9",
+        "InternalCode":  "CA043",
+        "ProductName":  "BOTELLA DE CHICLE SURTIDO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 20.0000, Base: 0)"
+    },
+    {
+        "Id":  "fb91490a-9220-4aff-b6fe-64d73b5e0709",
+        "InternalCode":  "CA044",
+        "ProductName":  "TOY CANDY",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 20.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "3010a75b-cdb9-4af4-8c8b-163fef7af0f4",
+        "InternalCode":  "CA045",
+        "ProductName":  "DELICIU CANDY SORPRESA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 20.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "9085ef64-d8c3-4982-82dd-7f472c0b2f55",
+        "InternalCode":  "CA046",
+        "ProductName":  "ICE CREAM GUMMY LOPIPOP",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 20.0000, Base: 0)"
+    },
+    {
+        "Id":  "4c65cd95-4083-4fed-8f8e-239cc478e97e",
+        "InternalCode":  "CA047",
+        "ProductName":  "MAGIC JELLY STICK",
+        "CurrentPhysicalStock":  14.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 20.0000, Base: 0)"
+    },
+    {
+        "Id":  "65f06d0c-6fec-4698-9b04-8e023c052f73",
+        "InternalCode":  "CA048",
+        "ProductName":  "BUBBLE CREAM-CHICLE LIQUIDO",
+        "CurrentPhysicalStock":  18.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 20.0000, Base: 0)"
+    },
+    {
+        "Id":  "eabcf65f-89e5-4fd2-bcfa-32d8f91d06d9",
+        "InternalCode":  "CA049",
+        "ProductName":  "FRUIT JELLY GELATINA",
+        "CurrentPhysicalStock":  12.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 16.0000, Base: 0)"
+    },
+    {
+        "Id":  "57203af2-015e-428a-b494-d13433ef722c",
+        "InternalCode":  "CA050",
+        "ProductName":  "KISS ALLOW CANDY",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "b3ff32c7-ed49-430b-a61f-ce3c0bd675c0",
+        "InternalCode":  "CA051",
+        "ProductName":  "FRUIT ICE CREAM",
+        "CurrentPhysicalStock":  6.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 8.0000, Base: 0)"
+    },
+    {
+        "Id":  "8ad7dfa2-d69c-4e87-b4e6-dc8e98dd7fa2",
+        "InternalCode":  "GA001",
+        "ProductName":  "GALLETAS WAFFER AMORIS CHOCOLATE",
+        "CurrentPhysicalStock":  3.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 30.0000, Base: 0)"
+    },
+    {
+        "Id":  "ee589150-7609-4047-ab2d-25235914079c",
+        "InternalCode":  "GA002",
+        "ProductName":  "GALLETAS WAFFER AMORIS FRESA",
+        "CurrentPhysicalStock":  3.0000,
+        "Presentations":  "Caja (Factor: 30.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "ab579245-8067-46f9-8e9c-7288c1a80f50",
+        "InternalCode":  "GA003",
+        "ProductName":  "GALLETAS WAFFER AMORIS ESCURETO",
+        "CurrentPhysicalStock":  3.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 30.0000, Base: 0)"
+    },
+    {
+        "Id":  "b14a1d29-6795-4b33-91a6-85ff049c8225",
+        "InternalCode":  "GA004",
+        "ProductName":  "GALLETAS TRIO 4 CANDY CHOCOLATE",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "6a8ee8ea-3eb9-4cdf-bcc7-01fbc992cba9",
+        "InternalCode":  "GA005",
+        "ProductName":  "GALLETAS TRIO 4 CANDY FRESA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "b61425ce-a6b9-4893-8424-5b8ccbac4f09",
+        "InternalCode":  "GA006",
+        "ProductName":  "GALLETAS TRIO 4 CANDY LIMON",
+        "CurrentPhysicalStock":  1.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "c7411618-6851-4c46-867f-c1f12fc5cf88",
+        "InternalCode":  "GA007",
+        "ProductName":  "TWINNIES FRESA",
+        "CurrentPhysicalStock":  1.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "0d3404b8-25e9-4ce4-b58e-de7d4d4d533c",
+        "InternalCode":  "GA008",
+        "ProductName":  "TWINNIES CHOCO VAINILLA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "48a7163b-be65-4441-bcb4-c1334e4093e4",
+        "InternalCode":  "GA009",
+        "ProductName":  "TWINNIES LIMON",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "73528d5a-0278-4f1b-be36-e344dd700f27",
+        "InternalCode":  "GA010",
+        "ProductName":  "TWINNIES VAINILLA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "2cd99afe-a50c-465d-9619-daf7fe026df3",
+        "InternalCode":  "GA011",
+        "ProductName":  "TWINNIES CHOCO CHOCO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "cf5a96cc-8897-45f1-997b-b83d9e0afc62",
+        "InternalCode":  "GA012",
+        "ProductName":  "DISPENSADOR CHOCO GALLETIN CRISPY",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "920bde0f-b8fa-450c-ae66-f2edf1219b50",
+        "InternalCode":  "GA013",
+        "ProductName":  "GALLETA CANDY GLUCOSA CREMELO FRESA",
+        "CurrentPhysicalStock":  41.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "b76c4bd1-f981-427f-8300-6d970b1a2dfb",
+        "InternalCode":  "GA014",
+        "ProductName":  "GALLETA CANDY GLUCOSA CREMELO COCO",
+        "CurrentPhysicalStock":  41.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "2c5fb2f9-b441-48d3-bbd8-d19eb76818bf",
+        "InternalCode":  "GA015",
+        "ProductName":  "GALLETA CANDY GLUCOSA CREMELO LECHE",
+        "CurrentPhysicalStock":  15.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "08c0966b-f458-426c-a826-2082792898fc",
+        "InternalCode":  "GA016",
+        "ProductName":  "GALLETA AMORIS REDONDA 125GR. FRESA",
+        "CurrentPhysicalStock":  27.0000,
+        "Presentations":  "Caja (Factor: 36.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "91f3d68f-c05b-44e7-8731-26b07529fb60",
+        "InternalCode":  "GA017",
+        "ProductName":  "GALLETA AMORIS REDONDA 125GR. CHOCOLATE",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 36.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "77a66b0f-22b0-45ef-82e3-385a88281ed6",
+        "InternalCode":  "GA018",
+        "ProductName":  "GALLETA AMORIS REDONDA 125GR. ESCURETO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 36.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "67bb2ee7-e185-43b2-be3f-c9cfbeac2860",
+        "InternalCode":  "GA019",
+        "ProductName":  "TARROS MD SUPER KRUNCH ORANGE",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 6.0000, Base: 0)"
+    },
+    {
+        "Id":  "f86bb4ca-0667-48dc-9226-bd537e276c29",
+        "InternalCode":  "GA020",
+        "ProductName":  "GALLETA JUMBO FRESA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 10.0000, Base: 0)"
+    },
+    {
+        "Id":  "ff63cdb9-c689-48dc-9b78-8534d3c686c9",
+        "InternalCode":  "GA021",
+        "ProductName":  "GALLETA JUMBO VAINILLA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 10.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "bceb95f8-183a-4fd9-a0c7-aca9def22cf4",
+        "InternalCode":  "GA022",
+        "ProductName":  "GALLETA JUMBO CHOCOLATE",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 10.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "67c3e325-6b3b-4756-bfda-519638950ded",
+        "InternalCode":  "GA023",
+        "ProductName":  "GALLETA KIDMAX FRESA",
+        "CurrentPhysicalStock":  22.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "e263669b-9ad7-4e78-a764-0b1f59adddec",
+        "InternalCode":  "GA024",
+        "ProductName":  "GALLETA KIDMAX VAINILLA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "142e8a3d-3b1a-4211-98c5-cacf06d429bc",
+        "InternalCode":  "GA025",
+        "ProductName":  "GALLETA KIDMAX CHOCOLATE",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "ece8447f-4196-4f14-aa44-8fe63c692121",
+        "InternalCode":  "GA026",
+        "ProductName":  "TORTITAS ZOO ANIMADOS FRESA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 6.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "1c0e4c90-a97e-43e0-b121-3941947178a5",
+        "InternalCode":  "GA027",
+        "ProductName":  "TORTITAS ZOO ANIMADOS VAINILLA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 6.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "de2b8165-fe68-4fdf-97a9-abfb1bc95fa2",
+        "InternalCode":  "GA028",
+        "ProductName":  "TORTITAS ZOO ANIMADOS CHOCOLATE",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 6.0000, Base: 0)"
+    },
+    {
+        "Id":  "8a8be868-90b6-4a9a-80fa-d982ad6c93af",
+        "InternalCode":  "GA029",
+        "ProductName":  "GALLETAS WAFFER ZOO ANIMADOS FRESA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 2.0000, Base: 0)"
+    },
+    {
+        "Id":  "8faf2914-ac81-415b-bcf5-f2d9522064c6",
+        "InternalCode":  "GA030",
+        "ProductName":  "GALLETAS WAFFER ZOO ANIMADOS CHOCOLATE",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 2.0000, Base: 0)"
+    },
+    {
+        "Id":  "b596a44f-677f-44e2-946b-a3843aca5660",
+        "InternalCode":  "GA031",
+        "ProductName":  "GALLETAS WAFFER AMORIS CODIGO SURTIDO",
+        "CurrentPhysicalStock":  30.0000,
+        "Presentations":  "Caja (Factor: 30.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "c36ec3ca-6a01-4eef-9fd2-edf519852a54",
+        "InternalCode":  "GA032",
+        "ProductName":  "GALLETA AMORIS REDONDA 125GR. CODIGO SURTIDO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 36.0000, Base: 0)"
+    },
+    {
+        "Id":  "f6a176f2-1e8f-404c-ba16-d79c45267359",
+        "InternalCode":  "GA033",
+        "ProductName":  "GALLETA TWINNIES CODIGO SURTIDO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "b33a7687-0415-4101-9009-4a328721946e",
+        "InternalCode":  "GA034",
+        "ProductName":  "GALLETA JUMBO CODIGO SURTIDO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 10.0000, Base: 0)"
+    },
+    {
+        "Id":  "22ddb290-62c4-455a-a7a5-4c24ccf48a20",
+        "InternalCode":  "GA035",
+        "ProductName":  "GALLETA KIDMAX SURTIDO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "UNIDAD (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "c959192b-42b3-4a92-b58f-1017aa6428b0",
+        "InternalCode":  "GA036",
+        "ProductName":  "TORTITAS ZOO ANIMADOS SURTIDO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "UNIDAD (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "8e3ae59a-a76f-4918-863d-f063a24bd7e2",
+        "InternalCode":  "GA037",
+        "ProductName":  "GALLETAS WAFFER ZOO ANIMADOS SURTIDO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "UNIDAD (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "7b00b7f8-9f17-4c02-8c6e-10509bb15ffd",
+        "InternalCode":  "GA038",
+        "ProductName":  "GALLETAS TRIO 4 CANDY SURTIDO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "2d307355-bcc6-454c-bee0-1ea06762d7cb",
+        "InternalCode":  "GA039",
+        "ProductName":  "MD CHOCOLATE CON LECHE BARRA AZUL",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "f4d47034-7e2e-4992-ac11-41d3c01a9a74",
+        "InternalCode":  "GA040",
+        "ProductName":  "MD CHOCOLATE BARRA COCO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "8925b439-a5ce-46d3-920b-3f26842da9b3",
+        "InternalCode":  "GA041",
+        "ProductName":  "BL COOKIE LOLIPO CON LUZ",
+        "CurrentPhysicalStock":  19.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "599b110f-9db5-46dd-bc69-4cafdb9cb588",
+        "InternalCode":  "GA042",
+        "ProductName":  "CHOCOLATE COPITAS",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "2d027878-eac3-44ef-a092-4ed1417b6237",
+        "InternalCode":  "MA001",
+        "ProductName":  "BOLSA CANDY SUPLAYER MALVAVISCO SUPER MINI MINO",
+        "CurrentPhysicalStock":  1.0000,
+        "Presentations":  "Caja (Factor: 8.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "f447f07a-c523-472e-8811-422361dbc232",
+        "InternalCode":  "MA002",
+        "ProductName":  "BOLSA MALVAVISCO MALVA MUFFIN",
+        "CurrentPhysicalStock":  1.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "c2191142-85ca-4759-94d1-240eb4cde8aa",
+        "InternalCode":  "MA003",
+        "ProductName":  "BOLSA MALVAVISCO ICE CREAM PLUS",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "1d53f9b1-efc4-4659-ae33-de38d5faddd5",
+        "InternalCode":  "MA004",
+        "ProductName":  "BOLSA MALVAVISCO ICE CREAM ACIDULADO",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 12.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "708c5046-0f9d-4cb7-8e28-3cab00463f72",
+        "InternalCode":  "MA005",
+        "ProductName":  "BOLSA MALVAVISCO YETI MALLOW",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "310e83be-a750-4bcc-a9f2-aaf7a7f53ef4",
+        "InternalCode":  "MA006",
+        "ProductName":  "BOLSA MALVAVISCO RELLENO TRI PACK",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 15.0000, Base: 0)"
+    },
+    {
+        "Id":  "9ba893a1-123f-4475-aa81-f69c677e0d00",
+        "InternalCode":  "MA007",
+        "ProductName":  "BOLSA MALVAVISCO 3D",
+        "CurrentPhysicalStock":  1.0000,
+        "Presentations":  "Caja (Factor: 16.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "e46b088c-b645-4162-a88e-33657092c1d8",
+        "InternalCode":  "MA008",
+        "ProductName":  "DISPENSADOR MALVAVISCO MALVA POP",
+        "CurrentPhysicalStock":  7.0000,
+        "Presentations":  "Caja (Factor: 12.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "4869ca03-c480-404b-9477-f7c596a6e41b",
+        "InternalCode":  "MA009",
+        "ProductName":  "MALVAVISCO DIPA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 20.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "9a04b2b1-350c-46e1-bd22-540f909db8f7",
+        "InternalCode":  "MA010",
+        "ProductName":  "COTTOM CANDY COLORFULL ROLLS",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 20.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "f0fb285f-7443-41a2-9b02-4ddaf1541af4",
+        "InternalCode":  "MA011",
+        "ProductName":  "RAINBOW LONG MARSHMALLOW",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 8.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "a3bd5fb3-7ac5-4c9a-a707-c98733983f1d",
+        "InternalCode":  "MA012",
+        "ProductName":  "TWINST MARSHMALLOW",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 8.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "202782bb-9a3e-4195-9878-fd33377cb4ea",
+        "InternalCode":  "MA013",
+        "ProductName":  "MARSHMALLOW CANDY LOKA",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "bfa4434a-0322-44d4-9381-f6a5668dc8ac",
+        "InternalCode":  "MA014",
+        "ProductName":  "MARSHMALLOW",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "e7b82622-6b9d-4892-8d1b-ed477aa2cd68",
+        "InternalCode":  "MA015",
+        "ProductName":  "GUITAR SHAPED MARSMALLOW",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 24.0000, Base: 0)"
+    },
+    {
+        "Id":  "0f80a8f3-0287-4680-9a31-c2ad0aaabdc5",
+        "InternalCode":  "TA001",
+        "ProductName":  "TOALLAS HUMEDAS FAMILYS ROBELLY CELESTE 96 HOJAS",
+        "CurrentPhysicalStock":  289.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "25d0b2c8-b2d5-4cda-9322-3642a6dc46a7",
+        "InternalCode":  "TA002",
+        "ProductName":  "TOALLAS HUMEDAS MIDDY BEAR 80 HOJAS",
+        "CurrentPhysicalStock":  9.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "68bd6128-7d6c-49f0-8471-5763bd6f5e03",
+        "InternalCode":  "TA003",
+        "ProductName":  "PAQUETE DE TOALLITA HUMEDA MIDDY BEAR 120 HOJAS",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 12.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "841246bf-dd38-4a3b-a92e-4eb422f85836",
+        "InternalCode":  "TA004",
+        "ProductName":  "UNIDAD JN203 TOALLITA COMPRIMIDA MIDDY BEAR",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 30.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "fe53b524-9140-4e8f-8d91-43dbaf9aa30c",
+        "InternalCode":  "TA005",
+        "ProductName":  "TOALLA HUMEDA SIPPACK MIDDY BEAR",
+        "CurrentPhysicalStock":  5.0000,
+        "Presentations":  "Caja (Factor: 20.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "c949b629-0545-439d-9321-010c53be6115",
+        "InternalCode":  "TA006",
+        "ProductName":  "PAPEL HIGIENICO ROBELLY 1620 HOJAS",
+        "CurrentPhysicalStock":  156.0000,
+        "Presentations":  "Caja (Factor: 24.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "ccd4e8f4-2e82-4a66-880a-17d510a9d2f0",
+        "InternalCode":  "TA007",
+        "ProductName":  "BOLSON DE PAÑALES CALSON OSITO -TALLAS; S,M,L,XL,XXL,3XL Y 4XL.",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 4.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "63fd0223-f5e5-4171-a117-199d6a35c733",
+        "InternalCode":  "TA008",
+        "ProductName":  "BOLSON DE PAÑALES PEGA PEGA OSITO -TALLAS; S,M,L,XL,XXL Y XXXL.",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 4.0000, Base: 0)"
+    },
+    {
+        "Id":  "953f7bf0-da8c-495d-a0e3-718703e982a7",
+        "InternalCode":  "TA009",
+        "ProductName":  "PAQUETE DE PAÑAL ADULTO MOMMY BEAR -TALLAS; M,L,XL.",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 8.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "bb7e87bf-ca34-4433-a282-1c329a654437",
+        "InternalCode":  "TA010",
+        "ProductName":  "TALCO SURTIDO MIDDY BEAR 635GR.",
+        "CurrentPhysicalStock":  1.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    },
+    {
+        "Id":  "f0c1c569-f978-48e7-a819-645477087f8d",
+        "InternalCode":  "TA011",
+        "ProductName":  "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6XL",
+        "CurrentPhysicalStock":  0.0000,
+        "Presentations":  "Caja (Factor: 4.0000, Base: 0) | Unidad (Factor: 1.0000, Base: 1)"
+    },
+    {
+        "Id":  "08a9f635-cfcc-43f7-930f-33677077ae43",
+        "InternalCode":  "TA012",
+        "ProductName":  "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL",
+        "CurrentPhysicalStock":  6.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 4.0000, Base: 0)"
+    },
+    {
+        "Id":  "4bf349ae-b841-4d66-a47f-df7a076cb969",
+        "InternalCode":  "TA013",
+        "ProductName":  "PAPEL HIGIENICO ROBELLY 1620 HOJAS",
+        "CurrentPhysicalStock":  396.0000,
+        "Presentations":  "Unidad (Factor: 1.0000, Base: 1) | Caja (Factor: 12.0000, Base: 0)"
+    }
+]

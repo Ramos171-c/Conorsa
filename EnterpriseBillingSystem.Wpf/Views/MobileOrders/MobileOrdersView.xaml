@@ -171,6 +171,14 @@
                                         </DataGridTemplateColumn.CellTemplate>
                                     </DataGridTemplateColumn>
 
+                                    <DataGridTemplateColumn Header="Vendedor" Width="150">
+                                         <DataGridTemplateColumn.CellTemplate>
+                                             <DataTemplate>
+                                                 <TextBlock Text="{Binding CreatedBy}" VerticalAlignment="Center" Margin="6,0" TextWrapping="NoWrap" TextTrimming="CharacterEllipsis" FontWeight="SemiBold" Foreground="#475569" />
+                                             </DataTemplate>
+                                         </DataGridTemplateColumn.CellTemplate>
+                                     </DataGridTemplateColumn>
+
                                     <DataGridTemplateColumn Header="Fecha Pedido" Width="140">
                                         <DataGridTemplateColumn.CellTemplate>
                                             <DataTemplate>

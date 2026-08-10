@@ -1,0 +1,728 @@
+﻿[
+    {
+        "Id":  "deee9d74-1416-4f6b-8317-cd9034b4b98a",
+        "InternalCode":  "CA001",
+        "Name":  "DISPENSADOR CANDY CHISQUETAZO",
+        "Description":  "DISPENSADOR CANDY CHISQUETAZO (U/E: 1*12*24)"
+    },
+    {
+        "Id":  "ecd86756-582a-4e99-9abf-ae69129d7f64",
+        "InternalCode":  "CA002",
+        "Name":  "DISPENSADOR CANDY SUPLAY CANDY BRUSH",
+        "Description":  "DISPENSADOR CANDY SUPLAY CANDY BRUSH (U/E: 1*12*24)"
+    },
+    {
+        "Id":  "811dbdf4-dad0-4b64-94b6-83bf128b3f61",
+        "InternalCode":  "CA003",
+        "Name":  "DISPENSADOR YUGL GOMITA GUITARRA",
+        "Description":  "DISPENSADOR YUGL GOMITA GUITARRA (U/E: 1*12*24)"
+    },
+    {
+        "Id":  "73c793e3-75f6-45e9-bdc8-32a520ae517b",
+        "InternalCode":  "CA004",
+        "Name":  "DISPENSADOR BON TON ROLL",
+        "Description":  "DISPENSADOR BON TON ROLL (U/E: 1*24*30)"
+    },
+    {
+        "Id":  "0d7fa9fd-6b2c-45c3-a156-321031917a95",
+        "InternalCode":  "CA005",
+        "Name":  "BOLSA DE BON TON",
+        "Description":  "BOLSA DE BON TON (U/E: 1*12*50)"
+    },
+    {
+        "Id":  "07a33b19-19e1-4114-8b71-0f23853adb0f",
+        "InternalCode":  "CA006",
+        "Name":  "BOLSA TEDDY BEAR 4",
+        "Description":  "BOLSA TEDDY BEAR 4 (U/E: 1*12*150)"
+    },
+    {
+        "Id":  "bb22ee17-34e0-4d71-90cc-a22c93e89cb9",
+        "InternalCode":  "CA007",
+        "Name":  "TARROS NR 112 MIX TERMO CARAMELO",
+        "Description":  "TARROS NR 112 MIX TERMO CARAMELO (U/E: 1*6*800)"
+    },
+    {
+        "Id":  "70179f8d-1155-4b5d-bcb6-7526824cb196",
+        "InternalCode":  "CA008",
+        "Name":  "DISPENSADOR SORPRESA DEL MUNDIAL 3D",
+        "Description":  "DISPENSADOR SORPRESA DEL MUNDIAL 3D (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "33853bfb-f357-4eb1-9e8b-504a24d8bc9a",
+        "InternalCode":  "CA009",
+        "Name":  "HERMETICO MD 198C KING EGG CHOCOLATE HERMETICO",
+        "Description":  "HERMETICO MD 198C KING EGG CHOCOLATE HERMETICO (U/E: 1*6*60)"
+    },
+    {
+        "Id":  "339d9aea-f150-465d-ad40-12123348d465",
+        "InternalCode":  "CA010",
+        "Name":  "BOLSA CANDY MINI GELATINA BOLSA GRANDE 1.5 KG.",
+        "Description":  "BOLSA CANDY MINI GELATINA BOLSA GRANDE 1.5 KG. (U/E: 1*8*100)"
+    },
+    {
+        "Id":  "9cceafe6-e33a-48f9-82b3-a2998c1fd4d4",
+        "InternalCode":  "CA011",
+        "Name":  "BOLSA CANDY MINI GELATINA LAS DELICIA PEQUEÑA",
+        "Description":  "BOLSA CANDY MINI GELATINA LAS DELICIA PEQUEÑA (U/E: 1*40*20)"
+    },
+    {
+        "Id":  "f7434b2a-104d-47f7-b580-3c149a432460",
+        "InternalCode":  "CA012",
+        "Name":  "DISPENSADOR CANDY SUPLAY CHUPON LUZ",
+        "Description":  "DISPENSADOR CANDY SUPLAY CHUPON LUZ (U/E: 1*12*24)"
+    },
+    {
+        "Id":  "1fa065f2-9c85-4f47-bb04-4e180fc266a4",
+        "InternalCode":  "CA013",
+        "Name":  "DISPENSADOR CANDY SUPLAY PALETA LUZ ANILLO",
+        "Description":  "DISPENSADOR CANDY SUPLAY PALETA LUZ ANILLO (U/E: 1*12*24)"
+    },
+    {
+        "Id":  "79fb7704-768f-4fc6-ab3e-49539488fc9d",
+        "InternalCode":  "CA014",
+        "Name":  "DISPENSADOR CANDY CHOCO CRUCH CONO",
+        "Description":  "DISPENSADOR CANDY CHOCO CRUCH CONO (U/E: 1*12*20)"
+    },
+    {
+        "Id":  "0c5f1db6-45c3-4ede-92ef-1b1a587baeb5",
+        "InternalCode":  "CA015",
+        "Name":  "DISPENSADOR MD 233 KING EGG HUEVO EN CHOCOLATE",
+        "Description":  "DISPENSADOR MD 233 KING EGG HUEVO EN CHOCOLATE (U/E: 1*12*24)"
+    },
+    {
+        "Id":  "18256042-ff4a-4599-b0f1-5b8520b52df9",
+        "InternalCode":  "CA016",
+        "Name":  "TARRO CANDY SUPLAY MINI CHICLE TATOO",
+        "Description":  "TARRO CANDY SUPLAY MINI CHICLE TATOO (U/E: 1*24*150)"
+    },
+    {
+        "Id":  "1fc1a5a4-de2d-44db-a109-43882d415ae2",
+        "InternalCode":  "CA017",
+        "Name":  "BOLSA CANDY SUPLAY MINI CHICLE TATOO",
+        "Description":  "BOLSA CANDY SUPLAY MINI CHICLE TATOO (U/E: 1*24*150)"
+    },
+    {
+        "Id":  "e849ed4a-98d3-4e79-b633-b3b4f538cdf0",
+        "InternalCode":  "CA018",
+        "Name":  "DISPENSADOR MD RF 2155-3 SLAY STITCH",
+        "Description":  "DISPENSADOR MD RF 2155-3 SLAY STITCH (U/E: 1*16*6)"
+    },
+    {
+        "Id":  "c91bedf7-2c0f-4b2b-8c16-3a4693c56b97",
+        "InternalCode":  "CA019",
+        "Name":  "TARRO MD MINI KRIZZY HUEVO CELESTE",
+        "Description":  "TARRO MD MINI KRIZZY HUEVO CELESTE (U/E: 1*12*60)"
+    },
+    {
+        "Id":  "e262f173-7da3-4922-8ec1-60eb3d837ed9",
+        "InternalCode":  "CA020",
+        "Name":  "TARRO MD MINI KRIZZY HUEVO ROJO",
+        "Description":  "TARRO MD MINI KRIZZY HUEVO ROJO (U/E: 1*12*60)"
+    },
+    {
+        "Id":  "813c5bf7-5d13-44c5-be1b-6c6f3c2edaaf",
+        "InternalCode":  "CA021",
+        "Name":  "DISPENSADOR PECCIN CHICLE BLONG NAPOLITANO",
+        "Description":  "DISPENSADOR PECCIN CHICLE BLONG NAPOLITANO (U/E: 1*24*40)"
+    },
+    {
+        "Id":  "8638cb55-11a0-4570-b146-5490a0219870",
+        "InternalCode":  "CA022",
+        "Name":  "BOLSA MD NR 47 CARAMELO MIX 3 LIBRAS",
+        "Description":  "BOLSA MD NR 47 CARAMELO MIX 3 LIBRAS (U/E: 1*6)"
+    },
+    {
+        "Id":  "645d6ee6-d763-4dee-a051-322b117f85f6",
+        "InternalCode":  "CA023",
+        "Name":  "BOLSA MD NR 47 CARAMELO MIX 5 LIBRAS",
+        "Description":  "BOLSA MD NR 47 CARAMELO MIX 5 LIBRAS (U/E: 1*6)"
+    },
+    {
+        "Id":  "7706f047-b551-4bf3-b4a4-e1c789d7850d",
+        "InternalCode":  "CA024",
+        "Name":  "BOLSA MD NR 47 CARAMELO MIX 10 LIBRAS",
+        "Description":  "BOLSA MD NR 47 CARAMELO MIX 10 LIBRAS (U/E: 1*4)"
+    },
+    {
+        "Id":  "78ada2d4-e567-47b5-bcc2-4516bc260505",
+        "InternalCode":  "CA025",
+        "Name":  "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO CHOCOLATE CAJA ANARANJADA",
+        "Description":  "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO CHOCOLATE CAJA ANARANJADA (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "9c1cd76e-1e27-40c0-b7e3-ae8742e0675c",
+        "InternalCode":  "CA026",
+        "Name":  "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO FRESA CAJA ROSADA",
+        "Description":  "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO FRESA CAJA ROSADA (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "3596d748-50de-484c-9177-a73a31cf0a9d",
+        "InternalCode":  "CA027",
+        "Name":  "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO LECHE CAJA AZUL",
+        "Description":  "DISPENSADOR MD CRISPY TWINS DOBLE ROLLO LECHE CAJA AZUL (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "d29b3b8a-06a0-4a35-b838-a2d6379aa8b3",
+        "InternalCode":  "CA028",
+        "Name":  "UNIDADES CANDY MINI BOLO SURTIDO NIÑA",
+        "Description":  "UNIDADES CANDY MINI BOLO SURTIDO NIÑA (U/E: 1*100)"
+    },
+    {
+        "Id":  "cd9f8869-cf43-4514-83fa-0c08c77d5b25",
+        "InternalCode":  "CA029",
+        "Name":  "UNIDADES CANDY MINI BOLO SURTIDO NIÑO",
+        "Description":  "UNIDADES CANDY MINI BOLO SURTIDO NIÑO (U/E: 1*100)"
+    },
+    {
+        "Id":  "32c107bf-fce9-4781-8255-cb8ac25b3d95",
+        "InternalCode":  "CA030",
+        "Name":  "UNIDADES MD NR 168 CHOCOLATE MILKSTAR PANA",
+        "Description":  "UNIDADES MD NR 168 CHOCOLATE MILKSTAR PANA (U/E: 1*12*40)"
+    },
+    {
+        "Id":  "5a771a52-4cee-48b4-8784-68668b80c192",
+        "InternalCode":  "CA031",
+        "Name":  "UNIDADES MD NR 168 CHOCOLATE MIL STAR PANA",
+        "Description":  "UNIDADES MD NR 168 CHOCOLATE MIL STAR PANA (U/E: 1*6*40)"
+    },
+    {
+        "Id":  "453f0d29-3a69-4ef6-8015-0a06b54f3c29",
+        "InternalCode":  "CA032",
+        "Name":  "MD 423 SOUR CANDY SUPER ESTIMULANTE EXTREMO ACIDO",
+        "Description":  "MD 423 SOUR CANDY SUPER ESTIMULANTE EXTREMO ACIDO (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "4b86fd98-3688-467e-a8a6-7ede606ba9ab",
+        "InternalCode":  "CA033",
+        "Name":  "TARRO MD NTC-321 OJO EN TARRO CON TRONADOR",
+        "Description":  "TARRO MD NTC-321 OJO EN TARRO CON TRONADOR (U/E: 1*8*60)"
+    },
+    {
+        "Id":  "bfd9b45a-078a-4626-8ff2-7d421d230d6d",
+        "InternalCode":  "CA034",
+        "Name":  "TARRO FRESH OLIVE BALL BUBBLEGUM",
+        "Description":  "TARRO FRESH OLIVE BALL BUBBLEGUM (U/E: 1*12*150)"
+    },
+    {
+        "Id":  "a62e95fc-0253-4afe-a527-f178b30d3f61",
+        "InternalCode":  "CA035",
+        "Name":  "TARRO RUGBY BALL BUBBLE GUM",
+        "Description":  "TARRO RUGBY BALL BUBBLE GUM (U/E: 1*24*220)"
+    },
+    {
+        "Id":  "2ce6b1eb-9cfc-4e4c-b8cb-a82eb67e2237",
+        "InternalCode":  "CA036",
+        "Name":  "TARRO SUPER TARZAN BUBBLE GUM",
+        "Description":  "TARRO SUPER TARZAN BUBBLE GUM (U/E: 1*12*250)"
+    },
+    {
+        "Id":  "7d5d1b0b-4b6a-4d99-bee1-1b896cd8a4e2",
+        "InternalCode":  "CA037",
+        "Name":  "KOBA TARRO FRESH OLIVE BALL BUBBLEGUM",
+        "Description":  "KOBA TARRO FRESH OLIVE BALL BUBBLEGUM (U/E: 1*24*100)"
+    },
+    {
+        "Id":  "d724c72a-81f4-4833-bd04-84a8c4d9277d",
+        "InternalCode":  "CA038",
+        "Name":  "CARAMELO CRYSTAL",
+        "Description":  "CARAMELO CRYSTAL (U/E: 1*8*200)"
+    },
+    {
+        "Id":  "087ab335-5664-4224-ab96-d97cb021b583",
+        "InternalCode":  "CA039",
+        "Name":  "BOLSA JUICE BURST",
+        "Description":  "BOLSA JUICE BURST (U/E: 1*12*150)"
+    },
+    {
+        "Id":  "c178b41c-737d-4b9c-a02d-499e70a86148",
+        "InternalCode":  "CA040",
+        "Name":  "YOHAN BALL BUBBLEGUM",
+        "Description":  "YOHAN BALL BUBBLEGUM (U/E: 1*12*250)"
+    },
+    {
+        "Id":  "f4aac96e-1bfe-4cd0-b264-2e26a2d75c60",
+        "InternalCode":  "CA041",
+        "Name":  "BOLSA FRUTZUCOS",
+        "Description":  "BOLSA FRUTZUCOS (U/E: 1*30*20)"
+    },
+    {
+        "Id":  "fafa3bd1-8139-45f9-b0ef-a577d4a453c4",
+        "InternalCode":  "CA042",
+        "Name":  "ROLLY TWIN",
+        "Description":  "ROLLY TWIN (U/E: 1*12*20)"
+    },
+    {
+        "Id":  "f2fb2790-e240-4c0b-85ab-bb2eb7f410f9",
+        "InternalCode":  "CA043",
+        "Name":  "BOTELLA DE CHICLE SURTIDO",
+        "Description":  "BOTELLA DE CHICLE SURTIDO (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "fb91490a-9220-4aff-b6fe-64d73b5e0709",
+        "InternalCode":  "CA044",
+        "Name":  "TOY CANDY",
+        "Description":  "TOY CANDY (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "3010a75b-cdb9-4af4-8c8b-163fef7af0f4",
+        "InternalCode":  "CA045",
+        "Name":  "DELICIU CANDY SORPRESA",
+        "Description":  "DELICIU CANDY SORPRESA (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "9085ef64-d8c3-4982-82dd-7f472c0b2f55",
+        "InternalCode":  "CA046",
+        "Name":  "ICE CREAM GUMMY LOPIPOP",
+        "Description":  "ICE CREAM GUMMY LOPIPOP (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "4c65cd95-4083-4fed-8f8e-239cc478e97e",
+        "InternalCode":  "CA047",
+        "Name":  "MAGIC JELLY STICK",
+        "Description":  "MAGIC JELLY STICK (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "65f06d0c-6fec-4698-9b04-8e023c052f73",
+        "InternalCode":  "CA048",
+        "Name":  "BUBBLE CREAM-CHICLE LIQUIDO",
+        "Description":  "BUBBLE CREAM-CHICLE LIQUIDO (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "eabcf65f-89e5-4fd2-bcfa-32d8f91d06d9",
+        "InternalCode":  "CA049",
+        "Name":  "FRUIT JELLY GELATINA",
+        "Description":  "FRUIT JELLY GELATINA (U/E: 1*16*30)"
+    },
+    {
+        "Id":  "57203af2-015e-428a-b494-d13433ef722c",
+        "InternalCode":  "CA050",
+        "Name":  "KISS ALLOW CANDY",
+        "Description":  "KISS ALLOW CANDY (U/E: 1*12*30)"
+    },
+    {
+        "Id":  "b3ff32c7-ed49-430b-a61f-ce3c0bd675c0",
+        "InternalCode":  "CA051",
+        "Name":  "FRUIT ICE CREAM",
+        "Description":  "FRUIT ICE CREAM (U/E: 1*8*30)"
+    },
+    {
+        "Id":  "8ad7dfa2-d69c-4e87-b4e6-dc8e98dd7fa2",
+        "InternalCode":  "GA001",
+        "Name":  "GALLETAS WAFFER AMORIS CHOCOLATE",
+        "Description":  "GALLETAS WAFFER AMORIS CHOCOLATE (U/E: 1/30)"
+    },
+    {
+        "Id":  "ee589150-7609-4047-ab2d-25235914079c",
+        "InternalCode":  "GA002",
+        "Name":  "GALLETAS WAFFER AMORIS FRESA",
+        "Description":  "GALLETAS WAFFER AMORIS FRESA (U/E: 1/30)"
+    },
+    {
+        "Id":  "ab579245-8067-46f9-8e9c-7288c1a80f50",
+        "InternalCode":  "GA003",
+        "Name":  "GALLETAS WAFFER AMORIS ESCURETO",
+        "Description":  "GALLETAS WAFFER AMORIS ESCURETO (U/E: 1/30)"
+    },
+    {
+        "Id":  "b14a1d29-6795-4b33-91a6-85ff049c8225",
+        "InternalCode":  "GA004",
+        "Name":  "GALLETAS TRIO 4 CANDY CHOCOLATE",
+        "Description":  "GALLETAS TRIO 4 CANDY CHOCOLATE (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "6a8ee8ea-3eb9-4cdf-bcc7-01fbc992cba9",
+        "InternalCode":  "GA005",
+        "Name":  "GALLETAS TRIO 4 CANDY FRESA",
+        "Description":  "GALLETAS TRIO 4 CANDY FRESA (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "b61425ce-a6b9-4893-8424-5b8ccbac4f09",
+        "InternalCode":  "GA006",
+        "Name":  "GALLETAS TRIO 4 CANDY LIMON",
+        "Description":  "GALLETAS TRIO 4 CANDY LIMON (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "c7411618-6851-4c46-867f-c1f12fc5cf88",
+        "InternalCode":  "GA007",
+        "Name":  "TWINNIES FRESA",
+        "Description":  "TWINNIES FRESA (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "0d3404b8-25e9-4ce4-b58e-de7d4d4d533c",
+        "InternalCode":  "GA008",
+        "Name":  "TWINNIES CHOCO VAINILLA",
+        "Description":  "TWINNIES CHOCO VAINILLA (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "48a7163b-be65-4441-bcb4-c1334e4093e4",
+        "InternalCode":  "GA009",
+        "Name":  "TWINNIES LIMON",
+        "Description":  "TWINNIES LIMON (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "73528d5a-0278-4f1b-be36-e344dd700f27",
+        "InternalCode":  "GA010",
+        "Name":  "TWINNIES VAINILLA",
+        "Description":  "TWINNIES VAINILLA (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "2cd99afe-a50c-465d-9619-daf7fe026df3",
+        "InternalCode":  "GA011",
+        "Name":  "TWINNIES CHOCO CHOCO",
+        "Description":  "TWINNIES CHOCO CHOCO (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "cf5a96cc-8897-45f1-997b-b83d9e0afc62",
+        "InternalCode":  "GA012",
+        "Name":  "DISPENSADOR CHOCO GALLETIN CRISPY",
+        "Description":  "DISPENSADOR CHOCO GALLETIN CRISPY (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "920bde0f-b8fa-450c-ae66-f2edf1219b50",
+        "InternalCode":  "GA013",
+        "Name":  "GALLETA CANDY GLUCOSA CREMELO FRESA",
+        "Description":  "GALLETA CANDY GLUCOSA CREMELO FRESA (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "b76c4bd1-f981-427f-8300-6d970b1a2dfb",
+        "InternalCode":  "GA014",
+        "Name":  "GALLETA CANDY GLUCOSA CREMELO COCO",
+        "Description":  "GALLETA CANDY GLUCOSA CREMELO COCO (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "2c5fb2f9-b441-48d3-bbd8-d19eb76818bf",
+        "InternalCode":  "GA015",
+        "Name":  "GALLETA CANDY GLUCOSA CREMELO LECHE",
+        "Description":  "GALLETA CANDY GLUCOSA CREMELO LECHE (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "08c0966b-f458-426c-a826-2082792898fc",
+        "InternalCode":  "GA016",
+        "Name":  "GALLETA AMORIS REDONDA 125GR. FRESA",
+        "Description":  "GALLETA AMORIS REDONDA 125GR. FRESA (U/E: 1/36)"
+    },
+    {
+        "Id":  "91f3d68f-c05b-44e7-8731-26b07529fb60",
+        "InternalCode":  "GA017",
+        "Name":  "GALLETA AMORIS REDONDA 125GR. CHOCOLATE",
+        "Description":  "GALLETA AMORIS REDONDA 125GR. CHOCOLATE (U/E: 1/36)"
+    },
+    {
+        "Id":  "77a66b0f-22b0-45ef-82e3-385a88281ed6",
+        "InternalCode":  "GA018",
+        "Name":  "GALLETA AMORIS REDONDA 125GR. ESCURETO",
+        "Description":  "GALLETA AMORIS REDONDA 125GR. ESCURETO (U/E: 1/36)"
+    },
+    {
+        "Id":  "67bb2ee7-e185-43b2-be3f-c9cfbeac2860",
+        "InternalCode":  "GA019",
+        "Name":  "TARROS MD SUPER KRUNCH ORANGE",
+        "Description":  "TARROS MD SUPER KRUNCH ORANGE (U/E: 1*6*60)"
+    },
+    {
+        "Id":  "f86bb4ca-0667-48dc-9226-bd537e276c29",
+        "InternalCode":  "GA020",
+        "Name":  "GALLETA JUMBO FRESA",
+        "Description":  "GALLETA JUMBO FRESA (U/E: 1*10*12)"
+    },
+    {
+        "Id":  "ff63cdb9-c689-48dc-9b78-8534d3c686c9",
+        "InternalCode":  "GA021",
+        "Name":  "GALLETA JUMBO VAINILLA",
+        "Description":  "GALLETA JUMBO VAINILLA (U/E: 1*10*12)"
+    },
+    {
+        "Id":  "bceb95f8-183a-4fd9-a0c7-aca9def22cf4",
+        "InternalCode":  "GA022",
+        "Name":  "GALLETA JUMBO CHOCOLATE",
+        "Description":  "GALLETA JUMBO CHOCOLATE (U/E: 1*10*12)"
+    },
+    {
+        "Id":  "67c3e325-6b3b-4756-bfda-519638950ded",
+        "InternalCode":  "GA023",
+        "Name":  "GALLETA KIDMAX FRESA",
+        "Description":  "GALLETA KIDMAX FRESA (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "e263669b-9ad7-4e78-a764-0b1f59adddec",
+        "InternalCode":  "GA024",
+        "Name":  "GALLETA KIDMAX VAINILLA",
+        "Description":  "GALLETA KIDMAX VAINILLA (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "142e8a3d-3b1a-4211-98c5-cacf06d429bc",
+        "InternalCode":  "GA025",
+        "Name":  "GALLETA KIDMAX CHOCOLATE",
+        "Description":  "GALLETA KIDMAX CHOCOLATE (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "ece8447f-4196-4f14-aa44-8fe63c692121",
+        "InternalCode":  "GA026",
+        "Name":  "TORTITAS ZOO ANIMADOS FRESA",
+        "Description":  "TORTITAS ZOO ANIMADOS FRESA (U/E: 1*6*12)"
+    },
+    {
+        "Id":  "1c0e4c90-a97e-43e0-b121-3941947178a5",
+        "InternalCode":  "GA027",
+        "Name":  "TORTITAS ZOO ANIMADOS VAINILLA",
+        "Description":  "TORTITAS ZOO ANIMADOS VAINILLA (U/E: 1*6*12)"
+    },
+    {
+        "Id":  "de2b8165-fe68-4fdf-97a9-abfb1bc95fa2",
+        "InternalCode":  "GA028",
+        "Name":  "TORTITAS ZOO ANIMADOS CHOCOLATE",
+        "Description":  "TORTITAS ZOO ANIMADOS CHOCOLATE (U/E: 1*6*12)"
+    },
+    {
+        "Id":  "8a8be868-90b6-4a9a-80fa-d982ad6c93af",
+        "InternalCode":  "GA029",
+        "Name":  "GALLETAS WAFFER ZOO ANIMADOS FRESA",
+        "Description":  "GALLETAS WAFFER ZOO ANIMADOS FRESA (U/E: 1*2*20)"
+    },
+    {
+        "Id":  "8faf2914-ac81-415b-bcf5-f2d9522064c6",
+        "InternalCode":  "GA030",
+        "Name":  "GALLETAS WAFFER ZOO ANIMADOS CHOCOLATE",
+        "Description":  "GALLETAS WAFFER ZOO ANIMADOS CHOCOLATE (U/E: 1*2*20)"
+    },
+    {
+        "Id":  "b596a44f-677f-44e2-946b-a3843aca5660",
+        "InternalCode":  "GA031",
+        "Name":  "GALLETAS WAFFER AMORIS CODIGO SURTIDO",
+        "Description":  "GALLETAS WAFFER AMORIS CODIGO SURTIDO (U/E: 1/30)"
+    },
+    {
+        "Id":  "c36ec3ca-6a01-4eef-9fd2-edf519852a54",
+        "InternalCode":  "GA032",
+        "Name":  "GALLETA AMORIS REDONDA 125GR. CODIGO SURTIDO",
+        "Description":  "GALLETA AMORIS REDONDA 125GR. CODIGO SURTIDO (U/E: 1/36)"
+    },
+    {
+        "Id":  "f6a176f2-1e8f-404c-ba16-d79c45267359",
+        "InternalCode":  "GA033",
+        "Name":  "GALLETA TWINNIES CODIGO SURTIDO",
+        "Description":  "GALLETA TWINNIES CODIGO SURTIDO (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "b33a7687-0415-4101-9009-4a328721946e",
+        "InternalCode":  "GA034",
+        "Name":  "GALLETA JUMBO CODIGO SURTIDO",
+        "Description":  "GALLETA JUMBO CODIGO SURTIDO (U/E: 1*10*12)"
+    },
+    {
+        "Id":  "22ddb290-62c4-455a-a7a5-4c24ccf48a20",
+        "InternalCode":  "GA035",
+        "Name":  "GALLETA KIDMAX SURTIDO",
+        "Description":  "GALLETA KIDMAX SURTIDO (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "c959192b-42b3-4a92-b58f-1017aa6428b0",
+        "InternalCode":  "GA036",
+        "Name":  "TORTITAS ZOO ANIMADOS SURTIDO",
+        "Description":  "TORTITAS ZOO ANIMADOS SURTIDO (U/E: 1*6*12)"
+    },
+    {
+        "Id":  "8e3ae59a-a76f-4918-863d-f063a24bd7e2",
+        "InternalCode":  "GA037",
+        "Name":  "GALLETAS WAFFER ZOO ANIMADOS SURTIDO",
+        "Description":  "GALLETAS WAFFER ZOO ANIMADOS SURTIDO (U/E: 1*2*20)"
+    },
+    {
+        "Id":  "7b00b7f8-9f17-4c02-8c6e-10509bb15ffd",
+        "InternalCode":  "GA038",
+        "Name":  "GALLETAS TRIO 4 CANDY SURTIDO",
+        "Description":  "GALLETAS TRIO 4 CANDY SURTIDO (U/E: 1*24*12)"
+    },
+    {
+        "Id":  "2d307355-bcc6-454c-bee0-1ea06762d7cb",
+        "InternalCode":  "GA039",
+        "Name":  "MD CHOCOLATE CON LECHE BARRA AZUL",
+        "Description":  "MD CHOCOLATE CON LECHE BARRA AZUL (U/E: 1*12*10)"
+    },
+    {
+        "Id":  "f4d47034-7e2e-4992-ac11-41d3c01a9a74",
+        "InternalCode":  "GA040",
+        "Name":  "MD CHOCOLATE BARRA COCO",
+        "Description":  "MD CHOCOLATE BARRA COCO (U/E: 1*12*10)"
+    },
+    {
+        "Id":  "8925b439-a5ce-46d3-920b-3f26842da9b3",
+        "InternalCode":  "GA041",
+        "Name":  "BL COOKIE LOLIPO CON LUZ",
+        "Description":  "BL COOKIE LOLIPO CON LUZ (U/E: 1*24*30)"
+    },
+    {
+        "Id":  "599b110f-9db5-46dd-bc69-4cafdb9cb588",
+        "InternalCode":  "GA042",
+        "Name":  "CHOCOLATE COPITAS",
+        "Description":  "CHOCOLATE COPITAS (U/E: 1*24*30)"
+    },
+    {
+        "Id":  "2d027878-eac3-44ef-a092-4ed1417b6237",
+        "InternalCode":  "MA001",
+        "Name":  "BOLSA CANDY SUPLAYER MALVAVISCO SUPER MINI MINO",
+        "Description":  "BOLSA CANDY SUPLAYER MALVAVISCO SUPER MINI MINO (U/E: 1*8*70)"
+    },
+    {
+        "Id":  "f447f07a-c523-472e-8811-422361dbc232",
+        "InternalCode":  "MA002",
+        "Name":  "BOLSA MALVAVISCO MALVA MUFFIN",
+        "Description":  "BOLSA MALVAVISCO MALVA MUFFIN (U/E: 1*12*24)"
+    },
+    {
+        "Id":  "c2191142-85ca-4759-94d1-240eb4cde8aa",
+        "InternalCode":  "MA003",
+        "Name":  "BOLSA MALVAVISCO ICE CREAM PLUS",
+        "Description":  "BOLSA MALVAVISCO ICE CREAM PLUS (U/E: 1*12*40)"
+    },
+    {
+        "Id":  "1d53f9b1-efc4-4659-ae33-de38d5faddd5",
+        "InternalCode":  "MA004",
+        "Name":  "BOLSA MALVAVISCO ICE CREAM ACIDULADO",
+        "Description":  "BOLSA MALVAVISCO ICE CREAM ACIDULADO (U/E: 1*12*24)"
+    },
+    {
+        "Id":  "708c5046-0f9d-4cb7-8e28-3cab00463f72",
+        "InternalCode":  "MA005",
+        "Name":  "BOLSA MALVAVISCO YETI MALLOW",
+        "Description":  "BOLSA MALVAVISCO YETI MALLOW (U/E: 1*12*24)"
+    },
+    {
+        "Id":  "310e83be-a750-4bcc-a9f2-aaf7a7f53ef4",
+        "InternalCode":  "MA006",
+        "Name":  "BOLSA MALVAVISCO RELLENO TRI PACK",
+        "Description":  "BOLSA MALVAVISCO RELLENO TRI PACK (U/E: 1*15*24*3 UNIDADES)"
+    },
+    {
+        "Id":  "9ba893a1-123f-4475-aa81-f69c677e0d00",
+        "InternalCode":  "MA007",
+        "Name":  "BOLSA MALVAVISCO 3D",
+        "Description":  "BOLSA MALVAVISCO 3D (U/E: 1*16*30)"
+    },
+    {
+        "Id":  "e46b088c-b645-4162-a88e-33657092c1d8",
+        "InternalCode":  "MA008",
+        "Name":  "DISPENSADOR MALVAVISCO MALVA POP",
+        "Description":  "DISPENSADOR MALVAVISCO MALVA POP (U/E: 1*12*30)"
+    },
+    {
+        "Id":  "4869ca03-c480-404b-9477-f7c596a6e41b",
+        "InternalCode":  "MA009",
+        "Name":  "MALVAVISCO DIPA",
+        "Description":  "MALVAVISCO DIPA (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "9a04b2b1-350c-46e1-bd22-540f909db8f7",
+        "InternalCode":  "MA010",
+        "Name":  "COTTOM CANDY COLORFULL ROLLS",
+        "Description":  "COTTOM CANDY COLORFULL ROLLS (U/E: 1*20*30)"
+    },
+    {
+        "Id":  "f0fb285f-7443-41a2-9b02-4ddaf1541af4",
+        "InternalCode":  "MA011",
+        "Name":  "RAINBOW LONG MARSHMALLOW",
+        "Description":  "RAINBOW LONG MARSHMALLOW (U/E: 1*8*65)"
+    },
+    {
+        "Id":  "a3bd5fb3-7ac5-4c9a-a707-c98733983f1d",
+        "InternalCode":  "MA012",
+        "Name":  "TWINST MARSHMALLOW",
+        "Description":  "TWINST MARSHMALLOW (U/E: 1*8*180)"
+    },
+    {
+        "Id":  "202782bb-9a3e-4195-9878-fd33377cb4ea",
+        "InternalCode":  "MA013",
+        "Name":  "MARSHMALLOW CANDY LOKA",
+        "Description":  "MARSHMALLOW CANDY LOKA (U/E: 1*24*30)"
+    },
+    {
+        "Id":  "bfa4434a-0322-44d4-9381-f6a5668dc8ac",
+        "InternalCode":  "MA014",
+        "Name":  "MARSHMALLOW",
+        "Description":  "MARSHMALLOW (U/E: 1*24*30)"
+    },
+    {
+        "Id":  "e7b82622-6b9d-4892-8d1b-ed477aa2cd68",
+        "InternalCode":  "MA015",
+        "Name":  "GUITAR SHAPED MARSMALLOW",
+        "Description":  "GUITAR SHAPED MARSMALLOW (U/E: 1*24*30)"
+    },
+    {
+        "Id":  "0f80a8f3-0287-4680-9a31-c2ad0aaabdc5",
+        "InternalCode":  "TA001",
+        "Name":  "TOALLAS HUMEDAS FAMILYS ROBELLY CELESTE 96 HOJAS",
+        "Description":  "TOALLAS HUMEDAS FAMILYS ROBELLY CELESTE 96 HOJAS (U/E: 1*12)"
+    },
+    {
+        "Id":  "25d0b2c8-b2d5-4cda-9322-3642a6dc46a7",
+        "InternalCode":  "TA002",
+        "Name":  "TOALLAS HUMEDAS MIDDY BEAR 80 HOJAS",
+        "Description":  "TOALLAS HUMEDAS MIDDY BEAR 80 HOJAS (U/E: 1*12)"
+    },
+    {
+        "Id":  "68bd6128-7d6c-49f0-8471-5763bd6f5e03",
+        "InternalCode":  "TA003",
+        "Name":  "PAQUETE DE TOALLITA HUMEDA MIDDY BEAR 120 HOJAS",
+        "Description":  "PAQUETE DE TOALLITA HUMEDA MIDDY BEAR 120 HOJAS (U/E: 1*12)"
+    },
+    {
+        "Id":  "841246bf-dd38-4a3b-a92e-4eb422f85836",
+        "InternalCode":  "TA004",
+        "Name":  "UNIDAD JN203 TOALLITA COMPRIMIDA MIDDY BEAR",
+        "Description":  "UNIDAD JN203 TOALLITA COMPRIMIDA MIDDY BEAR (U/E: 1*30*10)"
+    },
+    {
+        "Id":  "fe53b524-9140-4e8f-8d91-43dbaf9aa30c",
+        "InternalCode":  "TA005",
+        "Name":  "TOALLA HUMEDA SIPPACK MIDDY BEAR",
+        "Description":  "TOALLA HUMEDA SIPPACK MIDDY BEAR (U/E: 1*20*8)"
+    },
+    {
+        "Id":  "c949b629-0545-439d-9321-010c53be6115",
+        "InternalCode":  "TA006",
+        "Name":  "PAPEL HIGIENICO ROBELLY 1620 HOJAS",
+        "Description":  "PAPEL HIGIENICO ROBELLY 1620 HOJAS (U/E: 1/24)"
+    },
+    {
+        "Id":  "ccd4e8f4-2e82-4a66-880a-17d510a9d2f0",
+        "InternalCode":  "TA007",
+        "Name":  "BOLSON DE PAÑALES CALSON OSITO -TALLAS; S,M,L,XL,XXL,3XL Y 4XL.",
+        "Description":  "BOLSON DE PAÑALES CALSON OSITO -TALLAS; S,M,L,XL,XXL,3XL Y 4XL. (U/E: 1/4)"
+    },
+    {
+        "Id":  "63fd0223-f5e5-4171-a117-199d6a35c733",
+        "InternalCode":  "TA008",
+        "Name":  "BOLSON DE PAÑALES PEGA PEGA OSITO -TALLAS; S,M,L,XL,XXL Y XXXL.",
+        "Description":  "BOLSON DE PAÑALES PEGA PEGA OSITO -TALLAS; S,M,L,XL,XXL Y XXXL. (U/E: 1/4)"
+    },
+    {
+        "Id":  "953f7bf0-da8c-495d-a0e3-718703e982a7",
+        "InternalCode":  "TA009",
+        "Name":  "PAQUETE DE PAÑAL ADULTO MOMMY BEAR -TALLAS; M,L,XL.",
+        "Description":  "PAQUETE DE PAÑAL ADULTO MOMMY BEAR -TALLAS; M,L,XL. (U/E: 1*8*10)"
+    },
+    {
+        "Id":  "bb7e87bf-ca34-4433-a282-1c329a654437",
+        "InternalCode":  "TA010",
+        "Name":  "TALCO SURTIDO MIDDY BEAR 635GR.",
+        "Description":  "TALCO SURTIDO MIDDY BEAR 635GR. (U/E: 1*12)"
+    },
+    {
+        "Id":  "f0c1c569-f978-48e7-a819-645477087f8d",
+        "InternalCode":  "TA011",
+        "Name":  "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6XL",
+        "Description":  "PAQUETE DE PAÑAL NIÑO MIDDAY BEAR CALSON -TALLAS; M,L,XL,XXL,XXXL,4XL,5XL,6XL (U/E: 1*4*50)"
+    },
+    {
+        "Id":  "08a9f635-cfcc-43f7-930f-33677077ae43",
+        "InternalCode":  "TA012",
+        "Name":  "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL",
+        "Description":  "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL (U/E: 1*4*50)"
+    },
+    {
+        "Id":  "4bf349ae-b841-4d66-a47f-df7a076cb969",
+        "InternalCode":  "TA013",
+        "Name":  "PAPEL HIGIENICO ROBELLY 1620 HOJAS",
+        "Description":  "PAPEL HIGIENICO ROBELLY 1620 HOJAS (U/E: 1*12)"
+    }
+]

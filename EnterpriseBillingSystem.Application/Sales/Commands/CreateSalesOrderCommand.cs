@@ -8,6 +8,8 @@ using FluentValidation;
 using EnterpriseBillingSystem.Domain.Entities;
 using EnterpriseBillingSystem.Domain.Enums;
 using EnterpriseBillingSystem.Domain.Repositories;
+using EnterpriseBillingSystem.Application.Common.Interfaces;
+using Microsoft.AspNetCore.Identity;
 
 namespace EnterpriseBillingSystem.Application.Sales.Commands;
 
@@ -73,19 +75,25 @@ public class CreateSalesOrderCommandHandler : IRequestHandler<CreateSalesOrderCo
     private readonly IProductRepository _productRepository;
     private readonly IRepository<SystemParameter> _systemParameterRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
     public CreateSalesOrderCommandHandler(
         ISalesOrderRepository salesOrderRepository,
         ICustomerRepository customerRepository,
         IProductRepository productRepository,
         IRepository<SystemParameter> systemParameterRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUserService,
+        UserManager<ApplicationUser> userManager)
     {
         _salesOrderRepository = salesOrderRepository;
         _customerRepository = customerRepository;
         _productRepository = productRepository;
         _systemParameterRepository = systemParameterRepository;
         _unitOfWork = unitOfWork;
+        _currentUserService = currentUserService;
+        _userManager = userManager;
     }
 
     public async Task<Guid> Handle(CreateSalesOrderCommand request, CancellationToken cancellationToken)
@@ -155,6 +163,23 @@ public class CreateSalesOrderCommandHandler : IRequestHandler<CreateSalesOrderCo
             throw new InvalidOperationException($"El monto total del pedido de venta debe ser igual o mayor a C${minOrderAmount:N2}.");
         }
 
+        // Resolver vendedor actual
+        string createdByStr = "System";
+        if (!string.IsNullOrWhiteSpace(_currentUserService.UserId))
+        {
+            var user = await _userManager.FindByNameAsync(_currentUserService.UserId) 
+                    ?? await _userManager.FindByIdAsync(_currentUserService.UserId);
+            if (user != null)
+            {
+                var fullName = $"{user.FirstName} {user.LastName}".Trim();
+                createdByStr = !string.IsNullOrWhiteSpace(fullName) ? fullName : (user.UserName ?? _currentUserService.UserId);
+            }
+            else
+            {
+                createdByStr = _currentUserService.UserId;
+            }
+        }
+
         // 4. Crear pedido
         var order = new SalesOrder
         {
@@ -169,7 +194,7 @@ public class CreateSalesOrderCommandHandler : IRequestHandler<CreateSalesOrderCo
             Status = SalesOrderStatus.Recibido,
             Notes = request.Notes,
             Details = details,
-            CreatedBy = "System",
+            CreatedBy = createdByStr,
             CreatedOnUtc = DateTime.UtcNow
         };
 
@@ -179,3 +204,4 @@ public class CreateSalesOrderCommandHandler : IRequestHandler<CreateSalesOrderCo
         return order.Id;
     }
 }
+

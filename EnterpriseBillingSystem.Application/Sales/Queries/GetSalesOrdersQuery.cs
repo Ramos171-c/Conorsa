@@ -5,7 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
 using EnterpriseBillingSystem.Application.Common.Models;
+using EnterpriseBillingSystem.Domain.Entities;
 using EnterpriseBillingSystem.Domain.Repositories;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 
 namespace EnterpriseBillingSystem.Application.Sales.Queries;
 
@@ -79,10 +82,12 @@ public record GetSalesOrderByIdQuery(Guid SalesOrderId) : IRequest<SalesOrderDet
 public class GetSalesOrdersQueryHandler : IRequestHandler<GetSalesOrdersQuery, PagedResult<SalesOrderListItemDto>>
 {
     private readonly ISalesOrderRepository _repository;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public GetSalesOrdersQueryHandler(ISalesOrderRepository repository)
+    public GetSalesOrdersQueryHandler(ISalesOrderRepository repository, UserManager<ApplicationUser> userManager)
     {
         _repository = repository;
+        _userManager = userManager;
     }
 
     public async Task<PagedResult<SalesOrderListItemDto>> Handle(GetSalesOrdersQuery request, CancellationToken cancellationToken)
@@ -90,6 +95,8 @@ public class GetSalesOrdersQueryHandler : IRequestHandler<GetSalesOrdersQuery, P
         var (items, totalCount) = await _repository.GetPagedAsync(
             request.CustomerId, request.Status, request.FromDate, request.ToDate,
             request.PageNumber, request.PageSize, request.CreatedBy, request.RouteId, cancellationToken);
+
+        var users = await _userManager.Users.ToListAsync(cancellationToken);
 
         var dtos = items.Select(so => new SalesOrderListItemDto(
             so.Id,
@@ -102,7 +109,7 @@ public class GetSalesOrdersQueryHandler : IRequestHandler<GetSalesOrdersQuery, P
             so.TaxAmount,
             so.TotalAmount,
             so.Status.ToString(),
-            so.CreatedBy));
+            SalesOrderUserHelper.ResolveSellerFullName(so.CreatedBy, users)));
 
         return new PagedResult<SalesOrderListItemDto>(dtos.ToList(), totalCount, request.PageNumber, request.PageSize);
     }
@@ -111,16 +118,20 @@ public class GetSalesOrdersQueryHandler : IRequestHandler<GetSalesOrdersQuery, P
 public class GetSalesOrderByIdQueryHandler : IRequestHandler<GetSalesOrderByIdQuery, SalesOrderDetailDto?>
 {
     private readonly ISalesOrderRepository _repository;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public GetSalesOrderByIdQueryHandler(ISalesOrderRepository repository)
+    public GetSalesOrderByIdQueryHandler(ISalesOrderRepository repository, UserManager<ApplicationUser> userManager)
     {
         _repository = repository;
+        _userManager = userManager;
     }
 
     public async Task<SalesOrderDetailDto?> Handle(GetSalesOrderByIdQuery request, CancellationToken cancellationToken)
     {
         var order = await _repository.GetByIdWithDetailsAsync(request.SalesOrderId, cancellationToken);
         if (order == null) return null;
+
+        var users = await _userManager.Users.ToListAsync(cancellationToken);
 
         var details = order.Details.Select(d => new SalesOrderDetailItemDto(
             d.Id,
@@ -153,6 +164,31 @@ public class GetSalesOrderByIdQueryHandler : IRequestHandler<GetSalesOrderByIdQu
             order.Notes,
             order.CreatedOnUtc,
             details,
-            order.CreatedBy);
+            SalesOrderUserHelper.ResolveSellerFullName(order.CreatedBy, users));
     }
 }
+
+public static class SalesOrderUserHelper
+{
+    public static string ResolveSellerFullName(string? createdBy, List<ApplicationUser> users)
+    {
+        if (string.IsNullOrWhiteSpace(createdBy)) return "N/A";
+
+        var user = users.FirstOrDefault(u =>
+            string.Equals(u.UserName, createdBy, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(u.Id.ToString(), createdBy, StringComparison.OrdinalIgnoreCase) ||
+            string.Equals(u.Email, createdBy, StringComparison.OrdinalIgnoreCase));
+
+        if (user != null)
+        {
+            var fullName = $"{user.FirstName} {user.LastName}".Trim();
+            if (!string.IsNullOrWhiteSpace(fullName))
+                return fullName;
+            if (!string.IsNullOrWhiteSpace(user.UserName))
+                return user.UserName;
+        }
+
+        return createdBy;
+    }
+}
+
