@@ -36,6 +36,13 @@ public class AuthenticationService : IAuthenticationService
             var profile = await _authApiClient.GetMeAsync();
             if (profile != null)
             {
+                if (string.Equals(profile.Role, "VENDEDOR", StringComparison.OrdinalIgnoreCase) ||
+                    string.Equals(profile.Role, "Vendedor", StringComparison.OrdinalIgnoreCase))
+                {
+                    await LogoutAsync();
+                    throw new InvalidOperationException("Acceso restringido: Los vendedores únicamente pueden acceder desde la aplicación móvil.");
+                }
+
                 _currentUserService.CurrentUser = profile;
                 _currentUserService.Permissions = profile.Permissions;
                 _currentUserService.BranchId = profile.DefaultBranchId;
@@ -71,6 +78,13 @@ public class AuthenticationService : IAuthenticationService
                 var profile = await _authApiClient.GetMeAsync();
                 if (profile != null)
                 {
+                    if (string.Equals(profile.Role, "VENDEDOR", StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(profile.Role, "Vendedor", StringComparison.OrdinalIgnoreCase))
+                    {
+                        await LogoutAsync();
+                        return false;
+                    }
+
                     _currentUserService.CurrentUser = profile;
                     _currentUserService.Permissions = profile.Permissions;
                     _currentUserService.BranchId = profile.DefaultBranchId;
