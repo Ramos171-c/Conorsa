@@ -1044,6 +1044,11 @@ class _PosScreenState extends State<PosScreen> {
         ? orderProv.topProducts
         : orderProv.products;
 
+    // Filter by channel exclusivity (Cost-only products must not appear in Detalle/Semi/Mayorista)
+    if (posProv.currentLevel != 'COSTO') {
+      displayedProducts = displayedProducts.where((p) => !p.isCostChannelOnly).toList();
+    }
+
     // Filter by selected category if any
     if (_selectedProductCategoryId != null) {
       displayedProducts = displayedProducts.where((p) => p.categoryId == _selectedProductCategoryId).toList();

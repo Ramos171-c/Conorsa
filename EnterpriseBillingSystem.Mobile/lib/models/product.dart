@@ -13,7 +13,11 @@ class ProductPresentation {
   final double taxPercentage;
   final bool isBaseUnit;
   final bool isDefaultSalePresentation;
+  final bool allowDetailChannel;
+  final bool allowCostChannel;
   final bool isActive;
+
+  bool get isExclusiveCostChannel => allowCostChannel && !allowDetailChannel;
 
   ProductPresentation({
     required this.id,
@@ -30,6 +34,8 @@ class ProductPresentation {
     required this.taxPercentage,
     required this.isBaseUnit,
     required this.isDefaultSalePresentation,
+    this.allowDetailChannel = true,
+    this.allowCostChannel = true,
     required this.isActive,
   });
 
@@ -49,6 +55,8 @@ class ProductPresentation {
       taxPercentage: (json['taxPercentage'] as num?)?.toDouble() ?? 0.0,
       isBaseUnit: json['isBaseUnit'] as bool? ?? false,
       isDefaultSalePresentation: json['isDefaultSalePresentation'] as bool? ?? false,
+      allowDetailChannel: json['allowDetailChannel'] as bool? ?? true,
+      allowCostChannel: json['allowCostChannel'] as bool? ?? true,
       isActive: json['isActive'] as bool? ?? true,
     );
   }
@@ -69,6 +77,8 @@ class ProductPresentation {
       'taxPercentage': taxPercentage,
       'isBaseUnit': isBaseUnit,
       'isDefaultSalePresentation': isDefaultSalePresentation,
+      'allowDetailChannel': allowDetailChannel,
+      'allowCostChannel': allowCostChannel,
       'isActive': isActive,
     };
   }
@@ -91,6 +101,50 @@ class Product {
   final String? categoryName;
 
   String get displayName => (description != null && description!.trim().isNotEmpty) ? description! : name;
+
+  bool get isCostChannelOnly {
+    // 1. If explicitly set via database flags on presentation
+    if (presentations.any((p) => p.isExclusiveCostChannel)) {
+      return true;
+    }
+
+    // 2. Filter by SKUs and Product Names exclusive to Cost Channel
+    final code = internalCode.toUpperCase().trim();
+    final upperName = name.toUpperCase().trim();
+    final upperDesc = (description ?? '').toUpperCase().trim();
+
+    const exclusiveSkus = {
+      'CA052', 'CA053', 'CA054', 'CA055', 'CA056', 'CA057', 'CA058', 'CA059',
+      'MA016', 'MA017', 'MA018', 'MA019'
+    };
+
+    if (exclusiveSkus.contains(code)) {
+      return true;
+    }
+
+    const exclusiveNames = [
+      'COCKTAIL JELLY',
+      'PALETA LUZ LOLLIPOP',
+      'BUCK TEETH CANDY',
+      'HIGH BURGER',
+      'CHICLE ROCCKER',
+      'BOLSO DE GELATINA',
+      'CANDY MACHINE',
+      'SONIA FRESH OLIVE GUM BUBBLE GUM',
+      'TOTY MALVAVICO',
+      'MY MAGICAL UNICORN',
+      'CARTON MARSHMALLOW',
+      'MARSHMALLOW HOT DOG',
+    ];
+
+    for (var n in exclusiveNames) {
+      if (upperName.contains(n) || upperDesc.contains(n)) {
+        return true;
+      }
+    }
+
+    return false;
+  }
 
   Product({
     required this.id,
