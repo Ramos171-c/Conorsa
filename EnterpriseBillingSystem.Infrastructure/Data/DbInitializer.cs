@@ -1571,6 +1571,23 @@ END
             new("GA040", "MD CHOCOLATE BARRA COCO", "Galletas", "1*12*10", 12, 160.98m, 1931.82m, 160.98m, 1931.82m, 160.98m, 1931.82m, 141.67m, 1700.00m),
             new("GA041", "BL COOKIE LOLIPO CON LUZ", "Galletas", "1*24*30", 24, 114.58m, 2750.00m, 114.58m, 2750.00m, 114.58m, 2750.00m, 100.83m, 2420.00m),
             new("GA042", "CHOCOLATE COPITAS", "Galletas", "1*24*30", 24, 120.74m, 2897.73m, 120.74m, 2897.73m, 120.74m, 2897.73m, 106.25m, 2550.00m),
+            
+            // Galletas exclusivas Canal Costo (GA043-GA056)
+            new("GA043", "ARNO XXL CHOCOLATE", "Galletas", "1*6*24", 6, 271.67m, 1630.00m, 271.67m, 1630.00m, 271.67m, 1630.00m, CostUnit: 271.67m, CostBox: 1630.00m, IsCostOnly: true),
+            new("GA044", "ARNO XXL MANI", "Galletas", "1*6*24", 6, 271.67m, 1630.00m, 271.67m, 1630.00m, 271.67m, 1630.00m, CostUnit: 271.67m, CostBox: 1630.00m, IsCostOnly: true),
+            new("GA045", "677 XXL COCOA WAFER", "Galletas", "1*6*24", 6, 271.67m, 1630.00m, 271.67m, 1630.00m, 271.67m, 1630.00m, CostUnit: 271.67m, CostBox: 1630.00m, IsCostOnly: true),
+            new("GA046", "AURA COCOA XXL", "Galletas", "1*6*24", 6, 271.67m, 1630.00m, 271.67m, 1630.00m, 271.67m, 1630.00m, CostUnit: 271.67m, CostBox: 1630.00m, IsCostOnly: true),
+            new("GA047", "CHOCOLATE MONTREAL", "Galletas", "1*6*24", 6, 225.00m, 1350.00m, 225.00m, 1350.00m, 225.00m, 1350.00m, CostUnit: 225.00m, CostBox: 1350.00m, IsCostOnly: true),
+            new("GA048", "CHOCOLATE TABLETA", "Galletas", "1*6*24", 6, 250.00m, 1500.00m, 250.00m, 1500.00m, 250.00m, 1500.00m, CostUnit: 250.00m, CostBox: 1500.00m, IsCostOnly: true),
+            new("GA049", "FUM CREAMS CHOCOLATE SANDWICH BISCUITS", "Galletas", "1*48", 48, 16.67m, 800.00m, 16.67m, 800.00m, 16.67m, 800.00m, CostUnit: 16.67m, CostBox: 800.00m, IsCostOnly: true),
+            new("GA050", "FUM CREAMS ORANGE SANDWICH BISCUITS", "Galletas", "1*48", 48, 16.67m, 800.00m, 16.67m, 800.00m, 16.67m, 800.00m, CostUnit: 16.67m, CostBox: 800.00m, IsCostOnly: true),
+            new("GA051", "FUM CREAMS ORANGE SANDWICH PINEAPPLE CREAM BISCUITS", "Galletas", "1*48", 48, 16.67m, 800.00m, 16.67m, 800.00m, 16.67m, 800.00m, CostUnit: 16.67m, CostBox: 800.00m, IsCostOnly: true),
+            new("GA052", "FUM CREAMS VANILLA SANDWICH BISCUITS", "Galletas", "1*48", 48, 16.67m, 800.00m, 16.67m, 800.00m, 16.67m, 800.00m, CostUnit: 16.67m, CostBox: 800.00m, IsCostOnly: true),
+            new("GA053", "FUM CREAMS STRAWBERRY CREAM SANDWICH BISCUITS", "Galletas", "1*48", 48, 16.67m, 800.00m, 16.67m, 800.00m, 16.67m, 800.00m, CostUnit: 16.67m, CostBox: 800.00m, IsCostOnly: true),
+            new("GA054", "FUM CREAMS MANGO CREAM SANDWICH BISCUITS", "Galletas", "1*48", 48, 16.67m, 800.00m, 16.67m, 800.00m, 16.67m, 800.00m, CostUnit: 16.67m, CostBox: 800.00m, IsCostOnly: true),
+            new("GA055", "WE LOVE COCO SHOP", "Galletas", "1*6*24", 6, 271.67m, 1630.00m, 271.67m, 1630.00m, 271.67m, 1630.00m, CostUnit: 271.67m, CostBox: 1630.00m, IsCostOnly: true),
+            new("GA056", "CHOCOLATE DE GUERRA XXL", "Galletas", "1*6*24", 6, 268.33m, 1610.00m, 268.33m, 1610.00m, 268.33m, 1610.00m, CostUnit: 268.33m, CostBox: 1610.00m, IsCostOnly: true),
+
 
             // Caramelos (49)
             new("CA001", "DISPENSADOR CANDY CHISQUETAZO", "Caramelos", "1*12*24", 12, 144.00m, 1728.00m, 114.94m, 1379.31m, 122.73m, 1472.73m, 100.00m, 1200.00m),
@@ -1633,6 +1650,7 @@ END
             new("CA057", "BOLSO DE GELATINA", "Caramelos", "1*30*20", 30, 40.00m, 1200.00m, 40.00m, 1200.00m, 40.00m, 1200.00m, CostUnit: 40.00m, CostBox: 1200.00m, IsCostOnly: true),
             new("CA058", "CANDY MACHINE", "Caramelos", "1*24*30", 24, 125.00m, 3000.00m, 125.00m, 3000.00m, 125.00m, 3000.00m, CostUnit: 125.00m, CostBox: 3000.00m, IsCostOnly: true),
             new("CA059", "SONIA FRESH OLIVE GUM BUBBLE GUM", "Caramelos", "1*12*150", 12, 121.67m, 1460.00m, 121.67m, 1460.00m, 121.67m, 1460.00m, CostUnit: 121.67m, CostBox: 1460.00m, IsCostOnly: true),
+            new("CA060", "BON TON VASO", "Caramelos", "1*12*40", 12, 166.67m, 2000.00m, 166.67m, 2000.00m, 166.67m, 2000.00m, CostUnit: 166.67m, CostBox: 2000.00m, IsCostOnly: true),
 
             // Malvaviscos (15)
             new("MA001", "BOLSA CANDY SUPLAYER MALVAVISCO SUPER MINI MINO", "Malvaviscos", "1*8*70", 8, 252.00m, 2016.00m, 205.88m, 1647.06m, 214.77m, 1718.18m, 175.00m, 1400.00m),

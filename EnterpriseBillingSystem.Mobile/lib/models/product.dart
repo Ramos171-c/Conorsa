@@ -114,8 +114,10 @@ class Product {
     final upperDesc = (description ?? '').toUpperCase().trim();
 
     const exclusiveSkus = {
-      'CA052', 'CA053', 'CA054', 'CA055', 'CA056', 'CA057', 'CA058', 'CA059',
-      'MA016', 'MA017', 'MA018', 'MA019'
+      'CA052', 'CA053', 'CA054', 'CA055', 'CA056', 'CA057', 'CA058', 'CA059', 'CA060',
+      'MA016', 'MA017', 'MA018', 'MA019',
+      'GA043', 'GA044', 'GA045', 'GA046', 'GA047', 'GA048', 'GA049', 'GA050', 'GA051',
+      'GA052', 'GA053', 'GA054', 'GA055', 'GA056'
     };
 
     if (exclusiveSkus.contains(code)) {
@@ -135,6 +137,15 @@ class Product {
       'MY MAGICAL UNICORN',
       'CARTON MARSHMALLOW',
       'MARSHMALLOW HOT DOG',
+      'ARNO XXL',
+      '677 XXL',
+      'AURA COCOA XXL',
+      'CHOCOLATE MONTREAL',
+      'CHOCOLATE TABLETA',
+      'FUM CREAMS',
+      'WE LOVE COCO SHOP',
+      'CHOCOLATE DE GUERRA XXL',
+      'BON TON VASO'
     ];
 
     for (var n in exclusiveNames) {
