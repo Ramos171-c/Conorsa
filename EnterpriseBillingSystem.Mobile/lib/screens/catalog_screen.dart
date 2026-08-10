@@ -59,7 +59,13 @@ class _CatalogScreenState extends State<CatalogScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: const Text('Catálogo de Productos'),
+        title: Row(
+          children: [
+            Image.asset('assets/images/logo.png', height: 30, width: 30),
+            const SizedBox(width: 10),
+            const Text('CONORTE — Catálogo'),
+          ],
+        ),
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
         actions: [

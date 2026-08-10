@@ -35,9 +35,9 @@
 
             <!-- Logo / Brand Header -->
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" Margin="0,8,0,24">
-                <materialDesign:PackIcon Kind="Domain" Width="64" Height="64" Foreground="{DynamicResource PrimaryHueMidBrush}" HorizontalAlignment="Center" Margin="0,0,0,12" />
-                <TextBlock Text="CONORTE" FontSize="22" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" HorizontalAlignment="Center" />
-                <TextBlock Text="Cliente de Escritorio Corporativo" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" HorizontalAlignment="Center" Margin="0,4,0,0" />
+                <Image Source="/Assets/logo.png" Height="90" Width="90" RenderOptions.BitmapScalingMode="HighQuality" HorizontalAlignment="Center" Margin="0,0,0,12" />
+                <TextBlock Text="CONORTE" FontSize="24" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" HorizontalAlignment="Center" />
+                <TextBlock Text="Sistema de Gestión Empresarial CONORTE" FontSize="12" Foreground="{DynamicResource MaterialDesignBodyLight}" HorizontalAlignment="Center" Margin="0,4,0,0" />
             </StackPanel>
 
             <!-- Login Form Fields -->

@@ -175,7 +175,13 @@ class ProductDetailScreen extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       appBar: AppBar(
-        title: const Text('Detalle de Producto'),
+        title: Row(
+          children: [
+            Image.asset('assets/images/logo.png', height: 30, width: 30),
+            const SizedBox(width: 10),
+            const Text('CONORTE — Producto'),
+          ],
+        ),
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
       ),

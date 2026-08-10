@@ -75,11 +75,11 @@ class _LoginScreenState extends State<LoginScreen> {
                 mainAxisAlignment: MainAxisAlignment.center,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  // App Icon / Logo placeholder
-                  const Icon(
-                    Icons.domain,
-                    size: 80,
-                    color: Color(0xFF38BDF8), // Light Blue Accent
+                  // App Logo CONORTE
+                  Image.asset(
+                    'assets/images/logo.png',
+                    height: 110,
+                    width: 110,
                   ),
                   const SizedBox(height: 16),
                   const Text(
@@ -89,15 +89,15 @@ class _LoginScreenState extends State<LoginScreen> {
                       fontSize: 28,
                       fontWeight: FontWeight.bold,
                       color: Colors.white,
-                      letterSpacing: 1.2,
+                      letterSpacing: 1.5,
                     ),
                   ),
                   const Text(
-                    'Aplicación de Pedidos',
+                    'Sistema Móvil de Gestión CONORTE',
                     textAlign: TextAlign.center,
                     style: TextStyle(
-                      fontSize: 16,
-                      color: Colors.white60,
+                      fontSize: 15,
+                      color: Colors.white70,
                     ),
                   ),
                   const SizedBox(height: 48),

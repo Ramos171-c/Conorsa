@@ -904,7 +904,13 @@ class _PosScreenState extends State<PosScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
-        title: Text(posProv.editingOrderId != null ? 'Editar Pedido' : 'Crear Pedido'),
+        title: Row(
+          children: [
+            Image.asset('assets/images/logo.png', height: 30, width: 30),
+            const SizedBox(width: 10),
+            Text(posProv.editingOrderId != null ? 'CONORTE — Editar Pedido' : 'CONORTE — Crear Pedido'),
+          ],
+        ),
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
         actions: [

@@ -175,7 +175,13 @@ class _DashboardScreenState extends State<DashboardScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9),
       appBar: AppBar(
-        title: const Text('Dashboard de Preventas'),
+        title: Row(
+          children: [
+            Image.asset('assets/images/logo.png', height: 32, width: 32),
+            const SizedBox(width: 10),
+            const Text('CONORTE — Dashboard'),
+          ],
+        ),
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
         actions: [

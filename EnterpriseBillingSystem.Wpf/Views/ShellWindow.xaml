@@ -36,8 +36,8 @@
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Grid.Column="0" Orientation="Horizontal" VerticalAlignment="Center">
-                    <materialDesign:PackIcon Kind="Domain" Width="24" Height="24" Margin="0,0,12,0" VerticalAlignment="Center" />
-                    <TextBlock Text="CONORTE — Corporativo" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" />
+                    <Image Source="/Assets/logo.png" Width="36" Height="36" Margin="0,0,10,0" VerticalAlignment="Center" RenderOptions.BitmapScalingMode="HighQuality" />
+                    <TextBlock Text="CONORTE — Sistema Empresarial" FontSize="18" FontWeight="Bold" VerticalAlignment="Center" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="2" Orientation="Horizontal" VerticalAlignment="Center">

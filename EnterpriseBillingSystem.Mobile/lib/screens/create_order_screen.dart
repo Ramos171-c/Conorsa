@@ -258,7 +258,13 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Crear Pedido'),
+        title: Row(
+          children: [
+            Image.asset('assets/images/logo.png', height: 30, width: 30),
+            const SizedBox(width: 10),
+            const Text('CONORTE — Crear Pedido'),
+          ],
+        ),
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
         bottom: TabBar(

@@ -74,7 +74,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9), // Light background
       appBar: AppBar(
-        title: const Text('Mis Metas de Venta'),
+        title: Row(
+          children: [
+            Image.asset('assets/images/logo.png', height: 30, width: 30),
+            const SizedBox(width: 10),
+            const Text('CONORTE — Mis Metas'),
+          ],
+        ),
         backgroundColor: const Color(0xFF0F172A),
         foregroundColor: Colors.white,
         actions: [
