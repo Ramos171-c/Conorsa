@@ -118,7 +118,26 @@ END
 ";
         try
         {
-            await _context.Database.ExecuteSqlRawAsync(createTablesSql);
+            var connection = _context.Database.GetDbConnection();
+            var isOpen = connection.State == System.Data.ConnectionState.Open;
+            if (!isOpen)
+            {
+                await connection.OpenAsync();
+            }
+
+            try
+            {
+                using var command = connection.CreateCommand();
+                command.CommandText = createTablesSql;
+                await command.ExecuteNonQueryAsync();
+            }
+            finally
+            {
+                if (!isOpen)
+                {
+                    await connection.CloseAsync();
+                }
+            }
         }
         catch
         {
