@@ -1,3 +1,10 @@
+double _parseDouble(dynamic val) {
+  if (val == null) return 0.0;
+  if (val is num) return val.toDouble();
+  if (val is String) return double.tryParse(val) ?? 0.0;
+  return 0.0;
+}
+
 class SalesOrderListItem {
   final String id;
   final String orderNumber;
@@ -25,16 +32,16 @@ class SalesOrderListItem {
 
   factory SalesOrderListItem.fromJson(Map<String, dynamic> json) {
     return SalesOrderListItem(
-      id: json['id'] as String? ?? '',
-      orderNumber: json['orderNumber'] as String? ?? '',
-      customerId: json['customerId'] as String? ?? '',
-      customerName: json['customerName'] as String? ?? '',
-      orderDate: DateTime.tryParse(json['orderDate']?.toString() ?? '') ?? DateTime.now(),
-      subTotal: (json['subTotal'] as num?)?.toDouble() ?? 0.0,
-      discountAmount: (json['discountAmount'] as num?)?.toDouble() ?? 0.0,
-      taxAmount: (json['taxAmount'] as num?)?.toDouble() ?? 0.0,
-      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
-      status: json['status'] as String? ?? '',
+      id: json['id']?.toString() ?? '',
+      orderNumber: json['orderNumber']?.toString() ?? json['number']?.toString() ?? '',
+      customerId: json['customerId']?.toString() ?? '',
+      customerName: json['customerName']?.toString() ?? json['customer']?.toString() ?? '',
+      orderDate: DateTime.tryParse(json['orderDate']?.toString() ?? json['createdOnUtc']?.toString() ?? '') ?? DateTime.now(),
+      subTotal: _parseDouble(json['subTotal']),
+      discountAmount: _parseDouble(json['discountAmount']),
+      taxAmount: _parseDouble(json['taxAmount']),
+      totalAmount: _parseDouble(json['totalAmount']),
+      status: json['status']?.toString() ?? '',
     );
   }
 }
@@ -72,19 +79,19 @@ class SalesOrderDetailItem {
 
   factory SalesOrderDetailItem.fromJson(Map<String, dynamic> json) {
     return SalesOrderDetailItem(
-      id: json['id'] as String? ?? '',
-      productId: json['productId'] as String? ?? '',
-      productName: json['productName'] as String? ?? '',
-      productCode: json['productCode'] as String? ?? '',
-      unitOfMeasureId: json['unitOfMeasureId'] as String? ?? '',
-      unitOfMeasure: json['unitOfMeasure'] as String? ?? '',
-      quantity: (json['quantity'] as num?)?.toDouble() ?? 0.0,
-      unitPrice: (json['unitPrice'] as num?)?.toDouble() ?? 0.0,
-      discountPercentage: (json['discountPercentage'] as num?)?.toDouble() ?? 0.0,
-      discountAmount: (json['discountAmount'] as num?)?.toDouble() ?? 0.0,
-      taxPercentage: (json['taxPercentage'] as num?)?.toDouble() ?? 0.0,
-      taxAmount: (json['taxAmount'] as num?)?.toDouble() ?? 0.0,
-      netAmount: (json['netAmount'] as num?)?.toDouble() ?? 0.0,
+      id: json['id']?.toString() ?? '',
+      productId: json['productId']?.toString() ?? '',
+      productName: json['productName']?.toString() ?? '',
+      productCode: json['productCode']?.toString() ?? '',
+      unitOfMeasureId: json['unitOfMeasureId']?.toString() ?? '',
+      unitOfMeasure: json['unitOfMeasure']?.toString() ?? '',
+      quantity: _parseDouble(json['quantity']),
+      unitPrice: _parseDouble(json['unitPrice']),
+      discountPercentage: _parseDouble(json['discountPercentage']),
+      discountAmount: _parseDouble(json['discountAmount']),
+      taxPercentage: _parseDouble(json['taxPercentage']),
+      taxAmount: _parseDouble(json['taxAmount']),
+      netAmount: _parseDouble(json['netAmount']),
     );
   }
 }
@@ -123,25 +130,25 @@ class SalesOrderDetail {
   });
 
   factory SalesOrderDetail.fromJson(Map<String, dynamic> json) {
-    final detailsJson = json['details'] as List<dynamic>?;
+    final detailsJson = (json['details'] ?? json['items']) as List<dynamic>?;
     final detailsList = detailsJson != null
-        ? detailsJson.map((e) => SalesOrderDetailItem.fromJson(e)).toList()
+        ? detailsJson.map((e) => SalesOrderDetailItem.fromJson(Map<String, dynamic>.from(e as Map))).toList()
         : <SalesOrderDetailItem>[];
 
     return SalesOrderDetail(
-      id: json['id'] as String? ?? '',
-      orderNumber: json['orderNumber'] as String? ?? '',
-      customerId: json['customerId'] as String? ?? '',
-      customerName: json['customerName'] as String? ?? '',
-      customerCode: json['customerCode'] as String? ?? '',
-      orderDate: DateTime.tryParse(json['orderDate']?.toString() ?? '') ?? DateTime.now(),
-      subTotal: (json['subTotal'] as num?)?.toDouble() ?? 0.0,
-      discountAmount: (json['discountAmount'] as num?)?.toDouble() ?? 0.0,
-      taxAmount: (json['taxAmount'] as num?)?.toDouble() ?? 0.0,
-      totalAmount: (json['totalAmount'] as num?)?.toDouble() ?? 0.0,
-      status: json['status'] as String? ?? '',
-      notes: json['notes'] as String?,
-      createdOnUtc: DateTime.tryParse(json['createdOnUtc']?.toString() ?? '') ?? DateTime.now(),
+      id: json['id']?.toString() ?? '',
+      orderNumber: json['orderNumber']?.toString() ?? json['number']?.toString() ?? '',
+      customerId: json['customerId']?.toString() ?? '',
+      customerName: json['customerName']?.toString() ?? json['customer']?.toString() ?? '',
+      customerCode: json['customerCode']?.toString() ?? '',
+      orderDate: DateTime.tryParse(json['orderDate']?.toString() ?? json['createdOnUtc']?.toString() ?? '') ?? DateTime.now(),
+      subTotal: _parseDouble(json['subTotal']),
+      discountAmount: _parseDouble(json['discountAmount']),
+      taxAmount: _parseDouble(json['taxAmount']),
+      totalAmount: _parseDouble(json['totalAmount']),
+      status: json['status']?.toString() ?? '',
+      notes: json['notes']?.toString(),
+      createdOnUtc: DateTime.tryParse(json['createdOnUtc']?.toString() ?? json['orderDate']?.toString() ?? '') ?? DateTime.now(),
       details: detailsList,
     );
   }

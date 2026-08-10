@@ -50,32 +50,15 @@ public class SalesOrdersController : ApiControllerBase
         [FromQuery] DateTime? toDate = null,
         [FromQuery] int pageNumber = 1,
         [FromQuery] int pageSize = 20,
-        [FromQuery] Guid? routeId = null)
+        [FromQuery] Guid? routeId = null,
+        [FromQuery] string? createdBy = null)
     {
         try
         {
-            string? createdByFilter = null;
+            Log.Information("[DEBUG-ORDERS] User: '{User}', FilterCreatedBy: '{CreatedBy}', RouteId: '{RouteId}', Status: '{Status}'", 
+                User?.Identity?.Name, createdBy, routeId, status);
 
-            if (User?.Identity?.IsAuthenticated == true)
-            {
-                var roleClaim = User.FindFirst(System.Security.Claims.ClaimTypes.Role)?.Value 
-                                ?? User.FindFirst("role")?.Value 
-                                ?? User.FindFirst("http://schemas.microsoft.com/ws/2008/06/identity/claims/role")?.Value;
-
-                var isAdmin = string.Equals(roleClaim, "SUPER_ADMIN", StringComparison.OrdinalIgnoreCase) || 
-                              string.Equals(roleClaim, "ADMINISTRADOR", StringComparison.OrdinalIgnoreCase) ||
-                              string.Equals(roleClaim, "ADMIN", StringComparison.OrdinalIgnoreCase);
-
-                if (!isAdmin)
-                {
-                    createdByFilter = User.Identity.Name;
-                }
-            }
-
-            Log.Information("[DEBUG-ORDERS] User: '{User}', IsAdminFilter: '{Filter}', RouteId: '{RouteId}', Status: '{Status}'", 
-                User?.Identity?.Name, createdByFilter, routeId, status);
-
-            var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize, createdByFilter, routeId));
+            var result = await Mediator.Send(new GetSalesOrdersQuery(customerId, status, fromDate, toDate, pageNumber, pageSize, createdBy, routeId));
             return Ok(result);
         }
         catch (Exception ex)

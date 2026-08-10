@@ -529,22 +529,38 @@ class _OrderListScreenState extends State<OrderListScreen> {
         child: provider.isLoading && provider.orders.isEmpty
             ? const Center(child: CircularProgressIndicator())
             : provider.orders.isEmpty
-                ? const Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.history_toggle_off_rounded, size: 70, color: Color(0xFFCBD5E1)),
-                        SizedBox(height: 16),
-                        Text(
-                          'No hay pedidos registrados',
-                          style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF757575)),
-                        ),
-                        SizedBox(height: 6),
-                        Text(
-                          'Los pedidos que registre se mostrarán aquí.',
-                          style: TextStyle(color: Color(0xFF64748B)),
-                        ),
-                      ],
+                ? Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Icon(
+                            provider.errorMessage != null ? Icons.error_outline_rounded : Icons.history_toggle_off_rounded,
+                            size: 70,
+                            color: provider.errorMessage != null ? Colors.amber.shade700 : const Color(0xFFCBD5E1),
+                          ),
+                          const SizedBox(height: 16),
+                          Text(
+                            provider.errorMessage != null ? 'Aviso de Carga' : 'No hay pedidos registrados',
+                            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF757575)),
+                          ),
+                          const SizedBox(height: 6),
+                          Text(
+                            provider.errorMessage ?? 'Los pedidos que registre se mostrarán aquí.',
+                            textAlign: TextAlign.center,
+                            style: const TextStyle(color: Color(0xFF64748B)),
+                          ),
+                          if (provider.errorMessage != null) ...[
+                            const SizedBox(height: 16),
+                            ElevatedButton.icon(
+                              onPressed: () => provider.fetchOrders(),
+                              icon: const Icon(Icons.refresh),
+                              label: const Text('Reintentar'),
+                            ),
+                          ],
+                        ],
+                      ),
                     ),
                   )
                 : ListView.builder(

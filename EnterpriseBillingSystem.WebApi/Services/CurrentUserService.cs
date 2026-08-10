@@ -16,6 +16,9 @@ public class CurrentUserService : ICurrentUserService
 
     public string? UserId => _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.NameIdentifier);
 
+    public string? UserName => _httpContextAccessor.HttpContext?.User?.Identity?.Name
+                               ?? _httpContextAccessor.HttpContext?.User?.FindFirstValue(ClaimTypes.Name);
+
     public Guid? BranchId
     {
         get

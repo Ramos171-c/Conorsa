@@ -170,8 +170,10 @@ class OrderProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
+    final offlineService = OfflineService();
+
     try {
-      String queryParams = 'pageNumber=1&pageSize=50';
+      String queryParams = 'pageNumber=1&pageSize=100';
       if (routeId != null && routeId.isNotEmpty) {
         queryParams += '&routeId=$routeId';
       }
@@ -181,20 +183,56 @@ class OrderProvider extends ChangeNotifier {
       if (toDate != null) {
         queryParams += '&toDate=${toDate.toIso8601String()}';
       }
-      final response = await apiService.get('/sales-orders?$queryParams');
 
-      if (response.statusCode == 200) {
-        final data = jsonDecode(response.body);
-        final items = data['items'] as List<dynamic>? ?? [];
-        _orders = items.map((e) => SalesOrderListItem.fromJson(e)).toList();
-        // Connection success: trigger background sync
-        syncOfflineData();
-      } else {
-        _errorMessage = 'No se pudieron cargar los pedidos.';
+      List<SalesOrderListItem> fetchedOrders = [];
+
+      try {
+        final response = await apiService.get('/sales-orders?$queryParams');
+
+        if (response.statusCode == 200) {
+          final data = jsonDecode(response.body);
+          final List<dynamic> items = data is Map 
+              ? (data['items'] as List<dynamic>? ?? []) 
+              : (data is List ? data : []);
+
+          fetchedOrders = items.map((e) {
+            if (e is Map<String, dynamic>) {
+              return SalesOrderListItem.fromJson(e);
+            } else {
+              return SalesOrderListItem.fromJson(Map<String, dynamic>.from(e as Map));
+            }
+          }).toList();
+
+          // Connection success: trigger background sync
+          syncOfflineData();
+        } else {
+          _errorMessage = 'Respuesta de servidor: HTTP ${response.statusCode}';
+        }
+      } catch (netErr) {
+        // Mode offline or network issue
       }
+
+      // Merge with pending offline orders stored locally on device
+      final offlineOrdersRaw = await offlineService.getOfflineOrders();
+      final offlineOrderItems = offlineOrdersRaw.map((o) {
+        final total = (o['totalAmount'] as num?)?.toDouble() ?? (o['subTotal'] as num?)?.toDouble() ?? 0.0;
+        return SalesOrderListItem(
+          id: o['tempId']?.toString() ?? 'temp_${DateTime.now().millisecondsSinceEpoch}',
+          orderNumber: o['orderNumber']?.toString() ?? 'OFFLINE',
+          customerId: o['CustomerId']?.toString() ?? o['customerId']?.toString() ?? '',
+          customerName: o['customerName']?.toString() ?? 'Cliente (Pendiente Sync)',
+          orderDate: DateTime.tryParse(o['OrderDate']?.toString() ?? o['orderDate']?.toString() ?? '') ?? DateTime.now(),
+          subTotal: total,
+          discountAmount: 0.0,
+          taxAmount: 0.0,
+          totalAmount: total,
+          status: 'Pendiente Sync',
+        );
+      }).toList();
+
+      _orders = [...offlineOrderItems, ...fetchedOrders];
     } catch (e) {
-      // For orders, if offline we just keep what was loaded, or show connection error
-      _errorMessage = 'Error al cargar pedidos (Modo sin conexión): $e';
+      _errorMessage = 'Error al cargar pedidos: $e';
     } finally {
       _isLoading = false;
       notifyListeners();

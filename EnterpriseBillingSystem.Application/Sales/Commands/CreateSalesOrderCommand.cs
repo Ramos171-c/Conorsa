@@ -173,7 +173,7 @@ public class CreateSalesOrderCommandHandler : IRequestHandler<CreateSalesOrderCo
             Status = SalesOrderStatus.Recibido,
             Notes = request.Notes,
             Details = details,
-            CreatedBy = _currentUserService.UserId ?? "System",
+            CreatedBy = _currentUserService.UserName ?? "System",
             CreatedOnUtc = DateTime.UtcNow
         };
 

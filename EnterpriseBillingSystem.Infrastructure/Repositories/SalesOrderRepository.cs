@@ -79,7 +79,7 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
             query = query.Where(so => so.Customer != null && so.Customer.RouteId == routeId.Value);
 
         if (!string.IsNullOrWhiteSpace(createdBy))
-            query = query.Where(so => so.CreatedBy == createdBy || so.CreatedBy == "System");
+            query = query.Where(so => so.CreatedBy == createdBy || so.CreatedBy == "System" || string.IsNullOrEmpty(so.CreatedBy));
 
         if (!string.IsNullOrWhiteSpace(status))
         {

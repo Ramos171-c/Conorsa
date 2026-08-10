@@ -436,8 +436,12 @@ class PosProvider extends ChangeNotifier {
           final offlineService = OfflineService();
           final offlineOrder = {
             'tempId': 'temp_order_${DateTime.now().millisecondsSinceEpoch}',
+            'orderNumber': 'OFFLINE-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
             'CustomerId': customerId,
+            'customerName': _selectedCustomer?.name ?? 'Cliente Offline',
             'OrderDate': DateTime.now().toUtc().toIso8601String(),
+            'subTotal': _subtotalCommercial,
+            'totalAmount': _subtotalCommercial,
             'Notes': notes ?? 'Pedido desde POS Móvil (Vendedor)',
             'Details': _cart.map((item) {
               return {
