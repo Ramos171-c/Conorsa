@@ -297,7 +297,12 @@ class PosProvider extends ChangeNotifier {
       return;
     }
 
-    // 1. Calculate Subtotal Base (always quantity * retailPrice)
+    // 1. Remove cost-channel exclusive products if not in COSTO level
+    if (!_isCostSeller && _manualPricingLevelOverride != 'COSTO') {
+      _cart.removeWhere((item) => item.product.isCostChannelOnly);
+    }
+
+    // 2. Calculate Subtotal Base (always quantity * retailPrice)
     _subtotalBase = 0.0;
     for (var item in _cart) {
       _subtotalBase += item.quantity * item.presentation.retailPrice;

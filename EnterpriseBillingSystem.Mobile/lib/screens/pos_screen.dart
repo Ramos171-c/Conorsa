@@ -774,6 +774,7 @@ class _PosScreenState extends State<PosScreen> {
                   tooltip: 'Cambiar Nivel de Precios',
                   onSelected: (level) {
                     posProv.setManualPricingLevelOverride(level);
+                    setState(() {});
                   },
                   itemBuilder: (context) => [
                     const PopupMenuItem(
