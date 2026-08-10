@@ -779,9 +779,13 @@ class _OrderListScreenState extends State<OrderListScreen> {
                                       children: [
                                         Icon(Icons.calendar_today, size: 14, color: Colors.grey.shade400),
                                         const SizedBox(width: 8),
-                                        Text(
-                                          formattedDate,
-                                          style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                                        Expanded(
+                                          child: Text(
+                                            formattedDate,
+                                            style: TextStyle(fontSize: 13, color: Colors.grey.shade500),
+                                            overflow: TextOverflow.ellipsis,
+                                            maxLines: 1,
+                                          ),
                                         ),
                                       ],
                                     ),

@@ -1222,7 +1222,7 @@ class _PosScreenState extends State<PosScreen> {
                         : GridView.builder(
                         gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
                           maxCrossAxisExtent: 180,
-                          childAspectRatio: 0.72,
+                          childAspectRatio: 0.65, // Más alto para evitar desbordamiento de texto
                           crossAxisSpacing: 10,
                           mainAxisSpacing: 10,
                         ),

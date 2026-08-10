@@ -297,38 +297,50 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
                                         ],
                                       ),
                                       const SizedBox(height: 8),
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.qr_code_rounded, size: 16, color: Color(0xFF94A3B8)),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'Código: ${customer.customerCode}',
-                                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
-                                          ),
-                                        ],
-                                      ),
+                                       Row(
+                                         children: [
+                                           const Icon(Icons.qr_code_rounded, size: 16, color: Color(0xFF94A3B8)),
+                                           const SizedBox(width: 6),
+                                           Expanded(
+                                             child: Text(
+                                               'Código: ${customer.customerCode}',
+                                               style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                                               overflow: TextOverflow.ellipsis,
+                                               maxLines: 1,
+                                             ),
+                                           ),
+                                         ],
+                                       ),
                                       const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.route_rounded, size: 16, color: Color(0xFF94A3B8)),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'Ruta: $routeName',
-                                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
-                                          ),
-                                        ],
-                                      ),
+                                       Row(
+                                         children: [
+                                           const Icon(Icons.route_rounded, size: 16, color: Color(0xFF94A3B8)),
+                                           const SizedBox(width: 6),
+                                           Expanded(
+                                             child: Text(
+                                               'Ruta: $routeName',
+                                               style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                                               overflow: TextOverflow.ellipsis,
+                                               maxLines: 1,
+                                             ),
+                                           ),
+                                         ],
+                                       ),
                                       const SizedBox(height: 4),
-                                      Row(
-                                        children: [
-                                          const Icon(Icons.credit_card_rounded, size: 16, color: Color(0xFF94A3B8)),
-                                          const SizedBox(width: 6),
-                                          Text(
-                                            'Límite Crédito: ${customer.canUseCredit ? _formatCurrency(customer.creditLimit) : "No aplica"}',
-                                            style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
-                                          ),
-                                        ],
-                                      ),
+                                       Row(
+                                         children: [
+                                           const Icon(Icons.credit_card_rounded, size: 16, color: Color(0xFF94A3B8)),
+                                           const SizedBox(width: 6),
+                                           Expanded(
+                                             child: Text(
+                                               'Límite Crédito: ${customer.canUseCredit ? _formatCurrency(customer.creditLimit) : "No aplica"}',
+                                               style: const TextStyle(color: Color(0xFF64748B), fontSize: 13),
+                                               overflow: TextOverflow.ellipsis,
+                                               maxLines: 1,
+                                             ),
+                                           ),
+                                         ],
+                                       ),
                                       const Divider(height: 24),
                                       Row(
                                         mainAxisAlignment: MainAxisAlignment.end,

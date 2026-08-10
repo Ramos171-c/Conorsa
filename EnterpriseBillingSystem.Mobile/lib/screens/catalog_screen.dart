@@ -230,7 +230,7 @@ class _CatalogScreenState extends State<CatalogScreen> {
                             crossAxisCount: columns,
                             crossAxisSpacing: 16,
                             mainAxisSpacing: 16,
-                            childAspectRatio: 0.78, // Tighter ratio for cards without price
+                            childAspectRatio: 0.70, // Relación de aspecto más alta para evitar desbordamientos
                           ),
                           itemCount: filteredProducts.length,
                           itemBuilder: (context, index) {
