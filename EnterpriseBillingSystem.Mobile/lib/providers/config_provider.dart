@@ -30,8 +30,13 @@ class ConfigProvider extends ChangeNotifier {
   Future<void> loadConfig() async {
     final fallbackUrl = _dynamicDefaultUrl;
     try {
-      final prefs = await SharedPreferences.getInstance();
-      _apiUrl = prefs.getString(_keyApiUrl) ?? fallbackUrl;
+      if (kIsWeb) {
+        // On Web, always prioritize the active origin to prevent CORS or mismatched host IP issues
+        _apiUrl = fallbackUrl;
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        _apiUrl = prefs.getString(_keyApiUrl) ?? fallbackUrl;
+      }
     } catch (e) {
       _apiUrl = fallbackUrl;
     } finally {

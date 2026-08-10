@@ -123,7 +123,7 @@ class Product {
       description: json['description'] as String?,
       defaultUnitOfMeasureId: json['defaultUnitOfMeasureId'] as String? ?? '',
       defaultUnitOfMeasureCode: json['defaultUnitOfMeasureCode'] as String? ?? '',
-      defaultSalePrice: (json['defaultSalePrice'] as num?)?.toDouble() ?? 0.0,
+      defaultSalePrice: (json['defaultSalePrice'] as num?)?.toDouble() ?? (json['defaultPrice'] as num?)?.toDouble() ?? 0.0,
       imageUrl: json['imageUrl'] as String? ?? json['imagePath'] as String?,
       isActive: json['isActive'] as bool? ?? true,
       isSoldOut: json['isSoldOut'] as bool? ?? false,

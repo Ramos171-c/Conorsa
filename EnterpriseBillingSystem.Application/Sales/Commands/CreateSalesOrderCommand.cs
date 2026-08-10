@@ -8,6 +8,7 @@ using FluentValidation;
 using EnterpriseBillingSystem.Domain.Entities;
 using EnterpriseBillingSystem.Domain.Enums;
 using EnterpriseBillingSystem.Domain.Repositories;
+using EnterpriseBillingSystem.Application.Common.Interfaces;
 
 namespace EnterpriseBillingSystem.Application.Sales.Commands;
 
@@ -73,19 +74,22 @@ public class CreateSalesOrderCommandHandler : IRequestHandler<CreateSalesOrderCo
     private readonly IProductRepository _productRepository;
     private readonly IRepository<SystemParameter> _systemParameterRepository;
     private readonly IUnitOfWork _unitOfWork;
+    private readonly ICurrentUserService _currentUserService;
 
     public CreateSalesOrderCommandHandler(
         ISalesOrderRepository salesOrderRepository,
         ICustomerRepository customerRepository,
         IProductRepository productRepository,
         IRepository<SystemParameter> systemParameterRepository,
-        IUnitOfWork unitOfWork)
+        IUnitOfWork unitOfWork,
+        ICurrentUserService currentUserService)
     {
         _salesOrderRepository = salesOrderRepository;
         _customerRepository = customerRepository;
         _productRepository = productRepository;
         _systemParameterRepository = systemParameterRepository;
         _unitOfWork = unitOfWork;
+        _currentUserService = currentUserService;
     }
 
     public async Task<Guid> Handle(CreateSalesOrderCommand request, CancellationToken cancellationToken)
@@ -169,7 +173,7 @@ public class CreateSalesOrderCommandHandler : IRequestHandler<CreateSalesOrderCo
             Status = SalesOrderStatus.Recibido,
             Notes = request.Notes,
             Details = details,
-            CreatedBy = "System",
+            CreatedBy = _currentUserService.UserId ?? "System",
             CreatedOnUtc = DateTime.UtcNow
         };
 
