@@ -96,12 +96,23 @@ class AuthProvider extends ChangeNotifier {
           return false;
         }
       } else {
-        final errorData = jsonDecode(response.body);
-        _errorMessage = errorData['message'] ?? 'Credenciales incorrectas.';
+        try {
+          final errorData = jsonDecode(response.body);
+          if (errorData is Map) {
+            _errorMessage = errorData['message']?.toString() ??
+                errorData['detail']?.toString() ??
+                errorData['title']?.toString() ??
+                'Credenciales incorrectas.';
+          } else {
+            _errorMessage = 'Credenciales incorrectas (${response.statusCode}).';
+          }
+        } catch (_) {
+          _errorMessage = 'Credenciales incorrectas o error en servidor (${response.statusCode}).';
+        }
         return false;
       }
     } catch (e) {
-      _errorMessage = 'Error de conexión con el servidor. Verifique la dirección de la API.';
+      _errorMessage = 'Error de conexión: ${e.toString().replaceAll('Exception:', '').trim()}';
       return false;
     } finally {
       _isLoading = false;

@@ -133,7 +133,10 @@ try
 
     var app = builder.Build();
 
-    // Middleware de excepciones global al principio de la cadena
+    // Habilitar CORS al principio del pipeline para peticiones preflight (OPTIONS)
+    app.UseCors("AllowAll");
+
+    // Middleware de excepciones global
     app.UseMiddleware<ExceptionMiddleware>();
 
     // Usar Logging de peticiones Serilog
@@ -147,14 +150,6 @@ try
             c.SwaggerEndpoint("/swagger/v1/swagger.json", "LA UNIÓN API v1");
         });
     }
-
-    // Deshabilitado redireccion forzada a HTTPS para permitir la conexion por HTTP directo en IP 167.99.13.177
-    // if (!app.Environment.IsDevelopment())
-    // {
-    //     app.UseHttpsRedirection();
-    // }
-
-    app.UseCors("AllowAll");
 
     // Permitir la descarga de archivos .apk de Android y archivos por defecto (index.html) para Flutter Web (/app/)
     var provider = new Microsoft.AspNetCore.StaticFiles.FileExtensionContentTypeProvider();
