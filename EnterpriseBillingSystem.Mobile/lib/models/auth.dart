@@ -33,18 +33,18 @@ class UserProfile {
 
   factory UserProfile.fromJson(Map<String, dynamic> json) {
     return UserProfile(
-      id: json['id'] as String? ?? '',
-      username: json['username'] as String? ?? '',
-      email: json['email'] as String? ?? '',
-      firstName: json['firstName'] as String? ?? '',
-      lastName: json['lastName'] as String? ?? '',
-      defaultBranchId: json['defaultBranchId'] as String? ?? '',
-      role: json['role'] as String? ?? '',
+      id: json['id']?.toString() ?? '',
+      username: json['username']?.toString() ?? '',
+      email: json['email']?.toString() ?? '',
+      firstName: json['firstName']?.toString() ?? '',
+      lastName: json['lastName']?.toString() ?? '',
+      defaultBranchId: json['defaultBranchId']?.toString() ?? '',
+      role: json['role']?.toString() ?? '',
       permissions: (json['permissions'] as List<dynamic>?)
               ?.map((e) => e.toString())
               .toList() ?? 
           [],
-      routeId: json['routeId'] as String?,
+      routeId: json['routeId']?.toString(),
     );
   }
 

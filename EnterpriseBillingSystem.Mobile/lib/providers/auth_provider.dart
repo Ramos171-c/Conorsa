@@ -79,22 +79,30 @@ class AuthProvider extends ChangeNotifier {
         final data = jsonDecode(response.body);
         
         await apiService.saveAuthData(
-          accessToken: data['accessToken'],
-          refreshToken: data['refreshToken'],
-          expiration: data['expiration'],
-          username: data['username'],
+          accessToken: data['accessToken']?.toString() ?? '',
+          refreshToken: data['refreshToken']?.toString() ?? '',
+          expiration: data['expiration']?.toString() ?? '',
+          username: data['username']?.toString() ?? username,
         );
 
         final profileSuccess = await fetchUserProfile();
-        if (profileSuccess) {
-          _isLoggedIn = true;
-          _errorMessage = null;
-          return true;
-        } else {
-          _errorMessage = 'No se pudo cargar el perfil del usuario.';
-          await apiService.clearAuthData();
-          return false;
+        if (!profileSuccess && _userProfile == null) {
+          // Construct fallback profile so valid login is never blocked
+          _userProfile = UserProfile(
+            id: '',
+            username: username,
+            email: '',
+            firstName: username,
+            lastName: '',
+            defaultBranchId: '',
+            role: 'Usuario',
+            permissions: [],
+          );
         }
+        
+        _isLoggedIn = true;
+        _errorMessage = null;
+        return true;
       } else {
         try {
           final errorData = jsonDecode(response.body);
@@ -141,9 +149,10 @@ class AuthProvider extends ChangeNotifier {
       if (cachedData != null) {
         try {
           _userProfile = UserProfile.fromJson(jsonDecode(cachedData));
+          return true;
         } catch (_) {}
       }
-      throw NetworkException();
+      return false;
     }
   }
 
