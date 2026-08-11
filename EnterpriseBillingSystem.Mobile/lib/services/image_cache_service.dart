@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -7,6 +8,7 @@ class ImageCacheService {
 
   /// Pre-cache a list of image URLs in the background
   static Future<void> cacheImages(List<String> imageUrls) async {
+    if (kIsWeb) return; // Web browsers handle HTTP image caching natively
     for (final url in imageUrls) {
       if (url.isEmpty || url.contains('default-product.png')) continue;
       // Skip if already cached
@@ -19,19 +21,29 @@ class ImageCacheService {
 
   /// Check if image is cached locally
   static Future<bool> isCached(String imageUrl) async {
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.containsKey('$_keyPrefix$imageUrl');
+    if (kIsWeb) return false;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.containsKey('$_keyPrefix$imageUrl');
+    } catch (_) {
+      return false;
+    }
   }
 
   /// Get cached image bytes
   static Future<String?> getCachedImageBase64(String imageUrl) async {
-    if (imageUrl.isEmpty) return null;
-    final prefs = await SharedPreferences.getInstance();
-    return prefs.getString('$_keyPrefix$imageUrl');
+    if (imageUrl.isEmpty || kIsWeb) return null;
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      return prefs.getString('$_keyPrefix$imageUrl');
+    } catch (_) {
+      return null;
+    }
   }
 
   /// Download and cache single image
   static Future<void> _downloadAndCache(String imageUrl) async {
+    if (kIsWeb) return;
     try {
       final response = await http.get(Uri.parse(imageUrl)).timeout(const Duration(seconds: 15));
       if (response.statusCode == 200) {
@@ -40,13 +52,13 @@ class ImageCacheService {
         await prefs.setString('$_keyPrefix$imageUrl', base64Image);
       }
     } catch (_) {
-      // Ignore background download errors
+      // Ignore background download errors or quota limits safely
     }
   }
 
   /// Force cache single image (used by widgets on-the-fly)
   static Future<String?> downloadAndCacheOnTheFly(String imageUrl) async {
-    if (imageUrl.isEmpty || imageUrl.contains('default-product.png')) return null;
+    if (imageUrl.isEmpty || imageUrl.contains('default-product.png') || kIsWeb) return null;
     try {
       final response = await http.get(Uri.parse(imageUrl)).timeout(const Duration(seconds: 10));
       if (response.statusCode == 200) {

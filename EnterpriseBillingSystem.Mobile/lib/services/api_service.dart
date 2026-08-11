@@ -25,18 +25,42 @@ class ApiService {
     return prefs.getString(_keyToken);
   }
 
-  // Save auth tokens and info
+  // Save auth tokens and info safely
   Future<void> saveAuthData({
     required String accessToken,
     required String refreshToken,
     required String expiration,
     required String username,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyToken, accessToken);
-    await prefs.setString(_keyRefreshToken, refreshToken);
-    await prefs.setString(_keyTokenExp, expiration);
-    await prefs.setString(_keyUsername, username);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyToken, accessToken);
+      await prefs.setString(_keyRefreshToken, refreshToken);
+      await prefs.setString(_keyTokenExp, expiration);
+      await prefs.setString(_keyUsername, username);
+    } catch (e) {
+      // Purge non-essential cache if browser quota (e.g. Safari 5MB limit) is exceeded
+      await _purgeCacheForAuth();
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_keyToken, accessToken);
+        await prefs.setString(_keyRefreshToken, refreshToken);
+        await prefs.setString(_keyTokenExp, expiration);
+        await prefs.setString(_keyUsername, username);
+      } catch (_) {}
+    }
+  }
+
+  static Future<void> _purgeCacheForAuth() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs.getKeys();
+      for (final key in keys) {
+        if (key.startsWith('cached_img_') || key == 'cached_products' || key == 'cached_user_profile') {
+          await prefs.remove(key);
+        }
+      }
+    } catch (_) {}
   }
 
   // Clear auth tokens on logout

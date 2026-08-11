@@ -14,11 +14,11 @@ class OfflineService {
   // --- Catalog Cache Management ---
 
   Future<void> cacheProducts(List<dynamic> products) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyCachedProducts, jsonEncode(products));
-
-    // Pre-cache product images in the background
     try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyCachedProducts, jsonEncode(products));
+
+      // Pre-cache product images in the background
       final apiUrl = prefs.getString('api_base_url') ?? 'http://167.99.13.177:8081/api/v1';
       final uri = Uri.parse(apiUrl);
       final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ":${uri.port}" : ""}';
@@ -33,10 +33,10 @@ class OfflineService {
   }
 
   Future<List<dynamic>> getCachedProducts() async {
-    final prefs = await SharedPreferences.getInstance();
-    final jsonStr = prefs.getString(_keyCachedProducts);
-    if (jsonStr == null) return [];
     try {
+      final prefs = await SharedPreferences.getInstance();
+      final jsonStr = prefs.getString(_keyCachedProducts);
+      if (jsonStr == null) return [];
       return jsonDecode(jsonStr) as List<dynamic>;
     } catch (_) {
       return [];
@@ -44,8 +44,10 @@ class OfflineService {
   }
 
   Future<void> cacheCategories(List<dynamic> categories) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyCachedCategories, jsonEncode(categories));
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyCachedCategories, jsonEncode(categories));
+    } catch (_) {}
   }
 
   Future<List<dynamic>> getCachedCategories() async {
