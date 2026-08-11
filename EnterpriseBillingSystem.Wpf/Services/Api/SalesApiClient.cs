@@ -262,6 +262,17 @@ public class SalesApiClient
 
         return await _httpClient.GetFromJsonAsync<DashboardSummaryResponseDto>(url);
     }
+
+    public async Task<DashboardAnalyticsDto?> GetDashboardAnalyticsAsync(DateTime? fromDate = null, DateTime? toDate = null, Guid? routeId = null)
+    {
+        var url = "dashboard/analytics?";
+        if (fromDate.HasValue) url += $"fromDate={fromDate.Value:yyyy-MM-ddTHH:mm:ss}&";
+        if (toDate.HasValue) url += $"toDate={toDate.Value:yyyy-MM-ddTHH:mm:ss}&";
+        if (routeId.HasValue && routeId.Value != Guid.Empty) url += $"routeId={routeId.Value}&";
+        url = url.TrimEnd('&', '?');
+
+        return await _httpClient.GetFromJsonAsync<DashboardAnalyticsDto>(url);
+    }
 }
 
 public class DashboardSummaryResponseDto

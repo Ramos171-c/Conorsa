@@ -5,6 +5,8 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using EnterpriseBillingSystem.Wpf.Models;
+using EnterpriseBillingSystem.Wpf.Services.Api;
 using EnterpriseBillingSystem.Wpf.Services;
 using EnterpriseBillingSystem.Wpf.Services.Dialogs;
 
@@ -12,16 +14,20 @@ namespace EnterpriseBillingSystem.Wpf.ViewModels;
 
 public partial class ReportsDashboardViewModel : ObservableObject
 {
+    private readonly SalesApiClient _salesApiClient;
     private readonly INotificationService _notificationService;
 
     [ObservableProperty]
     private bool _isLoading;
 
     [ObservableProperty]
-    private DateTime? _fromDate = DateTime.UtcNow.AddDays(-7);
+    private DateTime? _fromDate = DateTime.Today.AddDays(-30);
 
     [ObservableProperty]
-    private DateTime? _toDate = DateTime.UtcNow;
+    private DateTime? _toDate = DateTime.Today;
+
+    [ObservableProperty]
+    private string _dateRangeLabel = "Cargando...";
 
     // KPI Cards
     [ObservableProperty]
@@ -48,16 +54,67 @@ public partial class ReportsDashboardViewModel : ObservableObject
     [ObservableProperty]
     private string _effectivenessSub = "Cumplimiento Global";
 
-    public ReportsDashboardViewModel(INotificationService notificationService)
+    public ObservableCollection<RouteReturnsChartDto> RouteReturns { get; } = new();
+
+    public ReportsDashboardViewModel(SalesApiClient salesApiClient, INotificationService notificationService)
     {
+        _salesApiClient = salesApiClient;
         _notificationService = notificationService;
+        _ = LoadDashboardDataAsync();
     }
 
     [RelayCommand]
-    private void RefreshDashboard()
+    public async Task LoadDashboardDataAsync()
     {
         IsLoading = true;
-        Task.Delay(500).ContinueWith(_ => IsLoading = false);
+        try
+        {
+            var from = FromDate ?? DateTime.Today.AddDays(-30);
+            var to = ToDate ?? DateTime.Today;
+            
+            // Format label
+            DateRangeLabel = $"Período: {from:dd/MM/yyyy} al {to:dd/MM/yyyy}";
+
+            var analytics = await _salesApiClient.GetDashboardAnalyticsAsync(from, to);
+            if (analytics != null)
+            {
+                // Directly bind the metrics computed by the API
+                TotalPresaleValue = analytics.TotalPresaleKpi?.Value ?? "C$ 0.00";
+                TotalPresaleSub = analytics.TotalPresaleKpi?.Subtitle ?? "0 Pedidos";
+
+                TotalDeliveredValue = analytics.TotalDeliveredKpi?.Value ?? "C$ 0.00";
+                TotalDeliveredSub = analytics.TotalDeliveredKpi?.Subtitle ?? "Entrega Efectiva";
+
+                TotalLossValue = analytics.TotalShortageLossKpi?.Value ?? "C$ 0.00";
+                TotalLossSub = analytics.TotalShortageLossKpi?.Subtitle ?? "0 Piezas Faltantes";
+
+                EffectivenessValue = analytics.GlobalEffectivenessKpi?.Value ?? "100.0%";
+                EffectivenessSub = analytics.GlobalEffectivenessKpi?.Subtitle ?? "Cumplimiento de Entrega";
+
+                RouteReturns.Clear();
+                if (analytics.RouteReturns != null)
+                {
+                    foreach (var route in analytics.RouteReturns)
+                    {
+                        RouteReturns.Add(route);
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            _notificationService.ShowError($"Error al actualizar analytics: {ex.Message}");
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    [RelayCommand]
+    private async Task RefreshDashboardAsync()
+    {
+        await LoadDashboardDataAsync();
     }
 
     [RelayCommand]

@@ -25,12 +25,16 @@
                 <TextBlock Text="Monitoree métricas de preventa, entrega efectiva, faltantes y exporte reportes auditados en PDF." Style="{StaticResource MaterialDesignBody2TextBlock}" Foreground="#64748B" />
             </StackPanel>
 
-            <Button Grid.Column="1" Command="{Binding RefreshDashboardCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Background="#4F46E5" BorderBrush="#4F46E5">
-                <StackPanel Orientation="Horizontal">
-                    <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
-                    <TextBlock Text="Actualizar Datos" VerticalAlignment="Center" FontWeight="Bold" />
-                </StackPanel>
-            </Button>
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                <DatePicker SelectedDate="{Binding FromDate}" Width="120" Margin="0,0,12,0" materialDesign:HintAssist.Hint="Fecha Inicio" Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+                <DatePicker SelectedDate="{Binding ToDate}" Width="120" Margin="0,0,16,0" materialDesign:HintAssist.Hint="Fecha Fin" Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+                <Button Command="{Binding RefreshDashboardCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Background="#4F46E5" BorderBrush="#4F46E5">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Actualizar Datos" VerticalAlignment="Center" FontWeight="Bold" />
+                    </StackPanel>
+                </Button>
+            </StackPanel>
         </Grid>
 
         <!-- KPI Cards Grid -->
@@ -219,26 +223,24 @@
 
                     <StackPanel Grid.Row="0">
                         <TextBlock Text="📈 Resumen Ejecutivo" FontSize="18" FontWeight="Bold" Foreground="White" />
-                        <TextBlock Text="Semana del 20 al 26 de Julio" FontSize="12" Foreground="#94A3B8" Margin="0,2,0,0" />
+                        <TextBlock Text="{Binding DateRangeLabel}" FontSize="12" Foreground="#94A3B8" Margin="0,2,0,0" />
                     </StackPanel>
 
-                    <StackPanel Grid.Row="1" VerticalAlignment="Center">
-                        <Border Background="#334155" CornerRadius="10" Padding="16" Margin="0,0,0,12">
-                            <StackPanel>
-                                <TextBlock Text="Ruta 1 (RC-00000009)" FontWeight="Bold" Foreground="#38BDF8" FontSize="14" />
-                                <TextBlock Text="21 Piezas Devueltas Afectadas" Foreground="#E2E8F0" FontSize="12" Margin="0,4,0,0" />
-                                <TextBlock Text="Pedidos pasados a Completado" Foreground="#4ADE80" FontSize="12" FontWeight="Bold" Margin="0,2,0,0" />
-                            </StackPanel>
-                        </Border>
-
-                        <Border Background="#334155" CornerRadius="10" Padding="16">
-                            <StackPanel>
-                                <TextBlock Text="Ruta 3 - Deysi (RC-00000010)" FontWeight="Bold" Foreground="#38BDF8" FontSize="14" />
-                                <TextBlock Text="24 Piezas Devueltas Afectadas" Foreground="#E2E8F0" FontSize="12" Margin="0,4,0,0" />
-                                <TextBlock Text="Pedidos pasados a Completado" Foreground="#4ADE80" FontSize="12" FontWeight="Bold" Margin="0,2,0,0" />
-                            </StackPanel>
-                        </Border>
-                    </StackPanel>
+                    <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,12,0,12">
+                        <ItemsControl ItemsSource="{Binding RouteReturns}">
+                            <ItemsControl.ItemTemplate>
+                                <DataTemplate>
+                                    <Border Background="#334155" CornerRadius="10" Padding="16" Margin="0,0,0,12">
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding RouteName}" FontWeight="Bold" Foreground="#38BDF8" FontSize="14" />
+                                            <TextBlock Text="{Binding ReturnedPieces, StringFormat='{}{0:N0} Piezas Devueltas Afectadas'}" Foreground="#E2E8F0" FontSize="12" Margin="0,4,0,0" />
+                                            <TextBlock Text="Pedidos pasados a Completado" Foreground="#4ADE80" FontSize="12" FontWeight="Bold" Margin="0,2,0,0" />
+                                        </StackPanel>
+                                    </Border>
+                                </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                    </ScrollViewer>
 
                     <Border Grid.Row="2" Background="#0F172A" CornerRadius="8" Padding="12">
                         <TextBlock Text="✓ Sistema de Liquidaciones y Devoluciones 100% Activo" Foreground="#38BDF8" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" />

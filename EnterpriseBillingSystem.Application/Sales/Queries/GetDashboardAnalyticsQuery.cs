@@ -120,8 +120,19 @@ public class GetDashboardAnalyticsQueryHandler : IRequestHandler<GetDashboardAna
 
             var dateKey = order.OrderDate.Date;
 
-            decimal presale = order.TotalAmount;
-            decimal delivered = order.TotalAmount; // En facturas modificadas, TotalAmount refleja la entrega real
+            // Reconstruct original presale amount from details
+            decimal presale = 0;
+            foreach (var detail in order.Details)
+            {
+                decimal qty = detail.OriginalPresaleQuantity ?? detail.Quantity;
+                decimal gross = qty * detail.UnitPrice;
+                decimal disc = gross * (detail.DiscountPercentage / 100m);
+                decimal tax = (gross - disc) * (detail.TaxPercentage / 100m);
+                presale += gross - disc + tax;
+            }
+
+            // Delivered is TotalAmount ONLY if the order is completed
+            decimal delivered = order.Status == SalesOrderStatus.Completado ? order.TotalAmount : 0m;
 
             totalPresale += presale;
             totalDelivered += delivered;
@@ -157,7 +168,8 @@ public class GetDashboardAnalyticsQueryHandler : IRequestHandler<GetDashboardAna
         }
 
         decimal totalLoss = totalReturnedAmount;
-        decimal effectivenessPct = totalPresale > 0 ? (totalDelivered / totalPresale) * 100m : 100m;
+        decimal completedPresale = totalDelivered + totalLoss;
+        decimal effectivenessPct = completedPresale > 0 ? (totalDelivered / completedPresale) * 100m : 100m;
 
         var kpiPresale = new KpiMetricDto("Preventa Solicitada", $"C$ {totalPresale:N2}", $"{validOrders.Count} Pedidos Tomados", "CurrencyUsd", "#0284C7");
         var kpiDelivered = new KpiMetricDto("Entrega Efectiva", $"C$ {totalDelivered:N2}", "Llegó al cliente", "TruckCheck", "#059669");
