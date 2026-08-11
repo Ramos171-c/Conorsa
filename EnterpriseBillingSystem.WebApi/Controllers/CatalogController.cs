@@ -218,6 +218,47 @@ public class CatalogController : ApiControllerBase
         }
     }
 
+    [HttpGet("visual-catalog/pdf")]
+    public async Task<IActionResult> GetVisualCatalogPdf([FromQuery] int layout = 2, [FromQuery] bool showSku = true, [FromQuery] string category = "ALL", [FromServices] IWebHostEnvironment env = null)
+    {
+        try
+        {
+            var webRoot = env?.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
+            var pdfPath = Path.Combine(webRoot, "Catalogo_La_Union.pdf");
+
+            // Execute Python generator if needed or return file
+            var scriptPath = Path.Combine(Directory.GetCurrentDirectory(), "generate_catalog.py");
+            if (System.IO.File.Exists(scriptPath))
+            {
+                var skuFlag = showSku ? "--show-sku" : "--hide-sku";
+                var startInfo = new System.Diagnostics.ProcessStartInfo
+                {
+                    FileName = "python",
+                    Arguments = $"\"{scriptPath}\" --layout {layout} {skuFlag} --category \"{category}\"",
+                    RedirectStandardOutput = true,
+                    RedirectStandardError = true,
+                    UseShellExecute = false,
+                    CreateNoWindow = true
+                };
+
+                using var proc = System.Diagnostics.Process.Start(startInfo);
+                await proc.WaitForExitAsync();
+            }
+
+            if (!System.IO.File.Exists(pdfPath))
+            {
+                return NotFound(new { Message = "No se pudo generar el archivo PDF del catálogo." });
+            }
+
+            var pdfBytes = await System.IO.File.ReadAllBytesAsync(pdfPath);
+            return File(pdfBytes, "application/pdf", "Catalogo_La_Union.pdf");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { Error = ex.Message });
+        }
+    }
+
     private static byte[] MakeBackgroundTransparent(string imagePath)
     {
         try
@@ -240,7 +281,6 @@ public class CatalogController : ApiControllerBase
             bool[,] visited = new bool[width, height];
             var queue = new Queue<SkiaSharp.SKPointI>();
 
-            // Agregar todo el perímetro exterior a la cola de Flood-Fill
             for (int x = 0; x < width; x++)
             {
                 queue.Enqueue(new SkiaSharp.SKPointI(x, 0));
@@ -252,10 +292,6 @@ public class CatalogController : ApiControllerBase
                 queue.Enqueue(new SkiaSharp.SKPointI(width - 1, y));
             }
 
-            // Criterio agresivo de detección de fondo:
-            // a) Fondos Blancos/Claros/Cremas (R >= 195 && G >= 195 && B >= 195)
-            // b) Fondos Negros/Oscuros (R <= 50 && G <= 50 && B <= 50)
-            // c) Fondos neutros monocromáticos (diferencia max de canales <= 25 && (R >= 170 || R <= 60))
             static bool IsBackgroundColor(SkiaSharp.SKColor c)
             {
                 bool isWhiteOrLight = c.Red >= 195 && c.Green >= 195 && c.Blue >= 195;
@@ -283,7 +319,6 @@ public class CatalogController : ApiControllerBase
                 {
                     resultBitmap.SetPixel(px, py, SkiaSharp.SKColors.Transparent);
 
-                    // Expandir a píxeles vecinos (4 direcciones)
                     if (px > 0 && !visited[px - 1, py]) queue.Enqueue(new SkiaSharp.SKPointI(px - 1, py));
                     if (px < width - 1 && !visited[px + 1, py]) queue.Enqueue(new SkiaSharp.SKPointI(px + 1, py));
                     if (py > 0 && !visited[px, py - 1]) queue.Enqueue(new SkiaSharp.SKPointI(px, py - 1));
@@ -291,7 +326,6 @@ public class CatalogController : ApiControllerBase
                 }
             }
 
-            // Segunda pasada: Limpieza agresiva de remanentes de bordes externos (12% del margen perimetral)
             for (int y = 0; y < height; y++)
             {
                 for (int x = 0; x < width; x++)
@@ -343,3 +377,4 @@ public class CatalogController : ApiControllerBase
         return System.IO.File.Exists(localImagePath);
     }
 }
+

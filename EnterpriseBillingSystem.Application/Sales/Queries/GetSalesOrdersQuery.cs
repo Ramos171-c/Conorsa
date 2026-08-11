@@ -55,7 +55,8 @@ public record SalesOrderDetailDto(
     string Status,
     string? Notes,
     DateTime CreatedOnUtc,
-    List<SalesOrderDetailItemDto> Details
+    List<SalesOrderDetailItemDto> Details,
+    string? CustomerAddress = null
 );
 
 // ─── Queries ─────────────────────────────────────────────────────────────────
@@ -137,6 +138,19 @@ public class GetSalesOrderByIdQueryHandler : IRequestHandler<GetSalesOrderByIdQu
             d.NetAmount
         )).ToList();
 
+        var addressObj = order.Customer?.Addresses?.FirstOrDefault(a => a.IsDefault) 
+                         ?? order.Customer?.Addresses?.FirstOrDefault();
+        string? customerAddress = null;
+        if (addressObj != null)
+        {
+            var parts = new List<string>();
+            if (!string.IsNullOrWhiteSpace(addressObj.AddressLine1)) parts.Add(addressObj.AddressLine1.Trim());
+            if (!string.IsNullOrWhiteSpace(addressObj.AddressLine2)) parts.Add(addressObj.AddressLine2.Trim());
+            if (!string.IsNullOrWhiteSpace(addressObj.City)) parts.Add(addressObj.City.Trim());
+            if (!string.IsNullOrWhiteSpace(addressObj.State)) parts.Add(addressObj.State.Trim());
+            if (parts.Count > 0) customerAddress = string.Join(", ", parts);
+        }
+
         return new SalesOrderDetailDto(
             order.Id,
             order.OrderNumber,
@@ -151,6 +165,7 @@ public class GetSalesOrderByIdQueryHandler : IRequestHandler<GetSalesOrderByIdQu
             order.Status.ToString(),
             order.Notes,
             order.CreatedOnUtc,
-            details);
+            details,
+            customerAddress);
     }
 }

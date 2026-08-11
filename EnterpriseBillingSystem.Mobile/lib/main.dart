@@ -9,6 +9,8 @@ import 'services/api_service.dart';
 import 'screens/catalog_screen.dart';
 import 'screens/home_screen.dart';
 
+import 'package:flutter/foundation.dart';
+
 // Bypass self-signed certificate checks in local development environments
 class MyHttpOverrides extends HttpOverrides {
   @override
@@ -19,7 +21,9 @@ class MyHttpOverrides extends HttpOverrides {
 }
 
 void main() async {
-  HttpOverrides.global = MyHttpOverrides();
+  if (!kIsWeb) {
+    HttpOverrides.global = MyHttpOverrides();
+  }
   WidgetsFlutterBinding.ensureInitialized();
 
   // Create core service instances

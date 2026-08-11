@@ -190,6 +190,7 @@ public class CreateProductPresentationCommandHandler : IRequestHandler<CreatePro
             Id = Guid.NewGuid(),
             ProductId = product.Id,
             ProductPresentationId = newPres.Id,
+            ProductPresentation = newPres,
             OldRetailPrice = 0,
             NewRetailPrice = newPres.RetailPrice,
             OldSemiWholesalePrice = 0,

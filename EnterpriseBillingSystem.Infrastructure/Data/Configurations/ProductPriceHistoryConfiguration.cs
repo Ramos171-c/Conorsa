@@ -56,6 +56,11 @@ public class ProductPriceHistoryConfiguration : IEntityTypeConfiguration<Product
             .HasForeignKey(p => p.ProductId)
             .OnDelete(DeleteBehavior.Cascade);
 
+        builder.HasOne(p => p.ProductPresentation)
+            .WithMany()
+            .HasForeignKey(p => p.ProductPresentationId)
+            .OnDelete(DeleteBehavior.Restrict);
+
         // Soft Delete filter
         builder.HasQueryFilter(p => !p.IsDeleted);
     }

@@ -283,6 +283,7 @@ public class UpdateProductPresentationCommandHandler : IRequestHandler<UpdatePro
                 Id = Guid.NewGuid(),
                 ProductId = product.Id,
                 ProductPresentationId = existing.Id,
+                ProductPresentation = existing,
                 OldRetailPrice = oldRetailPrice,
                 NewRetailPrice = pres.RetailPrice,
                 OldSemiWholesalePrice = oldSemiWholesalePrice,

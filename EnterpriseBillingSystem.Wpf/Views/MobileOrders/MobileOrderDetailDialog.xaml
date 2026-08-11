@@ -52,6 +52,19 @@
                     <TextBlock Text="Fecha: " FontWeight="SemiBold" Opacity="0.8" />
                     <TextBlock Text="{Binding OrderDate, StringFormat={}{0:dd/MM/yyyy HH:mm}}" FontWeight="Bold" />
                 </WrapPanel>
+
+                <!-- Customer Address -->
+                <StackPanel Orientation="Horizontal" Margin="0,4,0,0" Visibility="{Binding HasCustomerAddress, Converter={StaticResource BoolToVis}}">
+                    <materialDesign:PackIcon Kind="MapMarker" Width="16" Height="16" Foreground="#1976D2" Margin="0,0,4,0" VerticalAlignment="Center" />
+                    <TextBlock Text="Dirección: " FontWeight="SemiBold" Opacity="0.8" VerticalAlignment="Center" />
+                    <TextBox Text="{Binding CustomerAddress}" IsReadOnly="True" BorderThickness="0" Background="Transparent" 
+                             FontWeight="Bold" Foreground="#1565C0" TextWrapping="Wrap" VerticalAlignment="Center" 
+                             Padding="0" Margin="0,0,6,0" Cursor="IBeam" />
+                    <Button Command="{Binding CopyAddressCommand}" ToolTip="Copiar dirección al portapapeles" 
+                            Style="{StaticResource MaterialDesignToolButton}" Height="24" Width="24" Padding="0" VerticalAlignment="Center">
+                        <materialDesign:PackIcon Kind="ContentCopy" Width="14" Height="14" Foreground="#1976D2" />
+                    </Button>
+                </StackPanel>
             </StackPanel>
 
             <!-- Status Badge -->
@@ -197,17 +210,21 @@
                     <!-- Seller Notes -->
                     <StackPanel Grid.Row="0" Margin="0,0,0,8">
                         <TextBlock Text="Notas / Observaciones del Vendedor" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" FontWeight="Bold" Margin="0,0,0,4" />
-                        <TextBox Text="{Binding Notes}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" 
-                                 VerticalScrollBarVisibility="Auto" Height="45" 
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" VerticalContentAlignment="Top" />
+                        <Border Background="#F8F9FA" BorderBrush="#CCCCCC" BorderThickness="1" CornerRadius="4" Padding="8,4">
+                            <TextBox Text="{Binding Notes}" IsReadOnly="True" AcceptsReturn="True" TextWrapping="Wrap" 
+                                     VerticalScrollBarVisibility="Auto" Height="52" BorderThickness="0" Background="Transparent"
+                                     VerticalContentAlignment="Top" Foreground="#212121" FontSize="13" />
+                        </Border>
                     </StackPanel>
 
                     <!-- Dispatcher Notes -->
                     <StackPanel Grid.Row="1">
                         <TextBlock Text="Observaciones de Entrega / Despacho" Style="{StaticResource MaterialDesignSubtitle2TextBlock}" FontWeight="Bold" Margin="0,0,0,4" />
-                        <TextBox Text="{Binding DispatcherNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" 
-                                 VerticalScrollBarVisibility="Auto" Height="45" 
-                                 Style="{StaticResource MaterialDesignOutlinedTextBox}" VerticalContentAlignment="Top" />
+                        <Border Background="White" BorderBrush="#BDBDBD" BorderThickness="1" CornerRadius="4" Padding="8,4">
+                            <TextBox Text="{Binding DispatcherNotes, UpdateSourceTrigger=PropertyChanged}" AcceptsReturn="True" TextWrapping="Wrap" 
+                                     VerticalScrollBarVisibility="Auto" Height="52" BorderThickness="0" Background="Transparent"
+                                     VerticalContentAlignment="Top" Foreground="#212121" FontSize="13" />
+                        </Border>
                     </StackPanel>
                 </Grid>
 

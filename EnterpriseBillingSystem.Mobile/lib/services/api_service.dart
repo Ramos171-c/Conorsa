@@ -79,19 +79,20 @@ class ApiService {
 
     http.Response response;
 
+    const timeoutDuration = Duration(seconds: 15);
     switch (method.toUpperCase()) {
       case 'POST':
-        response = await http.post(url, headers: requestHeaders, body: jsonEncode(body));
+        response = await http.post(url, headers: requestHeaders, body: jsonEncode(body)).timeout(timeoutDuration);
         break;
       case 'PUT':
-        response = await http.put(url, headers: requestHeaders, body: jsonEncode(body));
+        response = await http.put(url, headers: requestHeaders, body: jsonEncode(body)).timeout(timeoutDuration);
         break;
       case 'DELETE':
-        response = await http.delete(url, headers: requestHeaders, body: jsonEncode(body));
+        response = await http.delete(url, headers: requestHeaders).timeout(timeoutDuration);
         break;
       case 'GET':
       default:
-        response = await http.get(url, headers: requestHeaders);
+        response = await http.get(url, headers: requestHeaders).timeout(timeoutDuration);
         break;
     }
 

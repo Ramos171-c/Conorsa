@@ -59,7 +59,8 @@ public record SalesOrderDetailDto(
     string Status,
     string? Notes,
     DateTime CreatedOnUtc,
-    List<SalesOrderDetailItemDto> Details
+    List<SalesOrderDetailItemDto> Details,
+    string? CustomerAddress = null
 );
 
 public record CancelSalesOrderCommandDto(

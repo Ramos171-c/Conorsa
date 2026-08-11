@@ -25,6 +25,12 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
     private string? _dispatcherNotes;
 
     [ObservableProperty]
+    [NotifyPropertyChangedFor(nameof(HasCustomerAddress))]
+    private string? _customerAddress;
+
+    public bool HasCustomerAddress => !string.IsNullOrWhiteSpace(CustomerAddress);
+
+    [ObservableProperty]
     private string _orderNumber = string.Empty;
 
     [ObservableProperty]
@@ -105,6 +111,7 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
         OrderNumber = order.OrderNumber;
         CustomerName = order.CustomerName;
         CustomerCode = order.CustomerCode;
+        CustomerAddress = order.CustomerAddress;
         OrderDate = order.OrderDate;
         Notes = order.Notes;
         Status = order.Status;
@@ -113,12 +120,60 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
         TaxAmount = order.TaxAmount;
         TotalAmount = order.TotalAmount;
 
+        if (string.IsNullOrWhiteSpace(CustomerAddress))
+        {
+            _ = LoadCustomerAddressAsync();
+        }
+
         IsActionEnabled = order.Status.Equals("Recibido", StringComparison.OrdinalIgnoreCase);
         SelectedNewStatus = AvailableStatuses.Contains(order.Status) ? order.Status : AvailableStatuses[0];
 
         foreach (var item in order.Details)
         {
             Details.Add(item);
+        }
+    }
+
+    private async Task LoadCustomerAddressAsync()
+    {
+        if (_order.CustomerId == Guid.Empty) return;
+        try
+        {
+            var customer = await _customerApiClient.GetCustomerByIdAsync(_order.CustomerId);
+            if (customer?.Addresses != null && customer.Addresses.Any())
+            {
+                var address = customer.Addresses.FirstOrDefault(a => a.IsDefault) ?? customer.Addresses.FirstOrDefault();
+                if (address != null)
+                {
+                    var parts = new System.Collections.Generic.List<string>();
+                    if (!string.IsNullOrWhiteSpace(address.AddressLine1)) parts.Add(address.AddressLine1.Trim());
+                    if (!string.IsNullOrWhiteSpace(address.AddressLine2)) parts.Add(address.AddressLine2.Trim());
+                    if (!string.IsNullOrWhiteSpace(address.City)) parts.Add(address.City.Trim());
+                    if (!string.IsNullOrWhiteSpace(address.State)) parts.Add(address.State.Trim());
+                    if (parts.Count > 0) CustomerAddress = string.Join(", ", parts);
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            System.Diagnostics.Debug.WriteLine($"Error loading customer address: {ex.Message}");
+        }
+    }
+
+    [RelayCommand]
+    private void CopyAddress()
+    {
+        if (!string.IsNullOrWhiteSpace(CustomerAddress))
+        {
+            try
+            {
+                Clipboard.SetText(CustomerAddress);
+                _notificationService.ShowSuccess("Dirección copiada al portapapeles.");
+            }
+            catch (Exception ex)
+            {
+                _notificationService.ShowError($"No se pudo copiar: {ex.Message}");
+            }
         }
     }
 
