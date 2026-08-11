@@ -117,6 +117,14 @@ class _ConfigScreenState extends State<ConfigScreen> {
                 runSpacing: 8,
                 children: [
                   ActionChip(
+                    avatar: const Icon(Icons.cloud_done, size: 18, color: Colors.white),
+                    backgroundColor: const Color(0xFF1E40AF),
+                    label: const Text('Servidor Producción (167.99.13.177)', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                    onPressed: () {
+                      _urlController.text = 'http://167.99.13.177:8081/api/v1';
+                    },
+                  ),
+                  ActionChip(
                     label: const Text('Android Emulator (10.0.2.2)'),
                     onPressed: () {
                       _urlController.text = 'http://10.0.2.2:5002/api/v1';
@@ -126,12 +134,6 @@ class _ConfigScreenState extends State<ConfigScreen> {
                     label: const Text('Localhost (127.0.0.1)'),
                     onPressed: () {
                       _urlController.text = 'http://127.0.0.1:5002/api/v1';
-                    },
-                  ),
-                  ActionChip(
-                    label: const Text('IIS Express Default'),
-                    onPressed: () {
-                      _urlController.text = 'http://10.0.2.2:47136/api/v1';
                     },
                   ),
                 ],

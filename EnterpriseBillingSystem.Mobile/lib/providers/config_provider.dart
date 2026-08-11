@@ -27,27 +27,11 @@ class ConfigProvider extends ChangeNotifier {
     return defaultUrl;
   }
 
-  Future<void> loadConfig() async {
-    final fallbackUrl = _dynamicDefaultUrl;
-    try {
-      if (kIsWeb) {
-        // On Web, always prioritize the active origin to prevent CORS or mismatched host IP issues
-        _apiUrl = fallbackUrl;
-      } else {
-        final prefs = await SharedPreferences.getInstance();
-        _apiUrl = prefs.getString(_keyApiUrl) ?? fallbackUrl;
-      }
-    } catch (e) {
-      _apiUrl = fallbackUrl;
-    } finally {
-      _isInitialized = true;
-      notifyListeners();
+  static String sanitizeUrl(String url) {
+    var formattedUrl = url.trim();
+    while (formattedUrl.contains('..')) {
+      formattedUrl = formattedUrl.replaceAll('..', '.');
     }
-  }
-
-  Future<void> updateApiUrl(String newUrl) async {
-    // Normalize URL
-    var formattedUrl = newUrl.trim();
     if (formattedUrl.endsWith('/')) {
       formattedUrl = formattedUrl.substring(0, formattedUrl.length - 1);
     }
@@ -58,8 +42,38 @@ class ConfigProvider extends ChangeNotifier {
         formattedUrl = '$formattedUrl/api/v1';
       }
     }
+    return formattedUrl;
+  }
 
-    _apiUrl = formattedUrl;
+  Future<void> loadConfig() async {
+    final fallbackUrl = _dynamicDefaultUrl;
+    try {
+      if (kIsWeb) {
+        // On Web, always prioritize the active origin to prevent CORS or mismatched host IP issues
+        _apiUrl = fallbackUrl;
+      } else {
+        final prefs = await SharedPreferences.getInstance();
+        final saved = prefs.getString(_keyApiUrl);
+        if (saved != null) {
+          _apiUrl = sanitizeUrl(saved);
+          if (_apiUrl != saved) {
+            await prefs.setString(_keyApiUrl, _apiUrl);
+          }
+        } else {
+          _apiUrl = fallbackUrl;
+        }
+      }
+    } catch (e) {
+      _apiUrl = fallbackUrl;
+    } finally {
+      _apiUrl = sanitizeUrl(_apiUrl);
+      _isInitialized = true;
+      notifyListeners();
+    }
+  }
+
+  Future<void> updateApiUrl(String newUrl) async {
+    _apiUrl = sanitizeUrl(newUrl);
     final prefs = await SharedPreferences.getInstance();
     await prefs.setString(_keyApiUrl, _apiUrl);
     notifyListeners();
