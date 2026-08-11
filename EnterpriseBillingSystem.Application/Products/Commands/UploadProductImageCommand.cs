@@ -44,8 +44,26 @@ public class UploadProductImageCommandHandler : IRequestHandler<UploadProductIma
             throw new InvalidOperationException("Tipo de archivo no permitido. Solo se permiten imágenes (jpg, jpeg, png, gif, webp).");
         }
 
+        // Robust wwwroot path resolution
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var wwwrootPath = Path.Combine(baseDir, "wwwroot");
+        if (!Directory.Exists(wwwrootPath))
+        {
+            var parent = Directory.GetParent(baseDir);
+            while (parent != null)
+            {
+                var candidate = Path.Combine(parent.FullName, "wwwroot");
+                if (Directory.Exists(candidate))
+                {
+                    wwwrootPath = candidate;
+                    break;
+                }
+                parent = parent.Parent;
+            }
+        }
+
         // Create folder if it doesn't exist
-        var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "products");
+        var uploadsFolder = Path.Combine(wwwrootPath, "uploads", "products");
         if (!Directory.Exists(uploadsFolder))
         {
             Directory.CreateDirectory(uploadsFolder);
@@ -54,7 +72,7 @@ public class UploadProductImageCommandHandler : IRequestHandler<UploadProductIma
         // Delete old image if exists
         if (!string.IsNullOrWhiteSpace(product.ImagePath))
         {
-            var oldPhysicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", product.ImagePath.TrimStart('/'));
+            var oldPhysicalPath = Path.Combine(wwwrootPath, product.ImagePath.TrimStart('/'));
             if (File.Exists(oldPhysicalPath))
             {
                 try

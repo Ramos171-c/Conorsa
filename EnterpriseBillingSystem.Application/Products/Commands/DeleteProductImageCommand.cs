@@ -35,8 +35,26 @@ public class DeleteProductImageCommandHandler : IRequestHandler<DeleteProductIma
             return true;
         }
 
+        // Robust wwwroot path resolution
+        var baseDir = AppDomain.CurrentDomain.BaseDirectory;
+        var wwwrootPath = Path.Combine(baseDir, "wwwroot");
+        if (!Directory.Exists(wwwrootPath))
+        {
+            var parent = Directory.GetParent(baseDir);
+            while (parent != null)
+            {
+                var candidate = Path.Combine(parent.FullName, "wwwroot");
+                if (Directory.Exists(candidate))
+                {
+                    wwwrootPath = candidate;
+                    break;
+                }
+                parent = parent.Parent;
+            }
+        }
+
         // Physical path
-        var physicalPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", product.ImagePath.TrimStart('/'));
+        var physicalPath = Path.Combine(wwwrootPath, product.ImagePath.TrimStart('/'));
         if (File.Exists(physicalPath))
         {
             try
