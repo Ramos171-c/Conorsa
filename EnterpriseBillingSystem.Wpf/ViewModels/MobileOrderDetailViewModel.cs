@@ -673,17 +673,41 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             itemsPara.Inlines.Add(new System.Windows.Documents.Run("DETALLE DEL PEDIDO\n"));
             itemsPara.Inlines.Add(new System.Windows.Documents.Run("------------------------------------\n"));
             
+            decimal delSubtotal = 0;
+            decimal delDiscount = 0;
+            decimal delTax = 0;
+
             foreach (var item in Details)
             {
-                if (item.Quantity <= 0) continue; // Skip items that are not being delivered (partial dispatch)
+                if (item.DeliveredQuantity <= 0) continue; // Skip items that are not being delivered at all
+
+                // Sum up totals for delivered quantities
+                decimal baseAmount = item.DeliveredQuantity * item.UnitPrice;
+                decimal disc = baseAmount * (item.DiscountPercentage / 100m);
+                decimal tax = (baseAmount - disc) * (item.TaxPercentage / 100m);
+
+                delSubtotal += baseAmount;
+                delDiscount += disc;
+                delTax += tax;
 
                 // Full product name (untruncated)
                 itemsPara.Inlines.Add(new System.Windows.Documents.Run($"{item.ProductName}\n"));
                 
-                // Indented quantity with UOM aligned next to net price
-                string qtyUom = $"{item.Quantity:N2} {item.UnitOfMeasure}";
-                string net = $"C${item.NetAmount:N2}";
-                itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   {qtyUom.PadRight(18)} {net.PadLeft(11)}\n"));
+                if (item.MissingQuantity > 0)
+                {
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   Pedido:     {item.Quantity:N2} {item.UnitOfMeasure}\n"));
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   Faltante:   {item.MissingQuantity:N2} {item.UnitOfMeasure} [{(string.IsNullOrWhiteSpace(item.MissingReason) ? "No vino" : item.MissingReason)}]\n"));
+                    
+                    string qtyUom = $"Entregado:  {item.DeliveredQuantity:N2} {item.UnitOfMeasure}";
+                    string net = $"C${item.EffectiveNetAmount:N2}";
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   {qtyUom.PadRight(18)} {net.PadLeft(11)}\n"));
+                }
+                else
+                {
+                    string qtyUom = $"{item.DeliveredQuantity:N2} {item.UnitOfMeasure}";
+                    string net = $"C${item.EffectiveNetAmount:N2}";
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   {qtyUom.PadRight(18)} {net.PadLeft(11)}\n"));
+                }
             }
             itemsPara.Inlines.Add(new System.Windows.Documents.Run("------------------------------------\n"));
             sec.Blocks.Add(itemsPara);
@@ -693,14 +717,26 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             {
                 TextAlignment = TextAlignment.Right
             };
-            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Subtotal:     C${SubTotal:N2}\n"));
-            if (DiscountAmount > 0)
+
+            decimal delTotal = delSubtotal - delDiscount + delTax;
+            var missingItems = Details.Where(d => d.MissingQuantity > 0).ToList();
+
+            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Subtotal:     C${delSubtotal:N2}\n"));
+            if (delDiscount > 0)
             {
-                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Descuento:   -C${DiscountAmount:N2}\n"));
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Descuento:   -C${delDiscount:N2}\n"));
             }
-            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL:        C${TotalAmount:N2}\n"));
+            if (delTax > 0)
+            {
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"IVA:          C${delTax:N2}\n"));
+            }
+            if (missingItems.Any())
+            {
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Faltantes:    {missingItems.Sum(m => m.MissingQuantity):N2} pzas\n"));
+            }
+            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL NETO:   C${delTotal:N2}\n"));
             
-            decimal totalUsd = TotalAmount / 36.5m;
+            decimal totalUsd = delTotal / 36.5m;
             totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL USD:     ${totalUsd:N2}\n"));
             totalsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
             sec.Blocks.Add(totalsPara);
