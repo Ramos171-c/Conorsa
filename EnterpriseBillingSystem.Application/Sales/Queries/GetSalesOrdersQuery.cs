@@ -27,7 +27,9 @@ public record SalesOrderDetailItemDto(
     decimal DiscountAmount,
     decimal TaxPercentage,
     decimal TaxAmount,
-    decimal NetAmount
+    decimal NetAmount,
+    decimal? DeliveredQuantity = null,
+    decimal? MissingQuantity = null
 );
 
 public record SalesOrderListItemDto(
@@ -133,21 +135,28 @@ public class GetSalesOrderByIdQueryHandler : IRequestHandler<GetSalesOrderByIdQu
 
         var users = await _userManager.Users.ToListAsync(cancellationToken);
 
-        var details = order.Details.Select(d => new SalesOrderDetailItemDto(
-            d.Id,
-            d.ProductId,
-            d.Product?.Name ?? string.Empty,
-            d.Product?.InternalCode ?? string.Empty,
-            d.UnitOfMeasureId,
-            d.UnitOfMeasure?.Code ?? string.Empty,
-            d.Quantity,
-            d.UnitPrice,
-            d.DiscountPercentage,
-            d.DiscountAmount,
-            d.TaxPercentage,
-            d.TaxAmount,
-            d.NetAmount
-        )).ToList();
+        var details = order.Details.Select(d => {
+            decimal originalQty = d.OriginalPresaleQuantity ?? d.Quantity;
+            decimal deliveredQty = d.Quantity;
+            decimal missingQty = Math.Max(0m, originalQty - deliveredQty);
+            return new SalesOrderDetailItemDto(
+                d.Id,
+                d.ProductId,
+                d.Product?.Name ?? string.Empty,
+                d.Product?.InternalCode ?? string.Empty,
+                d.UnitOfMeasureId,
+                d.UnitOfMeasure?.Code ?? string.Empty,
+                originalQty,
+                d.UnitPrice,
+                d.DiscountPercentage,
+                d.DiscountAmount,
+                d.TaxPercentage,
+                d.TaxAmount,
+                d.NetAmount,
+                deliveredQty,
+                missingQty
+            );
+        }).ToList();
 
         return new SalesOrderDetailDto(
             order.Id,
