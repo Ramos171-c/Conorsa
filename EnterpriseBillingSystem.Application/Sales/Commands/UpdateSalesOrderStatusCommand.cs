@@ -130,13 +130,39 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
 
                     decimal conversionFactor = presentation.ConversionFactor > 0 ? presentation.ConversionFactor : 1.0000m;
                     Guid presentationId = presentation.Id;
+                    // Get inventory record in Bodega Exhibición
+                    var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
+                    decimal availableInBaseUnit = inventory != null ? Math.Max(0.0000m, inventory.PhysicalStock) : 0.0000m;
+
+                    // Back up the original presale quantity requested
+                    if (detail.OriginalPresaleQuantity == null)
+                    {
+                        detail.OriginalPresaleQuantity = detail.Quantity;
+                    }
+
                     decimal requestedInBaseUnit = Math.Round(detail.Quantity * conversionFactor, 4);
+
+                    // Check if stock is insufficient and adjust quantity
+                    if (requestedInBaseUnit > availableInBaseUnit)
+                    {
+                        decimal fulfillableInBaseUnit = availableInBaseUnit;
+                        detail.Quantity = Math.Round(fulfillableInBaseUnit / conversionFactor, 4);
+
+                        // Recalculate line amounts
+                        var discountPercentage = detail.DiscountPercentage;
+                        var taxPercentage = detail.TaxPercentage;
+                        
+                        var grossAmount = detail.Quantity * detail.UnitPrice;
+                        detail.DiscountAmount = Math.Round(grossAmount * (discountPercentage / 100m), 4);
+                        var taxableAmount = grossAmount - detail.DiscountAmount;
+                        detail.TaxAmount = Math.Round(taxableAmount * (taxPercentage / 100m), 4);
+                        detail.NetAmount = Math.Round(taxableAmount + detail.TaxAmount, 4);
+
+                        requestedInBaseUnit = Math.Round(detail.Quantity * conversionFactor, 4);
+                    }
 
                     if (requestedInBaseUnit > 0.0000m)
                     {
-                        // Get inventory record in Bodega Exhibición
-                        var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
-
                         if (inventory == null)
                         {
                             inventory = new Domain.Entities.Inventory
