@@ -42,7 +42,7 @@ public class SalesOrderDetailConfiguration : IEntityTypeConfiguration<SalesOrder
             .HasPrecision(18, 4);
 
         // Constraints
-        builder.ToTable(t => t.HasCheckConstraint("CK_SalesOrderDetail_Quantity", "[Quantity] > 0"));
+        builder.ToTable(t => t.HasCheckConstraint("CK_SalesOrderDetail_Quantity", "[Quantity] >= 0"));
         builder.ToTable(t => t.HasCheckConstraint("CK_SalesOrderDetail_UnitPrice", "[UnitPrice] >= 0"));
         builder.ToTable(t => t.HasCheckConstraint("CK_SalesOrderDetail_DiscountPct", "[DiscountPercentage] >= 0 AND [DiscountPercentage] <= 100"));
 

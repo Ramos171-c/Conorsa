@@ -149,14 +149,16 @@ public class CreateSalesInvoiceCommandHandler : IRequestHandler<CreateSalesInvoi
 
         // Si se especificó un pedido y no se mandaron detalles, los jalamos del pedido
         var sourceDetails = (request.Details == null || !request.Details.Any()) && salesOrder != null
-            ? salesOrder.Details.Select(d => new SalesInvoiceDetailRequest(
-                d.ProductId,
-                Guid.Empty, // Placeholder para resolver en el ciclo
-                d.Quantity,
-                d.UnitPrice,
-                d.DiscountPercentage,
-                d.TaxPercentage
-            )).ToList()
+            ? salesOrder.Details
+                .Where(d => d.Quantity > 0m)
+                .Select(d => new SalesInvoiceDetailRequest(
+                    d.ProductId,
+                    Guid.Empty, // Placeholder para resolver en el ciclo
+                    d.Quantity,
+                    d.UnitPrice,
+                    d.DiscountPercentage,
+                    d.TaxPercentage
+                )).ToList()
             : request.Details;
 
         if (sourceDetails == null || !sourceDetails.Any())

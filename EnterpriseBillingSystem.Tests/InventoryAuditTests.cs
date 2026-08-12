@@ -125,7 +125,6 @@ public class InventoryAuditTests
             _productRepoMock.Object,
             _branchWarehouseRepoMock.Object,
             _warehouseRepoMock.Object,
-            _salesOrderDetailRepoMock.Object,
             _currentUserServiceMock.Object,
             _unitOfWorkMock.Object);
 
@@ -169,7 +168,6 @@ public class InventoryAuditTests
             _productRepoMock.Object,
             _branchWarehouseRepoMock.Object,
             _warehouseRepoMock.Object,
-            _salesOrderDetailRepoMock.Object,
             _currentUserServiceMock.Object,
             _unitOfWorkMock.Object);
 
@@ -251,7 +249,7 @@ public class InventoryAuditTests
     }
 
     [Fact]
-    public async Task UpdateSalesOrderStatus_TransitionToEnCamino_WithInsufficientStock_AdjustsAndRemovesDetails()
+    public async Task UpdateSalesOrderStatus_TransitionToEnCamino_WithInsufficientStock_AdjustsAndKeepsDetailsWithZeroQuantity()
     {
         // Arrange
         var orderId = Guid.NewGuid();
@@ -320,7 +318,6 @@ public class InventoryAuditTests
             _productRepoMock.Object,
             _branchWarehouseRepoMock.Object,
             _warehouseRepoMock.Object,
-            _salesOrderDetailRepoMock.Object,
             _currentUserServiceMock.Object,
             _unitOfWorkMock.Object);
 
@@ -335,8 +332,9 @@ public class InventoryAuditTests
         detail1.OriginalPresaleQuantity.Should().Be(10m);
         inventory1.PhysicalStock.Should().Be(0m);
 
-        // Detail 2 should be removed
-        order.Details.Should().NotContain(detail2);
-        _salesOrderDetailRepoMock.Verify(r => r.Remove(detail2), Times.Once);
+        // Detail 2 should remain but have quantity 0
+        detail2.Quantity.Should().Be(0m);
+        detail2.OriginalPresaleQuantity.Should().Be(5m);
+        order.Details.Should().Contain(detail2);
     }
 }
