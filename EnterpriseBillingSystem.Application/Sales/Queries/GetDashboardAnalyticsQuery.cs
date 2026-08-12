@@ -108,6 +108,8 @@ public class GetDashboardAnalyticsQueryHandler : IRequestHandler<GetDashboardAna
 
         decimal totalPresale = 0;
         decimal totalDelivered = 0;
+        decimal totalShortagePieces = 0;
+        decimal totalShortageAmount = 0;
 
         var sellerData = new Dictionary<string, (decimal Presale, decimal Delivered)>();
         var dailyData = new Dictionary<DateTime, (decimal Presale, decimal Delivered)>();
@@ -129,6 +131,17 @@ public class GetDashboardAnalyticsQueryHandler : IRequestHandler<GetDashboardAna
                 decimal disc = gross * (detail.DiscountPercentage / 100m);
                 decimal tax = (gross - disc) * (detail.TaxPercentage / 100m);
                 presale += gross - disc + tax;
+
+                if (detail.OriginalPresaleQuantity.HasValue && detail.OriginalPresaleQuantity.Value > detail.Quantity)
+                {
+                    decimal diffQty = detail.OriginalPresaleQuantity.Value - detail.Quantity;
+                    totalShortagePieces += diffQty;
+
+                    decimal lineGrossLoss = diffQty * detail.UnitPrice;
+                    decimal lineDiscLoss = lineGrossLoss * (detail.DiscountPercentage / 100m);
+                    decimal lineTaxLoss = (lineGrossLoss - lineDiscLoss) * (detail.TaxPercentage / 100m);
+                    totalShortageAmount += lineGrossLoss - lineDiscLoss + lineTaxLoss;
+                }
             }
 
             // Delivered is TotalAmount ONLY if the order is completed
@@ -167,13 +180,14 @@ public class GetDashboardAnalyticsQueryHandler : IRequestHandler<GetDashboardAna
             ));
         }
 
-        decimal totalLoss = totalReturnedAmount;
+        decimal totalLoss = totalReturnedAmount + totalShortageAmount;
+        decimal totalLossPieces = totalReturnedPieces + totalShortagePieces;
         decimal completedPresale = totalDelivered + totalLoss;
         decimal effectivenessPct = completedPresale > 0 ? (totalDelivered / completedPresale) * 100m : 100m;
 
         var kpiPresale = new KpiMetricDto("Preventa Solicitada", $"C$ {totalPresale:N2}", $"{validOrders.Count} Pedidos Tomados", "CurrencyUsd", "#0284C7");
         var kpiDelivered = new KpiMetricDto("Entrega Efectiva", $"C$ {totalDelivered:N2}", "Llegó al cliente", "TruckCheck", "#059669");
-        var kpiLoss = new KpiMetricDto("Pérdida por Devoluciones", $"C$ {totalLoss:N2}", $"{totalReturnedPieces:N0} Piezas Faltantes", "AlertCircleOutline", "#DC2626");
+        var kpiLoss = new KpiMetricDto("Pérdida por Devoluciones", $"C$ {totalLoss:N2}", $"{totalLossPieces:N0} Piezas Faltantes", "AlertCircleOutline", "#DC2626");
         var kpiEffectiveness = new KpiMetricDto("Efectividad Global", $"{effectivenessPct:N1}%", "Cumplimiento de Entrega", "ChartLine", "#7C3AED");
 
         var dailyTrendSeries = dailyData.OrderBy(kvp => kvp.Key).Select(kvp => new DailySalesTrendDto(
