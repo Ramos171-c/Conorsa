@@ -1,6 +1,6 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:shared_preferences/shared_preferences.dart';
-import 'image_cache_service.dart';
 
 class OfflineService {
   static const String _keyCachedProducts = 'cached_products';
@@ -11,26 +11,63 @@ class OfflineService {
   static const String _keyOfflineCustomers = 'offline_customers';
   static const String _keyOfflineOrders = 'offline_orders';
 
+  // Helper to purge old image base64 cache keys from SharedPreferences to free up space
+  Future<void> _clearOldImageCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs.getKeys();
+      final keysToRemove = keys.where((k) => k.startsWith('cached_img_')).toList();
+      for (final key in keysToRemove) {
+        await prefs.remove(key);
+      }
+      if (kDebugMode) {
+        print('OfflineService: Purged ${keysToRemove.length} old cached image keys.');
+      }
+    } catch (_) {}
+  }
+
+  // Safe wrapper for writing String values
+  Future<void> _safeSetString(String key, String value) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(key, value);
+    } catch (e) {
+      if (kDebugMode) {
+        print('OfflineService: error writing key $key. Executing emergency purge...');
+      }
+      await _clearOldImageCache();
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(key, value);
+      } catch (_) {
+        rethrow;
+      }
+    }
+  }
+
+  // Safe wrapper for writing StringList values
+  Future<void> _safeSetStringList(String key, List<String> value) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setStringList(key, value);
+    } catch (e) {
+      if (kDebugMode) {
+        print('OfflineService: error writing key list $key. Executing emergency purge...');
+      }
+      await _clearOldImageCache();
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setStringList(key, value);
+      } catch (_) {
+        rethrow;
+      }
+    }
+  }
+
   // --- Catalog Cache Management ---
 
   Future<void> cacheProducts(List<dynamic> products) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyCachedProducts, jsonEncode(products));
-
-    // Pre-cache product images in the background
-    try {
-      final apiUrl = prefs.getString('api_base_url') ?? 'http://167.99.13.177:8080/api/v1';
-      final uri = Uri.parse(apiUrl);
-      final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ":${uri.port}" : ""}';
-
-      final urls = products
-          .map((p) => (p['imageUrl'] as String? ?? p['imagePath'] as String?) ?? '')
-          .where((url) => url.isNotEmpty)
-          .map((url) => url.startsWith('http') ? url : '$base${url.startsWith('/') ? "" : "/"}$url')
-          .toList();
-      // Desactivar precarga en segundo plano para permitir carga bajo demanda (Lazy Loading) y ahorrar datos
-      // ImageCacheService.cacheImages(urls);
-    } catch (_) {}
+    await _safeSetString(_keyCachedProducts, jsonEncode(products));
   }
 
   Future<List<dynamic>> getCachedProducts() async {
@@ -45,8 +82,7 @@ class OfflineService {
   }
 
   Future<void> cacheCategories(List<dynamic> categories) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyCachedCategories, jsonEncode(categories));
+    await _safeSetString(_keyCachedCategories, jsonEncode(categories));
   }
 
   Future<List<dynamic>> getCachedCategories() async {
@@ -61,8 +97,7 @@ class OfflineService {
   }
 
   Future<void> cacheCustomers(List<dynamic> customers) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyCachedCustomers, jsonEncode(customers));
+    await _safeSetString(_keyCachedCustomers, jsonEncode(customers));
   }
 
   Future<List<dynamic>> getCachedCustomers() async {
@@ -77,8 +112,7 @@ class OfflineService {
   }
 
   Future<void> cacheCustomerCategories(List<dynamic> categories) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyCachedCustomerCategories, jsonEncode(categories));
+    await _safeSetString(_keyCachedCustomerCategories, jsonEncode(categories));
   }
 
   Future<List<dynamic>> getCachedCustomerCategories() async {
@@ -93,8 +127,7 @@ class OfflineService {
   }
 
   Future<void> cachePricingProfiles(List<dynamic> profiles) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyCachedPricingProfiles, jsonEncode(profiles));
+    await _safeSetString(_keyCachedPricingProfiles, jsonEncode(profiles));
   }
 
   Future<List<dynamic>> getCachedPricingProfiles() async {
@@ -114,7 +147,7 @@ class OfflineService {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(_keyOfflineCustomers) ?? [];
     list.add(jsonEncode(customer));
-    await prefs.setStringList(_keyOfflineCustomers, list);
+    await _safeSetStringList(_keyOfflineCustomers, list);
 
     // Also add to cached customers list so it's instantly selectable offline
     final cachedStr = prefs.getString(_keyCachedCustomers);
@@ -151,7 +184,7 @@ class OfflineService {
       'customerPricingProfileType': 0,
       'currentDebt': 0.0,
     });
-    await prefs.setString(_keyCachedCustomers, jsonEncode(cachedList));
+    await _safeSetString(_keyCachedCustomers, jsonEncode(cachedList));
   }
 
   Future<List<Map<String, dynamic>>> getOfflineCustomers() async {
@@ -161,9 +194,8 @@ class OfflineService {
   }
 
   Future<void> saveOfflineCustomers(List<Map<String, dynamic>> customers) async {
-    final prefs = await SharedPreferences.getInstance();
     final list = customers.map((e) => jsonEncode(e)).toList();
-    await prefs.setStringList(_keyOfflineCustomers, list);
+    await _safeSetStringList(_keyOfflineCustomers, list);
   }
 
   // --- Offline Order Placement ---
@@ -172,7 +204,7 @@ class OfflineService {
     final prefs = await SharedPreferences.getInstance();
     final list = prefs.getStringList(_keyOfflineOrders) ?? [];
     list.add(jsonEncode(order));
-    await prefs.setStringList(_keyOfflineOrders, list);
+    await _safeSetStringList(_keyOfflineOrders, list);
   }
 
   Future<List<Map<String, dynamic>>> getOfflineOrders() async {
@@ -182,9 +214,8 @@ class OfflineService {
   }
 
   Future<void> saveOfflineOrders(List<Map<String, dynamic>> orders) async {
-    final prefs = await SharedPreferences.getInstance();
     final list = orders.map((e) => jsonEncode(e)).toList();
-    await prefs.setStringList(_keyOfflineOrders, list);
+    await _safeSetStringList(_keyOfflineOrders, list);
   }
 
   // --- Helper to check if pending data exists ---

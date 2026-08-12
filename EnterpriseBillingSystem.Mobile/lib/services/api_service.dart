@@ -25,6 +25,25 @@ class ApiService {
     return prefs.getString(_keyToken);
   }
 
+  // Helper to purge old image base64 cache keys from SharedPreferences to free up space
+  Future<void> _clearOldImageCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keys = prefs.getKeys();
+      final keysToRemove = keys.where((k) => k.startsWith('cached_img_')).toList();
+      for (final key in keysToRemove) {
+        await prefs.remove(key);
+      }
+      if (kDebugMode) {
+        print('Purged ${keysToRemove.length} old cached image keys from SharedPreferences.');
+      }
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error purging old image cache: $e');
+      }
+    }
+  }
+
   // Save auth tokens and info
   Future<void> saveAuthData({
     required String accessToken,
@@ -32,11 +51,32 @@ class ApiService {
     required String expiration,
     required String username,
   }) async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString(_keyToken, accessToken);
-    await prefs.setString(_keyRefreshToken, refreshToken);
-    await prefs.setString(_keyTokenExp, expiration);
-    await prefs.setString(_keyUsername, username);
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setString(_keyToken, accessToken);
+      await prefs.setString(_keyRefreshToken, refreshToken);
+      await prefs.setString(_keyTokenExp, expiration);
+      await prefs.setString(_keyUsername, username);
+    } catch (e) {
+      if (kDebugMode) {
+        print('Error saving auth data (possible storage quota exceeded): $e. Executing emergency purge...');
+      }
+      await _clearOldImageCache();
+      
+      // Retry once after purge
+      try {
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString(_keyToken, accessToken);
+        await prefs.setString(_keyRefreshToken, refreshToken);
+        await prefs.setString(_keyTokenExp, expiration);
+        await prefs.setString(_keyUsername, username);
+      } catch (retryError) {
+        if (kDebugMode) {
+          print('Retry saving auth data failed after purge: $retryError');
+        }
+        rethrow;
+      }
+    }
   }
 
   // Clear auth tokens on logout

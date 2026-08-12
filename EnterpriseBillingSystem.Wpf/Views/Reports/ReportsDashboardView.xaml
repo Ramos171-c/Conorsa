@@ -37,20 +37,10 @@
             </StackPanel>
         </Grid>
 
-        <!-- KPI Cards Grid -->
-        <Grid Grid.Row="1" Margin="0,0,0,24">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition Width="16" />
-                <ColumnDefinition Width="*" />
-            </Grid.ColumnDefinitions>
-
+        <!-- KPI Cards WrapPanel -->
+        <WrapPanel Grid.Row="1" Margin="0,0,0,16" HorizontalAlignment="Left">
             <!-- Card 1: Preventa -->
-            <materialDesign:Card Grid.Column="0" UniformCornerRadius="12" Background="White" materialDesign:ElevationAssist.Elevation="Dp2" Padding="20">
+            <materialDesign:Card Width="240" Height="125" UniformCornerRadius="12" Background="White" materialDesign:ElevationAssist.Elevation="Dp2" Padding="20" Margin="0,0,16,16">
                 <StackPanel>
                     <Grid Margin="0,0,0,12">
                         <TextBlock Text="Preventa Solicitada" FontWeight="Bold" Foreground="#64748B" FontSize="13" VerticalAlignment="Center" />
@@ -64,7 +54,7 @@
             </materialDesign:Card>
 
             <!-- Card 2: Entrega Efectiva -->
-            <materialDesign:Card Grid.Column="2" UniformCornerRadius="12" Background="White" materialDesign:ElevationAssist.Elevation="Dp2" Padding="20">
+            <materialDesign:Card Width="240" Height="125" UniformCornerRadius="12" Background="White" materialDesign:ElevationAssist.Elevation="Dp2" Padding="20" Margin="0,0,16,16">
                 <StackPanel>
                     <Grid Margin="0,0,0,12">
                         <TextBlock Text="Entrega Efectiva Real" FontWeight="Bold" Foreground="#64748B" FontSize="13" VerticalAlignment="Center" />
@@ -78,7 +68,7 @@
             </materialDesign:Card>
 
             <!-- Card 3: Pérdida por Faltantes -->
-            <materialDesign:Card Grid.Column="4" UniformCornerRadius="12" Background="White" materialDesign:ElevationAssist.Elevation="Dp2" Padding="20">
+            <materialDesign:Card Width="240" Height="125" UniformCornerRadius="12" Background="White" materialDesign:ElevationAssist.Elevation="Dp2" Padding="20" Margin="0,0,16,16">
                 <StackPanel>
                     <Grid Margin="0,0,0,12">
                         <TextBlock Text="Pérdida por Devoluciones" FontWeight="Bold" Foreground="#64748B" FontSize="13" VerticalAlignment="Center" />
@@ -92,7 +82,7 @@
             </materialDesign:Card>
 
             <!-- Card 4: Efectividad -->
-            <materialDesign:Card Grid.Column="6" UniformCornerRadius="12" Background="White" materialDesign:ElevationAssist.Elevation="Dp2" Padding="20">
+            <materialDesign:Card Width="240" Height="125" UniformCornerRadius="12" Background="White" materialDesign:ElevationAssist.Elevation="Dp2" Padding="20" Margin="0,0,0,16">
                 <StackPanel>
                     <Grid Margin="0,0,0,12">
                         <TextBlock Text="Efectividad Global" FontWeight="Bold" Foreground="#64748B" FontSize="13" VerticalAlignment="Center" />
@@ -104,7 +94,7 @@
                     <TextBlock Text="{Binding EffectivenessSub}" FontSize="12" Foreground="#64748B" />
                 </StackPanel>
             </materialDesign:Card>
-        </Grid>
+        </WrapPanel>
 
         <!-- Main Content Area: PDF Download Center & Visual Quick Action Cards -->
         <Grid Grid.Row="2">

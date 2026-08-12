@@ -38,7 +38,7 @@ _flutter.buildConfig = {"engineRevision":"8cd19e509d6bece8ccd74aef027c4ca9473630
 
 
 _flutter.loader.load({
-  serviceWorkerSettings: {
+  serviceWorkerSettings: (window.location.protocol === 'https:' || window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') ? {
     serviceWorkerVersion: "489804811"
-  }
+  } : null
 });

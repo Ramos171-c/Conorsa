@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show rootBundle;
 import 'package:provider/provider.dart';
@@ -32,6 +33,7 @@ class _CachedProductImageState extends State<CachedProductImage> {
   bool _isLoading = true;
   bool _isAsset = false;
   String? _assetPath;
+  String? _resolvedUrl;
 
   @override
   void initState() {
@@ -62,6 +64,7 @@ class _CachedProductImageState extends State<CachedProductImage> {
         _isLoading = true;
         _isAsset = false;
         _assetPath = null;
+        _resolvedUrl = null;
       });
     }
 
@@ -104,6 +107,21 @@ class _CachedProductImageState extends State<CachedProductImage> {
           final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ":${uri.port}" : ""}';
           url = '$base${url.startsWith('/') ? "" : "/"}$url';
         } catch (_) {}
+      }
+
+      if (mounted) {
+        setState(() {
+          _resolvedUrl = url;
+        });
+      }
+
+      if (kIsWeb) {
+        if (mounted) {
+          setState(() {
+            _isLoading = false;
+          });
+        }
+        return;
       }
 
       // 2. Check local cache first
@@ -161,6 +179,20 @@ class _CachedProductImageState extends State<CachedProductImage> {
     if (_isAsset && _assetPath != null) {
       return Image.asset(
         _assetPath!,
+        width: widget.width,
+        height: widget.height,
+        fit: widget.fit,
+        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+      );
+    }
+
+    if (kIsWeb) {
+      final imgUrl = _resolvedUrl ?? widget.imageUrl ?? '';
+      if (imgUrl.isEmpty || imgUrl.contains('default-product.png')) {
+        return _buildPlaceholder();
+      }
+      return Image.network(
+        imgUrl,
         width: widget.width,
         height: widget.height,
         fit: widget.fit,
