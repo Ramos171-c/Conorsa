@@ -21,6 +21,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
     private readonly IProductRepository _productRepository;
     private readonly IRepository<BranchWarehouse> _branchWarehouseRepository;
     private readonly IWarehouseRepository _warehouseRepository;
+    private readonly IRepository<SalesOrderDetail> _salesOrderDetailRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IUnitOfWork _unitOfWork;
 
@@ -31,6 +32,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         IProductRepository productRepository,
         IRepository<BranchWarehouse> branchWarehouseRepository,
         IWarehouseRepository warehouseRepository,
+        IRepository<SalesOrderDetail> salesOrderDetailRepository,
         ICurrentUserService currentUserService,
         IUnitOfWork unitOfWork)
     {
@@ -40,6 +42,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         _productRepository = productRepository;
         _branchWarehouseRepository = branchWarehouseRepository;
         _warehouseRepository = warehouseRepository;
+        _salesOrderDetailRepository = salesOrderDetailRepository;
         _currentUserService = currentUserService;
         _unitOfWork = unitOfWork;
     }
@@ -94,6 +97,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 };
 
                 bool requiresMovement = false;
+                var detailsToRemove = new List<SalesOrderDetail>();
 
                 foreach (var detail in order.Details)
                 {
@@ -148,6 +152,12 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                         decimal fulfillableInBaseUnit = availableInBaseUnit;
                         detail.Quantity = Math.Round(fulfillableInBaseUnit / conversionFactor, 4);
 
+                        if (detail.Quantity <= 0.0000m)
+                        {
+                            detailsToRemove.Add(detail);
+                            continue;
+                        }
+
                         // Recalculate line amounts
                         var discountPercentage = detail.DiscountPercentage;
                         var taxPercentage = detail.TaxPercentage;
@@ -199,6 +209,12 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
 
                         requiresMovement = true;
                     }
+                }
+
+                foreach (var detailToRemove in detailsToRemove)
+                {
+                    order.Details.Remove(detailToRemove);
+                    _salesOrderDetailRepository.Remove(detailToRemove);
                 }
 
                 if (requiresMovement)
