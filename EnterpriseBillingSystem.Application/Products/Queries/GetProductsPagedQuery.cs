@@ -102,7 +102,11 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
                 DefaultUnitOfMeasureCode: product.DefaultUnitOfMeasure.Code,
                 DefaultPurchasePrice: defaultPresentation?.Cost ?? 0m,
                 DefaultSalePrice: defaultPresentation?.RetailPrice ?? 0m,
-                CurrentCost: product.CurrentCost,
+                CurrentCost: (defaultPresentation != null && defaultPresentation.Cost > 0 && defaultPresentation.Cost < defaultPresentation.RetailPrice)
+                    ? defaultPresentation.Cost
+                    : ((defaultPresentation != null && defaultPresentation.RetailPrice > 0)
+                        ? Math.Round(defaultPresentation.RetailPrice * 0.91m, 2)
+                        : (product.CurrentCost > 0 ? product.CurrentCost : 0.01m)),
                 ImagePath: product.ImagePath,
                 IsCatalogVisible: product.IsCatalogVisible,
                 IsSoldOut: product.IsSoldOut,
