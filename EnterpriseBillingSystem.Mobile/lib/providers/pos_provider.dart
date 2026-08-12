@@ -84,7 +84,7 @@ class PosProvider extends ChangeNotifier {
   // Set selected customer
   void setCustomer(Customer? customer) {
     _selectedCustomer = customer;
-    _manualPricingLevelOverride = 'DETALLE';
+    _manualPricingLevelOverride = _isCostSeller ? 'COSTO' : 'DETALLE';
     _errorMessage = null;
     recalculatePricing();
   }
@@ -250,11 +250,19 @@ class PosProvider extends ChangeNotifier {
     _cart.clear();
     _subtotalBase = 0.0;
     _subtotalCommercial = 0.0;
-    _currentLevel = 'DETALLE';
-    _manualPricingLevelOverride = 'DETALLE';
-    _nextLevel = 'SEMI MAYORISTA';
-    _progressToNextLevel = 0.0;
-    _missingToNextLevel = 0.0;
+    if (_isCostSeller) {
+      _currentLevel = 'COSTO';
+      _manualPricingLevelOverride = 'COSTO';
+      _nextLevel = '';
+      _progressToNextLevel = 1.0;
+      _missingToNextLevel = 0.0;
+    } else {
+      _currentLevel = 'DETALLE';
+      _manualPricingLevelOverride = 'DETALLE';
+      _nextLevel = 'SEMI MAYORISTA';
+      _progressToNextLevel = 0.0;
+      _missingToNextLevel = 0.0;
+    }
     _errorMessage = null;
     _successMessage = null;
     _editingOrderId = null;
@@ -267,9 +275,7 @@ class PosProvider extends ChangeNotifier {
   void setIsCostSeller(bool isCostSeller) {
     if (_isCostSeller != isCostSeller) {
       _isCostSeller = isCostSeller;
-      if (_isCostSeller) {
-        _manualPricingLevelOverride = 'COSTO';
-      }
+      _manualPricingLevelOverride = _isCostSeller ? 'COSTO' : 'DETALLE';
       recalculatePricing();
     }
   }

@@ -102,6 +102,15 @@ class Product {
 
   String get displayName => (description != null && description!.trim().isNotEmpty) ? description! : name;
 
+  double get defaultCost {
+    if (presentations.isEmpty) return 0.0;
+    final def = presentations.firstWhere(
+      (p) => p.isDefaultSalePresentation,
+      orElse: () => presentations.first,
+    );
+    return def.cost;
+  }
+
   bool get isCostChannelOnly {
     // 1. If explicitly set via database flags on presentation
     if (presentations.any((p) => p.isExclusiveCostChannel)) {

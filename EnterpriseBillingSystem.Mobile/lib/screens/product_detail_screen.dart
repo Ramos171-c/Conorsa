@@ -27,14 +27,19 @@ class ProductDetailScreen extends StatelessWidget {
     double quantity = 1.0;
     final qtyController = TextEditingController(text: '1');
 
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final isCostSeller = auth.userProfile?.isCostSeller == true;
+
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            final price = selectedPresentation.retailPrice > 0 
-                ? selectedPresentation.retailPrice 
-                : product.defaultSalePrice;
+            final price = isCostSeller
+                ? selectedPresentation.cost
+                : (selectedPresentation.retailPrice > 0 
+                    ? selectedPresentation.retailPrice 
+                    : product.defaultSalePrice);
             final subtotal = price * quantity;
 
             return AlertDialog(
@@ -48,7 +53,9 @@ class ProductDetailScreen extends StatelessWidget {
                     value: selectedPresentation,
                     isExpanded: true,
                     items: product.presentations.map((p) {
-                      final pPrice = p.retailPrice > 0 ? p.retailPrice : product.defaultSalePrice;
+                      final pPrice = isCostSeller
+                          ? p.cost
+                          : (p.retailPrice > 0 ? p.retailPrice : product.defaultSalePrice);
                       final conversionText = p.conversionFactor > 1 
                           ? ' (${p.conversionFactor.toInt()} ${p.unitOfMeasureCode})' 
                           : ' (1 ${p.unitOfMeasureCode})';

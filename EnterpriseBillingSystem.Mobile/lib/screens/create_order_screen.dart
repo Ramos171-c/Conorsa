@@ -77,14 +77,19 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
     double quantity = 1.0;
     final qtyController = TextEditingController(text: '1');
 
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final isCostSeller = auth.userProfile?.isCostSeller == true;
+
     showDialog(
       context: context,
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            final price = selectedPresentation.retailPrice > 0 
-                ? selectedPresentation.retailPrice 
-                : product.defaultSalePrice;
+            final price = isCostSeller
+                ? selectedPresentation.cost
+                : (selectedPresentation.retailPrice > 0 
+                    ? selectedPresentation.retailPrice 
+                    : product.defaultSalePrice);
             final subtotal = price * quantity;
 
             return AlertDialog(
@@ -99,7 +104,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
                       value: selectedPresentation,
                       isExpanded: true,
                       items: product.presentations.map((p) {
-                        final pPrice = p.retailPrice > 0 ? p.retailPrice : product.defaultSalePrice;
+                        final pPrice = isCostSeller
+                            ? p.cost
+                            : (p.retailPrice > 0 ? p.retailPrice : product.defaultSalePrice);
                         return DropdownMenuItem(
                           value: p,
                           child: Text('${p.name} - \$${pPrice.toStringAsFixed(2)}'),
@@ -451,6 +458,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
 
   // UI Step 2: Select Products
   Widget _buildProductsStep(OrderProvider provider) {
+    final authProv = Provider.of<AuthProvider>(context, listen: false);
+    final isCostSeller = authProv.userProfile?.isCostSeller == true;
+
     return Container(
       color: const Color(0xFFF8FAFC),
       padding: const EdgeInsets.all(16.0),
@@ -501,7 +511,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('SKU: ${product.internalCode}'),
-                                  Text('Precio base: \$${product.defaultSalePrice.toStringAsFixed(2)}'),
+                                  Text(isCostSeller
+                                      ? 'Precio costo: \$${product.defaultCost.toStringAsFixed(2)}'
+                                      : 'Precio base: \$${product.defaultSalePrice.toStringAsFixed(2)}'),
                                   Text('Presentaciones: ${product.presentations.length}'),
                                 ],
                               ),
