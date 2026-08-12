@@ -144,8 +144,8 @@ public class GetDashboardAnalyticsQueryHandler : IRequestHandler<GetDashboardAna
                 }
             }
 
-            // Delivered is TotalAmount ONLY if the order is completed
-            decimal delivered = order.Status == SalesOrderStatus.Completado ? order.TotalAmount : 0m;
+            // Delivered is TotalAmount if the order is completed or currently in transit (EnCamino)
+            decimal delivered = (order.Status == SalesOrderStatus.Completado || order.Status == SalesOrderStatus.EnCamino) ? order.TotalAmount : 0m;
 
             totalPresale += presale;
             totalDelivered += delivered;
