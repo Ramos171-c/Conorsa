@@ -150,6 +150,14 @@ class _DashboardScreenState extends State<DashboardScreen> {
   Widget build(BuildContext context) {
     final orderProv = Provider.of<OrderProvider>(context);
     final authProv = Provider.of<AuthProvider>(context);
+
+    if (!authProv.isLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      });
+      return const SizedBox.shrink();
+    }
+
     final isAdmin = authProv.userProfile?.isAdmin ?? false;
 
     // Calculations

@@ -541,6 +541,14 @@ class _OrderListScreenState extends State<OrderListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+    if (!auth.isLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      });
+      return const SizedBox.shrink();
+    }
+
     final provider = Provider.of<OrderProvider>(context);
 
     return Scaffold(

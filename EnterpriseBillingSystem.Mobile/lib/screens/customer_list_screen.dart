@@ -5,6 +5,7 @@ import '../providers/order_provider.dart';
 import '../models/customer.dart';
 import '../models/route.dart';
 import '../services/api_service.dart';
+import '../providers/auth_provider.dart';
 import 'register_customer_screen.dart';
 
 class CustomerListScreen extends StatefulWidget {
@@ -146,6 +147,14 @@ class _CustomerListScreenState extends State<CustomerListScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final auth = Provider.of<AuthProvider>(context);
+    if (!auth.isLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      });
+      return const SizedBox.shrink();
+    }
+
     final orderProv = Provider.of<OrderProvider>(context);
     final customers = orderProv.customers;
     

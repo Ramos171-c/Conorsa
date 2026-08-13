@@ -174,6 +174,13 @@ class ProductDetailScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
+    if (!auth.isLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      });
+      return const SizedBox.shrink();
+    }
+
     final orderProvider = Provider.of<OrderProvider>(context);
     final hasActiveOrder = auth.isLoggedIn && 
         orderProvider.draftOrder.customerId != null && 

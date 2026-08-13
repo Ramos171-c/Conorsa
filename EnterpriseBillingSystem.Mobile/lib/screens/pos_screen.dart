@@ -901,6 +901,13 @@ class _PosScreenState extends State<PosScreen> {
     final orderProv = Provider.of<OrderProvider>(context);
     final auth = Provider.of<AuthProvider>(context);
 
+    if (!auth.isLoggedIn) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        Navigator.of(context).popUntil((route) => route.isFirst);
+      });
+      return const SizedBox.shrink();
+    }
+
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),
       appBar: AppBar(
