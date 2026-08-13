@@ -148,7 +148,7 @@ class OrderProvider extends ChangeNotifier {
         
         var parsedProducts = items
             .map((e) => Product.fromJson(e))
-            .where((p) => p.isActive)
+            .where((p) => p.isActive && p.isAllowedInMobile)
             .toList();
 
         // Apply in-memory search filter for the guest catalog endpoint
@@ -175,7 +175,7 @@ class OrderProvider extends ChangeNotifier {
       if (cached.isNotEmpty) {
         var parsed = cached
             .map((e) => Product.fromJson(e))
-            .where((p) => p.isActive)
+            .where((p) => p.isActive && p.isAllowedInMobile)
             .toList();
         if (search != null && search.isNotEmpty) {
           final query = search.toLowerCase();

@@ -1724,6 +1724,8 @@ END
                 if (basePres != null)
                 {
                     basePres.RetailPrice = data.RetailUnit;
+                    basePres.SemiWholesalePrice = data.SemiUnit;
+                    basePres.WholesalePrice = data.WholesaleUnit;
                     if (data.CostUnit.HasValue) basePres.Cost = data.CostUnit.Value;
                 }
 
@@ -1732,6 +1734,8 @@ END
                 {
                     boxPres.ConversionFactor = (decimal)data.BoxFactor;
                     boxPres.RetailPrice = data.RetailBox;
+                    boxPres.SemiWholesalePrice = data.SemiBox;
+                    boxPres.WholesalePrice = data.WholesaleBox;
                     if (data.CostBox.HasValue) boxPres.Cost = data.CostBox.Value;
                 }
                 else if (data.BoxFactor > 1)
@@ -1831,6 +1835,24 @@ END
         }
 
         await _context.SaveChangesAsync();
+
+        // Desactivar todos los productos que contengan "SURTIDO" en su nombre o código
+        var surtidos = await _context.Products
+            .Include(p => p.Presentations)
+            .IgnoreQueryFilters()
+            .Where(p => p.Name.Contains("SURTIDO") || p.InternalCode.Contains("SURTIDO"))
+            .ToListAsync();
+
+        foreach (var p in surtidos)
+        {
+            p.IsActive = false;
+            foreach (var pres in p.Presentations)
+            {
+                pres.IsActive = false;
+            }
+        }
+        await _context.SaveChangesAsync();
+
         System.Console.WriteLine($"Catálogo de productos actualizado/sembrado con éxito. Total productos procesados: {productsData.Count}");
 
         // Limpieza de imágenes huérfanas en el servidor desactivada temporalmente por seguridad

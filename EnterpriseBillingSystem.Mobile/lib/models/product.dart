@@ -166,6 +166,24 @@ class Product {
     return false;
   }
 
+  bool get isAllowedInMobile {
+    final nameUpper = name.toUpperCase();
+    final codeUpper = internalCode.toUpperCase();
+    
+    // Hide assorted ("surtido") codes
+    if (nameUpper.contains('SURTIDO') || codeUpper.contains('SURTIDO')) {
+      return false;
+    }
+    
+    // Hide diaper ("pañal"/"pampers") codes from the mobile app
+    if (nameUpper.contains('PAÑAL') || nameUpper.contains('PAÑALES') || nameUpper.contains('PAMPERS') ||
+        codeUpper.contains('PAÑAL') || codeUpper.contains('PAÑALES') || codeUpper.contains('PAMPERS')) {
+      return false;
+    }
+    
+    return true;
+  }
+
   Product({
     required this.id,
     required this.internalCode,
