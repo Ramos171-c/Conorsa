@@ -110,6 +110,6 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
                 Taxes: taxDtos,
                 BranchProducts: branchProductDtos
             );
-        }).ToList();
+        }).Where(dto => !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel)).ToList();
     }
 }

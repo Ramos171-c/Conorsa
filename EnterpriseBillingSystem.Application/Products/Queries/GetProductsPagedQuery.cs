@@ -3,10 +3,13 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
+using EnterpriseBillingSystem.Domain.Entities;
 using EnterpriseBillingSystem.Domain.Repositories;
 using EnterpriseBillingSystem.Application.Products.DTOs;
 using EnterpriseBillingSystem.Application.Taxes.DTOs;
 using EnterpriseBillingSystem.Application.Common.Models;
+using EnterpriseBillingSystem.Application.Common.Interfaces;
 
 namespace EnterpriseBillingSystem.Application.Products.Queries;
 
@@ -22,10 +25,17 @@ public record GetProductsPagedQuery(
 public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuery, PagedResult<ProductDto>>
 {
     private readonly IProductRepository _productRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public GetProductsPagedQueryHandler(IProductRepository productRepository)
+    public GetProductsPagedQueryHandler(
+        IProductRepository productRepository,
+        ICurrentUserService currentUserService,
+        UserManager<ApplicationUser> userManager)
     {
         _productRepository = productRepository;
+        _currentUserService = currentUserService;
+        _userManager = userManager;
     }
 
     public async Task<PagedResult<ProductDto>> Handle(GetProductsPagedQuery request, CancellationToken cancellationToken)
@@ -129,6 +139,15 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
                 BranchProducts: branchProductDtos
             );
         }).ToList();
+
+        if (_currentUserService.UserId != null)
+        {
+            var user = await _userManager.FindByIdAsync(_currentUserService.UserId);
+            if (user != null && user.SellerCategory == Domain.Enums.SellerCategory.Detail)
+            {
+                dtos = dtos.Where(dto => !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel)).ToList();
+            }
+        }
 
         return new PagedResult<ProductDto>(dtos, totalCount, request.PageNumber, request.PageSize);
     }
