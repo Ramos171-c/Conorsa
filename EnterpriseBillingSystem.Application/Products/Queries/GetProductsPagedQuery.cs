@@ -143,11 +143,34 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
         if (_currentUserService.UserId != null)
         {
             var user = await _userManager.FindByIdAsync(_currentUserService.UserId);
-            if (user != null && user.SellerCategory == Domain.Enums.SellerCategory.Detail)
+            if (user != null)
             {
-                dtos = dtos.Where(dto => !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel)).ToList();
+                var isVendedor = await _userManager.IsInRoleAsync(user, "VENDEDOR");
+                if (isVendedor)
+                {
+                    // 1. Filtrar pañales y surtidos del sistema móvil
+                    dtos = dtos.Where(dto => 
+                        !dto.InternalCode.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
+                        !dto.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
+                        !dto.InternalCode.Contains("PAÑAL", StringComparison.OrdinalIgnoreCase) &&
+                        !dto.InternalCode.Contains("PAÑALES", StringComparison.OrdinalIgnoreCase) &&
+                        !dto.InternalCode.Contains("PAMPERS", StringComparison.OrdinalIgnoreCase) &&
+                        !dto.Name.Contains("PAÑAL", StringComparison.OrdinalIgnoreCase) &&
+                        !dto.Name.Contains("PAÑALES", StringComparison.OrdinalIgnoreCase) &&
+                        !dto.Name.Contains("PAMPERS", StringComparison.OrdinalIgnoreCase)
+                    ).ToList();
+                }
+
+                // 2. Filtrar productos del canal Costo si el vendedor es de tipo Detalle
+                if (user.SellerCategory == Domain.Enums.SellerCategory.Detail)
+                {
+                    dtos = dtos.Where(dto => !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel)).ToList();
+                }
             }
         }
+
+        // 3. Filtrar cualquier producto sin presentaciones activas (para evitar productos vacíos o con precio 0)
+        dtos = dtos.Where(dto => dto.Presentations != null && dto.Presentations.Any()).ToList();
 
         return new PagedResult<ProductDto>(dtos, totalCount, request.PageNumber, request.PageSize);
     }

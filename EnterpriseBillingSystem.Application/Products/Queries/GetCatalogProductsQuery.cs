@@ -110,6 +110,17 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
                 Taxes: taxDtos,
                 BranchProducts: branchProductDtos
             );
-        }).Where(dto => !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel)).ToList();
+        }).Where(dto => 
+            dto.Presentations != null && dto.Presentations.Any() &&
+            !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel) &&
+            !dto.InternalCode.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
+            !dto.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
+            !dto.InternalCode.Contains("PAÑAL", StringComparison.OrdinalIgnoreCase) &&
+            !dto.InternalCode.Contains("PAÑALES", StringComparison.OrdinalIgnoreCase) &&
+            !dto.InternalCode.Contains("PAMPERS", StringComparison.OrdinalIgnoreCase) &&
+            !dto.Name.Contains("PAÑAL", StringComparison.OrdinalIgnoreCase) &&
+            !dto.Name.Contains("PAÑALES", StringComparison.OrdinalIgnoreCase) &&
+            !dto.Name.Contains("PAMPERS", StringComparison.OrdinalIgnoreCase)
+        ).ToList();
     }
 }
