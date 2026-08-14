@@ -267,14 +267,14 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
 
     private async Task<bool> PresentationHasMovementsAsync(Guid presentationId)
     {
-        var sales = await _salesDetailRepository.FindAsync(d => d.ProductPresentationId == presentationId);
-        if (sales.Any()) return true;
+        var sales = await _salesDetailRepository.AnyAsync(d => d.ProductPresentationId == presentationId);
+        if (sales) return true;
 
-        var purchases = await _purchaseDetailRepository.FindAsync(d => d.ProductPresentationId == presentationId);
-        if (purchases.Any()) return true;
+        var purchases = await _purchaseDetailRepository.AnyAsync(d => d.ProductPresentationId == presentationId);
+        if (purchases) return true;
 
-        var movements = await _movementDetailRepository.FindAsync(d => d.ProductPresentationId == presentationId);
-        if (movements.Any()) return true;
+        var movements = await _movementDetailRepository.AnyAsync(d => d.ProductPresentationId == presentationId);
+        if (movements) return true;
 
         return false;
     }
