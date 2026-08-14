@@ -139,7 +139,7 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
                 }
 
                 // 2. Filtrar productos del canal Costo si el vendedor es de tipo Detalle
-                if (user.SellerCategory == Domain.Enums.SellerCategory.Detail)
+                if (isVendedor && user.SellerCategory == Domain.Enums.SellerCategory.Detail)
                 {
                     dtos = dtos.Where(dto => !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel)).ToList();
                 }
