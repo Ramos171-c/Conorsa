@@ -148,16 +148,10 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
                 var isVendedor = await _userManager.IsInRoleAsync(user, "VENDEDOR");
                 if (isVendedor)
                 {
-                    // 1. Filtrar pañales y surtidos del sistema móvil
+                    // 1. Filtrar surtidos del sistema móvil
                     dtos = dtos.Where(dto => 
                         !dto.InternalCode.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
-                        !dto.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
-                        !dto.InternalCode.Contains("PAÑAL", StringComparison.OrdinalIgnoreCase) &&
-                        !dto.InternalCode.Contains("PAÑALES", StringComparison.OrdinalIgnoreCase) &&
-                        !dto.InternalCode.Contains("PAMPERS", StringComparison.OrdinalIgnoreCase) &&
-                        !dto.Name.Contains("PAÑAL", StringComparison.OrdinalIgnoreCase) &&
-                        !dto.Name.Contains("PAÑALES", StringComparison.OrdinalIgnoreCase) &&
-                        !dto.Name.Contains("PAMPERS", StringComparison.OrdinalIgnoreCase)
+                        !dto.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)
                     ).ToList();
                 }
 

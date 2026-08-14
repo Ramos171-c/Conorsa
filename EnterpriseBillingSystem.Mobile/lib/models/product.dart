@@ -182,12 +182,6 @@ class Product {
       return false;
     }
     
-    // Hide diaper ("pañal"/"pampers") codes from the mobile app
-    if (nameUpper.contains('PAÑAL') || nameUpper.contains('PAÑALES') || nameUpper.contains('PAMPERS') ||
-        codeUpper.contains('PAÑAL') || codeUpper.contains('PAÑALES') || codeUpper.contains('PAMPERS')) {
-      return false;
-    }
-    
     return true;
   }
 
