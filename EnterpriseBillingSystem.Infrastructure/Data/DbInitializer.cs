@@ -1587,6 +1587,7 @@ END
             new("GA054", "FUM CREAMS MANGO CREAM SANDWICH BISCUITS", "Galletas", "1*48", 48, 16.67m, 800.00m, 16.67m, 800.00m, 16.67m, 800.00m, CostUnit: 16.67m, CostBox: 800.00m, IsCostOnly: true),
             new("GA055", "WE LOVE COCO SHOP", "Galletas", "1*6*24", 6, 271.67m, 1630.00m, 271.67m, 1630.00m, 271.67m, 1630.00m, CostUnit: 271.67m, CostBox: 1630.00m, IsCostOnly: true),
             new("GA056", "CHOCOLATE DE GUERRA XXL", "Galletas", "1*6*24", 6, 268.33m, 1610.00m, 268.33m, 1610.00m, 268.33m, 1610.00m, CostUnit: 268.33m, CostBox: 1610.00m, IsCostOnly: true),
+            new("GA057", "MD 000MD GALLETA OMICO MINI SANDWICH BISCUI", "Galletas", "1*12*82", 12, 102.50m, 1230.00m, 102.50m, 1230.00m, 102.50m, 1230.00m, CostUnit: 102.50m, CostBox: 1230.00m, IsCostOnly: true),
 
 
             // Caramelos (49)
@@ -1651,6 +1652,11 @@ END
             new("CA058", "CANDY MACHINE", "Caramelos", "1*24*30", 24, 125.00m, 3000.00m, 125.00m, 3000.00m, 125.00m, 3000.00m, CostUnit: 125.00m, CostBox: 3000.00m, IsCostOnly: true),
             new("CA059", "SONIA FRESH OLIVE GUM BUBBLE GUM", "Caramelos", "1*12*150", 12, 121.67m, 1460.00m, 121.67m, 1460.00m, 121.67m, 1460.00m, CostUnit: 121.67m, CostBox: 1460.00m, IsCostOnly: true),
             new("CA060", "BON TON VASO", "Caramelos", "1*12*40", 12, 166.67m, 2000.00m, 166.67m, 2000.00m, 166.67m, 2000.00m, CostUnit: 166.67m, CostBox: 2000.00m, IsCostOnly: true),
+            new("CA061", "Md 000Md 556 SORPRESA CAJITA", "Caramelos", "1*30*20", 30, 96.67m, 2900.00m, 96.67m, 2900.00m, 96.67m, 2900.00m, CostUnit: 96.67m, CostBox: 2900.00m, IsCostOnly: true),
+            new("CA062", "Md T1111CHICLE ESPADA", "Caramelos", "1*20*30", 20, 115.00m, 2300.00m, 115.00m, 2300.00m, 115.00m, 2300.00m, CostUnit: 115.00m, CostBox: 2300.00m, IsCostOnly: true),
+            new("CA063", "Md 000Md GELATINA BASO SANTA CLAUSS", "Caramelos", "1*6*100", 6, 216.67m, 1300.00m, 216.67m, 1300.00m, 216.67m, 1300.00m, CostUnit: 216.67m, CostBox: 1300.00m, IsCostOnly: true),
+            new("CA064", "Md 000Md BASTON NAVIDEÑO", "Caramelos", "1*10*60", 10, 188.00m, 1880.00m, 188.00m, 1880.00m, 188.00m, 1880.00m, CostUnit: 188.00m, CostBox: 1880.00m, IsCostOnly: true),
+            new("CA065", "Md 000Md GELATINA PRESTIGE FUN JELLY ZOMBIE", "Caramelos", "1*12*20", 12, 158.33m, 1900.00m, 158.33m, 1900.00m, 158.33m, 1900.00m, CostUnit: 158.33m, CostBox: 1900.00m, IsCostOnly: true),
 
             // Malvaviscos (15)
             new("MA001", "BOLSA CANDY SUPLAYER MALVAVISCO SUPER MINI MINO", "Malvaviscos", "1*8*70", 8, 252.00m, 2016.00m, 205.88m, 1647.06m, 214.77m, 1718.18m, 175.00m, 1400.00m),

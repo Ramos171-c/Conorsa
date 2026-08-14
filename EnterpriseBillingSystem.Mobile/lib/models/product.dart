@@ -124,9 +124,10 @@ class Product {
 
     const exclusiveSkus = {
       'CA052', 'CA053', 'CA054', 'CA055', 'CA056', 'CA057', 'CA058', 'CA059', 'CA060',
+      'CA061', 'CA062', 'CA063', 'CA064', 'CA065',
       'MA016', 'MA017', 'MA018', 'MA019',
       'GA043', 'GA044', 'GA045', 'GA046', 'GA047', 'GA048', 'GA049', 'GA050', 'GA051',
-      'GA052', 'GA053', 'GA054', 'GA055', 'GA056'
+      'GA052', 'GA053', 'GA054', 'GA055', 'GA056', 'GA057'
     };
 
     if (exclusiveSkus.contains(code)) {
@@ -154,7 +155,13 @@ class Product {
       'FUM CREAMS',
       'WE LOVE COCO SHOP',
       'CHOCOLATE DE GUERRA XXL',
-      'BON TON VASO'
+      'BON TON VASO',
+      'OMICO',
+      'SORPRESA CAJITA',
+      'CHICLE ESPADA',
+      'GELATINA BASO SANTA CLAUSS',
+      'BASTON NAVIDEÑO',
+      'FUN JELLY ZOMBIE'
     ];
 
     for (var n in exclusiveNames) {
