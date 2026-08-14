@@ -32,6 +32,32 @@
 
   <title>CONORTE POS Móvil</title>
   <link rel="manifest" href="manifest.json">
+  <script>
+    window._flutter = {};
+    let loaderInstance;
+    Object.defineProperty(window._flutter, 'loader', {
+      get: () => loaderInstance,
+      set: (loader) => {
+        loaderInstance = loader;
+        if (loader) {
+          const originalLoad = loader.load;
+          loader.load = function(options) {
+            if (options && options.serviceWorkerSettings) {
+              const isSecure = window.location.protocol === 'https:' || 
+                               window.location.hostname === 'localhost' || 
+                               window.location.hostname === '127.0.0.1';
+              if (!isSecure) {
+                console.log("Contexto no seguro: desactivando Service Worker para evitar error de HTTPS forzado en Safari.");
+                options.serviceWorkerSettings = null;
+              }
+            }
+            return originalLoad.call(this, options);
+          };
+        }
+      },
+      configurable: true
+    });
+  </script>
 </head>
 <body>
   <script src="flutter_bootstrap.js" async></script>
