@@ -1,11 +1,15 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
+using Microsoft.AspNetCore.Identity;
+using EnterpriseBillingSystem.Domain.Entities;
 using EnterpriseBillingSystem.Domain.Repositories;
 using EnterpriseBillingSystem.Application.Products.DTOs;
 using EnterpriseBillingSystem.Application.Taxes.DTOs;
+using EnterpriseBillingSystem.Application.Common.Interfaces;
 
 namespace EnterpriseBillingSystem.Application.Products.Queries;
 
@@ -14,16 +18,23 @@ public record GetCatalogProductsQuery() : IRequest<IEnumerable<ProductDto>>;
 public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProductsQuery, IEnumerable<ProductDto>>
 {
     private readonly IProductRepository _productRepository;
+    private readonly ICurrentUserService _currentUserService;
+    private readonly UserManager<ApplicationUser> _userManager;
 
-    public GetCatalogProductsQueryHandler(IProductRepository productRepository)
+    public GetCatalogProductsQueryHandler(
+        IProductRepository productRepository,
+        ICurrentUserService currentUserService,
+        UserManager<ApplicationUser> userManager)
     {
         _productRepository = productRepository;
+        _currentUserService = currentUserService;
+        _userManager = userManager;
     }
 
     public async Task<IEnumerable<ProductDto>> Handle(GetCatalogProductsQuery request, CancellationToken cancellationToken)
     {
         var products = await _productRepository.GetCatalogProductsAsync(cancellationToken);
-        return products.Select(product =>
+        var dtos = products.Select(product =>
         {
             var taxDtos = product.Tax != null
                 ? new List<TaxDto> { new TaxDto(product.Tax.Id, product.Tax.Name, product.Tax.Rate, product.Tax.IsActive) }
@@ -110,11 +121,34 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
                 Taxes: taxDtos,
                 BranchProducts: branchProductDtos
             );
-        }).Where(dto => 
-            dto.Presentations != null && dto.Presentations.Any() &&
-            !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel) &&
-            !dto.InternalCode.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
-            !dto.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)
-        ).ToList();
+        }).ToList();
+
+        if (_currentUserService.UserId != null)
+        {
+            var user = await _userManager.FindByIdAsync(_currentUserService.UserId);
+            if (user != null)
+            {
+                var isVendedor = await _userManager.IsInRoleAsync(user, "VENDEDOR");
+                if (isVendedor)
+                {
+                    // 1. Filtrar surtidos del sistema móvil
+                    dtos = dtos.Where(dto => 
+                        !dto.InternalCode.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
+                        !dto.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)
+                    ).ToList();
+                }
+
+                // 2. Filtrar productos del canal Costo si el vendedor es de tipo Detalle
+                if (user.SellerCategory == Domain.Enums.SellerCategory.Detail)
+                {
+                    dtos = dtos.Where(dto => !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel)).ToList();
+                }
+            }
+        }
+
+        // 3. Filtrar cualquier producto sin presentaciones activas (para evitar productos vacíos o con precio 0)
+        dtos = dtos.Where(dto => dto.Presentations != null && dto.Presentations.Any()).ToList();
+
+        return dtos;
     }
 }
