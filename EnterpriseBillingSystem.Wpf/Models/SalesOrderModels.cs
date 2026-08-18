@@ -22,6 +22,8 @@ public class SalesOrderDetailItemDto : CommunityToolkit.Mvvm.ComponentModel.Obse
     public Guid Id { get; set; }
     public Guid ProductId { get; set; }
     public string ProductName { get; set; } = string.Empty;
+    public string? ProductDescription { get; set; }
+    public string DisplayText => !string.IsNullOrWhiteSpace(ProductDescription) ? ProductDescription : ProductName;
     public string ProductCode { get; set; } = string.Empty;
     public Guid UnitOfMeasureId { get; set; }
     public string UnitOfMeasure { get; set; } = string.Empty;

@@ -172,11 +172,11 @@
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>
 
-                        <!-- Nombre del Producto -->
-                        <DataGridTemplateColumn Header="Nombre del Producto" Width="*">
+                        <!-- Descripción / Nombre del Producto -->
+                        <DataGridTemplateColumn Header="Descripción del Producto" Width="*">
                             <DataGridTemplateColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Text="{Binding ProductName}" FontWeight="SemiBold" Foreground="#0F172A" VerticalAlignment="Center" Margin="6,0" TextWrapping="Wrap" />
+                                    <TextBlock Text="{Binding DisplayText}" ToolTip="{Binding DisplayText}" FontWeight="SemiBold" Foreground="#0F172A" VerticalAlignment="Center" Margin="6,0" TextWrapping="Wrap" />
                                 </DataTemplate>
                             </DataGridTemplateColumn.CellTemplate>
                         </DataGridTemplateColumn>

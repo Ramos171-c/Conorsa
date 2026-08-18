@@ -29,7 +29,8 @@ public record SalesOrderDetailItemDto(
     decimal TaxAmount,
     decimal NetAmount,
     decimal? DeliveredQuantity = null,
-    decimal? MissingQuantity = null
+    decimal? MissingQuantity = null,
+    string? ProductDescription = null
 );
 
 public record SalesOrderListItemDto(
@@ -154,7 +155,8 @@ public class GetSalesOrderByIdQueryHandler : IRequestHandler<GetSalesOrderByIdQu
                 d.TaxAmount,
                 d.NetAmount,
                 deliveredQty,
-                missingQty
+                missingQty,
+                d.Product?.Description
             );
         }).ToList();
 

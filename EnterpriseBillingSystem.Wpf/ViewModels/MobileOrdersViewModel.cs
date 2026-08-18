@@ -528,7 +528,7 @@ public partial class MobileOrdersViewModel : ViewModelBase
                     orderTax += lineTax;
 
                     string codePrefix = !string.IsNullOrWhiteSpace(detail.ProductCode) ? $"[{detail.ProductCode}] " : "";
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{detail.ProductName}\n")));
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{detail.DisplayText}\n")));
                     string qtyUom = $"{detail.Quantity:N2} {detail.UnitOfMeasure}";
                     string net = $"C${lineNet:N2}";
                     itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {qtyUom.PadRight(22)} {net.PadLeft(14)}\n")));

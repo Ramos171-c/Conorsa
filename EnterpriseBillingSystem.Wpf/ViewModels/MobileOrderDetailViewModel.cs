@@ -705,9 +705,9 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                 delDiscount += disc;
                 delTax += tax;
 
-                // Full product name (untruncated and bold)
+                // Full product description (untruncated and bold)
                 string codePrefix = !string.IsNullOrWhiteSpace(item.ProductCode) ? $"[{item.ProductCode}] " : "";
-                itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{item.ProductName}\n")));
+                itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{item.DisplayText}\n")));
                 
                 if (item.MissingQuantity > 0)
                 {
