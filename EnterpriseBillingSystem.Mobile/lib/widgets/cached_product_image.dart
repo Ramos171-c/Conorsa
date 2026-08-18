@@ -69,7 +69,68 @@ class _CachedProductImageState extends State<CachedProductImage> {
     }
 
     try {
-      // 1. Check local assets first to save network & avoid any loading lag
+      var url = widget.imageUrl ?? '';
+
+      // 1. If server image URL is provided, prioritize it
+      if (url.isNotEmpty && !url.contains('default-product.png')) {
+        // Convert relative path to absolute URL if necessary
+        if (!url.startsWith('http')) {
+          try {
+            final config = Provider.of<ConfigProvider>(context, listen: false);
+            final uri = Uri.parse(config.apiUrl);
+            final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ":${uri.port}" : ""}';
+            url = '$base${url.startsWith('/') ? "" : "/"}$url';
+          } catch (_) {}
+        }
+
+        // Add cache-buster on web so the browser always loads the freshest image
+        final displayUrl = kIsWeb
+            ? (url.contains('?')
+                ? '$url&_v=${DateTime.now().millisecondsSinceEpoch ~/ (1000 * 60 * 60)}'
+                : '$url?_v=${DateTime.now().millisecondsSinceEpoch ~/ (1000 * 60 * 60)}')
+            : url;
+
+        if (mounted) {
+          setState(() {
+            _resolvedUrl = displayUrl;
+          });
+        }
+
+        if (kIsWeb) {
+          if (mounted) {
+            setState(() {
+              _isLoading = false;
+            });
+          }
+          return;
+        }
+
+        // On Native: Check local disk cache first
+        final cachedPath = ImageCacheService.getCachedImagePath(url);
+        if (cachedPath != null) {
+          if (mounted) {
+            setState(() {
+              _filePath = cachedPath;
+              _isLoading = false;
+            });
+          }
+          return;
+        }
+
+        // Download and cache on-the-fly
+        final downloadedPath = await ImageCacheService.downloadAndCacheOnTheFly(url);
+        if (downloadedPath != null) {
+          if (mounted) {
+            setState(() {
+              _filePath = downloadedPath;
+              _isLoading = false;
+            });
+          }
+          return;
+        }
+      }
+
+      // 2. Fallback to pre-bundled APK assets if no server image or offline without cache
       if (widget.productCode != null && widget.productCode!.isNotEmpty) {
         final code = widget.productCode!.toUpperCase();
         final formats = ['.png', '.jpg', '.jpeg', '.webp'];
@@ -88,67 +149,9 @@ class _CachedProductImageState extends State<CachedProductImage> {
         }
       }
 
-      var url = widget.imageUrl ?? '';
-      if (url.isEmpty || url.contains('default-product.png')) {
-        if (mounted) {
-          setState(() {
-            _filePath = null;
-            _isLoading = false;
-          });
-        }
-        return;
-      }
-
-      // Convert relative path to absolute URL if necessary
-      if (!url.startsWith('http')) {
-        try {
-          final config = Provider.of<ConfigProvider>(context, listen: false);
-          final uri = Uri.parse(config.apiUrl);
-          final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ":${uri.port}" : ""}';
-          url = '$base${url.startsWith('/') ? "" : "/"}$url';
-        } catch (_) {}
-      }
-
-      // Add hourly cache-buster on web so the browser never serves a stale
-      // image after a product image upload replaces the file on the server
-      final displayUrl = kIsWeb
-          ? (url.contains('?')
-              ? '$url&_v=${DateTime.now().millisecondsSinceEpoch ~/ (1000 * 60 * 60)}'
-              : '$url?_v=${DateTime.now().millisecondsSinceEpoch ~/ (1000 * 60 * 60)}')
-          : url;
-
       if (mounted) {
         setState(() {
-          _resolvedUrl = displayUrl;
-        });
-      }
-
-      if (kIsWeb) {
-        if (mounted) {
-          setState(() {
-            _isLoading = false;
-          });
-        }
-        return;
-      }
-
-      // 2. Check local cache first
-      final cachedPath = ImageCacheService.getCachedImagePath(url);
-      if (cachedPath != null) {
-        if (mounted) {
-          setState(() {
-            _filePath = cachedPath;
-            _isLoading = false;
-          });
-        }
-        return;
-      }
-
-      // 3. Download and cache on-the-fly
-      final downloadedPath = await ImageCacheService.downloadAndCacheOnTheFly(url);
-      if (mounted) {
-        setState(() {
-          _filePath = downloadedPath;
+          _filePath = null;
           _isLoading = false;
         });
       }
