@@ -461,17 +461,67 @@ public partial class MobileOrdersViewModel : ViewModelBase
                     BreakPageBefore = flowDoc.Blocks.Any()
                 };
 
-                // Title Header
+                // Logo
+                try
+                {
+                    System.Windows.Media.Imaging.BitmapImage? logoBitmap = null;
+                    try
+                    {
+                        logoBitmap = new System.Windows.Media.Imaging.BitmapImage();
+                        logoBitmap.BeginInit();
+                        logoBitmap.UriSource = new Uri("pack://application:,,,/EnterpriseBillingSystem.Wpf;component/Assets/logo.png", UriKind.RelativeOrAbsolute);
+                        logoBitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                        logoBitmap.EndInit();
+                    }
+                    catch
+                    {
+                        var logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "logo.png");
+                        if (System.IO.File.Exists(logoPath))
+                        {
+                            logoBitmap = new System.Windows.Media.Imaging.BitmapImage();
+                            logoBitmap.BeginInit();
+                            logoBitmap.UriSource = new Uri(logoPath, UriKind.Absolute);
+                            logoBitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                            logoBitmap.EndInit();
+                        }
+                    }
+
+                    if (logoBitmap != null)
+                    {
+                        var img = new System.Windows.Controls.Image
+                        {
+                            Source = logoBitmap,
+                            Width = 70,
+                            Height = 70,
+                            HorizontalAlignment = System.Windows.HorizontalAlignment.Center
+                        };
+
+                        var imgContainer = new System.Windows.Documents.BlockUIContainer(img)
+                        {
+                            Margin = new System.Windows.Thickness(0, 0, 0, 4),
+                            TextAlignment = System.Windows.TextAlignment.Center
+                        };
+                        sec.Blocks.Add(imgContainer);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error rendering ticket logo: {ex.Message}");
+                }
+
+                // Title Header - Dulce y caramelos + Dirección + Teléfono
                 var headerPara = new System.Windows.Documents.Paragraph
                 {
-                    FontSize = 18,
+                    FontSize = 15,
                     FontWeight = System.Windows.FontWeights.Bold,
                     Foreground = System.Windows.Media.Brushes.Black,
                     TextAlignment = System.Windows.TextAlignment.Center,
                     Margin = new System.Windows.Thickness(0, 0, 0, 4)
                 };
-                headerPara.Inlines.Add(new System.Windows.Documents.Run("Dulce y caramelos\n"));
-                headerPara.Inlines.Add(new System.Windows.Documents.Run("FACTURA / TICKET DE ENTREGA (EN CAMINO)\n") { FontSize = 13, FontWeight = System.Windows.FontWeights.Bold });
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("Dulce y caramelos\n") { FontSize = 18, FontWeight = System.Windows.FontWeights.Bold });
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("Dirección: Matagalpa\n") { FontSize = 11, FontWeight = System.Windows.FontWeights.Bold });
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("Teléfono:  86953060\n") { FontSize = 11, FontWeight = System.Windows.FontWeights.Bold });
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("FACTURA / TICKET DE ENTREGA\n") { FontSize = 13, FontWeight = System.Windows.FontWeights.Bold });
                 headerPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n") { FontWeight = System.Windows.FontWeights.Bold });
                 sec.Blocks.Add(headerPara);
 
@@ -479,12 +529,12 @@ public partial class MobileOrdersViewModel : ViewModelBase
                 var custPara = new System.Windows.Documents.Paragraph
                 {
                     Foreground = System.Windows.Media.Brushes.Black,
-                    FontWeight = System.Windows.FontWeights.SemiBold,
+                    FontWeight = System.Windows.FontWeights.Bold,
                     Margin = new System.Windows.Thickness(0, 0, 0, 4)
                 };
-                custPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"Pedido No:   {fullOrder.OrderNumber}\n")));
+                custPara.Inlines.Add(new System.Windows.Documents.Run($"Pedido No:   {fullOrder.OrderNumber}\n"));
                 custPara.Inlines.Add(new System.Windows.Documents.Run($"Fecha:       {fullOrder.OrderDate:dd/MM/yyyy HH:mm}\n"));
-                custPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"Cliente:     {fullOrder.CustomerName} ({fullOrder.CustomerCode})\n")));
+                custPara.Inlines.Add(new System.Windows.Documents.Run($"Cliente:     {fullOrder.CustomerName} ({fullOrder.CustomerCode})\n"));
                 
                 if (customer != null)
                 {
@@ -528,18 +578,21 @@ public partial class MobileOrdersViewModel : ViewModelBase
                     orderTax += lineTax;
 
                     string codePrefix = !string.IsNullOrWhiteSpace(detail.ProductCode) ? $"[{detail.ProductCode}] " : "";
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{detail.DisplayText}\n")));
-                    string qtyUom = $"{detail.Quantity:N2} {detail.UnitOfMeasure}";
-                    string net = $"C${lineNet:N2}";
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {qtyUom.PadRight(22)} {net.PadLeft(14)}\n")));
+                    string displayName = !string.IsNullOrWhiteSpace(detail.ProductDescription) ? detail.ProductDescription : detail.ProductName;
+
+                    // Line 1: Product Code + Description (with U/E)
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{displayName}\n")));
+
+                    // Line 2: Cantidad x Precio Unitario = Total
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {detail.Quantity:N2} {detail.UnitOfMeasure} x C${detail.UnitPrice:N2} = C${lineNet:N2}\n")));
 
                     detailIndex++;
                     if (detailIndex < validDetails.Count)
                     {
-                        itemsPara.Inlines.Add(new System.Windows.Documents.Run(" - - - - - - - - - - - - - - - - - - - - \n"));
+                        itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n"));
                     }
                 }
-                itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n") { FontWeight = System.Windows.FontWeights.Bold });
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n") { FontWeight = System.Windows.FontWeights.Bold });
                 sec.Blocks.Add(itemsPara);
 
                 // Totals

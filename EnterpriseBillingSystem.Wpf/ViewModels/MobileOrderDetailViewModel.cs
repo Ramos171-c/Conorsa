@@ -625,24 +625,74 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                 ColumnWidth = double.PositiveInfinity,
                 FontFamily = new System.Windows.Media.FontFamily("Consolas"),
                 FontSize = 12,
-                FontWeight = FontWeights.SemiBold,
+                FontWeight = FontWeights.Bold,
                 Foreground = System.Windows.Media.Brushes.Black,
                 TextAlignment = TextAlignment.Left
             };
 
             var sec = new System.Windows.Documents.Section();
 
-            // Header - Dulce y caramelos
+            // Logo
+            try
+            {
+                System.Windows.Media.Imaging.BitmapImage? logoBitmap = null;
+                try
+                {
+                    logoBitmap = new System.Windows.Media.Imaging.BitmapImage();
+                    logoBitmap.BeginInit();
+                    logoBitmap.UriSource = new Uri("pack://application:,,,/EnterpriseBillingSystem.Wpf;component/Assets/logo.png", UriKind.RelativeOrAbsolute);
+                    logoBitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                    logoBitmap.EndInit();
+                }
+                catch
+                {
+                    var logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "logo.png");
+                    if (System.IO.File.Exists(logoPath))
+                    {
+                        logoBitmap = new System.Windows.Media.Imaging.BitmapImage();
+                        logoBitmap.BeginInit();
+                        logoBitmap.UriSource = new Uri(logoPath, UriKind.Absolute);
+                        logoBitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                        logoBitmap.EndInit();
+                    }
+                }
+
+                if (logoBitmap != null)
+                {
+                    var img = new System.Windows.Controls.Image
+                    {
+                        Source = logoBitmap,
+                        Width = 70,
+                        Height = 70,
+                        HorizontalAlignment = HorizontalAlignment.Center
+                    };
+
+                    var imgContainer = new System.Windows.Documents.BlockUIContainer(img)
+                    {
+                        Margin = new Thickness(0, 0, 0, 4),
+                        TextAlignment = TextAlignment.Center
+                    };
+                    sec.Blocks.Add(imgContainer);
+                }
+            }
+            catch (Exception ex)
+            {
+                System.Diagnostics.Debug.WriteLine($"Error rendering ticket logo: {ex.Message}");
+            }
+
+            // Header - Dulce y caramelos + Dirección + Teléfono
             var headerPara = new System.Windows.Documents.Paragraph
             {
-                FontSize = 18,
+                FontSize = 15,
                 FontWeight = FontWeights.Bold,
                 Foreground = System.Windows.Media.Brushes.Black,
                 TextAlignment = TextAlignment.Center,
                 Margin = new Thickness(0, 0, 0, 4)
             };
-            headerPara.Inlines.Add(new System.Windows.Documents.Run("Dulce y caramelos\n"));
-            headerPara.Inlines.Add(new System.Windows.Documents.Run("TICKET DE ENTREGA\n") { FontSize = 14, FontWeight = FontWeights.Bold });
+            headerPara.Inlines.Add(new System.Windows.Documents.Run("Dulce y caramelos\n") { FontSize = 18, FontWeight = FontWeights.Bold });
+            headerPara.Inlines.Add(new System.Windows.Documents.Run("Dirección: Matagalpa\n") { FontSize = 11, FontWeight = FontWeights.Bold });
+            headerPara.Inlines.Add(new System.Windows.Documents.Run("Teléfono:  86953060\n") { FontSize = 11, FontWeight = FontWeights.Bold });
+            headerPara.Inlines.Add(new System.Windows.Documents.Run("TICKET DE ENTREGA\n") { FontSize = 13, FontWeight = FontWeights.Bold });
             headerPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n") { FontWeight = FontWeights.Bold });
             sec.Blocks.Add(headerPara);
 
@@ -650,25 +700,23 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             var custPara = new System.Windows.Documents.Paragraph
             {
                 Foreground = System.Windows.Media.Brushes.Black,
-                FontWeight = FontWeights.SemiBold,
+                FontWeight = FontWeights.Bold,
                 Margin = new Thickness(0, 0, 0, 4)
             };
-            custPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"Pedido No:   {OrderNumber}\n")));
+            custPara.Inlines.Add(new System.Windows.Documents.Run($"Pedido No:   {OrderNumber}\n"));
             custPara.Inlines.Add(new System.Windows.Documents.Run($"Fecha:       {OrderDate:dd/MM/yyyy HH:mm}\n"));
-            custPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"Cliente:     {CustomerName} ({CustomerCode})\n")));
+            custPara.Inlines.Add(new System.Windows.Documents.Run($"Cliente:     {CustomerName} ({CustomerCode})\n"));
             
             if (customer != null)
             {
                 custPara.Inlines.Add(new System.Windows.Documents.Run($"Ruta:        {customer.RouteName ?? "No asignada"}\n"));
                 
-                // Get default address
                 var address = customer.Addresses?.FirstOrDefault(a => a.IsDefault) ?? customer.Addresses?.FirstOrDefault();
                 if (address != null)
                 {
                     custPara.Inlines.Add(new System.Windows.Documents.Run($"Dirección:   {address.AddressLine1}, {address.City}\n"));
                 }
                 
-                // Get default phone
                 var phone = customer.Phones?.FirstOrDefault()?.PhoneNumber;
                 if (!string.IsNullOrEmpty(phone))
                 {
@@ -696,7 +744,6 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
 
             foreach (var item in billableDetails)
             {
-                // Sum up totals for delivered quantities
                 decimal baseAmount = item.DeliveredQuantity * item.UnitPrice;
                 decimal disc = baseAmount * (item.DiscountPercentage / 100m);
                 decimal tax = (baseAmount - disc) * (item.TaxPercentage / 100m);
@@ -705,40 +752,39 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                 delDiscount += disc;
                 delTax += tax;
 
-                // Full product description (untruncated and bold)
                 string codePrefix = !string.IsNullOrWhiteSpace(item.ProductCode) ? $"[{item.ProductCode}] " : "";
-                itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{item.DisplayText}\n")));
+                string displayName = !string.IsNullOrWhiteSpace(item.ProductDescription) ? item.ProductDescription : item.ProductName;
+
+                // Line 1: Product Code + Description (with U/E)
+                itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{displayName}\n")));
                 
+                // Line 2: Cantidad x Precio Unitario = Total
                 if (item.MissingQuantity > 0)
                 {
                     itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   Pedido:    {item.Quantity:N2} {item.UnitOfMeasure}\n"));
                     itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   Faltante:  {item.MissingQuantity:N2} {item.UnitOfMeasure} [{(string.IsNullOrWhiteSpace(item.MissingReason) ? "No vino" : item.MissingReason)}]\n")));
-                    
-                    string qtyUom = $"Entregado: {item.DeliveredQuantity:N2} {item.UnitOfMeasure}";
-                    string net = $"C${item.EffectiveNetAmount:N2}";
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {qtyUom.PadRight(18)} {net.PadLeft(11)}\n")));
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   Entregado: {item.DeliveredQuantity:N2} {item.UnitOfMeasure} x C${item.UnitPrice:N2} = C${item.EffectiveNetAmount:N2}\n")));
                 }
                 else
                 {
-                    string qtyUom = $"{item.DeliveredQuantity:N2} {item.UnitOfMeasure}";
-                    string net = $"C${item.EffectiveNetAmount:N2}";
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {qtyUom.PadRight(18)} {net.PadLeft(11)}\n")));
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {item.DeliveredQuantity:N2} {item.UnitOfMeasure} x C${item.UnitPrice:N2} = C${item.EffectiveNetAmount:N2}\n")));
                 }
 
+                // Divider line between items
                 itemIndex++;
                 if (itemIndex < billableDetails.Count)
                 {
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Run(" - - - - - - - - - - - - - - - - -\n"));
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Run("----------------------------------\n"));
                 }
             }
-            itemsPara.Inlines.Add(new System.Windows.Documents.Run("----------------------------------\n") { FontWeight = FontWeights.Bold });
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n") { FontWeight = FontWeights.Bold });
             sec.Blocks.Add(itemsPara);
 
             // Totals
             var totalsPara = new System.Windows.Documents.Paragraph
             {
                 Foreground = System.Windows.Media.Brushes.Black,
-                FontWeight = FontWeights.SemiBold,
+                FontWeight = FontWeights.Bold,
                 TextAlignment = TextAlignment.Right,
                 Margin = new Thickness(0, 0, 0, 4)
             };
