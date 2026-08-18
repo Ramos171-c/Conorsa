@@ -36,6 +36,11 @@ public class CatalogController : ApiControllerBase
                 : (Uri.TryCreate(p.ImagePath, UriKind.Absolute, out _) ? p.ImagePath : $"{baseUri}{(p.ImagePath.StartsWith('/') ? p.ImagePath : $"/{p.ImagePath}")}")
         }).ToList();
 
+        // Prevent all caching so clients always receive the latest image URLs
+        Response.Headers["Cache-Control"] = "no-cache, no-store, must-revalidate";
+        Response.Headers["Pragma"] = "no-cache";
+        Response.Headers["Expires"] = "0";
+
         return Ok(mapped);
     }
 

@@ -49,11 +49,39 @@ class ImageCacheService {
       if (response.statusCode == 200) {
         final base64Image = base64Encode(response.bodyBytes);
         final prefs = await SharedPreferences.getInstance();
+
+        // Evict any stale cached image for the same product (same UUID, different ticks)
+        _evictStaleProductImage(prefs, imageUrl);
+
         await prefs.setString('$_keyPrefix$imageUrl', base64Image);
       }
     } catch (_) {
       // Ignore background download errors or quota limits safely
     }
+  }
+
+  /// Remove any previously cached image that belongs to the same product UUID
+  static void _evictStaleProductImage(SharedPreferences prefs, String newUrl) {
+    try {
+      // Extract the product UUID from a path like /uploads/products/<UUID>_<ticks>.jpg
+      final uri = Uri.parse(newUrl);
+      final segments = uri.pathSegments;
+      if (segments.length < 2) return;
+      final filename = segments.last; // e.g. "25d0b2c8-b2d5-4cda-9322-3642a6dc46a7_639226638255167943.jpg"
+      final underscoreIdx = filename.indexOf('_');
+      if (underscoreIdx <= 0) return;
+      final productId = filename.substring(0, underscoreIdx); // the UUID part
+
+      // Find all cached keys that reference the same product but with a different filename
+      final keysToDelete = prefs
+          .getKeys()
+          .where((k) => k.startsWith(_keyPrefix) && k.contains(productId) && !k.endsWith(filename))
+          .toList();
+
+      for (final k in keysToDelete) {
+        prefs.remove(k);
+      }
+    } catch (_) {}
   }
 
   /// Force cache single image (used by widgets on-the-fly)

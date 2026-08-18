@@ -79,9 +79,13 @@ class _CachedProductImageState extends State<CachedProductImage> {
 
     // On Flutter Web, use browser native network loading and caching directly
     if (kIsWeb) {
+      // Add hourly cache-buster so the browser always loads the latest image
+      // without caching stale versions across image updates
+      final hourBucket = DateTime.now().millisecondsSinceEpoch ~/ (1000 * 60 * 60);
+      final bustUrl = url.contains('?') ? '$url&_v=$hourBucket' : '$url?_v=$hourBucket';
       if (mounted) {
         setState(() {
-          _resolvedUrl = url;
+          _resolvedUrl = bustUrl;
           _isLoading = false;
         });
       }
