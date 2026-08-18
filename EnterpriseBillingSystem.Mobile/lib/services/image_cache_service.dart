@@ -70,6 +70,9 @@ class ImageCacheService {
     try {
       final response = await http.get(Uri.parse(imageUrl)).timeout(const Duration(seconds: 15));
       if (response.statusCode == 200) {
+        // Evict any stale cached file for the same product (same UUID, different ticks)
+        _evictStaleProductImage(imageUrl);
+
         final filePath = _getLocalFilePath(imageUrl);
         final file = File(filePath);
         await file.writeAsBytes(response.bodyBytes);
@@ -77,6 +80,31 @@ class ImageCacheService {
     } catch (_) {
       // Ignore background download errors
     }
+  }
+
+  /// Remove any previously cached temp file that belongs to the same product UUID
+  static void _evictStaleProductImage(String newUrl) {
+    try {
+      final uri = Uri.parse(newUrl);
+      final segments = uri.pathSegments;
+      if (segments.length < 2) return;
+      final filename = segments.last; // e.g. "<UUID>_<ticks>.jpg"
+      final underscoreIdx = filename.indexOf('_');
+      if (underscoreIdx <= 0) return;
+      final productId = filename.substring(0, underscoreIdx);
+
+      final tempDir = Directory.systemTemp;
+      for (final f in tempDir.listSync()) {
+        if (f is File) {
+          final name = f.path.split(Platform.pathSeparator).last;
+          if (name.startsWith(_filePrefix) &&
+              name.contains(productId) &&
+              !name.endsWith(filename.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '_'))) {
+            f.deleteSync();
+          }
+        }
+      }
+    } catch (_) {}
   }
 
   /// Force cache single image (used by widgets on-the-fly)

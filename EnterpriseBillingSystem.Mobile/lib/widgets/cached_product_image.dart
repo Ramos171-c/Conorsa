@@ -109,9 +109,17 @@ class _CachedProductImageState extends State<CachedProductImage> {
         } catch (_) {}
       }
 
+      // Add hourly cache-buster on web so the browser never serves a stale
+      // image after a product image upload replaces the file on the server
+      final displayUrl = kIsWeb
+          ? (url.contains('?')
+              ? '$url&_v=${DateTime.now().millisecondsSinceEpoch ~/ (1000 * 60 * 60)}'
+              : '$url?_v=${DateTime.now().millisecondsSinceEpoch ~/ (1000 * 60 * 60)}')
+          : url;
+
       if (mounted) {
         setState(() {
-          _resolvedUrl = url;
+          _resolvedUrl = displayUrl;
         });
       }
 
