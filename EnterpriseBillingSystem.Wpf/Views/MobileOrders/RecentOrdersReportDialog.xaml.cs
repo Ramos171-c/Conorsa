@@ -401,24 +401,92 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
 
                 var flowDoc = new System.Windows.Documents.FlowDocument
                 {
-                    PagePadding = new System.Windows.Thickness(10),
+                    PagePadding = new System.Windows.Thickness(15, 10, 15, 10),
                     ColumnWidth = double.PositiveInfinity,
-                    FontFamily = new System.Windows.Media.FontFamily("Courier New"),
+                    FontFamily = new System.Windows.Media.FontFamily("Consolas"),
                     FontSize = 11,
+                    FontWeight = System.Windows.FontWeights.Bold,
+                    Foreground = System.Windows.Media.Brushes.Black,
                     TextAlignment = System.Windows.TextAlignment.Left
                 };
 
-                var sb = new System.Text.StringBuilder();
-                sb.AppendLine("==================================================================");
-                sb.AppendLine("                 CONSOLIDADO DE CARGA POR RUTA");
-                sb.AppendLine("                     ESTADO: EN CAMINO");
-                sb.AppendLine("==================================================================");
-                sb.AppendLine($"Ruta:            {routeName}");
-                sb.AppendLine($"Fecha Impresión: {DateTime.Now:dd/MM/yyyy HH:mm}");
-                sb.AppendLine($"Total Productos: {ConsolidatedProducts.Count}");
-                sb.AppendLine("==================================================================");
-                sb.AppendLine(string.Format("{0,-12} {1,-32} {2,-8} {3,10}", "CÓDIGO", "PRODUCTO", "U.M.", "CANTIDAD"));
-                sb.AppendLine("------------------------------------------------------------------");
+                var sec = new System.Windows.Documents.Section();
+
+                // Logo
+                try
+                {
+                    System.Windows.Media.Imaging.BitmapImage? logoBitmap = null;
+                    try
+                    {
+                        logoBitmap = new System.Windows.Media.Imaging.BitmapImage();
+                        logoBitmap.BeginInit();
+                        logoBitmap.UriSource = new Uri("pack://application:,,,/EnterpriseBillingSystem.Wpf;component/Assets/logo.png", UriKind.RelativeOrAbsolute);
+                        logoBitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                        logoBitmap.EndInit();
+                    }
+                    catch
+                    {
+                        var logoPath = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Assets", "logo.png");
+                        if (System.IO.File.Exists(logoPath))
+                        {
+                            logoBitmap = new System.Windows.Media.Imaging.BitmapImage();
+                            logoBitmap.BeginInit();
+                            logoBitmap.UriSource = new Uri(logoPath, UriKind.Absolute);
+                            logoBitmap.CacheOption = System.Windows.Media.Imaging.BitmapCacheOption.OnLoad;
+                            logoBitmap.EndInit();
+                        }
+                    }
+
+                    if (logoBitmap != null)
+                    {
+                        var img = new System.Windows.Controls.Image
+                        {
+                            Source = logoBitmap,
+                            Width = 70,
+                            Height = 70,
+                            HorizontalAlignment = System.Windows.HorizontalAlignment.Center
+                        };
+
+                        var imgContainer = new System.Windows.Documents.BlockUIContainer(img)
+                        {
+                            Margin = new System.Windows.Thickness(0, 0, 0, 4),
+                            TextAlignment = System.Windows.TextAlignment.Center
+                        };
+                        sec.Blocks.Add(imgContainer);
+                    }
+                }
+                catch (Exception ex)
+                {
+                    System.Diagnostics.Debug.WriteLine($"Error rendering ticket logo: {ex.Message}");
+                }
+
+                var headerPara = new System.Windows.Documents.Paragraph
+                {
+                    FontSize = 15,
+                    FontWeight = System.Windows.FontWeights.Bold,
+                    Foreground = System.Windows.Media.Brushes.Black,
+                    TextAlignment = System.Windows.TextAlignment.Center,
+                    Margin = new System.Windows.Thickness(0, 0, 0, 4)
+                };
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("Dulce y caramelos\n") { FontSize = 18, FontWeight = System.Windows.FontWeights.Bold });
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("Dirección: Matagalpa\n") { FontSize = 11, FontWeight = System.Windows.FontWeights.Bold });
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("Teléfono:  86953060\n") { FontSize = 11, FontWeight = System.Windows.FontWeights.Bold });
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("CONSOLIDADO DE CARGA POR RUTA\n") { FontSize = 13, FontWeight = System.Windows.FontWeights.Bold });
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("==================================================================\n") { FontWeight = System.Windows.FontWeights.Bold });
+                sec.Blocks.Add(headerPara);
+
+                var infoPara = new System.Windows.Documents.Paragraph
+                {
+                    Foreground = System.Windows.Media.Brushes.Black,
+                    FontWeight = System.Windows.FontWeights.Bold,
+                    Margin = new System.Windows.Thickness(0, 0, 0, 4)
+                };
+                infoPara.Inlines.Add(new System.Windows.Documents.Run($"Ruta:            {routeName}\n"));
+                infoPara.Inlines.Add(new System.Windows.Documents.Run($"Fecha Impresión: {DateTime.Now:dd/MM/yyyy HH:mm}\n"));
+                infoPara.Inlines.Add(new System.Windows.Documents.Run($"Total Productos: {ConsolidatedProducts.Count}\n"));
+                infoPara.Inlines.Add(new System.Windows.Documents.Run("==================================================================\n") { FontWeight = System.Windows.FontWeights.Bold });
+                infoPara.Inlines.Add(new System.Windows.Documents.Run(string.Format("{0,-12} {1,-32} {2,-8} {3,10}\n", "CÓDIGO", "PRODUCTO", "U.M.", "CANTIDAD")));
+                infoPara.Inlines.Add(new System.Windows.Documents.Run("------------------------------------------------------------------\n") { FontWeight = System.Windows.FontWeights.Bold });
 
                 foreach (var item in ConsolidatedProducts)
                 {
@@ -426,16 +494,17 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                     string name = (item.ProductName ?? "").Length > 32 ? item.ProductName.Substring(0, 32) : item.ProductName;
                     string uom = (item.UnitOfMeasure ?? "").Length > 8 ? item.UnitOfMeasure.Substring(0, 8) : item.UnitOfMeasure;
 
-                    sb.AppendLine(string.Format("{0,-12} {1,-32} {2,-8} {3,10:N2}", code, name, uom, item.TotalQuantity));
+                    infoPara.Inlines.Add(new System.Windows.Documents.Run(string.Format("{0,-12} {1,-32} {2,-8} {3,10:N2}\n", code, name, uom, item.TotalQuantity)));
+                    infoPara.Inlines.Add(new System.Windows.Documents.Run("------------------------------------------------------------------\n"));
                 }
 
-                sb.AppendLine("==================================================================");
-                sb.AppendLine("\n");
-                sb.AppendLine("_______________________                  _______________________");
-                sb.AppendLine(" Firma Despachador                       Firma Conductor / Chofer");
+                infoPara.Inlines.Add(new System.Windows.Documents.Run("==================================================================\n") { FontWeight = System.Windows.FontWeights.Bold });
+                infoPara.Inlines.Add(new System.Windows.Documents.Run("\n\n"));
+                infoPara.Inlines.Add(new System.Windows.Documents.Run("_______________________                  _______________________\n"));
+                infoPara.Inlines.Add(new System.Windows.Documents.Run(" Firma Despachador                       Firma Conductor / Chofer\n"));
+                sec.Blocks.Add(infoPara);
 
-                var p = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run(sb.ToString()));
-                flowDoc.Blocks.Add(p);
+                flowDoc.Blocks.Add(sec);
 
                 var paginator = ((System.Windows.Documents.IDocumentPaginatorSource)flowDoc).DocumentPaginator;
                 printDialog.PrintDocument(paginator, $"Consolidado_Carga_Ruta_{routeName}");
