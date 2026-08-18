@@ -425,10 +425,12 @@ public partial class MobileOrdersViewModel : ViewModelBase
 
             var flowDoc = new System.Windows.Documents.FlowDocument
             {
-                PagePadding = new System.Windows.Thickness(5, 5, 5, 5),
+                PagePadding = new System.Windows.Thickness(15, 10, 15, 10),
                 ColumnWidth = double.PositiveInfinity,
-                FontFamily = new System.Windows.Media.FontFamily("Courier New"),
+                FontFamily = new System.Windows.Media.FontFamily("Consolas"),
                 FontSize = 11,
+                FontWeight = System.Windows.FontWeights.SemiBold,
+                Foreground = System.Windows.Media.Brushes.Black,
                 TextAlignment = System.Windows.TextAlignment.Left
             };
 
@@ -460,21 +462,29 @@ public partial class MobileOrdersViewModel : ViewModelBase
                 };
 
                 // Title Header
-                var headerPara = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("Dulce y caramelos\n"))
+                var headerPara = new System.Windows.Documents.Paragraph
                 {
                     FontSize = 18,
                     FontWeight = System.Windows.FontWeights.Bold,
-                    TextAlignment = System.Windows.TextAlignment.Center
+                    Foreground = System.Windows.Media.Brushes.Black,
+                    TextAlignment = System.Windows.TextAlignment.Center,
+                    Margin = new System.Windows.Thickness(0, 0, 0, 4)
                 };
-                headerPara.Inlines.Add(new System.Windows.Documents.Run("FACTURA / TICKET DE ENTREGA (EN CAMINO)\n"));
-                headerPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("Dulce y caramelos\n"));
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("FACTURA / TICKET DE ENTREGA (EN CAMINO)\n") { FontSize = 13, FontWeight = System.Windows.FontWeights.Bold });
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n") { FontWeight = System.Windows.FontWeights.Bold });
                 sec.Blocks.Add(headerPara);
 
                 // Customer Details
-                var custPara = new System.Windows.Documents.Paragraph();
-                custPara.Inlines.Add(new System.Windows.Documents.Run($"Pedido No:   {fullOrder.OrderNumber}\n"));
+                var custPara = new System.Windows.Documents.Paragraph
+                {
+                    Foreground = System.Windows.Media.Brushes.Black,
+                    FontWeight = System.Windows.FontWeights.SemiBold,
+                    Margin = new System.Windows.Thickness(0, 0, 0, 4)
+                };
+                custPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"Pedido No:   {fullOrder.OrderNumber}\n")));
                 custPara.Inlines.Add(new System.Windows.Documents.Run($"Fecha:       {fullOrder.OrderDate:dd/MM/yyyy HH:mm}\n"));
-                custPara.Inlines.Add(new System.Windows.Documents.Run($"Cliente:     {fullOrder.CustomerName} ({fullOrder.CustomerCode})\n"));
+                custPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"Cliente:     {fullOrder.CustomerName} ({fullOrder.CustomerCode})\n")));
                 
                 if (customer != null)
                 {
@@ -490,7 +500,7 @@ public partial class MobileOrdersViewModel : ViewModelBase
                         custPara.Inlines.Add(new System.Windows.Documents.Run($"Teléfono:    {phone}\n"));
                     }
                 }
-                custPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
+                custPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n") { FontWeight = System.Windows.FontWeights.Bold });
                 sec.Blocks.Add(custPara);
 
                 // Order Lines (Only items with Quantity > 0)
@@ -498,10 +508,15 @@ public partial class MobileOrdersViewModel : ViewModelBase
                 decimal orderDiscount = 0;
                 decimal orderTax = 0;
 
-                var itemsPara = new System.Windows.Documents.Paragraph();
-                itemsPara.Inlines.Add(new System.Windows.Documents.Run("PRODUCTOS CARGADOS A ENTREGAR\n"));
-                itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n"));
+                var itemsPara = new System.Windows.Documents.Paragraph
+                {
+                    Foreground = System.Windows.Media.Brushes.Black,
+                    Margin = new System.Windows.Thickness(0, 0, 0, 4)
+                };
+                itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run("PRODUCTOS CARGADOS A ENTREGAR\n")));
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n") { FontWeight = System.Windows.FontWeights.Bold });
                 
+                int detailIndex = 0;
                 foreach (var detail in validDetails)
                 {
                     decimal lineDiscount = detail.DiscountAmount;
@@ -512,27 +527,40 @@ public partial class MobileOrdersViewModel : ViewModelBase
                     orderDiscount += lineDiscount;
                     orderTax += lineTax;
 
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"{detail.ProductName}\n"));
+                    string codePrefix = !string.IsNullOrWhiteSpace(detail.ProductCode) ? $"[{detail.ProductCode}] " : "";
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{detail.ProductName}\n")));
                     string qtyUom = $"{detail.Quantity:N2} {detail.UnitOfMeasure}";
                     string net = $"C${lineNet:N2}";
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   {qtyUom.PadRight(22)} {net.PadLeft(14)}\n"));
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {qtyUom.PadRight(22)} {net.PadLeft(14)}\n")));
+
+                    detailIndex++;
+                    if (detailIndex < validDetails.Count)
+                    {
+                        itemsPara.Inlines.Add(new System.Windows.Documents.Run(" - - - - - - - - - - - - - - - - - - - - \n"));
+                    }
                 }
-                itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n"));
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run("-----------------------------------------\n") { FontWeight = System.Windows.FontWeights.Bold });
                 sec.Blocks.Add(itemsPara);
 
                 // Totals
                 decimal orderTotal = orderSubtotal - orderDiscount + orderTax;
-                var totalsPara = new System.Windows.Documents.Paragraph { TextAlignment = System.Windows.TextAlignment.Right };
+                var totalsPara = new System.Windows.Documents.Paragraph
+                {
+                    Foreground = System.Windows.Media.Brushes.Black,
+                    FontWeight = System.Windows.FontWeights.SemiBold,
+                    TextAlignment = System.Windows.TextAlignment.Right,
+                    Margin = new System.Windows.Thickness(0, 0, 0, 4)
+                };
                 totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Subtotal:     C${orderSubtotal:N2}\n"));
                 if (orderDiscount > 0)
                 {
                     totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Descuento:   -C${orderDiscount:N2}\n"));
                 }
-                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL:        C${orderTotal:N2}\n"));
+                totalsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"TOTAL:        C${orderTotal:N2}\n")));
                 
                 decimal totalUsd = orderTotal / 36.5m;
-                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL USD:     ${totalUsd:N2}\n"));
-                totalsPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
+                totalsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"TOTAL USD:     ${totalUsd:N2}\n")));
+                totalsPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n") { FontWeight = System.Windows.FontWeights.Bold });
                 sec.Blocks.Add(totalsPara);
 
                 flowDoc.Blocks.Add(sec);

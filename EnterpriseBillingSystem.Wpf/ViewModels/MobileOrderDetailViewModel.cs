@@ -621,31 +621,41 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             // 2. Build the FlowDocument dynamically
             var doc = new System.Windows.Documents.FlowDocument
             {
-                PagePadding = new Thickness(30),
+                PagePadding = new Thickness(15, 10, 15, 10),
                 ColumnWidth = double.PositiveInfinity,
-                FontFamily = new System.Windows.Media.FontFamily("Courier New"),
+                FontFamily = new System.Windows.Media.FontFamily("Consolas"),
                 FontSize = 12,
+                FontWeight = FontWeights.SemiBold,
+                Foreground = System.Windows.Media.Brushes.Black,
                 TextAlignment = TextAlignment.Left
             };
 
             var sec = new System.Windows.Documents.Section();
 
             // Header - Dulce y caramelos
-            var headerPara = new System.Windows.Documents.Paragraph(new System.Windows.Documents.Run("Dulce y caramelos\n"))
+            var headerPara = new System.Windows.Documents.Paragraph
             {
                 FontSize = 18,
                 FontWeight = FontWeights.Bold,
-                TextAlignment = TextAlignment.Center
+                Foreground = System.Windows.Media.Brushes.Black,
+                TextAlignment = TextAlignment.Center,
+                Margin = new Thickness(0, 0, 0, 4)
             };
-            headerPara.Inlines.Add(new System.Windows.Documents.Run("TICKET DE ENTREGA\n"));
-            headerPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
+            headerPara.Inlines.Add(new System.Windows.Documents.Run("Dulce y caramelos\n"));
+            headerPara.Inlines.Add(new System.Windows.Documents.Run("TICKET DE ENTREGA\n") { FontSize = 14, FontWeight = FontWeights.Bold });
+            headerPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n") { FontWeight = FontWeights.Bold });
             sec.Blocks.Add(headerPara);
 
             // Customer Details
-            var custPara = new System.Windows.Documents.Paragraph();
-            custPara.Inlines.Add(new System.Windows.Documents.Run($"Pedido No:   {OrderNumber}\n"));
+            var custPara = new System.Windows.Documents.Paragraph
+            {
+                Foreground = System.Windows.Media.Brushes.Black,
+                FontWeight = FontWeights.SemiBold,
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+            custPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"Pedido No:   {OrderNumber}\n")));
             custPara.Inlines.Add(new System.Windows.Documents.Run($"Fecha:       {OrderDate:dd/MM/yyyy HH:mm}\n"));
-            custPara.Inlines.Add(new System.Windows.Documents.Run($"Cliente:     {CustomerName} ({CustomerCode})\n"));
+            custPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"Cliente:     {CustomerName} ({CustomerCode})\n")));
             
             if (customer != null)
             {
@@ -665,22 +675,27 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                     custPara.Inlines.Add(new System.Windows.Documents.Run($"Teléfono:    {phone}\n"));
                 }
             }
-            custPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
+            custPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n") { FontWeight = FontWeights.Bold });
             sec.Blocks.Add(custPara);
 
             // Order Lines
-            var itemsPara = new System.Windows.Documents.Paragraph();
-            itemsPara.Inlines.Add(new System.Windows.Documents.Run("DETALLE DEL PEDIDO\n"));
-            itemsPara.Inlines.Add(new System.Windows.Documents.Run("------------------------------------\n"));
+            var itemsPara = new System.Windows.Documents.Paragraph
+            {
+                Foreground = System.Windows.Media.Brushes.Black,
+                Margin = new Thickness(0, 0, 0, 4)
+            };
+            itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run("DETALLE DEL PEDIDO\n")));
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("----------------------------------\n") { FontWeight = FontWeights.Bold });
             
             decimal delSubtotal = 0;
             decimal delDiscount = 0;
             decimal delTax = 0;
 
-            foreach (var item in Details)
-            {
-                if (item.DeliveredQuantity <= 0) continue; // Skip items that are not being delivered at all
+            var billableDetails = Details.Where(d => d.DeliveredQuantity > 0).ToList();
+            int itemIndex = 0;
 
+            foreach (var item in billableDetails)
+            {
                 // Sum up totals for delivered quantities
                 decimal baseAmount = item.DeliveredQuantity * item.UnitPrice;
                 decimal disc = baseAmount * (item.DiscountPercentage / 100m);
@@ -690,32 +705,42 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                 delDiscount += disc;
                 delTax += tax;
 
-                // Full product name (untruncated)
-                itemsPara.Inlines.Add(new System.Windows.Documents.Run($"{item.ProductName}\n"));
+                // Full product name (untruncated and bold)
+                string codePrefix = !string.IsNullOrWhiteSpace(item.ProductCode) ? $"[{item.ProductCode}] " : "";
+                itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{item.ProductName}\n")));
                 
                 if (item.MissingQuantity > 0)
                 {
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   Pedido:     {item.Quantity:N2} {item.UnitOfMeasure}\n"));
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   Faltante:   {item.MissingQuantity:N2} {item.UnitOfMeasure} [{(string.IsNullOrWhiteSpace(item.MissingReason) ? "No vino" : item.MissingReason)}]\n"));
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   Pedido:    {item.Quantity:N2} {item.UnitOfMeasure}\n"));
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   Faltante:  {item.MissingQuantity:N2} {item.UnitOfMeasure} [{(string.IsNullOrWhiteSpace(item.MissingReason) ? "No vino" : item.MissingReason)}]\n")));
                     
-                    string qtyUom = $"Entregado:  {item.DeliveredQuantity:N2} {item.UnitOfMeasure}";
+                    string qtyUom = $"Entregado: {item.DeliveredQuantity:N2} {item.UnitOfMeasure}";
                     string net = $"C${item.EffectiveNetAmount:N2}";
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   {qtyUom.PadRight(18)} {net.PadLeft(11)}\n"));
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {qtyUom.PadRight(18)} {net.PadLeft(11)}\n")));
                 }
                 else
                 {
                     string qtyUom = $"{item.DeliveredQuantity:N2} {item.UnitOfMeasure}";
                     string net = $"C${item.EffectiveNetAmount:N2}";
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   {qtyUom.PadRight(18)} {net.PadLeft(11)}\n"));
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {qtyUom.PadRight(18)} {net.PadLeft(11)}\n")));
+                }
+
+                itemIndex++;
+                if (itemIndex < billableDetails.Count)
+                {
+                    itemsPara.Inlines.Add(new System.Windows.Documents.Run(" - - - - - - - - - - - - - - - - -\n"));
                 }
             }
-            itemsPara.Inlines.Add(new System.Windows.Documents.Run("------------------------------------\n"));
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("----------------------------------\n") { FontWeight = FontWeights.Bold });
             sec.Blocks.Add(itemsPara);
 
             // Totals
             var totalsPara = new System.Windows.Documents.Paragraph
             {
-                TextAlignment = TextAlignment.Right
+                Foreground = System.Windows.Media.Brushes.Black,
+                FontWeight = FontWeights.SemiBold,
+                TextAlignment = TextAlignment.Right,
+                Margin = new Thickness(0, 0, 0, 4)
             };
 
             decimal delTotal = delSubtotal - delDiscount + delTax;
@@ -732,13 +757,13 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             }
             if (missingItems.Any())
             {
-                totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Faltantes:    {missingItems.Sum(m => m.MissingQuantity):N2} pzas\n"));
+                totalsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"Faltantes:    {missingItems.Sum(m => m.MissingQuantity):N2} pzas\n")));
             }
-            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL NETO:   C${delTotal:N2}\n"));
+            totalsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"TOTAL NETO:   C${delTotal:N2}\n")));
             
             decimal totalUsd = delTotal / 36.5m;
-            totalsPara.Inlines.Add(new System.Windows.Documents.Run($"TOTAL USD:     ${totalUsd:N2}\n"));
-            totalsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
+            totalsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"TOTAL USD:     ${totalUsd:N2}\n")));
+            totalsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n") { FontWeight = FontWeights.Bold });
             sec.Blocks.Add(totalsPara);
 
             // Observations
@@ -769,10 +794,15 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
 
             if (showNotes)
             {
-                var obsPara = new System.Windows.Documents.Paragraph();
-                obsPara.Inlines.Add(new System.Windows.Documents.Run("OBSERVACIONES:\n"));
+                var obsPara = new System.Windows.Documents.Paragraph
+                {
+                    Foreground = System.Windows.Media.Brushes.Black,
+                    FontWeight = FontWeights.SemiBold,
+                    Margin = new Thickness(0, 0, 0, 4)
+                };
+                obsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run("OBSERVACIONES:\n")));
                 obsPara.Inlines.Add(new System.Windows.Documents.Run($"- Vendedor:  {notesText}\n"));
-                obsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n"));
+                obsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n") { FontWeight = FontWeights.Bold });
                 sec.Blocks.Add(obsPara);
             }
 
