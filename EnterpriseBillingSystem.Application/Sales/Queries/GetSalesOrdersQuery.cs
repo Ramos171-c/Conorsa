@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using MediatR;
 using EnterpriseBillingSystem.Application.Common.Models;
 using EnterpriseBillingSystem.Domain.Entities;
+using EnterpriseBillingSystem.Domain.Enums;
 using EnterpriseBillingSystem.Domain.Repositories;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
