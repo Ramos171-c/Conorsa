@@ -130,8 +130,10 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
 
                     decimal conversionFactor = presentation.ConversionFactor > 0 ? presentation.ConversionFactor : 1.0000m;
                     Guid presentationId = presentation.Id;
-                    // Get inventory record in Bodega Exhibición
+                    
+                    // Get inventory record in warehouse
                     var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(warehouse.Id, detail.ProductId, cancellationToken);
+                    
                     // Back up the original presale quantity requested
                     if (detail.OriginalPresaleQuantity == null)
                     {
@@ -139,27 +141,36 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                     }
 
                     decimal requestedInBaseUnit = Math.Round(detail.Quantity * conversionFactor, 4);
+                    decimal availableBaseStock = Math.Max(0m, inventory?.PhysicalStock ?? 0m);
 
-                    if (requestedInBaseUnit > 0.0000m)
+                    // AUTOMATIC DEDUCTION: Only deliver what ACTUALLY EXISTS in inventory
+                    decimal deliveredInBaseUnit = Math.Min(requestedInBaseUnit, availableBaseStock);
+                    decimal deliveredQuantity = conversionFactor > 0 ? Math.Round(deliveredInBaseUnit / conversionFactor, 4) : 0m;
+                    decimal missingQuantity = Math.Max(0m, detail.Quantity - deliveredQuantity);
+
+                    if (missingQuantity > 0)
                     {
-                        if (inventory == null)
-                        {
-                            inventory = new Domain.Entities.Inventory
-                            {
-                                Id = Guid.NewGuid(),
-                                BranchWarehouseId = warehouse.Id,
-                                ProductId = detail.ProductId,
-                                PhysicalStock = 0,
-                                ReservedStock = 0,
-                                CommittedStock = 0,
-                                CreatedBy = _currentUserService.UserId ?? "System",
-                                CreatedOnUtc = DateTime.UtcNow
-                            };
-                            await _inventoryRepository.AddAsync(inventory);
-                        }
+                        var uomName = presentation.Name ?? "UND";
+                        var missingMsg = $"{product.Name}: Pedido={detail.Quantity:N2}, Entregado={deliveredQuantity:N2}, Faltante={missingQuantity:N2} {uomName} (Sin stock en bodega)";
+                        if (string.IsNullOrWhiteSpace(order.Notes))
+                            order.Notes = $"[FALTANTE POR STOCK]: {missingMsg}";
+                        else if (!order.Notes.Contains(product.Name))
+                            order.Notes += $"\n[FALTANTE POR STOCK]: {missingMsg}";
+                    }
 
-                        inventory.PhysicalStock -= requestedInBaseUnit;
-                        _inventoryRepository.Update(inventory);
+                    // Update detail quantity to reflect ONLY the delivered units
+                    detail.Quantity = deliveredQuantity;
+                    detail.DiscountAmount = detail.DiscountPercentage > 0 ? (detail.Quantity * detail.UnitPrice * (detail.DiscountPercentage / 100m)) : 0m;
+                    detail.TaxAmount = detail.TaxPercentage > 0 ? ((detail.Quantity * detail.UnitPrice - detail.DiscountAmount) * (detail.TaxPercentage / 100m)) : 0m;
+                    detail.NetAmount = (detail.Quantity * detail.UnitPrice) - detail.DiscountAmount + detail.TaxAmount;
+
+                    if (deliveredInBaseUnit > 0.0000m)
+                    {
+                        if (inventory != null)
+                        {
+                            inventory.PhysicalStock -= deliveredInBaseUnit;
+                            _inventoryRepository.Update(inventory);
+                        }
 
                         movement.Details.Add(new InventoryMovementDetail
                         {
@@ -167,11 +178,11 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                             InventoryMovementId = movement.Id,
                             BranchId = warehouse.BranchId,
                             ProductId = detail.ProductId,
-                            Quantity = detail.Quantity,
+                            Quantity = deliveredQuantity,
                             UnitOfMeasureId = detail.UnitOfMeasureId,
                             ProductPresentationId = presentationId,
                             ConversionFactor = conversionFactor,
-                            QuantityInBaseUnit = requestedInBaseUnit,
+                            QuantityInBaseUnit = deliveredInBaseUnit,
                             CreatedBy = _currentUserService.UserId ?? "System",
                             CreatedOnUtc = DateTime.UtcNow
                         });
@@ -186,6 +197,7 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                 }
             }
 
+            // Recalculate order totals based ONLY on delivered quantities
             order.SubTotal = order.Details.Sum(d => d.Quantity * d.UnitPrice);
             order.DiscountAmount = order.Details.Sum(d => d.DiscountAmount);
             order.TaxAmount = order.Details.Sum(d => d.TaxAmount);

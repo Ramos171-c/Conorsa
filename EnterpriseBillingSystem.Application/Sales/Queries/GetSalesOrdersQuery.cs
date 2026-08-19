@@ -121,11 +121,16 @@ public class GetSalesOrdersQueryHandler : IRequestHandler<GetSalesOrdersQuery, P
 public class GetSalesOrderByIdQueryHandler : IRequestHandler<GetSalesOrderByIdQuery, SalesOrderDetailDto?>
 {
     private readonly ISalesOrderRepository _repository;
+    private readonly IInventoryRepository _inventoryRepository;
     private readonly UserManager<ApplicationUser> _userManager;
 
-    public GetSalesOrderByIdQueryHandler(ISalesOrderRepository repository, UserManager<ApplicationUser> userManager)
+    public GetSalesOrderByIdQueryHandler(
+        ISalesOrderRepository repository,
+        IInventoryRepository inventoryRepository,
+        UserManager<ApplicationUser> userManager)
     {
         _repository = repository;
+        _inventoryRepository = inventoryRepository;
         _userManager = userManager;
     }
 
@@ -136,10 +141,28 @@ public class GetSalesOrderByIdQueryHandler : IRequestHandler<GetSalesOrderByIdQu
 
         var users = await _userManager.Users.ToListAsync(cancellationToken);
 
+        var productIds = order.Details.Select(d => d.ProductId).Distinct().ToList();
+        var stockDict = await _inventoryRepository.GetAvailableStockByProductIdsAsync(productIds, cancellationToken);
+
         var details = order.Details.Select(d => {
             decimal originalQty = d.OriginalPresaleQuantity ?? d.Quantity;
-            decimal deliveredQty = d.Quantity;
-            decimal missingQty = Math.Max(0m, originalQty - deliveredQty);
+            decimal deliveredQty;
+            decimal missingQty;
+
+            if (order.Status == SalesOrderStatus.EnCamino || order.Status == SalesOrderStatus.Completado)
+            {
+                // Si ya fue despachado a EnCamino o Completado, d.Quantity es la cantidad entregada real
+                deliveredQty = d.Quantity;
+                missingQty = Math.Max(0m, originalQty - deliveredQty);
+            }
+            else
+            {
+                // Si aún está en Recibido o EnProceso, auto-calcular con base en el stock real disponible en inventario
+                decimal availableStock = stockDict.TryGetValue(d.ProductId, out var st) ? Math.Max(0m, st) : 0m;
+                deliveredQty = Math.Min(originalQty, availableStock);
+                missingQty = Math.Max(0m, originalQty - deliveredQty);
+            }
+
             return new SalesOrderDetailItemDto(
                 d.Id,
                 d.ProductId,
