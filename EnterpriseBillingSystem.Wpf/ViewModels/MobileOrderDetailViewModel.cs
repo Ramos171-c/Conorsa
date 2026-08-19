@@ -371,6 +371,15 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             return;
         }
 
+        var missingItems = Details.Where(d => d.MissingQuantity > 0 || d.DeliveredQuantity < d.Quantity).ToList();
+
+        // Si se han modificado cantidades o hay faltantes, guardar primero las modificaciones para ajustar la factura
+        if (IsOrderEdited || missingItems.Any())
+        {
+            await SaveOrderChangesAsync();
+            if (IsOrderEdited) return;
+        }
+
         var confirm = Views.Dialogs.CustomMessageBox.Show(
             $"¿Está seguro de que desea cambiar el estado del pedido a '{SelectedNewStatus}'?",
             "Actualizar Estado",
@@ -400,7 +409,7 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                 IsActionEnabled = Status.Equals("Recibido", StringComparison.OrdinalIgnoreCase);
                 OnPropertyChanged(nameof(IsStatusChangeVisible));
                 
-                _notificationService.ShowSuccess($"Estado del pedido {OrderNumber} actualizado a '{SelectedNewStatus}' exitosamente.");
+                _notificationService.ShowSuccess($"Estado del pedido {OrderNumber} actualizado a '{SelectedNewStatus}' exitosamente y ajustado en inventario.");
                 OrderActionTaken?.Invoke();
             }
             else
