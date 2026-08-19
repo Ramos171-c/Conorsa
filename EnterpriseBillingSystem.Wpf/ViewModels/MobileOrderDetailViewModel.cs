@@ -361,69 +361,75 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
     {
         if (string.IsNullOrWhiteSpace(SelectedNewStatus)) return;
 
-        if (SelectedNewStatus.Equals(Status, StringComparison.OrdinalIgnoreCase))
+        var missingItems = Details.Where(d => d.MissingQuantity > 0 || d.DeliveredQuantity < d.Quantity).ToList();
+        bool statusChanged = !SelectedNewStatus.Equals(Status, StringComparison.OrdinalIgnoreCase);
+
+        // Si el estado es el mismo Y no hay modificaciones en productos/faltantes, avisar al usuario
+        if (!statusChanged && !IsOrderEdited && !missingItems.Any())
         {
             Views.Dialogs.CustomMessageBox.Show(
-                "El pedido ya se encuentra en este estado.", 
+                "El pedido ya se encuentra en este estado y no tiene modificaciones pendientes.", 
                 "Información", 
                 MessageBoxButton.OK, 
                 MessageBoxImage.Information);
             return;
         }
 
-        var missingItems = Details.Where(d => d.MissingQuantity > 0 || d.DeliveredQuantity < d.Quantity).ToList();
-
         // Si se han modificado cantidades o hay faltantes, guardar primero las modificaciones para ajustar la factura
         if (IsOrderEdited || missingItems.Any())
         {
             await SaveOrderChangesAsync();
-            if (IsOrderEdited) return;
+            if (IsOrderEdited) return; // Si fue cancelado o falló, no continuar
         }
 
-        var confirm = Views.Dialogs.CustomMessageBox.Show(
-            $"¿Está seguro de que desea cambiar el estado del pedido a '{SelectedNewStatus}'?",
-            "Actualizar Estado",
-            MessageBoxButton.YesNo,
-            MessageBoxImage.Question);
-
-        if (confirm != MessageBoxResult.Yes) return;
-
-        IsProcessing = true;
-        try
+        // Si además el estado cambió, actualizarlo en el servidor
+        if (statusChanged)
         {
-            int statusValue = SelectedNewStatus switch
-            {
-                "Solicitud" => 1,
-                "Recibido" => 2,
-                "Anulado" => 3,
-                "EnProceso" => 4,
-                "EnCamino" => 5,
-                "Completado" => 6,
-                _ => 1
-            };
+            var confirm = Views.Dialogs.CustomMessageBox.Show(
+                $"¿Está seguro de que desea cambiar el estado del pedido a '{SelectedNewStatus}'?",
+                "Actualizar Estado",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Question);
 
-            var success = await _salesApiClient.UpdateSalesOrderStatusAsync(_order.Id, statusValue);
-            if (success)
+            if (confirm != MessageBoxResult.Yes) return;
+
+            IsProcessing = true;
+            try
             {
-                Status = SelectedNewStatus;
-                IsActionEnabled = Status.Equals("Recibido", StringComparison.OrdinalIgnoreCase);
-                OnPropertyChanged(nameof(IsStatusChangeVisible));
-                
-                _notificationService.ShowSuccess($"Estado del pedido {OrderNumber} actualizado a '{SelectedNewStatus}' exitosamente y ajustado en inventario.");
-                OrderActionTaken?.Invoke();
+                int statusValue = SelectedNewStatus switch
+                {
+                    "Solicitud" => 1,
+                    "Recibido" => 2,
+                    "Anulado" => 3,
+                    "EnProceso" => 4,
+                    "EnCamino" => 5,
+                    "Completado" => 6,
+                    _ => 1
+                };
+
+                var success = await _salesApiClient.UpdateSalesOrderStatusAsync(_order.Id, statusValue);
+                if (success)
+                {
+                    Status = SelectedNewStatus;
+                    IsActionEnabled = Status.Equals("Recibido", StringComparison.OrdinalIgnoreCase);
+                    OnPropertyChanged(nameof(IsStatusChangeVisible));
+                    
+                    _notificationService.ShowSuccess($"Estado del pedido {OrderNumber} actualizado a '{SelectedNewStatus}' exitosamente.");
+                    OrderActionTaken?.Invoke();
+                }
+                else
+                {
+                    _notificationService.ShowError("Error al actualizar el estado del pedido.");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                _notificationService.ShowError("Error al actualizar el estado del pedido.");
+                _notificationService.ShowError($"Error al actualizar estado del pedido: {ex.Message}");
             }
-        }
-        catch (Exception ex)
-        {
-            _notificationService.ShowError($"Error al actualizar estado del pedido: {ex.Message}");
-        }
-        finally
-        {
-            IsProcessing = false;
+            finally
+            {
+                IsProcessing = false;
+            }
         }
     }
 

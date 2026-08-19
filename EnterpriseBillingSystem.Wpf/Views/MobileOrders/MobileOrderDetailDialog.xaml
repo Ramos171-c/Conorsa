@@ -444,15 +444,27 @@
                 </Button>
             </StackPanel>
 
-            <!-- Status Update Panel (visible for non-finalized states) -->
-            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center" 
-                        Visibility="{Binding IsStatusChangeVisible, Converter={StaticResource BoolToVis}}">
-                <TextBlock Text="Estado: " VerticalAlignment="Center" Margin="0,0,6,0" FontSize="13" />
-                <ComboBox ItemsSource="{Binding AvailableStatuses}" SelectedItem="{Binding SelectedNewStatus}" 
-                          Width="120" Margin="0,0,6,0" />
-                <Button Command="{Binding UpdateStatusCommand}" 
+            <!-- Status Update Panel & Save Changes -->
+            <StackPanel Grid.Column="2" Orientation="Horizontal" HorizontalAlignment="Center">
+                <Button Command="{Binding SaveOrderChangesCommand}" 
                         Style="{StaticResource MaterialDesignRaisedButton}" 
-                        Content="Actualizar" />
+                        Background="#2E7D32" BorderBrush="#2E7D32"
+                        Margin="0,0,12,0"
+                        ToolTip="Guarda los ajustes de cantidades entregadas y faltantes en la factura">
+                    <StackPanel Orientation="Horizontal">
+                        <materialDesign:PackIcon Kind="ContentSave" Width="18" Height="18" Margin="0,0,6,0" VerticalAlignment="Center" />
+                        <TextBlock Text="Guardar Cambios" VerticalAlignment="Center" />
+                    </StackPanel>
+                </Button>
+
+                <StackPanel Orientation="Horizontal" Visibility="{Binding IsStatusChangeVisible, Converter={StaticResource BoolToVis}}">
+                    <TextBlock Text="Estado: " VerticalAlignment="Center" Margin="0,0,6,0" FontSize="13" />
+                    <ComboBox ItemsSource="{Binding AvailableStatuses}" SelectedItem="{Binding SelectedNewStatus}" 
+                              Width="120" Margin="0,0,6,0" />
+                    <Button Command="{Binding UpdateStatusCommand}" 
+                            Style="{StaticResource MaterialDesignRaisedButton}" 
+                            Content="Actualizar" />
+                </StackPanel>
             </StackPanel>
 
             <!-- Close Button & Print Ticket -->
