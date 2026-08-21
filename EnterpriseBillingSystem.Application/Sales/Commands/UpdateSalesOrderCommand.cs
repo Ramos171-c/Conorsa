@@ -130,8 +130,14 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         decimal totalTax = 0;
 
         // 3.1 Eliminar detalles que ya no vienen en la solicitud
-        var requestedProductIds = request.Details.Select(d => d.ProductId).ToList();
-        var detailsToRemove = order.Details.Where(d => !requestedProductIds.Contains(d.ProductId)).ToList();
+        // IMPORTANTE: se compara por ProductId + UnitOfMeasureId para soportar el mismo
+        // producto en dos presentaciones distintas dentro del mismo pedido.
+        var requestedKeys = request.Details
+            .Select(d => (d.ProductId, d.UnitOfMeasureId))
+            .ToHashSet();
+        var detailsToRemove = order.Details
+            .Where(d => !requestedKeys.Contains((d.ProductId, d.UnitOfMeasureId)))
+            .ToList();
         foreach (var detail in detailsToRemove)
         {
             _salesOrderDetailRepository.Remove(detail);
@@ -159,7 +165,8 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
             totalDiscount += discountAmount;
             totalTax += taxAmount;
 
-            var existingDetail = order.Details.FirstOrDefault(d => d.ProductId == req.ProductId);
+            var existingDetail = order.Details.FirstOrDefault(d =>
+                d.ProductId == req.ProductId && d.UnitOfMeasureId == req.UnitOfMeasureId);
             if (existingDetail != null)
             {
                 existingDetail.UnitOfMeasureId = req.UnitOfMeasureId;
@@ -173,20 +180,23 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
             }
             else
             {
-                order.Details.Add(new SalesOrderDetail
+                var newDetail = new SalesOrderDetail
                 {
                     Id = Guid.NewGuid(),
                     SalesOrderId = order.Id,
                     ProductId = req.ProductId,
                     UnitOfMeasureId = req.UnitOfMeasureId,
                     Quantity = req.Quantity,
+                    OriginalPresaleQuantity = req.Quantity,
                     UnitPrice = req.UnitPrice,
                     DiscountPercentage = req.DiscountPercentage,
                     DiscountAmount = discountAmount,
                     TaxPercentage = effectiveTaxPct,
                     TaxAmount = taxAmount,
                     NetAmount = netAmount
-                });
+                };
+                await _salesOrderDetailRepository.AddAsync(newDetail);
+                order.Details.Add(newDetail);
             }
         }
 
