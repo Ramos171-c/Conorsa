@@ -178,11 +178,24 @@ public class CatalogController : ApiControllerBase
                                     var webRoot = env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot");
                                     var localImagePath = Path.Combine(webRoot, relativePath.TrimStart('/'));
                                     
-                                    var transparentImageBytes = MakeBackgroundTransparent(localImagePath);
-                                    column.Item()
-                                        .AlignCenter()
-                                        .Height(430) // Imagen significativamente más grande (hasta 430pt de alto)
-                                        .Image(transparentImageBytes, ImageScaling.FitArea);
+                                    byte[] imageBytes;
+                                    if (System.IO.File.Exists(localImagePath))
+                                    {
+                                        imageBytes = System.IO.File.ReadAllBytes(localImagePath);
+                                    }
+                                    else
+                                    {
+                                        var defaultImg = Path.Combine(webRoot, "uploads", "products", "default-product.png");
+                                        imageBytes = System.IO.File.Exists(defaultImg) ? System.IO.File.ReadAllBytes(defaultImg) : Array.Empty<byte>();
+                                    }
+
+                                    if (imageBytes.Length > 0)
+                                    {
+                                        column.Item()
+                                            .AlignCenter()
+                                            .Height(430)
+                                            .Image(imageBytes, ImageScaling.FitArea);
+                                    }
 
                                     if (prodIdx < prodArray.Length - 1 || catIdx < categories.Length - 1)
                                     {
