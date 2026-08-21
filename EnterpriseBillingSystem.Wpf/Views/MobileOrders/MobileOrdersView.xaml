@@ -355,7 +355,7 @@
                                                           <materialDesign:PackIcon Kind="CheckCircleOutline" Width="16" Height="16" Foreground="#2E7D32" />
                                                       </Button>
  
-                                                      <!-- Cancel Button (Visible if Recibido or EnProceso) -->
+                                                      <!-- Cancel Button (Visible if Recibido, EnProceso or EnCamino) -->
                                                       <Button Command="{Binding DataContext.CancelOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                                               CommandParameter="{Binding}" 
                                                               ToolTip="Anular Pedido" Width="30" Height="30" Padding="0" Margin="0,0,4,0">
@@ -367,6 +367,9 @@
                                                                           <Setter Property="Visibility" Value="Visible" />
                                                                       </DataTrigger>
                                                                       <DataTrigger Binding="{Binding Status}" Value="EnProceso">
+                                                                          <Setter Property="Visibility" Value="Visible" />
+                                                                      </DataTrigger>
+                                                                      <DataTrigger Binding="{Binding Status}" Value="EnCamino">
                                                                           <Setter Property="Visibility" Value="Visible" />
                                                                       </DataTrigger>
                                                                   </Style.Triggers>

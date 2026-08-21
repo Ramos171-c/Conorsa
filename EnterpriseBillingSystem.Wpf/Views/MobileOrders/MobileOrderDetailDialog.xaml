@@ -371,8 +371,8 @@
                 <Button Command="{Binding CancelOrderCommand}" 
                         Style="{StaticResource MaterialDesignRaisedButton}" 
                         Background="#C62828" BorderBrush="#C62828" 
-                        IsEnabled="{Binding IsActionEnabled}"
-                        Visibility="{Binding IsActionEnabled, Converter={StaticResource BoolToVis}}"
+                        IsEnabled="{Binding CanCancelOrder}"
+                        Visibility="{Binding CanCancelOrder, Converter={StaticResource BoolToVis}}"
                         Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Cancel" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />

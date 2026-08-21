@@ -312,10 +312,13 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
         }
     }
 
+    public bool CanCancelOrder => !Status.Equals("Anulado", StringComparison.OrdinalIgnoreCase) && 
+                                  !Status.Equals("Completado", StringComparison.OrdinalIgnoreCase);
+
     [RelayCommand]
     private async Task CancelOrderAsync()
     {
-        if (!IsActionEnabled) return;
+        if (!CanCancelOrder) return;
 
         var input = Views.Dialogs.CustomInputDialog.Show(
             "Escriba el motivo de la anulación del pedido:",
