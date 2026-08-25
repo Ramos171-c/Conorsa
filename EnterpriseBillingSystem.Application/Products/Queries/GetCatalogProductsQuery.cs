@@ -46,8 +46,8 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
             if (user != null)
             {
                 isVendedor = await _userManager.IsInRoleAsync(user, "VENDEDOR");
-                isCostSeller = isVendedor && user.SellerCategory == Domain.Enums.SellerCategory.Cost;
-                isDetailSeller = isVendedor && user.SellerCategory == Domain.Enums.SellerCategory.Detail;
+                isCostSeller = user.SellerCategory == Domain.Enums.SellerCategory.Cost;
+                isDetailSeller = user.SellerCategory == Domain.Enums.SellerCategory.Detail;
             }
         }
 
