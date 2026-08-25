@@ -62,23 +62,27 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
 
   // Show Product Presentation & Qty selector dialog
   void _showAddProductDialog(Product product) {
-    if (product.presentations.isEmpty) {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final isCostSeller = auth.userProfile?.isCostSeller == true;
+
+    final availablePresentations = isCostSeller
+        ? product.presentations
+        : product.presentations.where((p) => p.allowDetailChannel).toList();
+
+    if (availablePresentations.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Este producto no tiene presentaciones configuradas.'),
+          content: Text('Este producto no tiene presentaciones disponibles para su canal de venta.'),
           backgroundColor: Colors.orange,
         ),
       );
       return;
     }
 
-    // Default select first presentation
-    ProductPresentation selectedPresentation = product.presentations.first;
+    // Default select first available presentation
+    ProductPresentation selectedPresentation = availablePresentations.first;
     double quantity = 1.0;
     final qtyController = TextEditingController(text: '1');
-
-    final auth = Provider.of<AuthProvider>(context, listen: false);
-    final isCostSeller = auth.userProfile?.isCostSeller == true;
 
     showDialog(
       context: context,
@@ -86,7 +90,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
         return StatefulBuilder(
           builder: (context, setDialogState) {
             final price = isCostSeller
-                ? selectedPresentation.cost
+                ? selectedPresentation.costSellerPrice
                 : (selectedPresentation.retailPrice > 0 
                     ? selectedPresentation.retailPrice 
                     : product.defaultSalePrice);
@@ -103,9 +107,9 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
                     DropdownButton<ProductPresentation>(
                       value: selectedPresentation,
                       isExpanded: true,
-                      items: product.presentations.map((p) {
+                      items: availablePresentations.map((p) {
                         final pPrice = isCostSeller
-                            ? p.cost
+                            ? p.costSellerPrice
                             : (p.retailPrice > 0 ? p.retailPrice : product.defaultSalePrice);
                         return DropdownMenuItem(
                           value: p,
@@ -461,6 +465,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
     final authProv = Provider.of<AuthProvider>(context, listen: false);
     final isCostSeller = authProv.userProfile?.isCostSeller == true;
 
+    final availableProducts = isCostSeller
+        ? provider.products
+        : provider.products.where((p) => !p.isCostChannelOnly).toList();
+
     return Container(
       color: const Color(0xFFF8FAFC),
       padding: const EdgeInsets.all(16.0),
@@ -478,14 +486,14 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
           ),
           const SizedBox(height: 16),
           Expanded(
-            child: provider.isLoading && provider.products.isEmpty
+            child: provider.isLoading && availableProducts.isEmpty
                 ? const Center(child: CircularProgressIndicator())
-                : provider.products.isEmpty
+                : availableProducts.isEmpty
                     ? const Center(child: Text('No se encontraron productos.'))
                     : ListView.builder(
-                        itemCount: provider.products.length,
+                        itemCount: availableProducts.length,
                         itemBuilder: (context, index) {
-                          final product = provider.products[index];
+                          final product = availableProducts[index];
 
                           return Card(
                             shape: RoundedRectangleBorder(
@@ -512,7 +520,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
                                 children: [
                                   Text('SKU: ${product.internalCode}'),
                                   Text(isCostSeller
-                                      ? 'Precio costo: \$${product.defaultCost.toStringAsFixed(2)}'
+                                      ? 'Precio costo (+2%): \$${product.defaultCostSellerPrice.toStringAsFixed(2)}'
                                       : 'Precio base: \$${product.defaultSalePrice.toStringAsFixed(2)}'),
                                   Text('Presentaciones: ${product.presentations.length}'),
                                 ],

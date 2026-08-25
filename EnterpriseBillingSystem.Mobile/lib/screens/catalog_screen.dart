@@ -51,10 +51,15 @@ class _CatalogScreenState extends State<CatalogScreen> {
     // Responsive Column count: 3 on tablets (width > 600), 2 on phones
     final columns = width > 600 ? 3 : 2;
 
+    final isCostSeller = auth.isLoggedIn && auth.userProfile?.isCostSeller == true;
+    final availableProducts = isCostSeller
+        ? provider.products
+        : provider.products.where((p) => !p.isCostChannelOnly).toList();
+
     // Filter products locally by selected category
     final filteredProducts = _selectedCategoryId == null
-        ? provider.products
-        : provider.products.where((p) => p.categoryId == _selectedCategoryId).toList();
+        ? availableProducts
+        : availableProducts.where((p) => p.categoryId == _selectedCategoryId).toList();
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8FAFC),

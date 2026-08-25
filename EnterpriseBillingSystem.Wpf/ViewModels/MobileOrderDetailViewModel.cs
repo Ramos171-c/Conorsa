@@ -641,7 +641,7 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             {
                 PagePadding = new Thickness(15, 10, 15, 10),
                 ColumnWidth = double.PositiveInfinity,
-                FontFamily = new System.Windows.Media.FontFamily("Consolas"),
+                FontFamily = new System.Windows.Media.FontFamily("Segoe UI, Arial"),
                 FontSize = 12,
                 FontWeight = FontWeights.Bold,
                 Foreground = System.Windows.Media.Brushes.Black,

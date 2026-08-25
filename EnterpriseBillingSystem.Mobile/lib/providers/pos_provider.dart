@@ -288,7 +288,7 @@ class PosProvider extends ChangeNotifier {
       _subtotalCommercial = 0.0;
 
       for (var item in _cart) {
-        double price = item.manualPriceOverride ?? item.presentation.cost;
+        double price = item.manualPriceOverride ?? item.presentation.costSellerPrice;
         item.unitPriceDisplayed = price;
         item.discountPercentage = 0.0;
         item.lineTotal = price * item.quantity;

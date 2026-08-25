@@ -13,22 +13,26 @@ class ProductDetailScreen extends StatelessWidget {
   // Presentation selector for logged-in salespeople
   void _showSalespersonAddDialog(BuildContext context) {
     final provider = Provider.of<OrderProvider>(context, listen: false);
-    if (product.presentations.isEmpty) {
+    final auth = Provider.of<AuthProvider>(context, listen: false);
+    final isCostSeller = auth.userProfile?.isCostSeller == true;
+
+    final availablePresentations = isCostSeller
+        ? product.presentations
+        : product.presentations.where((p) => p.allowDetailChannel).toList();
+
+    if (availablePresentations.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Este producto no tiene presentaciones configuradas.'),
+          content: Text('Este producto no tiene presentaciones disponibles para su canal de venta.'),
           backgroundColor: Colors.orange,
         ),
       );
       return;
     }
 
-    ProductPresentation selectedPresentation = product.presentations.first;
+    ProductPresentation selectedPresentation = availablePresentations.first;
     double quantity = 1.0;
     final qtyController = TextEditingController(text: '1');
-
-    final auth = Provider.of<AuthProvider>(context, listen: false);
-    final isCostSeller = auth.userProfile?.isCostSeller == true;
 
     showDialog(
       context: context,
@@ -36,7 +40,7 @@ class ProductDetailScreen extends StatelessWidget {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             final price = isCostSeller
-                ? selectedPresentation.cost
+                ? selectedPresentation.costSellerPrice
                 : (selectedPresentation.retailPrice > 0 
                     ? selectedPresentation.retailPrice 
                     : product.defaultSalePrice);
@@ -52,9 +56,9 @@ class ProductDetailScreen extends StatelessWidget {
                   DropdownButton<ProductPresentation>(
                     value: selectedPresentation,
                     isExpanded: true,
-                    items: product.presentations.map((p) {
+                    items: availablePresentations.map((p) {
                       final pPrice = isCostSeller
-                          ? p.cost
+                          ? p.costSellerPrice
                           : (p.retailPrice > 0 ? p.retailPrice : product.defaultSalePrice);
                       final conversionText = p.conversionFactor > 1 
                           ? ' (${p.conversionFactor.toInt()} ${p.unitOfMeasureCode})' 

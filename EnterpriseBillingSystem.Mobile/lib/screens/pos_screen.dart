@@ -125,10 +125,10 @@ class _PosScreenState extends State<PosScreen> {
     final qtyController = TextEditingController(text: '1');
 
     // Calculate initial price based on level and category
-    double initialPrice = isCostSeller ? selectedPresentation.cost : selectedPresentation.retailPrice;
+    double initialPrice = isCostSeller ? selectedPresentation.costSellerPrice : selectedPresentation.retailPrice;
     if (!isCostSeller) {
       if (posProv.currentLevel == 'COSTO') {
-        initialPrice = selectedPresentation.cost;
+        initialPrice = selectedPresentation.costSellerPrice;
       } else if (posProv.currentLevel == 'MAYORISTA') {
         initialPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
       } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
@@ -178,10 +178,10 @@ class _PosScreenState extends State<PosScreen> {
                           selectedPresentation = val;
                           
                           // Recalculate price
-                          double newPrice = isCostSeller ? selectedPresentation.cost : selectedPresentation.retailPrice;
+                          double newPrice = isCostSeller ? selectedPresentation.costSellerPrice : selectedPresentation.retailPrice;
                           if (!isCostSeller) {
                             if (posProv.currentLevel == 'COSTO') {
-                              newPrice = selectedPresentation.cost;
+                              newPrice = selectedPresentation.costSellerPrice;
                             } else if (posProv.currentLevel == 'MAYORISTA') {
                               newPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
                             } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
@@ -1519,7 +1519,7 @@ class _PosScreenState extends State<PosScreen> {
     );
 
     if (level == 'COSTO') {
-      return presentation.cost;
+      return presentation.costSellerPrice;
     } else if (level == 'MAYORISTA') {
       return presentation.wholesalePrice > 0 
           ? presentation.wholesalePrice 

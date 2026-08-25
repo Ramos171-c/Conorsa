@@ -1657,6 +1657,26 @@ END
             new("CA063", "Md 000Md GELATINA BASO SANTA CLAUSS", "Caramelos", "1*6*100", 6, 216.67m, 1300.00m, 216.67m, 1300.00m, 216.67m, 1300.00m, CostUnit: 216.67m, CostBox: 1300.00m, IsCostOnly: true),
             new("CA064", "Md 000Md BASTON NAVIDEÑO", "Caramelos", "1*10*60", 10, 188.00m, 1880.00m, 188.00m, 1880.00m, 188.00m, 1880.00m, CostUnit: 188.00m, CostBox: 1880.00m, IsCostOnly: true),
             new("CA065", "Md 000Md GELATINA PRESTIGE FUN JELLY ZOMBIE", "Caramelos", "1*12*20", 12, 158.33m, 1900.00m, 158.33m, 1900.00m, 158.33m, 1900.00m, CostUnit: 158.33m, CostBox: 1900.00m, IsCostOnly: true),
+            new("CA066", "BUBBLE GUM ASORTED FRUIT GUM BALLS", "Caramelos", "1*12*125", 12, 154.17m, 1850.00m, 154.17m, 1850.00m, 154.17m, 1850.00m, CostUnit: 154.17m, CostBox: 1850.00m, IsCostOnly: true),
+            new("CA067", "BUBBLE GUM FRUIT FLAVOR FRESA", "Caramelos", "1*12*50", 12, 146.67m, 1760.00m, 146.67m, 1760.00m, 146.67m, 1760.00m, CostUnit: 146.67m, CostBox: 1760.00m, IsCostOnly: true),
+            new("CA068", "BUBBLE GUM FRUIT FLAVOR OJO", "Caramelos", "1*12*50", 12, 146.67m, 1760.00m, 146.67m, 1760.00m, 146.67m, 1760.00m, CostUnit: 146.67m, CostBox: 1760.00m, IsCostOnly: true),
+            new("CA069", "BUBBLE GUM FRUIT FLAVOR BALON.", "Caramelos", "1*12*50", 12, 146.67m, 1760.00m, 146.67m, 1760.00m, 146.67m, 1760.00m, CostUnit: 146.67m, CostBox: 1760.00m, IsCostOnly: true),
+            new("CA070", "CHICLE TARRO STRAWBERRY 4GR.", "Caramelos", "1*24*100", 24, 57.08m, 1370.00m, 57.08m, 1370.00m, 57.08m, 1370.00m, CostUnit: 57.08m, CostBox: 1370.00m, IsCostOnly: true),
+            new("CA071", "MD 000MD 516 SUPER ICE COLD GUM", "Caramelos", "1*20*30", 20, 115.00m, 2300.00m, 115.00m, 2300.00m, 115.00m, 2300.00m, CostUnit: 115.00m, CostBox: 2300.00m, IsCostOnly: true),
+            new("CA072", "HAPPY POP FRIES OR PIZZA", "Caramelos", "1*12*50", 12, 108.33m, 1300.00m, 108.33m, 1300.00m, 108.33m, 1300.00m, CostUnit: 108.33m, CostBox: 1300.00m, IsCostOnly: true),
+            new("CA073", "HOPPIN ANIMAL KINGDOM PALETA", "Caramelos", "1*12", 12, 108.42m, 1301.00m, 108.42m, 1301.00m, 108.42m, 1301.00m, CostUnit: 108.42m, CostBox: 1301.00m, IsCostOnly: true),
+            new("CA074", "DOUBLE DECKER CHOCOLATE CHOCOPARTY", "Caramelos", "1*24*16", 24, 111.67m, 2680.00m, 111.67m, 2680.00m, 111.67m, 2680.00m, CostUnit: 111.67m, CostBox: 2680.00m, IsCostOnly: true),
+            new("CA075", "SOLID HEART CHOCOLATE GIFT BOX CHOCOPARTY", "Caramelos", "1*48*3", 48, 28.13m, 1350.00m, 28.13m, 1350.00m, 28.13m, 1350.00m, CostUnit: 28.13m, CostBox: 1350.00m, IsCostOnly: true),
+            new("CA076", "CHOCOPARTY", "Caramelos", "1*12*24", 12, 166.67m, 2000.00m, 166.67m, 2000.00m, 166.67m, 2000.00m, CostUnit: 166.67m, CostBox: 2000.00m, IsCostOnly: true),
+            new("CA077", "BUCKET CHOCOPARTY", "Caramelos", "1*12*12", 12, 100.00m, 1200.00m, 100.00m, 1200.00m, 100.00m, 1200.00m, CostUnit: 100.00m, CostBox: 1200.00m, IsCostOnly: true),
+            new("CA078", "SOLID HEART CHOCOLATE CHOCOPARTY", "Caramelos", "1*48*5", 48, 39.58m, 1900.00m, 39.58m, 1900.00m, 39.58m, 1900.00m, CostUnit: 39.58m, CostBox: 1900.00m, IsCostOnly: true),
+            new("CA079", "SOLID HEART CHOCOLATE GIFT CHOCOPARTY", "Caramelos", "1*24*6", 24, 54.17m, 1300.00m, 54.17m, 1300.00m, 54.17m, 1300.00m, CostUnit: 54.17m, CostBox: 1300.00m, IsCostOnly: true),
+            new("CA080", "TARRO WHITE CHOCOLATE BALL CHOCOPARTY", "Caramelos", "1*6*100", 6, 450.00m, 2700.00m, 450.00m, 2700.00m, 450.00m, 2700.00m, CostUnit: 450.00m, CostBox: 2700.00m, IsCostOnly: true),
+            new("CA081", "SOLID HEART CHOCOLATE GIFT CHOCOPARTY", "Caramelos", "1*24*8", 24, 75.00m, 1800.00m, 75.00m, 1800.00m, 75.00m, 1800.00m, CostUnit: 75.00m, CostBox: 1800.00m, IsCostOnly: true),
+            new("CA082", "AILESI CHOCOLATE LOVE YOU HEAT 60GR.", "Caramelos", "1*24", 24, 55.00m, 1320.00m, 55.00m, 1320.00m, 55.00m, 1320.00m, CostUnit: 55.00m, CostBox: 1320.00m, IsCostOnly: true),
+            new("CA083", "SQUARE GIFT BOX CHOCOLATE", "Caramelos", "1*36*8", 36, 67.78m, 2440.00m, 67.78m, 2440.00m, 67.78m, 2440.00m, CostUnit: 67.78m, CostBox: 2440.00m, IsCostOnly: true),
+            new("CA084", "COD 1313 RAMO DE CHOCOLATE", "Caramelos", "1*48*6", 48, 105.21m, 5050.00m, 105.21m, 5050.00m, 105.21m, 5050.00m, CostUnit: 105.21m, CostBox: 5050.00m, IsCostOnly: true),
+            new("CA085", "SOLID HEART CHOCOLATE GIFT CHOCOPARTY", "Caramelos", "1*12*15", 12, 166.67m, 2000.00m, 166.67m, 2000.00m, 166.67m, 2000.00m, CostUnit: 166.67m, CostBox: 2000.00m, IsCostOnly: true),
 
             // Malvaviscos (15)
             new("MA001", "BOLSA CANDY SUPLAYER MALVAVISCO SUPER MINI MINO", "Malvaviscos", "1*8*70", 8, 252.00m, 2016.00m, 205.88m, 1647.06m, 214.77m, 1718.18m, 175.00m, 1400.00m),
@@ -1696,6 +1716,7 @@ END
             new("TA012", "PAÑAL LUCAS SUPER SET.TALLAS; S,M,L,XL,XXL", "Toallas y Otros", "1*4*50", 4, 304.88m, 1219.51m, 287.36m, 1149.43m, 277.78m, 1111.11m, 250.00m, 1000.00m),
             new("TA013", "PAPEL HIGIENICO ROBELLY 1620 HOJAS", "Toallas y Otros", "1*12", 12, 23.82m, 285.88m, 21.55m, 258.62m, 23.01m, 276.12m, 18.75m, 225.00m),
             new("TA014", "TOALLAS HUMEDAS FAMILYS ROBELLY 120 HOJAS", "Toallas y Otros", "1*12", 12, 74.12m, 889.41m, 67.05m, 804.60m, 71.59m, 859.09m, CostUnit: 58.33m, CostBox: 700.00m),
+            new("TO041", "TOALLAS HUMEDAS MOMMY BEAR 120 HOJAS", "Toallas y Otros", "1*12*120", 12, 58.33m, 700.00m, 58.33m, 700.00m, 58.33m, 700.00m, CostUnit: 58.33m, CostBox: 700.00m, IsCostOnly: true),
         };
 
         foreach (var data in productsData)
@@ -1732,6 +1753,8 @@ END
                     basePres.RetailPrice = data.RetailUnit;
                     basePres.SemiWholesalePrice = data.SemiUnit;
                     basePres.WholesalePrice = data.WholesaleUnit;
+                    basePres.AllowDetailChannel = !data.IsCostOnly;
+                    basePres.AllowCostChannel = true;
                     if (data.CostUnit.HasValue) basePres.Cost = data.CostUnit.Value;
                 }
 
@@ -1742,6 +1765,8 @@ END
                     boxPres.RetailPrice = data.RetailBox;
                     boxPres.SemiWholesalePrice = data.SemiBox;
                     boxPres.WholesalePrice = data.WholesaleBox;
+                    boxPres.AllowDetailChannel = !data.IsCostOnly;
+                    boxPres.AllowCostChannel = true;
                     if (data.CostBox.HasValue) boxPres.Cost = data.CostBox.Value;
                 }
                 else if (data.BoxFactor > 1)

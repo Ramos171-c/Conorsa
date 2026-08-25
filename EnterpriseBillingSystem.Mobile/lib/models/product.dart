@@ -18,6 +18,7 @@ class ProductPresentation {
   final bool isActive;
 
   bool get isExclusiveCostChannel => allowCostChannel && !allowDetailChannel;
+  double get costSellerPrice => double.parse((cost * 1.02).toStringAsFixed(2));
 
   ProductPresentation({
     required this.id,
@@ -111,6 +112,8 @@ class Product {
     return def.cost;
   }
 
+  double get defaultCostSellerPrice => double.parse((defaultCost * 1.02).toStringAsFixed(2));
+
   bool get isCostChannelOnly {
     // 1. If explicitly set via database flags on presentation
     if (presentations.any((p) => p.isExclusiveCostChannel)) {
@@ -124,10 +127,13 @@ class Product {
 
     const exclusiveSkus = {
       'CA052', 'CA053', 'CA054', 'CA055', 'CA056', 'CA057', 'CA058', 'CA059', 'CA060',
-      'CA061', 'CA062', 'CA063', 'CA064', 'CA065',
+      'CA061', 'CA062', 'CA063', 'CA064', 'CA065', 'CA066', 'CA067', 'CA068', 'CA069',
+      'CA070', 'CA071', 'CA072', 'CA073', 'CA074', 'CA075', 'CA076', 'CA077', 'CA078',
+      'CA079', 'CA080', 'CA081', 'CA082', 'CA083', 'CA084', 'CA085',
       'MA016', 'MA017', 'MA018', 'MA019',
       'GA043', 'GA044', 'GA045', 'GA046', 'GA047', 'GA048', 'GA049', 'GA050', 'GA051',
-      'GA052', 'GA053', 'GA054', 'GA055', 'GA056', 'GA057'
+      'GA052', 'GA053', 'GA054', 'GA055', 'GA056', 'GA057',
+      'TO041'
     };
 
     if (exclusiveSkus.contains(code)) {
@@ -161,7 +167,21 @@ class Product {
       'CHICLE ESPADA',
       'GELATINA BASO SANTA CLAUSS',
       'BASTON NAVIDEÑO',
-      'FUN JELLY ZOMBIE'
+      'FUN JELLY ZOMBIE',
+      'ASORTED FRUIT GUM BALLS',
+      'FRUIT FLAVOR FRESA',
+      'FRUIT FLAVOR OJO',
+      'FRUIT FLAVOR BALON',
+      'TARRO STRAWBERRY',
+      'SUPER ICE COLD GUM',
+      'HAPPY POP FRIES',
+      'HOPPIN ANIMAL KINGDOM',
+      'DOUBLE DECKER CHOCOLATE',
+      'CHOCOPARTY',
+      'BUCKET CHOCOPARTY',
+      'AILESI CHOCOLATE',
+      'SQUARE GIFT BOX',
+      'RAMO DE CHOCOLATE'
     ];
 
     for (var n in exclusiveNames) {

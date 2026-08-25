@@ -11,10 +11,10 @@ public class PriceResolverService : IPriceResolverService
     {
         if (presentation == null) throw new ArgumentNullException(nameof(presentation));
 
-        // Regla 1: Vendedor Costo -> Utiliza exclusivamente ProductPresentation.Cost
+        // Regla 1: Vendedor Costo -> Utiliza exclusivamente ProductPresentation.Cost + 2% lineal
         if (sellerCategory == SellerCategory.Cost)
         {
-            return presentation.Cost;
+            return Math.Round(presentation.Cost * 1.02m, 2);
         }
 
         // Regla 2: Vendedor Detalle -> Evalúa el tipo de cliente (Retail, SemiWholesale, Wholesale)

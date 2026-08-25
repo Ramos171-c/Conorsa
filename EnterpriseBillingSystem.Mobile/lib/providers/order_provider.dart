@@ -339,7 +339,7 @@ class OrderProvider extends ChangeNotifier {
       updateQuantity(product.id, presentation.unitOfMeasureId, newQty);
     } else {
       double calculatedPrice = isCostSeller 
-          ? presentation.cost 
+          ? presentation.costSellerPrice 
           : (presentation.retailPrice > 0 ? presentation.retailPrice : product.defaultSalePrice);
 
       // Add new item

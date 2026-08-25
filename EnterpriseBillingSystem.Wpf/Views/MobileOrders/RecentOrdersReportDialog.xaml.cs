@@ -403,7 +403,7 @@ namespace EnterpriseBillingSystem.Wpf.Views.MobileOrders
                 {
                     PagePadding = new System.Windows.Thickness(15, 10, 15, 10),
                     ColumnWidth = double.PositiveInfinity,
-                    FontFamily = new System.Windows.Media.FontFamily("Consolas"),
+                    FontFamily = new System.Windows.Media.FontFamily("Segoe UI, Arial"),
                     FontSize = 11,
                     FontWeight = System.Windows.FontWeights.Bold,
                     Foreground = System.Windows.Media.Brushes.Black,

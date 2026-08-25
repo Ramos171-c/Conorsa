@@ -25,7 +25,8 @@ public class CatalogController : ApiControllerBase
         var result = await Mediator.Send(new GetCatalogProductsQuery());
         var filteredResult = result.Where(p => p.Name != null && p.IsCatalogVisible && p.IsActive &&
             !p.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
-            !(p.CategoryName != null && p.CategoryName.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)));
+            !(p.CategoryName != null && p.CategoryName.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)) &&
+            !p.Presentations.Any(pres => pres.AllowCostChannel && !pres.AllowDetailChannel));
         
         // Build absolute URL for ImagePath
         var baseUri = $"{Request.Scheme}://{Request.Host}{Request.PathBase}";
@@ -60,6 +61,7 @@ public class CatalogController : ApiControllerBase
                 .Where(p => p.Name != null && p.IsCatalogVisible && p.IsActive &&
                             !p.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
                             !(p.CategoryName != null && p.CategoryName.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)) &&
+                            !p.Presentations.Any(pres => pres.AllowCostChannel && !pres.AllowDetailChannel) &&
                             HasValidImage(p, env));
                 
             if (categoryId.HasValue)
