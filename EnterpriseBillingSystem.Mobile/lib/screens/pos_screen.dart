@@ -1511,7 +1511,7 @@ class _PosScreenState extends State<PosScreen> {
 
   double _getProductPriceForLevel(Product product, String level) {
     if (product.presentations.isEmpty) {
-      return level == 'COSTO' ? 0.0 : product.defaultSalePrice;
+      return level == 'COSTO' ? product.defaultCostSellerPrice : product.defaultSalePrice;
     }
     final presentation = product.presentations.firstWhere(
       (pres) => pres.isDefaultSalePresentation,
