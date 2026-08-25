@@ -156,8 +156,8 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
             ).ToList();
         }
 
-        // 2. Filtrar productos del canal Costo si el vendedor es de tipo Detalle
-        if (isDetailSeller)
+        // 2. Filtrar productos del canal Costo si el vendedor NO es de tipo Costo
+        if (!isCostSeller)
         {
             dtos = dtos.Where(dto => !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel)).ToList();
         }
