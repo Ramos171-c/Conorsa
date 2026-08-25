@@ -143,7 +143,7 @@ class Product {
     final upperDesc = (description ?? '').toUpperCase().trim();
 
     const exclusiveSkus = {
-      'CA045', 'CA046', 'CA047', 'CA048', 'CA049', 'CA050', 'CA051', 'CA052', 'CA053',
+      'CA052', 'CA053',
       'CA054', 'CA055', 'CA056', 'CA057', 'CA058', 'CA059', 'CA060', 'CA061', 'CA062',
       'CA063', 'CA064', 'CA065', 'CA066', 'CA067', 'CA068', 'CA069', 'CA070', 'CA071',
       'CA072', 'CA073', 'CA074', 'CA075', 'CA076', 'CA077', 'CA078', 'CA079', 'CA080',
