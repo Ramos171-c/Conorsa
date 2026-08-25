@@ -215,8 +215,10 @@ class Product {
     final nameUpper = name.toUpperCase();
     final codeUpper = internalCode.toUpperCase();
     
-    // Hide assorted ("surtido") codes
-    if (nameUpper.contains('SURTIDO') || codeUpper.contains('SURTIDO')) {
+    // Only hide internal SURTIDO system codes (e.g. codes that literally start with "SURTIDO")
+    // Products whose NAME contains "SURTIDO" (like TALCO SURTIDO, BOTELLA DE CHICLE SURTIDO)
+    // are legitimate and must NOT be filtered out.
+    if (codeUpper.startsWith('SURTIDO')) {
       return false;
     }
     
