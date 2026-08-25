@@ -87,7 +87,7 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
                         Name: pr.Name,
                         ConversionFactor: pr.ConversionFactor,
                         Barcode: pr.Barcode,
-                        Cost: pr.Cost,
+                        Cost: costSellerPrice,
                         RetailPrice: isCostSeller ? costSellerPrice : pr.RetailPrice,
                         SemiWholesalePrice: isCostSeller ? costSellerPrice : pr.SemiWholesalePrice,
                         WholesalePrice: isCostSeller ? costSellerPrice : pr.WholesalePrice,

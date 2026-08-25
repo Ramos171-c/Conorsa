@@ -18,7 +18,15 @@ class ProductPresentation {
   final bool isActive;
 
   bool get isExclusiveCostChannel => allowCostChannel && !allowDetailChannel;
-  double get costSellerPrice => double.parse((cost * 1.02).toStringAsFixed(2));
+  double get costSellerPrice {
+    if (cost > 0) {
+      if ((cost - retailPrice).abs() < 0.01) {
+        return double.parse(cost.toStringAsFixed(2));
+      }
+      return double.parse((cost * 1.02).toStringAsFixed(2));
+    }
+    return 0.0;
+  }
 
   ProductPresentation({
     required this.id,
@@ -112,7 +120,16 @@ class Product {
     return def.cost;
   }
 
-  double get defaultCostSellerPrice => double.parse((defaultCost * 1.02).toStringAsFixed(2));
+  double get defaultCostSellerPrice {
+    final c = defaultCost;
+    if (c > 0) {
+      if ((c - defaultSalePrice).abs() < 0.01) {
+        return double.parse(c.toStringAsFixed(2));
+      }
+      return double.parse((c * 1.02).toStringAsFixed(2));
+    }
+    return 0.0;
+  }
 
   bool get isCostChannelOnly {
     // 1. If explicitly set via database flags on presentation
