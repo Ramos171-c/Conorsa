@@ -151,9 +151,8 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
         if (isVendedor)
         {
             // 1. Filtrar surtidos del sistema móvil
-            dtos = dtos.Where(dto =>
-                !dto.InternalCode.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
-                !dto.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)
+            dtos = dtos.Where(dto => 
+                !dto.InternalCode.StartsWith("SURTIDO", StringComparison.OrdinalIgnoreCase)
             ).ToList();
         }
 

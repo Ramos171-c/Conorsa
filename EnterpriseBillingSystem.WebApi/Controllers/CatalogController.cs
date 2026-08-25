@@ -24,7 +24,7 @@ public class CatalogController : ApiControllerBase
     {
         var result = await Mediator.Send(new GetCatalogProductsQuery());
         var filteredResult = result.Where(p => p.Name != null && p.IsCatalogVisible && p.IsActive &&
-            !p.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
+            !p.InternalCode.StartsWith("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
             !(p.CategoryName != null && p.CategoryName.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)) &&
             !p.Presentations.Any(pres => pres.AllowCostChannel && !pres.AllowDetailChannel));
         
@@ -59,7 +59,7 @@ public class CatalogController : ApiControllerBase
             var productsList = await Mediator.Send(new GetCatalogProductsQuery());
             var products = productsList.AsEnumerable()
                 .Where(p => p.Name != null && p.IsCatalogVisible && p.IsActive &&
-                            !p.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
+                            !p.InternalCode.StartsWith("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
                             !(p.CategoryName != null && p.CategoryName.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)) &&
                             !p.Presentations.Any(pres => pres.AllowCostChannel && !pres.AllowDetailChannel) &&
                             HasValidImage(p, env));
