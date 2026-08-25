@@ -106,7 +106,7 @@ public class GetProductsPagedQueryHandler : IRequestHandler<GetProductsPagedQuer
                 ?? presentationDtos.FirstOrDefault();
 
             decimal resolvedDefaultPrice = isCostSeller
-                ? (defaultPresentation != null ? Math.Round(defaultPresentation.Cost * 1.02m, 2) : 0m)
+                ? (defaultPresentation?.Cost ?? 0m)
                 : (defaultPresentation?.RetailPrice ?? 0m);
 
             var branchProductDtos = product.BranchProducts
