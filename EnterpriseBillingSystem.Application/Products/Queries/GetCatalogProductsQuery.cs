@@ -34,6 +34,23 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
     public async Task<IEnumerable<ProductDto>> Handle(GetCatalogProductsQuery request, CancellationToken cancellationToken)
     {
         var products = await _productRepository.GetCatalogProductsAsync(cancellationToken);
+
+        bool isVendedor = false;
+        bool isCostSeller = false;
+        bool isDetailSeller = false;
+
+        if (!string.IsNullOrWhiteSpace(_currentUserService.UserId))
+        {
+            var user = await _userManager.FindByIdAsync(_currentUserService.UserId)
+                    ?? await _userManager.FindByNameAsync(_currentUserService.UserId);
+            if (user != null)
+            {
+                isVendedor = await _userManager.IsInRoleAsync(user, "VENDEDOR");
+                isCostSeller = isVendedor && user.SellerCategory == Domain.Enums.SellerCategory.Cost;
+                isDetailSeller = isVendedor && user.SellerCategory == Domain.Enums.SellerCategory.Detail;
+            }
+        }
+
         var dtos = products.Select(product =>
         {
             var taxDtos = product.Tax != null
@@ -42,31 +59,39 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
 
             var presentationDtos = product.Presentations
                 .Where(pr => pr.IsActive && !pr.IsDeleted)
-                .Select(pr => new ProductPresentationDto(
-                    Id: pr.Id,
-                    ProductId: pr.ProductId,
-                    ProductName: product.Name,
-                    ProductInternalCode: product.InternalCode,
-                    TaxPercentage: product.Tax?.Rate ?? 0m,
-                    UnitOfMeasureId: pr.UnitOfMeasureId,
-                    UnitOfMeasureCode: pr.UnitOfMeasure.Code,
-                    Name: pr.Name,
-                    ConversionFactor: pr.ConversionFactor,
-                    Barcode: pr.Barcode,
-                    Cost: pr.Cost,
-                    RetailPrice: pr.RetailPrice,
-                    SemiWholesalePrice: pr.SemiWholesalePrice,
-                    WholesalePrice: pr.WholesalePrice,
-                    IsBaseUnit: pr.IsBaseUnit,
-                    IsDefaultSalePresentation: pr.IsDefaultSalePresentation,
-                    AllowPurchase: pr.AllowPurchase,
-                    AllowSale: pr.AllowSale,
-                    IsActive: pr.IsActive
-                ))
+                .Select(pr =>
+                {
+                    decimal costSellerPrice = Math.Round(pr.Cost * 1.02m, 2);
+                    return new ProductPresentationDto(
+                        Id: pr.Id,
+                        ProductId: pr.ProductId,
+                        ProductName: product.Name,
+                        ProductInternalCode: product.InternalCode,
+                        TaxPercentage: product.Tax?.Rate ?? 0m,
+                        UnitOfMeasureId: pr.UnitOfMeasureId,
+                        UnitOfMeasureCode: pr.UnitOfMeasure.Code,
+                        Name: pr.Name,
+                        ConversionFactor: pr.ConversionFactor,
+                        Barcode: pr.Barcode,
+                        Cost: pr.Cost,
+                        RetailPrice: isCostSeller ? costSellerPrice : pr.RetailPrice,
+                        SemiWholesalePrice: isCostSeller ? costSellerPrice : pr.SemiWholesalePrice,
+                        WholesalePrice: isCostSeller ? costSellerPrice : pr.WholesalePrice,
+                        IsBaseUnit: pr.IsBaseUnit,
+                        IsDefaultSalePresentation: pr.IsDefaultSalePresentation,
+                        AllowPurchase: pr.AllowPurchase,
+                        AllowSale: pr.AllowSale,
+                        IsActive: pr.IsActive
+                    );
+                })
                 .ToList();
 
             var defaultPresentation = presentationDtos.FirstOrDefault(pr => pr.IsDefaultSalePresentation)
                 ?? presentationDtos.FirstOrDefault();
+
+            decimal resolvedDefaultPrice = isCostSeller
+                ? (defaultPresentation != null ? Math.Round(defaultPresentation.Cost * 1.02m, 2) : 0m)
+                : (defaultPresentation?.RetailPrice ?? 0m);
 
             var branchProductDtos = product.BranchProducts
                 .Select(bp => new BranchProductDto(
@@ -96,7 +121,7 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
                 DefaultUnitOfMeasureId: product.DefaultUnitOfMeasureId,
                 DefaultUnitOfMeasureCode: product.DefaultUnitOfMeasure.Code,
                 DefaultPurchasePrice: defaultPresentation?.Cost ?? 0m,
-                DefaultSalePrice: defaultPresentation?.RetailPrice ?? 0m,
+                DefaultSalePrice: resolvedDefaultPrice,
                 CurrentCost: product.CurrentCost,
                 ImagePath: product.ImagePath,
                 IsCatalogVisible: product.IsCatalogVisible,
@@ -115,7 +140,7 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
                 IsActive: product.IsActive,
                 Presentations: presentationDtos,
                 DefaultPresentation: defaultPresentation,
-                DefaultPrice: defaultPresentation?.RetailPrice ?? 0m,
+                DefaultPrice: resolvedDefaultPrice,
                 ImageUrl: product.ImagePath,
                 Availability: product.IsSoldOut ? "Sold Out" : "Available",
                 Taxes: taxDtos,
@@ -123,27 +148,19 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
             );
         }).ToList();
 
-        if (_currentUserService.UserId != null)
+        if (isVendedor)
         {
-            var user = await _userManager.FindByIdAsync(_currentUserService.UserId);
-            if (user != null)
-            {
-                var isVendedor = await _userManager.IsInRoleAsync(user, "VENDEDOR");
-                if (isVendedor)
-                {
-                    // 1. Filtrar surtidos del sistema móvil
-                    dtos = dtos.Where(dto => 
-                        !dto.InternalCode.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
-                        !dto.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)
-                    ).ToList();
-                }
+            // 1. Filtrar surtidos del sistema móvil
+            dtos = dtos.Where(dto =>
+                !dto.InternalCode.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase) &&
+                !dto.Name.Contains("SURTIDO", StringComparison.OrdinalIgnoreCase)
+            ).ToList();
+        }
 
-                // 2. Filtrar productos del canal Costo si el vendedor es de tipo Detalle
-                if (isVendedor && user.SellerCategory == Domain.Enums.SellerCategory.Detail)
-                {
-                    dtos = dtos.Where(dto => !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel)).ToList();
-                }
-            }
+        // 2. Filtrar productos del canal Costo si el vendedor es de tipo Detalle
+        if (isDetailSeller)
+        {
+            dtos = dtos.Where(dto => !dto.Presentations.Any(p => p.AllowCostChannel && !p.AllowDetailChannel)).ToList();
         }
 
         // 3. Filtrar cualquier producto sin presentaciones activas (para evitar productos vacíos o con precio 0)
