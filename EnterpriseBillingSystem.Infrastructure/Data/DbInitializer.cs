@@ -1867,11 +1867,11 @@ END
 
         await _context.SaveChangesAsync();
 
-        // Desactivar todos los productos que contengan "SURTIDO" en su nombre o código
+        // Desactivar solo códigos de sistema interno que comiencen con "SURTIDO"
         var surtidos = await _context.Products
             .Include(p => p.Presentations)
             .IgnoreQueryFilters()
-            .Where(p => p.Name.Contains("SURTIDO") || p.InternalCode.Contains("SURTIDO"))
+            .Where(p => p.InternalCode.StartsWith("SURTIDO"))
             .ToListAsync();
 
         foreach (var p in surtidos)

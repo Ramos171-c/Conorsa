@@ -807,16 +807,6 @@ class _PosScreenState extends State<PosScreen> {
                         ],
                       ),
                     ),
-                    const PopupMenuItem(
-                      value: 'COSTO',
-                      child: Row(
-                        children: [
-                          Icon(Icons.monetization_on_rounded, color: Colors.purple),
-                          SizedBox(width: 8),
-                          Text('Costo'),
-                        ],
-                      ),
-                    ),
                   ],
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
