@@ -641,8 +641,8 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             {
                 PagePadding = new Thickness(15, 10, 15, 10),
                 ColumnWidth = double.PositiveInfinity,
-                FontFamily = new System.Windows.Media.FontFamily("Segoe UI, Arial"),
-                FontSize = 12,
+                FontFamily = new System.Windows.Media.FontFamily("Consolas, Courier New"),
+                FontSize = 11,
                 FontWeight = FontWeights.Bold,
                 Foreground = System.Windows.Media.Brushes.Black,
                 TextAlignment = TextAlignment.Left
@@ -818,10 +818,6 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             if (delTax > 0)
             {
                 totalsPara.Inlines.Add(new System.Windows.Documents.Run($"IVA:          C${delTax:N2}\n"));
-            }
-            if (missingItems.Any())
-            {
-                totalsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"Faltantes:    {missingItems.Sum(m => m.MissingQuantity):N2} pzas\n")));
             }
             totalsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"TOTAL NETO:   C${delTotal:N2}\n")));
             
