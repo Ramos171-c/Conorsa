@@ -53,7 +53,7 @@ public class ReturnSalesOrderCommandHandler : IRequestHandler<ReturnSalesOrderCo
             throw new InvalidOperationException("El pedido ya está anulado.");
 
         // Verificar que no tenga facturas confirmadas
-        bool hasPostedInvoices = order.SalesInvoices.Any(si => si.Status == SalesInvoiceStatus.Posted);
+        bool hasPostedInvoices = order.SalesInvoices != null && order.SalesInvoices.Any(si => si.Status == SalesInvoiceStatus.Posted);
         if (hasPostedInvoices)
             throw new InvalidOperationException("No se puede realizar una devolución en un pedido con facturas confirmadas asociadas.");
 
@@ -72,7 +72,10 @@ public class ReturnSalesOrderCommandHandler : IRequestHandler<ReturnSalesOrderCo
             order.DiscountAmount = 0;
             order.TaxAmount = 0;
             order.TotalAmount = 0;
-            order.Notes = $"{order.Notes}\n[DEVOLUCIÓN TOTAL]: Pedido devuelto por completo el {DateTime.Now:dd/MM/yyyy HH:mm}.";
+            
+            string totalNotes = $"{order.Notes}\n[DEVOLUCIÓN TOTAL]: Pedido devuelto por completo el {DateTime.Now:dd/MM/yyyy HH:mm}.";
+            if (totalNotes.Length > 500) totalNotes = totalNotes.Substring(0, 500);
+            order.Notes = totalNotes;
         }
         else
         {
@@ -115,7 +118,9 @@ public class ReturnSalesOrderCommandHandler : IRequestHandler<ReturnSalesOrderCo
             }
 
             var notesString = string.Join(", ", noteParts);
-            order.Notes = $"{order.Notes}\n[DEVOLUCIÓN PARCIAL]: Devuelto: {notesString} el {DateTime.Now:dd/MM/yyyy HH:mm}.";
+            string partialNotes = $"{order.Notes}\n[DEVOLUCIÓN PARCIAL]: Devuelto: {notesString} el {DateTime.Now:dd/MM/yyyy HH:mm}.";
+            if (partialNotes.Length > 500) partialNotes = partialNotes.Substring(0, 500);
+            order.Notes = partialNotes;
         }
 
         order.LastModifiedBy = "System";

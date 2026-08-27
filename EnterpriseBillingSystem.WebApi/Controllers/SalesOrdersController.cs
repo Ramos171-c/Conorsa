@@ -128,11 +128,19 @@ public class SalesOrdersController : ApiControllerBase
     [HasPermission("sales.edit")]
     public async Task<ActionResult> ReturnOrder(Guid id, [FromBody] ReturnSalesOrderCommand command)
     {
-        if (id != command.SalesOrderId)
-            return BadRequest(new { Message = "El Id en la ruta no coincide con el del cuerpo." });
+        try
+        {
+            if (id != command.SalesOrderId)
+                return BadRequest(new { Message = "El Id en la ruta no coincide con el del cuerpo.", Detail = "El Id en la ruta no coincide con el del cuerpo." });
 
-        await Mediator.Send(command);
-        return NoContent();
+            await Mediator.Send(command);
+            return NoContent();
+        }
+        catch (Exception ex)
+        {
+            Log.Error(ex, "[ERROR-RETURN-ORDER] Error al procesar devolución para pedido {OrderId}: {Message}", id, ex.Message);
+            return BadRequest(new { Message = ex.Message, Detail = ex.Message, detail = ex.Message });
+        }
     }
 
     /// <summary>
