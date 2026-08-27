@@ -172,7 +172,7 @@
                             <DataGridTextColumn Header="Descto. %" Binding="{Binding DiscountPercentage, StringFormat={}{0:N1}}" Width="90" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
                             <DataGridTextColumn Header="IVA %" Binding="{Binding TaxPercentage, StringFormat={}{0:N1}}" Width="80" ElementStyle="{StaticResource RightAlignedColumnStyle}" IsReadOnly="True" />
                             <DataGridTextColumn Header="Neto" Binding="{Binding NetAmount, StringFormat={}{0:C2}}" Width="130" ElementStyle="{StaticResource RightAlignedColumnStyle}" FontWeight="Bold" IsReadOnly="True" />
-                            <DataGridTemplateColumn Header="Cant. Devolver" Width="130">
+                            <DataGridTemplateColumn Header="Cant. Devolver" Width="130" Visibility="Collapsed">
                                 <DataGridTemplateColumn.CellTemplate>
                                     <DataTemplate>
                                         <Border BorderBrush="#1976D2" 
@@ -336,7 +336,7 @@
                         Style="{StaticResource MaterialDesignRaisedButton}" 
                         Background="#1976D2" BorderBrush="#1976D2" 
                         IsEnabled="{Binding IsReturnEnabled}"
-                        Visibility="{Binding IsReturnEnabled, Converter={StaticResource BoolToVis}}"
+                        Visibility="Collapsed"
                         Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="KeyboardReturn" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
@@ -349,7 +349,7 @@
                         Style="{StaticResource MaterialDesignRaisedButton}" 
                         Background="#E65100" BorderBrush="#E65100" 
                         IsEnabled="{Binding IsReturnEnabled}"
-                        Visibility="{Binding IsReturnEnabled, Converter={StaticResource BoolToVis}}"
+                        Visibility="Collapsed"
                         Margin="0,0,8,0">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="History" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />
