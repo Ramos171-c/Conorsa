@@ -89,6 +89,7 @@ public class GetSalesGoalsQueryHandler : IRequestHandler<GetSalesGoalsQuery, IEn
                 ? (double)(currentSum / goal.TargetAmount) * 100 
                 : 0.0;
             decimal remaining = Math.Max(0m, goal.TargetAmount - currentSum);
+            bool effectiveIsActive = goal.IsActive && DateTime.Today <= goal.EndDate.Date;
 
             resultList.Add(new SalesGoalDto(
                 goal.Id,
@@ -102,7 +103,7 @@ public class GetSalesGoalsQueryHandler : IRequestHandler<GetSalesGoalsQuery, IEn
                 remaining,
                 goal.StartDate,
                 goal.EndDate,
-                goal.IsActive
+                effectiveIsActive
             ));
         }
 
@@ -172,6 +173,8 @@ public class GetMySalesGoalsQueryHandler : IRequestHandler<GetMySalesGoalsQuery,
                 : 0.0;
             decimal remaining = Math.Max(0m, goal.TargetAmount - currentSum);
 
+            bool effectiveIsActive = goal.IsActive && DateTime.Today <= goal.EndDate.Date;
+
             resultList.Add(new SalesGoalDto(
                 goal.Id,
                 goal.UserId,
@@ -184,7 +187,7 @@ public class GetMySalesGoalsQueryHandler : IRequestHandler<GetMySalesGoalsQuery,
                 remaining,
                 goal.StartDate,
                 goal.EndDate,
-                goal.IsActive
+                effectiveIsActive
             ));
         }
 

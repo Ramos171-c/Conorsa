@@ -47,8 +47,9 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         if (order == null)
             throw new ArgumentException($"El pedido con Id '{request.SalesOrderId}' no existe.");
 
-        // Deduct from inventory ONLY when transitioning to "EnCamino"
-        if (request.Status == SalesOrderStatus.EnCamino && order.Status != SalesOrderStatus.EnCamino)
+        // Deduct from inventory when transitioning to "Completado" (or "EnCamino" legacy)
+        if ((request.Status == SalesOrderStatus.Completado || request.Status == SalesOrderStatus.EnCamino) && 
+            order.Status != SalesOrderStatus.Completado && order.Status != SalesOrderStatus.EnCamino)
         {
             var warehouse = (await _branchWarehouseRepository.FindAsync(bw => bw.IsDefault && bw.IsActive)).FirstOrDefault()
                 ?? (await _branchWarehouseRepository.FindAsync(bw => bw.IsActive)).FirstOrDefault();

@@ -157,7 +157,7 @@
                             <RowDefinition Height="*" />
                         </Grid.RowDefinitions>
 
-                        <TextBlock Grid.Row="0" Text="Top 5 Productos más Vendidos (Por Monto Neto)" FontSize="15" FontWeight="Bold" Margin="0,0,0,16" Foreground="{DynamicResource MaterialDesignBody}" />
+                        <TextBlock Grid.Row="0" Text="Ranking de Productos Vendidos (Por Monto Neto)" FontSize="15" FontWeight="Bold" Margin="0,0,0,16" Foreground="{DynamicResource MaterialDesignBody}" />
                         
                         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto">
                             <ItemsControl ItemsSource="{Binding TopSellingProducts}">
@@ -226,6 +226,48 @@
                                 <DataGridTextColumn Header="Clientes en Zona" Binding="{Binding ClientsCount}" Width="150" ElementStyle="{StaticResource CenterAlignedColumnStyle}" />
                                 <DataGridTextColumn Header="Cant. Pedidos" Binding="{Binding OrdersCount}" Width="150" ElementStyle="{StaticResource CenterAlignedColumnStyle}" />
                                 <DataGridTextColumn Header="Total Ventas" Binding="{Binding TotalSales, StringFormat=C2}" Width="200" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+
+                <!-- Tab 4: Sales By Seller -->
+                <TabItem Header="Ventas por Vendedor" Width="180" Height="48">
+                    <Grid Margin="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Desempeño de Ventas por Vendedor / Usuario" FontSize="15" FontWeight="Bold" Margin="0,0,0,16" Foreground="{DynamicResource MaterialDesignBody}" />
+
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding SalesBySeller}" AutoGenerateColumns="False" IsReadOnly="True" VerticalScrollBarVisibility="Auto">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Vendedor / Usuario" Binding="{Binding SellerName}" Width="*" />
+                                <DataGridTextColumn Header="Cant. Pedidos" Binding="{Binding OrdersCount}" Width="150" ElementStyle="{StaticResource CenterAlignedColumnStyle}" />
+                                <DataGridTextColumn Header="Ticket Promedio" Binding="{Binding AverageTicket, StringFormat=C2}" Width="180" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                <DataGridTextColumn Header="Total Ventas" Binding="{Binding TotalSales, StringFormat=C2}" Width="200" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                            </DataGrid.Columns>
+                        </DataGrid>
+                    </Grid>
+                </TabItem>
+
+                <!-- Tab 5: Sales By Day -->
+                <TabItem Header="Ventas por Fecha" Width="180" Height="48">
+                    <Grid Margin="16">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto" />
+                            <RowDefinition Height="*" />
+                        </Grid.RowDefinitions>
+
+                        <TextBlock Grid.Row="0" Text="Comportamiento Diario de Facturación" FontSize="15" FontWeight="Bold" Margin="0,0,0,16" Foreground="{DynamicResource MaterialDesignBody}" />
+
+                        <DataGrid Grid.Row="1" ItemsSource="{Binding SalesByDay}" AutoGenerateColumns="False" IsReadOnly="True" VerticalScrollBarVisibility="Auto">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Fecha" Binding="{Binding Date, StringFormat=d}" Width="180" />
+                                <DataGridTextColumn Header="Cant. Pedidos" Binding="{Binding OrdersCount}" Width="150" ElementStyle="{StaticResource CenterAlignedColumnStyle}" />
+                                <DataGridTextColumn Header="Ticket Promedio" Binding="{Binding AverageTicket, StringFormat=C2}" Width="180" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
+                                <DataGridTextColumn Header="Total Ventas" Binding="{Binding TotalSales, StringFormat=C2}" Width="*" ElementStyle="{StaticResource RightAlignedColumnStyle}" />
                             </DataGrid.Columns>
                         </DataGrid>
                     </Grid>

@@ -187,6 +187,9 @@ class _GoalsScreenState extends State<GoalsScreen> {
         final double remaining = (goal['remainingAmount'] as num).toDouble();
         final String period = goal['periodName'] ?? 'General';
         
+        final DateTime? endDate = DateTime.tryParse(goal['endDate'] ?? '');
+        final bool isExpired = endDate != null && DateTime.now().isAfter(endDate.add(const Duration(days: 1)).subtract(const Duration(seconds: 1)));
+        final bool effectiveIsActive = isActive && !isExpired;
         final double displayProgress = (progress / 100).clamp(0.0, 1.0);
         final bool isCompleted = progress >= 100.0;
 
@@ -197,10 +200,10 @@ class _GoalsScreenState extends State<GoalsScreen> {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(16),
             side: BorderSide(
-              color: isActive 
+              color: effectiveIsActive 
                   ? (isCompleted ? const Color(0xFF10B981) : const Color(0xFFE2E8F0))
                   : const Color(0xFFCBD5E1),
-              width: isActive && isCompleted ? 2.0 : 1.0,
+              width: effectiveIsActive && isCompleted ? 2.0 : 1.0,
             ),
           ),
           child: Padding(
@@ -220,7 +223,7 @@ class _GoalsScreenState extends State<GoalsScreen> {
                         color: Color(0xFF0F172A),
                       ),
                     ),
-                    _buildStatusBadge(isActive, isCompleted),
+                    _buildStatusBadge(isActive, isCompleted, isExpired),
                   ],
                 ),
                 const SizedBox(height: 4),
@@ -308,13 +311,13 @@ class _GoalsScreenState extends State<GoalsScreen> {
                     backgroundColor: const Color(0xFFE2E8F0),
                     color: isCompleted 
                         ? const Color(0xFF10B981) 
-                        : (isActive ? const Color(0xFF38BDF8) : const Color(0xFF94A3B8)),
+                        : (effectiveIsActive ? const Color(0xFF38BDF8) : const Color(0xFF94A3B8)),
                   ),
                 ),
                 const SizedBox(height: 12),
 
                 // Bottom notes / remaining indicator
-                if (isActive)
+                if (effectiveIsActive)
                   Row(
                     children: [
                       Icon(
@@ -334,6 +337,27 @@ class _GoalsScreenState extends State<GoalsScreen> {
                         ),
                       ),
                     ],
+                  )
+                else if (isExpired || !isActive)
+                  Row(
+                    children: [
+                      Icon(
+                        isCompleted ? Icons.check_circle_rounded : Icons.history_toggle_off_rounded,
+                        size: 14,
+                        color: isCompleted ? const Color(0xFF10B981) : const Color(0xFF64748B),
+                      ),
+                      const SizedBox(width: 6),
+                      Text(
+                        isCompleted
+                            ? 'Meta completada.'
+                            : 'Periodo finalizado.',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.w500,
+                          color: isCompleted ? const Color(0xFF10B981) : const Color(0xFF64748B),
+                        ),
+                      ),
+                    ],
                   ),
               ],
             ),
@@ -343,19 +367,19 @@ class _GoalsScreenState extends State<GoalsScreen> {
     );
   }
 
-  Widget _buildStatusBadge(bool isActive, bool isCompleted) {
+  Widget _buildStatusBadge(bool isActive, bool isCompleted, bool isExpired) {
     Color bg;
     Color fg;
     String text;
 
-    if (!isActive) {
-      bg = const Color(0xFFE2E8F0);
-      fg = const Color(0xFF64748B);
-      text = 'Inactiva';
-    } else if (isCompleted) {
+    if (isCompleted) {
       bg = const Color(0xFFD1FAE5);
       fg = const Color(0xFF065F46);
       text = 'Lograda';
+    } else if (isExpired || !isActive) {
+      bg = const Color(0xFFE2E8F0);
+      fg = const Color(0xFF475569);
+      text = 'Finalizada';
     } else {
       bg = const Color(0xFFE0F2FE);
       fg = const Color(0xFF0369A1);

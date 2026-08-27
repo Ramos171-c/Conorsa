@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace EnterpriseBillingSystem.Wpf.Models;
 
@@ -17,7 +18,7 @@ public record SalesOrderListItemDto(
     string? CreatedBy
 );
 
-public class SalesOrderDetailItemDto
+public class SalesOrderDetailItemDto : ObservableObject
 {
     public Guid Id { get; set; }
     public Guid ProductId { get; set; }
@@ -32,7 +33,13 @@ public class SalesOrderDetailItemDto
     public decimal TaxPercentage { get; set; }
     public decimal TaxAmount { get; set; }
     public decimal NetAmount { get; set; }
-    public decimal ReturnedQuantity { get; set; } = 0;
+
+    private decimal _returnedQuantity = 0;
+    public decimal ReturnedQuantity
+    {
+        get => _returnedQuantity;
+        set => SetProperty(ref _returnedQuantity, value);
+    }
 }
 
 public record ReturnSalesOrderDetailItemDto(

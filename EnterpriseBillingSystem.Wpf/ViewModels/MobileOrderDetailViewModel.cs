@@ -75,7 +75,6 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
     {
         "Recibido",
         "EnProceso",
-        "EnCamino",
         "Completado",
         "Anulado"
     };

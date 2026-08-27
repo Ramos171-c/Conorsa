@@ -88,18 +88,6 @@
 
                         <Separator Style="{StaticResource MaterialDesignSeparator}" Margin="8,8" />
 
-                        <!-- POS (Point Of Sale) -->
-                        <Button Style="{StaticResource MaterialDesignFlatButton}" 
-                                Command="{Binding NavigateToPosCommand}"
-                                Height="48" Margin="8,2" HorizontalContentAlignment="Left"
-                                materialDesign:ButtonAssist.CornerRadius="8"
-                                Visibility="{Binding IsPosVisible, Converter={StaticResource BoolToVis}}">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="CashRegister" Width="20" Height="20" Margin="0,0,16,0" VerticalAlignment="Center" />
-                                <TextBlock Text="Facturación POS" VerticalAlignment="Center" FontWeight="Bold" Foreground="{DynamicResource PrimaryHueMidBrush}" />
-                            </StackPanel>
-                        </Button>
-
                         <!-- Clientes -->
                         <Button Style="{StaticResource MaterialDesignFlatButton}" 
                                 Command="{Binding NavigateToCustomersCommand}"
@@ -278,17 +266,6 @@
                             <StackPanel Orientation="Horizontal">
                                 <materialDesign:PackIcon Kind="CellphoneText" Width="20" Height="20" Margin="0,0,16,0" VerticalAlignment="Center" />
                                 <TextBlock Text="Pedidos Móviles" VerticalAlignment="Center" />
-                            </StackPanel>
-                        </Button>
-
-                        <!-- Analytics & Reportes -->
-                        <Button Style="{StaticResource MaterialDesignFlatButton}" 
-                                Command="{Binding NavigateToReportsDashboardCommand}"
-                                Height="48" Margin="8,2" HorizontalContentAlignment="Left"
-                                materialDesign:ButtonAssist.CornerRadius="8">
-                            <StackPanel Orientation="Horizontal">
-                                <materialDesign:PackIcon Kind="ChartBar" Width="20" Height="20" Margin="0,0,16,0" VerticalAlignment="Center" />
-                                <TextBlock Text="Analytics &amp; Reportes" VerticalAlignment="Center" />
                             </StackPanel>
                         </Button>
 

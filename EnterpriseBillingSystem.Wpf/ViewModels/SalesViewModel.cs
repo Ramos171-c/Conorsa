@@ -27,10 +27,27 @@ public class ZoneSalesSummary
     public decimal TotalSales { get; set; }
 }
 
+public class SellerSalesSummary
+{
+    public string SellerName { get; set; } = "Sin Vendedor";
+    public int OrdersCount { get; set; }
+    public decimal TotalSales { get; set; }
+    public decimal AverageTicket => OrdersCount > 0 ? TotalSales / OrdersCount : 0m;
+}
+
+public class DailySalesSummary
+{
+    public DateTime Date { get; set; }
+    public int OrdersCount { get; set; }
+    public decimal TotalSales { get; set; }
+    public decimal AverageTicket => OrdersCount > 0 ? TotalSales / OrdersCount : 0m;
+}
+
 public partial class SalesViewModel : ViewModelBase
 {
     private readonly SalesApiClient _salesApiClient;
     private readonly CustomerApiClient _customerApiClient;
+    private readonly UserApiClient _userApiClient;
 
     [ObservableProperty]
     private DateTime _startDate = DateTime.Today.AddDays(-30);
@@ -67,14 +84,17 @@ public partial class SalesViewModel : ViewModelBase
     public ObservableCollection<SalesOrderListItemDto> FilteredOrders { get; } = new();
     public ObservableCollection<ClientSalesSummary> SalesByClient { get; } = new();
     public ObservableCollection<ZoneSalesSummary> SalesByZone { get; } = new();
+    public ObservableCollection<SellerSalesSummary> SalesBySeller { get; } = new();
+    public ObservableCollection<DailySalesSummary> SalesByDay { get; } = new();
     public ObservableCollection<ConsolidatedProductDto> TopSellingProducts { get; } = new();
 
     public string Title => "Reporte y Análisis de Ventas";
 
-    public SalesViewModel(SalesApiClient salesApiClient, CustomerApiClient customerApiClient)
+    public SalesViewModel(SalesApiClient salesApiClient, CustomerApiClient customerApiClient, UserApiClient userApiClient)
     {
         _salesApiClient = salesApiClient;
         _customerApiClient = customerApiClient;
+        _userApiClient = userApiClient;
 
         // Auto load on creation
         _ = LoadSalesDataAsync();
@@ -94,7 +114,7 @@ public partial class SalesViewModel : ViewModelBase
 
         try
         {
-            // 1. Fetch sales orders and customers from API (server-filtered by date and status)
+            // 1. Fetch sales orders, customers, and users from API
             string? apiStatus = SelectedStatus == "Todos" ? null : SelectedStatus;
             var ordersResult = await _salesApiClient.GetSalesOrdersPagedAsync(
                 page: 1, 
@@ -104,9 +124,22 @@ public partial class SalesViewModel : ViewModelBase
                 toDate: EndDate.Date.AddDays(1).AddSeconds(-1)
             );
             var customersResult = await _customerApiClient.GetCustomersPagedAsync(1, 9999);
+            var usersResult = await _userApiClient.GetUsersPagedAsync(1, 100);
 
             var orders = ordersResult?.Items ?? new List<SalesOrderListItemDto>();
             var customers = customersResult?.Items ?? new List<CustomerDto>();
+
+            // Map User ID & Username -> User Full Name
+            var userMap = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (usersResult?.Items != null)
+            {
+                foreach (var u in usersResult.Items)
+                {
+                    string displayName = string.IsNullOrWhiteSpace(u.FullName) ? u.Username : u.FullName;
+                    userMap[u.Id.ToString()] = displayName;
+                    userMap[u.Username] = displayName;
+                }
+            }
 
             // Map Customer ID to Route (Zone) Name
             var customerRoutes = customers.ToDictionary(
@@ -114,14 +147,14 @@ public partial class SalesViewModel : ViewModelBase
                 c => c.RouteName ?? "Sin Zona"
             );
 
-            // Fetch top consolidated products for the date range
+            // Fetch consolidated products for the date range
             var consolidatedProducts = await _salesApiClient.GetConsolidatedProductsAsync(
                 fromDate: StartDate,
                 toDate: EndDate.AddDays(1).AddSeconds(-1)
             );
 
             TopSellingProducts.Clear();
-            foreach (var prod in consolidatedProducts.OrderByDescending(p => p.TotalNetAmount).Take(5))
+            foreach (var prod in consolidatedProducts.OrderByDescending(p => p.TotalNetAmount))
             {
                 TopSellingProducts.Add(prod);
             }
@@ -222,6 +255,50 @@ public partial class SalesViewModel : ViewModelBase
             {
                 SalesByZone.Add(z);
             }
+
+            // 5. Compute Grouping by Seller / User (Displaying Full Name)
+            var sellerGroups = financialOrders
+                .GroupBy(o => {
+                    var createdBy = o.CreatedBy ?? string.Empty;
+                    if (string.IsNullOrWhiteSpace(createdBy)) return "Sistema / Sin Vendedor";
+                    if (userMap.TryGetValue(createdBy, out var fullName) && !string.IsNullOrWhiteSpace(fullName))
+                    {
+                        return fullName;
+                    }
+                    return createdBy;
+                })
+                .Select(g => new SellerSalesSummary
+                {
+                    SellerName = g.Key,
+                    OrdersCount = g.Count(),
+                    TotalSales = g.Sum(o => o.TotalAmount)
+                })
+                .OrderByDescending(s => s.TotalSales)
+                .ToList();
+
+            SalesBySeller.Clear();
+            foreach (var s in sellerGroups)
+            {
+                SalesBySeller.Add(s);
+            }
+
+            // 6. Compute Grouping by Day
+            var dayGroups = financialOrders
+                .GroupBy(o => o.OrderDate.Date)
+                .Select(g => new DailySalesSummary
+                {
+                    Date = g.Key,
+                    OrdersCount = g.Count(),
+                    TotalSales = g.Sum(o => o.TotalAmount)
+                })
+                .OrderByDescending(d => d.Date)
+                .ToList();
+
+            SalesByDay.Clear();
+            foreach (var d in dayGroups)
+            {
+                SalesByDay.Add(d);
+            }
         }
         catch (Exception)
         {
@@ -233,6 +310,8 @@ public partial class SalesViewModel : ViewModelBase
             FilteredOrders.Clear();
             SalesByClient.Clear();
             SalesByZone.Clear();
+            SalesBySeller.Clear();
+            SalesByDay.Clear();
             TopSellingProducts.Clear();
         }
         finally

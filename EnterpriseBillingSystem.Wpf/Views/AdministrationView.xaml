@@ -35,37 +35,13 @@
                             TabStripPlacement="Top" 
                             Style="{StaticResource MaterialDesignTabControl}">
                     
-                    <!-- TAB 1: UMBRALES DE PRECIOS -->
-                    <TabItem Header="Umbrales de Precios">
+                    <!-- TAB 1: COMPRA MÍNIMA -->
+                    <TabItem Header="Compra Mínima">
                         <ScrollViewer VerticalScrollBarVisibility="Auto">
                             <StackPanel Margin="24" MaxWidth="600" HorizontalAlignment="Left">
-                                <TextBlock Text="Umbrales del Motor de Precios Dinámicos" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Margin="0,0,0,8" />
-                                <TextBlock Text="Defina los subtotales base acumulados (en moneda principal) necesarios para que una compra aplique de forma reactiva al precio de Semi Mayorista o Mayorista en caja y POS móvil." 
+                                <TextBlock Text="Configuración de Compra Mínima" Style="{StaticResource MaterialDesignHeadline5TextBlock}" FontWeight="Bold" Margin="0,0,0,8" />
+                                <TextBlock Text="Define el monto mínimo total requerido para registrar una factura de venta o un pedido." 
                                            TextWrapping="Wrap" Style="{StaticResource MaterialDesignBody1TextBlock}" Margin="0,0,0,24" Opacity="0.8" />
-
-                                <materialDesign:Card Padding="20" Margin="0,0,0,16" Background="{DynamicResource MaterialDesignCardBackground}">
-                                    <StackPanel>
-                                        <TextBlock Text="Umbral para SEMI MAYORISTA" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,12" />
-                                        <TextBox Text="{Binding SemiWholesaleThreshold, UpdateSourceTrigger=PropertyChanged}"
-                                                 materialDesign:HintAssist.Hint="Monto mínimo C$"
-                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                                 materialDesign:TextFieldAssist.PrefixText="C$ "
-                                                 KeyboardNavigation.IsTabStop="True"/>
-                                        <TextBlock Text="Las compras que superen este monto base en precios retail recibirán automáticamente precios semi-mayoristas." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.6" Margin="0,6,0,0" />
-                                    </StackPanel>
-                                </materialDesign:Card>
-
-                                <materialDesign:Card Padding="20" Margin="0,0,0,16" Background="{DynamicResource MaterialDesignCardBackground}">
-                                    <StackPanel>
-                                        <TextBlock Text="Umbral para MAYORISTA" FontWeight="Bold" FontSize="14" Foreground="{DynamicResource PrimaryHueMidBrush}" Margin="0,0,0,12" />
-                                        <TextBox Text="{Binding WholesaleThreshold, UpdateSourceTrigger=PropertyChanged}"
-                                                 materialDesign:HintAssist.Hint="Monto mínimo C$"
-                                                 Style="{StaticResource MaterialDesignOutlinedTextBox}"
-                                                 materialDesign:TextFieldAssist.PrefixText="C$ "
-                                                 KeyboardNavigation.IsTabStop="True"/>
-                                        <TextBlock Text="Las compras que superen este monto base en precios retail recibirán automáticamente precios mayoristas." Style="{StaticResource MaterialDesignBody2TextBlock}" Opacity="0.6" Margin="0,6,0,0" />
-                                    </StackPanel>
-                                </materialDesign:Card>
 
                                 <materialDesign:Card Padding="20" Margin="0,0,0,24" Background="{DynamicResource MaterialDesignCardBackground}">
                                     <StackPanel>

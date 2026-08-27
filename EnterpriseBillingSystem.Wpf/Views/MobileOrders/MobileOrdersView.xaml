@@ -197,24 +197,7 @@
                                                           <materialDesign:PackIcon Kind="Check" Width="16" Height="16" Foreground="#2E7D32" />
                                                       </Button>
 
-                                                     <!-- Ship Button (Only visible if EnProceso) -->
-                                                     <Button Command="{Binding DataContext.ShipOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
-                                                             CommandParameter="{Binding}" 
-                                                             ToolTip="Confirmar Envío (En Camino)" Width="30" Height="30" Padding="0" Margin="0,0,4,0">
-                                                          <Button.Style>
-                                                              <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
-                                                                  <Setter Property="Visibility" Value="Collapsed" />
-                                                                  <Style.Triggers>
-                                                                      <DataTrigger Binding="{Binding Status}" Value="EnProceso">
-                                                                          <Setter Property="Visibility" Value="Visible" />
-                                                                      </DataTrigger>
-                                                                  </Style.Triggers>
-                                                              </Style>
-                                                          </Button.Style>
-                                                          <materialDesign:PackIcon Kind="TruckDelivery" Width="16" Height="16" Foreground="#1565C0" />
-                                                      </Button>
-
-                                                     <!-- Deliver Button (Only visible if EnCamino) -->
+                                                     <!-- Deliver / Complete Button (Visible if EnProceso or EnCamino) -->
                                                      <Button Command="{Binding DataContext.DeliverOrderCommand, RelativeSource={RelativeSource AncestorType=UserControl}}" 
                                                              CommandParameter="{Binding}" 
                                                              ToolTip="Confirmar Entrega (Completado)" Width="30" Height="30" Padding="0" Margin="0,0,4,0">
@@ -222,9 +205,9 @@
                                                               <Style TargetType="Button" BasedOn="{StaticResource MaterialDesignIconButton}">
                                                                   <Setter Property="Visibility" Value="Collapsed" />
                                                                   <Style.Triggers>
-                                                                      <DataTrigger Binding="{Binding Status}" Value="EnCamino">
-                                                                          <Setter Property="Visibility" Value="Visible" />
-                                                                      </DataTrigger>
+                                                                       <DataTrigger Binding="{Binding Status}" Value="EnProceso">
+                                                                           <Setter Property="Visibility" Value="Visible" />
+                                                                       </DataTrigger>
                                                                   </Style.Triggers>
                                                               </Style>
                                                           </Button.Style>

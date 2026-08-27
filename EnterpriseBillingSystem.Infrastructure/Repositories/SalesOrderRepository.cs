@@ -26,6 +26,7 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
                 .ThenInclude(d => d.Product)
             .Include(so => so.Details)
                 .ThenInclude(d => d.UnitOfMeasure)
+            .Include(so => so.SalesInvoices)
             .FirstOrDefaultAsync(so => so.Id == id, cancellationToken);
     }
 

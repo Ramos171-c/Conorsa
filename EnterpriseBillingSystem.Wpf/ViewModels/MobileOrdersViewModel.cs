@@ -43,7 +43,7 @@ public partial class MobileOrdersViewModel : ViewModelBase
     private string _errorMessage = string.Empty;
 
     public ObservableCollection<SalesOrderListItemDto> Orders { get; } = new();
-    public ObservableCollection<string> Statuses { get; } = new() { "-- Todos --", "Recibido", "EnProceso", "EnCamino", "Completado", "Anulado", "SolicitudAnulacion" };
+    public ObservableCollection<string> Statuses { get; } = new() { "-- Todos --", "Recibido", "EnProceso", "Completado", "Anulado", "SolicitudAnulacion" };
     public ObservableCollection<RouteDto> Routes { get; } = new();
 
     [ObservableProperty]
@@ -379,16 +379,16 @@ public partial class MobileOrdersViewModel : ViewModelBase
         {
             Guid? routeFilter = (SelectedRoute == null || SelectedRoute.Id == Guid.Empty) ? null : SelectedRoute.Id;
             
-            // Get all orders in status EnCamino (status filter = "EnCamino")
-            var pagedResult = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, routeFilter, "EnCamino");
+            // Get all orders in status EnProceso
+            var pagedResult = await _salesApiClient.GetSalesOrdersPagedAsync(1, 9999, routeFilter, "EnProceso");
             if (pagedResult?.Items == null || !pagedResult.Items.Any())
             {
-                _notificationService.ShowWarning("No se encontraron pedidos en estado 'En Camino' para imprimir.");
+                _notificationService.ShowWarning("No se encontraron pedidos activos en proceso para imprimir.");
                 return;
             }
 
             var confirm = System.Windows.MessageBox.Show(
-                $"Se van a generar e imprimir masivamente {pagedResult.Items.Count()} factura(s) / ticket(s) de entrega en estado 'En Camino'.\n\n¿Desea continuar?",
+                $"Se van a generar e imprimir masivamente {pagedResult.Items.Count()} factura(s) / ticket(s) de entrega.\n\n¿Desea continuar?",
                 "Impresión Masiva de Entregas",
                 System.Windows.MessageBoxButton.YesNo,
                 System.Windows.MessageBoxImage.Question);
@@ -441,7 +441,7 @@ public partial class MobileOrdersViewModel : ViewModelBase
                     FontWeight = System.Windows.FontWeights.Bold,
                     TextAlignment = System.Windows.TextAlignment.Center
                 };
-                headerPara.Inlines.Add(new System.Windows.Documents.Run("FACTURA / TICKET DE ENTREGA (EN CAMINO)\n"));
+                headerPara.Inlines.Add(new System.Windows.Documents.Run("FACTURA / TICKET DE ENTREGA\n"));
                 headerPara.Inlines.Add(new System.Windows.Documents.Run("=========================================\n"));
                 sec.Blocks.Add(headerPara);
 
