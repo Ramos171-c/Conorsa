@@ -143,14 +143,10 @@ class Product {
     final upperDesc = (description ?? '').toUpperCase().trim();
 
     const exclusiveSkus = {
-      'CA052', 'CA053',
-      'CA054', 'CA055', 'CA056', 'CA057', 'CA058', 'CA059', 'CA060', 'CA061', 'CA062',
-      'CA063', 'CA064', 'CA065', 'CA066', 'CA067', 'CA068', 'CA069', 'CA070', 'CA071',
-      'CA072', 'CA073', 'CA074', 'CA075', 'CA076', 'CA077', 'CA078', 'CA079', 'CA080',
-      'CA081', 'CA082', 'CA083', 'CA084', 'CA085',
+      'CA052', 'CA053', 'CA054', 'CA055', 'CA056', 'CA057',
+      'CA066', 'CA067', 'CA068', 'CA069', 'CA070', 'CA071', 'CA072',
+      'CA074', 'CA075', 'CA076', 'CA077', 'CA078', 'CA079', 'CA080', 'CA081', 'CA082', 'CA083', 'CA084', 'CA085',
       'MA016', 'MA017', 'MA018', 'MA019',
-      'GA043', 'GA044', 'GA045', 'GA046', 'GA047', 'GA048', 'GA049', 'GA050', 'GA051',
-      'GA052', 'GA053', 'GA054', 'GA055', 'GA056', 'GA057', 'GA058', 'GA059',
       'TO041'
     };
 

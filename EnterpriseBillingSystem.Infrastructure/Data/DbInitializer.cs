@@ -1679,6 +1679,8 @@ END
             new("CA083", "SQUARE GIFT BOX CHOCOLATE", "Caramelos", "1*36*8", 36, 67.78m, 2440.00m, 67.78m, 2440.00m, 67.78m, 2440.00m, CostUnit: 67.78m, CostBox: 2440.00m, IsCostOnly: true),
             new("CA084", "COD 1313 RAMO DE CHOCOLATE", "Caramelos", "1*48*6", 48, 105.21m, 5050.00m, 105.21m, 5050.00m, 105.21m, 5050.00m, CostUnit: 105.21m, CostBox: 5050.00m, IsCostOnly: true),
             new("CA085", "SOLID HEART CHOCOLATE GIFT CHOCOPARTY", "Caramelos", "1*12*15", 12, 166.67m, 2000.00m, 166.67m, 2000.00m, 166.67m, 2000.00m, CostUnit: 166.67m, CostBox: 2000.00m, IsCostOnly: true),
+            new("CA086", "GUMMY CANDY ZANAHORIA", "Caramelos", "1*20*30", 20, 98.85m, 1977.01m, 96.63m, 1932.58m, 95.56m, 1911.11m),
+            new("CA087", "GUMMY CANDY CHILE", "Caramelos", "1*20*30", 20, 98.85m, 1977.01m, 96.63m, 1932.58m, 95.56m, 1911.11m),
 
             // Malvaviscos (15)
             new("MA001", "BOLSA CANDY SUPLAYER MALVAVISCO SUPER MINI MINO", "Malvaviscos", "1*8*70", 8, 252.00m, 2016.00m, 205.88m, 1647.06m, 214.77m, 1718.18m, 175.00m, 1400.00m),
