@@ -1588,6 +1588,8 @@ END
             new("GA055", "WE LOVE COCO SHOP", "Galletas", "1*6*24", 6, 271.67m, 1630.00m, 271.67m, 1630.00m, 271.67m, 1630.00m, CostUnit: 271.67m, CostBox: 1630.00m, IsCostOnly: true),
             new("GA056", "CHOCOLATE DE GUERRA XXL", "Galletas", "1*6*24", 6, 268.33m, 1610.00m, 268.33m, 1610.00m, 268.33m, 1610.00m, CostUnit: 268.33m, CostBox: 1610.00m, IsCostOnly: true),
             new("GA057", "MD 000MD GALLETA OMICO MINI SANDWICH BISCUI", "Galletas", "1*12*82", 12, 102.50m, 1230.00m, 102.50m, 1230.00m, 102.50m, 1230.00m, CostUnit: 102.50m, CostBox: 1230.00m, IsCostOnly: true),
+            new("GA058", "NUGA TIME CHOCOLATE", "Galletas", "1*8*85", 8, 237.50m, 1900.00m, 237.50m, 1900.00m, 237.50m, 1900.00m, CostUnit: 237.50m, CostBox: 1900.00m, IsCostOnly: true),
+            new("GA059", "BISMOLA BARRA DE CHOCOLATE", "Galletas", "1*6*24", 6, 233.33m, 1400.00m, 233.33m, 1400.00m, 233.33m, 1400.00m, CostUnit: 233.33m, CostBox: 1400.00m, IsCostOnly: true),
 
 
             // Caramelos (49)
