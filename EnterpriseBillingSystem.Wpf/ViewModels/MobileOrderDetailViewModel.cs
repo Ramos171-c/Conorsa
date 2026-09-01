@@ -776,17 +776,8 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                 // Line 1: Product Code + Description (with U/E)
                 itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{displayName}\n")));
                 
-                // Line 2: Cantidad x Precio Unitario = Total
-                if (item.MissingQuantity > 0)
-                {
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Run($"   Pedido:    {item.Quantity:N2} {item.UnitOfMeasure}\n"));
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   Faltante:  {item.MissingQuantity:N2} {item.UnitOfMeasure} [{(string.IsNullOrWhiteSpace(item.MissingReason) ? "No vino" : item.MissingReason)}]\n")));
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   Entregado: {item.DeliveredQuantity:N2} {item.UnitOfMeasure} x C${item.UnitPrice:N2} = C${item.EffectiveNetAmount:N2}\n")));
-                }
-                else
-                {
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {item.DeliveredQuantity:N2} {item.UnitOfMeasure} x C${item.UnitPrice:N2} = C${item.EffectiveNetAmount:N2}\n")));
-                }
+                // Line 2: Cantidad x Precio Unitario = Total (Se imprime solo lo entregado)
+                itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {item.DeliveredQuantity:N2} {item.UnitOfMeasure} x C${item.UnitPrice:N2} = C${item.EffectiveNetAmount:N2}\n")));
 
                 // Divider line between items
                 itemIndex++;
@@ -808,7 +799,6 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             };
 
             decimal delTotal = delSubtotal - delDiscount + delTax;
-            var missingItems = Details.Where(d => d.MissingQuantity > 0).ToList();
 
             totalsPara.Inlines.Add(new System.Windows.Documents.Run($"Subtotal:     C${delSubtotal:N2}\n"));
             if (delDiscount > 0)
@@ -837,15 +827,16 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                                      
                 if (!isDefaultNote)
                 {
-                    // Strip the [Faltantes] block from printed ticket observations
-                    int faltantesIndex = cleanNotes.IndexOf("[Faltantes]:", StringComparison.OrdinalIgnoreCase);
-                    if (faltantesIndex >= 0)
+                    // Strip any [Faltantes] / [PRODUCTOS NO ENTREGADOS] block from printed ticket observations
+                    notesText = cleanNotes;
+                    string[] tagsToStrip = new[] { "[Faltantes]:", "[PRODUCTOS NO ENTREGADOS", "[PRODUCTOS FALTANTES" };
+                    foreach (var tag in tagsToStrip)
                     {
-                        notesText = cleanNotes.Substring(0, faltantesIndex).Trim();
-                    }
-                    else
-                    {
-                        notesText = cleanNotes;
+                        int idx = notesText.IndexOf(tag, StringComparison.OrdinalIgnoreCase);
+                        if (idx >= 0)
+                        {
+                            notesText = notesText.Substring(0, idx).Trim();
+                        }
                     }
                     
                     showNotes = !string.IsNullOrWhiteSpace(notesText);
