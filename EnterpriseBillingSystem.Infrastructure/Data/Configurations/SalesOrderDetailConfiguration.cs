@@ -46,6 +46,10 @@ public class SalesOrderDetailConfiguration : IEntityTypeConfiguration<SalesOrder
         builder.ToTable(t => t.HasCheckConstraint("CK_SalesOrderDetail_UnitPrice", "[UnitPrice] >= 0"));
         builder.ToTable(t => t.HasCheckConstraint("CK_SalesOrderDetail_DiscountPct", "[DiscountPercentage] >= 0 AND [DiscountPercentage] <= 100"));
 
+        // Soft-delete: excluir detalles marcados como eliminados en todas las consultas.
+        // GetOrderDetailsIncludingDeletedAsync usa IgnoreQueryFilters() para acceder a los eliminados.
+        builder.HasQueryFilter(d => !d.IsDeleted);
+
         // Relaciones
         builder.HasOne(d => d.SalesOrder)
             .WithMany(so => so.Details)

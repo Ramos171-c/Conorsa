@@ -112,13 +112,15 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         decimal totalDiscount = 0;
         decimal totalTax = 0;
 
-        // 3.1 Eliminar detalles que ya no vienen en la solicitud
+        // 3.1 Eliminar detalles que ya no vienen en la solicitud.
+        // Se llama Remove en el repositorio (marca EntityState.Deleted) y se limpia la colección
+        // en memoria para evitar que EF los vuelva a rastrear como existentes.
         var requestedProductIds = request.Details.Select(d => d.ProductId).ToList();
         var detailsToRemove = order.Details.Where(d => !requestedProductIds.Contains(d.ProductId)).ToList();
         foreach (var detail in detailsToRemove)
         {
-            _salesOrderDetailRepository.Remove(detail);
             order.Details.Remove(detail);
+            _salesOrderDetailRepository.Remove(detail);
         }
 
         // 3.2 Agregar o actualizar detalles
@@ -143,6 +145,7 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
             var existingDetail = order.Details.FirstOrDefault(d => d.ProductId == req.ProductId);
             if (existingDetail != null)
             {
+                // Actualizar detalle existente — EF lo detecta como Modified automáticamente
                 existingDetail.UnitOfMeasureId = req.UnitOfMeasureId;
                 existingDetail.Quantity = req.Quantity;
                 existingDetail.UnitPrice = req.UnitPrice;
@@ -154,7 +157,9 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
             }
             else
             {
-                order.Details.Add(new SalesOrderDetail
+                // Nuevo detalle — se registra explícitamente en el DbSet para garantizar
+                // que EF lo marque como EntityState.Added y lo persista en la BD.
+                var newDetail = new SalesOrderDetail
                 {
                     Id = Guid.NewGuid(),
                     SalesOrderId = order.Id,
@@ -167,13 +172,15 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
                     TaxPercentage = effectiveTaxPct,
                     TaxAmount = taxAmount,
                     NetAmount = netAmount
-                });
+                };
+                await _salesOrderDetailRepository.AddAsync(newDetail);
+                order.Details.Add(newDetail);
             }
         }
 
         decimal totalAmount = subTotal - totalDiscount + totalTax;
 
-        // 4. Actualizar pedido
+        // 4. Actualizar encabezado del pedido
         order.CustomerId = request.CustomerId;
         order.OrderDate = request.OrderDate;
         order.SubTotal = subTotal;
@@ -189,46 +196,27 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
         order.LastModifiedBy = "System";
         order.LastModifiedOnUtc = DateTime.UtcNow;
 
+        // 5. Persistir todos los cambios (encabezado + detalles agregados/actualizados/eliminados)
+        // en una sola transacción. Si hay conflicto de concurrencia, se refrescan los valores
+        // originales y se reintenta una vez más antes de propagar el error al caller.
         try
         {
             await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
         catch (Microsoft.EntityFrameworkCore.DbUpdateConcurrencyException ex)
         {
+            // Refrescar los OriginalValues con los valores actuales de la BD
             foreach (var entry in ex.Entries)
             {
                 var databaseValues = await entry.GetDatabaseValuesAsync(cancellationToken);
                 if (databaseValues == null)
-                {
                     entry.State = Microsoft.EntityFrameworkCore.EntityState.Detached;
-                }
                 else
-                {
                     entry.OriginalValues.SetValues(databaseValues);
-                }
             }
-            try
-            {
-                await _unitOfWork.SaveChangesAsync(cancellationToken);
-            }
-            catch
-            {
-                var freshOrder = await _salesOrderRepository.GetByIdWithDetailsAsync(request.Id, cancellationToken);
-                if (freshOrder != null)
-                {
-                    freshOrder.SubTotal = subTotal;
-                    freshOrder.DiscountAmount = totalDiscount;
-                    freshOrder.TaxAmount = totalTax;
-                    freshOrder.TotalAmount = totalAmount;
-                    freshOrder.Notes = request.Notes;
-                    if (request.Status.HasValue) freshOrder.Status = request.Status.Value;
 
-                    freshOrder.LastModifiedBy = "System";
-                    freshOrder.LastModifiedOnUtc = DateTime.UtcNow;
-
-                    await _unitOfWork.SaveChangesAsync(cancellationToken);
-                }
-            }
+            // Reintentar con los valores corregidos — si falla nuevamente, propagar el error
+            await _unitOfWork.SaveChangesAsync(cancellationToken);
         }
 
         return Unit.Value;
