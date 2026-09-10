@@ -190,37 +190,6 @@ public class TransferInventoryCommandHandler : IRequestHandler<TransferInventory
 
         await _movementRepository.AddAsync(movement);
 
-        // 8. AutoMarkSoldOut
-        if (product.AutoMarkSoldOut)
-        {
-            var activeWarehouses = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
-            var activeWarehouseIds = activeWarehouses.Select(w => w.Id).ToList();
-            var inventories = await _inventoryRepository.FindAsync(i => i.ProductId == product.Id);
-            
-            // Consolidar existencias considerando que ya fueron modificadas en memoria
-            var otherWarehousesStock = inventories
-                .Where(i => i.Id != fromInventory.Id && i.Id != toInventory.Id && activeWarehouseIds.Contains(i.BranchWarehouseId))
-                .Sum(i => i.PhysicalStock);
-            
-            var totalPhysicalStock = otherWarehousesStock;
-            if (activeWarehouseIds.Contains(fromInventory.BranchWarehouseId))
-            {
-                totalPhysicalStock += fromInventory.PhysicalStock;
-            }
-            if (activeWarehouseIds.Contains(toInventory.BranchWarehouseId))
-            {
-                totalPhysicalStock += toInventory.PhysicalStock;
-            }
-
-            var newIsSoldOut = totalPhysicalStock <= 0;
-            if (product.IsSoldOut != newIsSoldOut)
-            {
-                product.IsSoldOut = newIsSoldOut;
-                product.SoldOutAt = newIsSoldOut ? DateTime.UtcNow : null;
-                product.SoldOutBy = newIsSoldOut ? (_currentUserService.UserId ?? "System") : null;
-                _productRepository.Update(product);
-            }
-        }
 
         await _unitOfWork.SaveChangesAsync(cancellationToken);
 

@@ -1,6 +1,5 @@
 using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -32,13 +31,9 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
 {
     private readonly ISalesInvoiceRepository _salesInvoiceRepository;
     private readonly ICustomerRepository _customerRepository;
-    private readonly IProductRepository _productRepository;
-    private readonly IInventoryRepository _inventoryRepository;
-    private readonly IInventoryMovementRepository _movementRepository;
     private readonly ICashSessionRepository _cashSessionRepository;
     private readonly IPaymentMethodRepository _paymentMethodRepository;
     private readonly IAccountsReceivableRepository _arRepository;
-    private readonly IRepository<BranchWarehouse> _branchWarehouseRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IMediator _mediator;
     private readonly ILogger<PostSalesInvoiceCommandHandler> _logger;
@@ -47,13 +42,9 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
     public PostSalesInvoiceCommandHandler(
         ISalesInvoiceRepository salesInvoiceRepository,
         ICustomerRepository customerRepository,
-        IProductRepository productRepository,
-        IInventoryRepository inventoryRepository,
-        IInventoryMovementRepository movementRepository,
         ICashSessionRepository cashSessionRepository,
         IPaymentMethodRepository paymentMethodRepository,
         IAccountsReceivableRepository arRepository,
-        IRepository<BranchWarehouse> branchWarehouseRepository,
         ICurrentUserService currentUserService,
         IMediator mediator,
         ILogger<PostSalesInvoiceCommandHandler> logger,
@@ -61,13 +52,9 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
     {
         _salesInvoiceRepository = salesInvoiceRepository;
         _customerRepository = customerRepository;
-        _productRepository = productRepository;
-        _inventoryRepository = inventoryRepository;
-        _movementRepository = movementRepository;
         _cashSessionRepository = cashSessionRepository;
         _paymentMethodRepository = paymentMethodRepository;
         _arRepository = arRepository;
-        _branchWarehouseRepository = branchWarehouseRepository;
         _currentUserService = currentUserService;
         _mediator = mediator;
         _logger = logger;
@@ -138,130 +125,7 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
             }
         }
 
-        // 4. Procesar inventario
-        var movementNumber = await _movementRepository.GenerateMovementNumberAsync(cancellationToken);
-        var movement = new InventoryMovement
-        {
-            Id = Guid.NewGuid(),
-            MovementNumber = movementNumber,
-            MovementType = MovementType.Sale,
-            FromBranchWarehouseId = invoice.BranchWarehouseId,
-            ToBranchWarehouseId = null,
-            ReferenceDocument = invoice.InvoiceNumber,
-            Notes = $"Salida por venta Factura {invoice.InvoiceNumber}",
-            MovementDate = invoice.InvoiceDate,
-            CreatedBy = _currentUserService.UserId ?? "System",
-            CreatedOnUtc = DateTime.UtcNow
-        };
-
-        bool requiresMovement = false;
-        decimal totalCost = 0;
-        var affectedProducts = new Dictionary<Guid, Product>();
-        var warehouse = await _branchWarehouseRepository.GetByIdAsync(invoice.BranchWarehouseId);
-
-        foreach (var detail in invoice.Details)
-        {
-            var product = await _productRepository.GetByIdWithDetailsAsync(detail.ProductId, cancellationToken);
-            if (product == null)
-                throw new ArgumentException($"El producto con Id '{detail.ProductId}' no existe.");
-            if (!product.IsActive)
-                throw new InvalidOperationException($"El producto '{product.Name}' no está activo.");
-
-            // Si el producto es servicio o no se trackea inventario, no afecta stock
-            if (product.ProductType == ProductType.Service || !product.TrackInventory)
-                continue;
-
-            if (!affectedProducts.ContainsKey(product.Id))
-            {
-                affectedProducts.Add(product.Id, product);
-            }
-
-            // Obtener presentación
-            var presentation = product.Presentations.FirstOrDefault(p => p.Id == detail.ProductPresentationId);
-            if (presentation == null)
-                throw new ArgumentException($"La presentación especificada no existe para el producto '{product.Name}'.");
-
-            decimal conversionFactor = presentation.ConversionFactor;
-            decimal quantityInBaseUnit = detail.Quantity * conversionFactor;
-
-            // Obtener stock actual
-            var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(invoice.BranchWarehouseId, detail.ProductId, cancellationToken);
-            if (inventory == null)
-            {
-                if (warehouse == null || !warehouse.AllowNegativeInventory)
-                {
-                    throw new InvalidOperationException($"Stock insuficiente para el producto '{product.Name}' en la bodega de salida. Disponible: 0, Requerido: {quantityInBaseUnit} (en unidad base).");
-                }
-                inventory = new Domain.Entities.Inventory
-                {
-                    Id = Guid.NewGuid(),
-                    BranchWarehouseId = invoice.BranchWarehouseId,
-                    ProductId = detail.ProductId,
-                    PhysicalStock = 0,
-                    ReservedStock = 0,
-                    CommittedStock = 0,
-                    CreatedBy = _currentUserService.UserId ?? "System",
-                    CreatedOnUtc = DateTime.UtcNow
-                };
-                await _inventoryRepository.AddAsync(inventory);
-            }
-            else if (warehouse == null || (!warehouse.AllowNegativeInventory && inventory.AvailableStock < quantityInBaseUnit))
-            {
-                throw new InvalidOperationException($"Stock insuficiente para el producto '{product.Name}' en la bodega de salida. Disponible: {inventory.AvailableStock}, Requerido: {quantityInBaseUnit} (en unidad base).");
-            }
-
-            // Descontar del inventario
-            inventory.PhysicalStock -= quantityInBaseUnit;
-            _inventoryRepository.Update(inventory);
-
-            // Detalle del movimiento Kardex
-            movement.Details.Add(new InventoryMovementDetail
-            {
-                Id = Guid.NewGuid(),
-                ProductId = detail.ProductId,
-                Quantity = detail.Quantity,
-                UnitOfMeasureId = detail.UnitOfMeasureId,
-                ProductPresentationId = detail.ProductPresentationId,
-                ConversionFactor = conversionFactor,
-                QuantityInBaseUnit = quantityInBaseUnit,
-                CreatedBy = _currentUserService.UserId ?? "System",
-                CreatedOnUtc = DateTime.UtcNow
-            });
-
-            totalCost += quantityInBaseUnit * product.CurrentCost;
-            requiresMovement = true;
-        }
-
-        if (requiresMovement)
-        {
-            await _movementRepository.AddAsync(movement);
-        }
-
-        // 4.5 AutoMarkSoldOut
-        foreach (var prod in affectedProducts.Values)
-        {
-            if (prod.AutoMarkSoldOut)
-            {
-                var activeWarehouses = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
-                var activeWarehouseIds = activeWarehouses.Select(w => w.Id).ToList();
-                var inventories = await _inventoryRepository.FindAsync(i => i.ProductId == prod.Id);
-                
-                var totalPhysicalStock = inventories
-                    .Where(i => activeWarehouseIds.Contains(i.BranchWarehouseId))
-                    .Sum(i => i.PhysicalStock);
-
-                var newIsSoldOut = totalPhysicalStock <= 0;
-                if (prod.IsSoldOut != newIsSoldOut)
-                {
-                    prod.IsSoldOut = newIsSoldOut;
-                    prod.SoldOutAt = newIsSoldOut ? DateTime.UtcNow : null;
-                    prod.SoldOutBy = newIsSoldOut ? (_currentUserService.UserId ?? "System") : null;
-                    _productRepository.Update(prod);
-                }
-            }
-        }
-
-        // 5. Registrar cobro en caja (si es contado)
+        // 4. Registrar cobro en caja (si es contado)
         if (!invoice.IsCreditSale && openSession != null && paymentMethod != null)
         {
             var cashMovement = new CashMovement
@@ -329,12 +193,8 @@ public class PostSalesInvoiceCommandHandler : IRequestHandler<PostSalesInvoiceCo
                 jeDetails.Add(new JournalEntryDetailInput("4100", 0, invoice.TotalAmount, $"Venta Factura Crédito {invoice.InvoiceNumber}"));
             }
 
-            if (totalCost > 0)
-            {
-                // Costo: Dr 5100 Costo de Ventas / Cr 1300 Inventarios
-                jeDetails.Add(new JournalEntryDetailInput("5100", totalCost, 0, $"Costo de Venta Factura {invoice.InvoiceNumber}"));
-                jeDetails.Add(new JournalEntryDetailInput("1300", 0, totalCost, $"Descargo Inventario Factura {invoice.InvoiceNumber}"));
-            }
+            // El costo de ventas ya no se calcula desde facturas (inventario manual).
+            // Se omite el asiento contable de costo.
 
             var createJeCmd = new CreateJournalEntryCommand(
                 EntryDate: invoice.InvoiceDate,

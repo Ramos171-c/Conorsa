@@ -25,8 +25,14 @@ class UserProfile {
       ? '$firstName $lastName' 
       : username;
 
-  /// Administrators (SUPER_ADMIN, ADMINISTRADOR) can access all routes
-  bool get isAdmin => role == 'SUPER_ADMIN' || role == 'ADMINISTRADOR';
+  /// Administrators (SUPER_ADMIN, ADMINISTRADOR, ADMIN, GERENTE, etc.)
+  bool get isAdmin => role == 'SUPER_ADMIN' || 
+                      role == 'ADMINISTRADOR' || 
+                      role.toUpperCase().contains('ADMIN') || 
+                      role.toUpperCase().contains('GERENTE') ||
+                      role.toUpperCase().contains('SUPERVISOR') ||
+                      permissions.contains('orders.cost_pricing') ||
+                      permissions.contains('products.view_cost');
 
   /// Returns null for admins so they see all customers from every route
   String? get effectiveRouteId => isAdmin ? null : routeId;

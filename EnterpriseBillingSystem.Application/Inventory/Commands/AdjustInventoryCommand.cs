@@ -180,33 +180,6 @@ public class AdjustInventoryCommandHandler : IRequestHandler<AdjustInventoryComm
 
         await _movementRepository.AddAsync(movement);
 
-        // 6. AutoMarkSoldOut
-        if (product.AutoMarkSoldOut)
-        {
-            var activeWarehouses = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
-            var activeWarehouseIds = activeWarehouses.Select(w => w.Id).ToList();
-            var inventories = await _inventoryRepository.FindAsync(i => i.ProductId == product.Id);
-            
-            // Consolidar existencias considerando que el inventario actual ya fue modificado en memoria
-            var otherWarehousesStock = inventories
-                .Where(i => i.Id != inventory.Id && activeWarehouseIds.Contains(i.BranchWarehouseId))
-                .Sum(i => i.PhysicalStock);
-            
-            var totalPhysicalStock = otherWarehousesStock;
-            if (activeWarehouseIds.Contains(inventory.BranchWarehouseId))
-            {
-                totalPhysicalStock += inventory.PhysicalStock;
-            }
-
-            var newIsSoldOut = totalPhysicalStock <= 0;
-            if (product.IsSoldOut != newIsSoldOut)
-            {
-                product.IsSoldOut = newIsSoldOut;
-                product.SoldOutAt = newIsSoldOut ? DateTime.UtcNow : null;
-                product.SoldOutBy = newIsSoldOut ? (_currentUserService.UserId ?? "System") : null;
-                _productRepository.Update(product);
-            }
-        }
 
         // Generar asiento contable automático
         var cost = quantityInBaseUnit * product.CurrentCost;

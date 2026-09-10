@@ -127,56 +127,10 @@ public class ApplicationDbContext : IdentityDbContext<ApplicationUser, Applicati
             }
         }
 
-        await ProcessAutoSoldOutAsync(cancellationToken);
 
         return await base.SaveChangesAsync(cancellationToken);
     }
 
-    private async Task ProcessAutoSoldOutAsync(CancellationToken cancellationToken)
-    {
-        var productIds = ChangeTracker.Entries<Inventory>()
-            .Where(e => e.State == EntityState.Added || e.State == EntityState.Modified || e.State == EntityState.Deleted)
-            .Select(e => e.Entity.ProductId)
-            .Distinct()
-            .ToList();
-
-        if (!productIds.Any()) return;
-
-        foreach (var productId in productIds)
-        {
-            var product = await Products.FirstOrDefaultAsync(p => p.Id == productId, cancellationToken);
-            if (product != null && product.AutoMarkSoldOut)
-            {
-                var dbItems = await Inventories.AsNoTracking()
-                    .Where(i => i.ProductId == productId && !i.IsDeleted)
-                    .ToListAsync(cancellationToken);
-
-                var stockDict = dbItems.ToDictionary(i => i.Id, i => i.PhysicalStock);
-
-                foreach (var entry in ChangeTracker.Entries<Inventory>().Where(e => e.Entity.ProductId == productId))
-                {
-                    if (entry.State == EntityState.Added || entry.State == EntityState.Modified)
-                    {
-                        stockDict[entry.Entity.Id] = entry.Entity.PhysicalStock;
-                    }
-                    else if (entry.State == EntityState.Deleted)
-                    {
-                        stockDict.Remove(entry.Entity.Id);
-                    }
-                }
-
-                var finalTotalStock = stockDict.Values.Sum();
-                var shouldBeSoldOut = finalTotalStock <= 0;
-
-                if (product.IsSoldOut != shouldBeSoldOut)
-                {
-                    product.IsSoldOut = shouldBeSoldOut;
-                    product.SoldOutAt = shouldBeSoldOut ? DateTime.UtcNow : null;
-                    product.SoldOutBy = shouldBeSoldOut ? (_currentUserService.UserId ?? "System (Auto)") : null;
-                }
-            }
-        }
-    }
 
     protected override void OnModelCreating(ModelBuilder builder)
     {

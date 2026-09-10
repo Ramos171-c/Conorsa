@@ -1,6 +1,4 @@
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using MediatR;
@@ -34,13 +32,9 @@ public class CancelSalesInvoiceCommandValidator : AbstractValidator<CancelSalesI
 public class CancelSalesInvoiceCommandHandler : IRequestHandler<CancelSalesInvoiceCommand, Unit>
 {
     private readonly ISalesInvoiceRepository _salesInvoiceRepository;
-    private readonly IProductRepository _productRepository;
-    private readonly IInventoryRepository _inventoryRepository;
-    private readonly IInventoryMovementRepository _movementRepository;
     private readonly ICashSessionRepository _cashSessionRepository;
     private readonly IPaymentMethodRepository _paymentMethodRepository;
     private readonly IAccountsReceivableRepository _arRepository;
-    private readonly IRepository<BranchWarehouse> _branchWarehouseRepository;
     private readonly ICurrentUserService _currentUserService;
     private readonly IJournalEntryRepository _journalEntryRepository;
     private readonly IMediator _mediator;
@@ -48,26 +42,18 @@ public class CancelSalesInvoiceCommandHandler : IRequestHandler<CancelSalesInvoi
 
     public CancelSalesInvoiceCommandHandler(
         ISalesInvoiceRepository salesInvoiceRepository,
-        IProductRepository productRepository,
-        IInventoryRepository inventoryRepository,
-        IInventoryMovementRepository movementRepository,
         ICashSessionRepository cashSessionRepository,
         IPaymentMethodRepository paymentMethodRepository,
         IAccountsReceivableRepository arRepository,
-        IRepository<BranchWarehouse> branchWarehouseRepository,
         ICurrentUserService currentUserService,
         IJournalEntryRepository journalEntryRepository,
         IMediator mediator,
         IUnitOfWork unitOfWork)
     {
         _salesInvoiceRepository = salesInvoiceRepository;
-        _productRepository = productRepository;
-        _inventoryRepository = inventoryRepository;
-        _movementRepository = movementRepository;
         _cashSessionRepository = cashSessionRepository;
         _paymentMethodRepository = paymentMethodRepository;
         _arRepository = arRepository;
-        _branchWarehouseRepository = branchWarehouseRepository;
         _currentUserService = currentUserService;
         _journalEntryRepository = journalEntryRepository;
         _mediator = mediator;
@@ -129,113 +115,8 @@ public class CancelSalesInvoiceCommandHandler : IRequestHandler<CancelSalesInvoi
             _cashSessionRepository.Update(openSession);
         }
 
-        // 3. Reversar inventario
-        var movementNumber = await _movementRepository.GenerateMovementNumberAsync(cancellationToken);
-        var movement = new InventoryMovement
-        {
-            Id = Guid.NewGuid(),
-            MovementNumber = movementNumber,
-            MovementType = MovementType.SaleReversal,
-            FromBranchWarehouseId = null,
-            ToBranchWarehouseId = invoice.BranchWarehouseId,
-            ReferenceDocument = invoice.InvoiceNumber,
-            Notes = $"Anulación de Factura {invoice.InvoiceNumber}. Motivo: {request.CancellationReason}",
-            MovementDate = DateTime.UtcNow,
-            CreatedBy = _currentUserService.UserId ?? "System",
-            CreatedOnUtc = DateTime.UtcNow
-        };
 
-        bool requiresMovement = false;
-        var affectedProducts = new Dictionary<Guid, Product>();
-
-        foreach (var detail in invoice.Details)
-        {
-            var product = await _productRepository.GetByIdWithDetailsAsync(detail.ProductId, cancellationToken);
-            if (product == null) continue;
-
-            if (product.ProductType == ProductType.Service || !product.TrackInventory)
-                continue;
-
-            if (!affectedProducts.ContainsKey(product.Id))
-            {
-                affectedProducts.Add(product.Id, product);
-            }
-
-            var presentation = product.Presentations.FirstOrDefault(p => p.Id == detail.ProductPresentationId);
-            if (presentation == null)
-                throw new ArgumentException($"La presentación especificada no existe para el producto '{product.Name}'.");
-
-            decimal conversionFactor = presentation.ConversionFactor;
-            decimal quantityInBaseUnit = detail.Quantity * conversionFactor;
-
-            var inventory = await _inventoryRepository.GetByWarehouseAndProductAsync(invoice.BranchWarehouseId, detail.ProductId, cancellationToken);
-            if (inventory == null)
-            {
-                inventory = new Domain.Entities.Inventory
-                {
-                    Id = Guid.NewGuid(),
-                    BranchWarehouseId = invoice.BranchWarehouseId,
-                    ProductId = detail.ProductId,
-                    PhysicalStock = quantityInBaseUnit,
-                    ReservedStock = 0,
-                    CommittedStock = 0,
-                    CreatedBy = _currentUserService.UserId ?? "System",
-                    CreatedOnUtc = DateTime.UtcNow
-                };
-                await _inventoryRepository.AddAsync(inventory);
-            }
-            else
-            {
-                inventory.PhysicalStock += quantityInBaseUnit;
-                _inventoryRepository.Update(inventory);
-            }
-
-            movement.Details.Add(new InventoryMovementDetail
-            {
-                Id = Guid.NewGuid(),
-                ProductId = detail.ProductId,
-                Quantity = detail.Quantity,
-                UnitOfMeasureId = detail.UnitOfMeasureId,
-                ProductPresentationId = detail.ProductPresentationId,
-                ConversionFactor = conversionFactor,
-                QuantityInBaseUnit = quantityInBaseUnit,
-                CreatedBy = _currentUserService.UserId ?? "System",
-                CreatedOnUtc = DateTime.UtcNow
-            });
-
-            requiresMovement = true;
-        }
-
-        if (requiresMovement)
-        {
-            await _movementRepository.AddAsync(movement);
-        }
-
-        // 3.5 AutoMarkSoldOut
-        foreach (var prod in affectedProducts.Values)
-        {
-            if (prod.AutoMarkSoldOut)
-            {
-                var activeWarehouses = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
-                var activeWarehouseIds = activeWarehouses.Select(w => w.Id).ToList();
-                var inventories = await _inventoryRepository.FindAsync(i => i.ProductId == prod.Id);
-                
-                var totalPhysicalStock = inventories
-                    .Where(i => activeWarehouseIds.Contains(i.BranchWarehouseId))
-                    .Sum(i => i.PhysicalStock);
-
-                var newIsSoldOut = totalPhysicalStock <= 0;
-                if (prod.IsSoldOut != newIsSoldOut)
-                {
-                    prod.IsSoldOut = newIsSoldOut;
-                    prod.SoldOutAt = newIsSoldOut ? DateTime.UtcNow : null;
-                    prod.SoldOutBy = newIsSoldOut ? (_currentUserService.UserId ?? "System") : null;
-                    _productRepository.Update(prod);
-                }
-            }
-        }
-
-        // 4. Cambiar estado de la factura
+        // 3. Cambiar estado de la factura
         invoice.Status = SalesInvoiceStatus.Cancelled;
         invoice.CancellationReason = request.CancellationReason;
         invoice.CancelledOnUtc = DateTime.UtcNow;

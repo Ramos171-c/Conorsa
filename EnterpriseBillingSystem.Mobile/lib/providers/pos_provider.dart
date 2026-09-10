@@ -283,7 +283,9 @@ class PosProvider extends ChangeNotifier {
 
     // 3. Determine Level using manual override (defaults to 'DETALLE')
     int finalLevel = 0;
-    if (_manualPricingLevelOverride == 'MAYORISTA') {
+    if (_manualPricingLevelOverride == 'COSTO') {
+      finalLevel = -1;
+    } else if (_manualPricingLevelOverride == 'MAYORISTA') {
       finalLevel = 2;
     } else if (_manualPricingLevelOverride == 'SEMI MAYORISTA') {
       finalLevel = 1;
@@ -291,16 +293,26 @@ class PosProvider extends ChangeNotifier {
 
     // 5. Map final level and update unitPriceDisplayed/lineTotal on all items
     _subtotalCommercial = 0.0;
-    _currentLevel = finalLevel == 2 
-        ? 'MAYORISTA' 
-        : (finalLevel == 1 ? 'SEMI MAYORISTA' : 'DETALLE');
+    if (finalLevel == -1) {
+      _currentLevel = 'COSTO';
+    } else if (finalLevel == 2) {
+      _currentLevel = 'MAYORISTA';
+    } else if (finalLevel == 1) {
+      _currentLevel = 'SEMI MAYORISTA';
+    } else {
+      _currentLevel = 'DETALLE';
+    }
 
     for (var item in _cart) {
       double price = item.presentation.retailPrice;
       if (item.manualPriceOverride != null) {
         price = item.manualPriceOverride!;
       } else {
-        if (finalLevel == 2) {
+        if (finalLevel == -1) {
+          price = item.presentation.cost > 0 
+              ? item.presentation.cost 
+              : item.presentation.retailPrice;
+        } else if (finalLevel == 2) {
           price = item.presentation.wholesalePrice > 0 
               ? item.presentation.wholesalePrice 
               : item.presentation.retailPrice;

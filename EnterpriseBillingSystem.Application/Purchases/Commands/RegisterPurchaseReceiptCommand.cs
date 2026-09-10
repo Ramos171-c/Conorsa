@@ -285,29 +285,6 @@ public class RegisterPurchaseReceiptCommandHandler : IRequestHandler<RegisterPur
 
         await _movementRepository.AddAsync(movement);
 
-        // 8.5 AutoMarkSoldOut
-        foreach (var prod in affectedProducts.Values)
-        {
-            if (prod.AutoMarkSoldOut)
-            {
-                var activeWarehouses = await _branchWarehouseRepository.FindAsync(bw => bw.IsActive);
-                var activeWarehouseIds = activeWarehouses.Select(w => w.Id).ToList();
-                var inventories = await _inventoryRepository.FindAsync(i => i.ProductId == prod.Id);
-                
-                var totalPhysicalStock = inventories
-                    .Where(i => activeWarehouseIds.Contains(i.BranchWarehouseId))
-                    .Sum(i => i.PhysicalStock);
-
-                var newIsSoldOut = totalPhysicalStock <= 0;
-                if (prod.IsSoldOut != newIsSoldOut)
-                {
-                    prod.IsSoldOut = newIsSoldOut;
-                    prod.SoldOutAt = newIsSoldOut ? DateTime.UtcNow : null;
-                    prod.SoldOutBy = newIsSoldOut ? (_currentUserService.UserId ?? "System") : null;
-                    _productRepository.Update(prod);
-                }
-            }
-        }
 
         // 9. Guardar todo en una sola transacción
         await _unitOfWork.SaveChangesAsync(cancellationToken);

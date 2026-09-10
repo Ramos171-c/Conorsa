@@ -118,7 +118,9 @@ class _PosScreenState extends State<PosScreen> {
 
     // Calculate initial price based on level
     double initialPrice = selectedPresentation.retailPrice;
-    if (posProv.currentLevel == 'MAYORISTA') {
+    if (posProv.currentLevel == 'COSTO') {
+      initialPrice = selectedPresentation.cost > 0 ? selectedPresentation.cost : selectedPresentation.retailPrice;
+    } else if (posProv.currentLevel == 'MAYORISTA') {
       initialPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
     } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
       initialPrice = selectedPresentation.semiWholesalePrice > 0 ? selectedPresentation.semiWholesalePrice : selectedPresentation.retailPrice;
@@ -167,7 +169,9 @@ class _PosScreenState extends State<PosScreen> {
                           
                           // Recalculate price
                           double newPrice = selectedPresentation.retailPrice;
-                          if (posProv.currentLevel == 'MAYORISTA') {
+                          if (posProv.currentLevel == 'COSTO') {
+                            newPrice = selectedPresentation.cost > 0 ? selectedPresentation.cost : selectedPresentation.retailPrice;
+                          } else if (posProv.currentLevel == 'MAYORISTA') {
                             newPrice = selectedPresentation.wholesalePrice > 0 ? selectedPresentation.wholesalePrice : selectedPresentation.retailPrice;
                           } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
                             newPrice = selectedPresentation.semiWholesalePrice > 0 ? selectedPresentation.semiWholesalePrice : selectedPresentation.retailPrice;
@@ -635,13 +639,18 @@ class _PosScreenState extends State<PosScreen> {
   Widget _buildHeaderPanel(PosProvider posProv, AuthProvider auth) {
     Color badgeColor = Colors.green;
     IconData badgeIcon = Icons.star_border_rounded;
-    if (posProv.currentLevel == 'MAYORISTA') {
+    if (posProv.currentLevel == 'COSTO') {
+      badgeColor = Colors.purple.shade700;
+      badgeIcon = Icons.monetization_on_outlined;
+    } else if (posProv.currentLevel == 'MAYORISTA') {
       badgeColor = Colors.blue.shade700;
       badgeIcon = Icons.stars_rounded;
     } else if (posProv.currentLevel == 'SEMI MAYORISTA') {
       badgeColor = Colors.orange.shade700;
       badgeIcon = Icons.star_half_rounded;
     }
+
+    final isAdmin = auth.userProfile?.isAdmin == true;
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
@@ -672,23 +681,97 @@ class _PosScreenState extends State<PosScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: badgeColor.withOpacity(0.1),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: badgeColor, width: 1.2),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    Icon(badgeIcon, color: badgeColor, size: 13),
-                    const SizedBox(width: 4),
-                    Text(
-                      posProv.currentLevel,
-                      style: TextStyle(color: badgeColor, fontWeight: FontWeight.bold, fontSize: 10),
+              PopupMenuButton<String>(
+                tooltip: 'Cambiar Nivel de Precio',
+                offset: const Offset(0, 30),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                onSelected: (level) {
+                  posProv.setManualPricingLevelOverride(level);
+                },
+                itemBuilder: (context) {
+                  return [
+                    PopupMenuItem(
+                      value: 'DETALLE',
+                      child: Row(
+                        children: [
+                          Icon(Icons.star_border_rounded, color: Colors.green.shade600, size: 20),
+                          const SizedBox(width: 10),
+                          const Text('Detalle', style: TextStyle(fontWeight: FontWeight.w600)),
+                          if (posProv.currentLevel == 'DETALLE') ...[
+                            const Spacer(),
+                            const Icon(Icons.check, color: Colors.green, size: 18),
+                          ],
+                        ],
+                      ),
                     ),
-                  ],
+                    PopupMenuItem(
+                      value: 'SEMI MAYORISTA',
+                      child: Row(
+                        children: [
+                          Icon(Icons.star_half_rounded, color: Colors.orange.shade700, size: 20),
+                          const SizedBox(width: 10),
+                          const Text('Semi Mayorista', style: TextStyle(fontWeight: FontWeight.w600)),
+                          if (posProv.currentLevel == 'SEMI MAYORISTA') ...[
+                            const Spacer(),
+                            const Icon(Icons.check, color: Colors.orange, size: 18),
+                          ],
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'MAYORISTA',
+                      child: Row(
+                        children: [
+                          Icon(Icons.stars_rounded, color: Colors.blue.shade700, size: 20),
+                          const SizedBox(width: 10),
+                          const Text('Mayorista', style: TextStyle(fontWeight: FontWeight.w600)),
+                          if (posProv.currentLevel == 'MAYORISTA') ...[
+                            const Spacer(),
+                            const Icon(Icons.check, color: Colors.blue, size: 18),
+                          ],
+                        ],
+                      ),
+                    ),
+                    if (isAdmin)
+                      PopupMenuItem(
+                        value: 'COSTO',
+                        child: Row(
+                          children: [
+                            Icon(Icons.monetization_on_outlined, color: Colors.purple.shade700, size: 20),
+                            const SizedBox(width: 10),
+                            Text(
+                              'Costo (Admin)',
+                              style: TextStyle(fontWeight: FontWeight.w600, color: Colors.purple.shade700),
+                            ),
+                            if (posProv.currentLevel == 'COSTO') ...[
+                              const Spacer(),
+                              Icon(Icons.check, color: Colors.purple.shade700, size: 18),
+                            ],
+                          ],
+                        ),
+                      ),
+                  ];
+                },
+                child: Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
+                  decoration: BoxDecoration(
+                    color: badgeColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(color: badgeColor, width: 1.2),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      Icon(badgeIcon, color: badgeColor, size: 13),
+                      const SizedBox(width: 4),
+                      Text(
+                        posProv.currentLevel,
+                        style: TextStyle(color: badgeColor, fontWeight: FontWeight.bold, fontSize: 10),
+                      ),
+                      const SizedBox(width: 2),
+                      Icon(Icons.arrow_drop_down, color: badgeColor, size: 14),
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -1343,7 +1426,11 @@ class _PosScreenState extends State<PosScreen> {
       orElse: () => product.presentations.first,
     );
 
-    if (level == 'MAYORISTA') {
+    if (level == 'COSTO') {
+      return presentation.cost > 0 
+          ? presentation.cost 
+          : presentation.retailPrice;
+    } else if (level == 'MAYORISTA') {
       return presentation.wholesalePrice > 0 
           ? presentation.wholesalePrice 
           : presentation.retailPrice;

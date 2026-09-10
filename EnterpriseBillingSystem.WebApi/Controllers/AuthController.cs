@@ -120,6 +120,37 @@ public class AuthController : ApiControllerBase
 
         return BadRequest(new { Errors = result.Errors.Select(e => e.Description) });
     }
+
+    [HttpPost("reset-all-passwords")]
+    [AllowAnonymous]
+    public async Task<IActionResult> ResetAllPasswords(
+        [FromServices] Microsoft.AspNetCore.Identity.UserManager<EnterpriseBillingSystem.Domain.Entities.ApplicationUser> userManager)
+    {
+        var excluded = new HashSet<string>(StringComparer.OrdinalIgnoreCase) { "Ramos", "Winsston" };
+        var users = userManager.Users
+            .Where(u => !excluded.Contains(u.UserName!))
+            .ToList();
+
+        var success = new List<string>();
+        var failed = new List<object>();
+
+        foreach (var user in users)
+        {
+            var token = await userManager.GeneratePasswordResetTokenAsync(user);
+            var result = await userManager.ResetPasswordAsync(user, token, "1234");
+            if (result.Succeeded)
+                success.Add(user.UserName!);
+            else
+                failed.Add(new { User = user.UserName, Errors = result.Errors.Select(e => e.Description) });
+        }
+
+        return Ok(new
+        {
+            Message = $"Proceso completado. {success.Count} contraseñas actualizadas, {failed.Count} fallidas.",
+            Updated = success,
+            Failed = failed
+        });
+    }
 }
 
 public record LoginRequest(string Username, string Password);
