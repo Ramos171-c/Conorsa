@@ -528,42 +528,6 @@
         "SemiFactor":  1.0000
     },
     {
-        "Code":  "CA088",
-        "Name":  "GOMITA TARRO SANTA CLAUS",
-        "CategoryName":  "Caramelos",
-        "BrandName":  "",
-        "Description":  "GOMITA TARRO SANTA CLAUS 1*20*30",
-        "ImagePath":  "",
-        "BoxUe":  "Caja",
-        "BoxFactor":  20.0000,
-        "SemiUe":  "Unidad",
-        "SemiFactor":  1.0000
-    },
-    {
-        "Code":  "CA087",
-        "Name":  "GUMMY CANDY CHILE",
-        "CategoryName":  "Caramelos",
-        "BrandName":  "",
-        "Description":  "GUMMY CANDY CHILE 1*20*30",
-        "ImagePath":  "",
-        "BoxUe":  "Caja",
-        "BoxFactor":  20.0000,
-        "SemiUe":  "Unidad",
-        "SemiFactor":  1.0000
-    },
-    {
-        "Code":  "CA086",
-        "Name":  "GUMMY CANDY ZANAHORIA",
-        "CategoryName":  "Caramelos",
-        "BrandName":  "",
-        "Description":  "GUMMY CANDY ZANAHORIA 1*20*30",
-        "ImagePath":  "",
-        "BoxUe":  "Caja",
-        "BoxFactor":  20.0000,
-        "SemiUe":  "Unidad",
-        "SemiFactor":  1.0000
-    },
-    {
         "Code":  "LU182",
         "Name":  "CHILE BRIOMOL 89g",
         "CategoryName":  "Chiles",
@@ -1284,30 +1248,6 @@
         "SemiFactor":  1.0000
     },
     {
-        "Code":  "GA061",
-        "Name":  "GALLETAS RELLENAS CON QUESO ZIPS",
-        "CategoryName":  "Galletas",
-        "BrandName":  "",
-        "Description":  "GALLETAS RELLENAS CON QUESO ZIPS 1*12*13",
-        "ImagePath":  "",
-        "BoxUe":  "Caja",
-        "BoxFactor":  12.0000,
-        "SemiUe":  "Unidad",
-        "SemiFactor":  1.0000
-    },
-    {
-        "Code":  "GA060",
-        "Name":  "GALLETAS SALADAS ZIPS",
-        "CategoryName":  "Galletas",
-        "BrandName":  "",
-        "Description":  "GALLETAS SALADAS ZIPS 1*24*12",
-        "ImagePath":  "",
-        "BoxUe":  "Caja",
-        "BoxFactor":  24.0000,
-        "SemiUe":  "Unidad",
-        "SemiFactor":  1.0000
-    },
-    {
         "Code":  "LU086",
         "Name":  "HARIMASA 410g",
         "CategoryName":  "Harinas",
@@ -1689,18 +1629,6 @@
         "BoxUe":  "Mayorista",
         "BoxFactor":  30.0000,
         "SemiUe":  "Semimayorista",
-        "SemiFactor":  1.0000
-    },
-    {
-        "Code":  "MA016",
-        "Name":  "MARSHMALLOW SANTA CLAUS",
-        "CategoryName":  "Malvaviscos",
-        "BrandName":  "",
-        "Description":  "MARSHMALLOW SANTA CLAUS (U/E: 1*12*24)",
-        "ImagePath":  "",
-        "BoxUe":  "Caja",
-        "BoxFactor":  12.0000,
-        "SemiUe":  "Unidad",
         "SemiFactor":  1.0000
     },
     {
