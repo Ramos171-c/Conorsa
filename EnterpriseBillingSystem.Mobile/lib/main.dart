@@ -1,4 +1,4 @@
-import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'providers/config_provider.dart';
@@ -8,24 +8,12 @@ import 'providers/pos_provider.dart';
 import 'services/api_service.dart';
 import 'screens/catalog_screen.dart';
 import 'screens/home_screen.dart';
-
-import 'package:flutter/foundation.dart';
-
-// Bypass self-signed certificate checks in local development environments
-class MyHttpOverrides extends HttpOverrides {
-  @override
-  HttpClient createHttpClient(SecurityContext? context) {
-    return super.createHttpClient(context)
-      ..badCertificateCallback = (X509Certificate cert, String host, int port) => true;
-  }
-}
+import 'utils/http_overrides.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  if (!kIsWeb) {
-    HttpOverrides.global = MyHttpOverrides();
-  }
+  setupHttpOverrides();
 
   // Global Flutter error handling
   FlutterError.onError = (FlutterErrorDetails details) {
@@ -69,7 +57,6 @@ void main() async {
     ),
   );
 }
-
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

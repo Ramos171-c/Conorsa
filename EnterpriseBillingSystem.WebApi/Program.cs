@@ -172,6 +172,10 @@ try
 
     app.MapControllers();
 
+    // Redirección y soporte SPA para Flutter Web (/app/)
+    app.MapGet("/app", () => Results.Redirect("/app/"));
+    app.MapFallbackToFile("app/{*path}", "app/index.html");
+
     // Sembrar la base de datos al inicio
     try
     {
