@@ -1,5 +1,6 @@
 using System;
 using System.IO;
+using System.Net.Http;
 using System.Windows;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
@@ -60,23 +61,28 @@ public partial class App : Application
         var apiUri = new Uri(baseUrl);
         RelativeImageUrlConverter.ApiImageBaseUrl = $"{apiUri.Scheme}://{apiUri.Authority}";
 
-        services.AddHttpClient<AuthApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        
-        services.AddHttpClient<CustomerApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<SupplierApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<ProductApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<InventoryApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<SalesApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<PurchaseApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<CashApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<AccountsReceivableApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<AccountsPayableApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<AccountingApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<TreasuryApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<FixedAssetsApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<PosApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<UserApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
-        services.AddHttpClient<AdministrationApiClient>(client => client.BaseAddress = new Uri(baseUrl)).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        Action<HttpClient> configureClient = client =>
+        {
+            client.BaseAddress = new Uri(baseUrl);
+            client.Timeout = TimeSpan.FromSeconds(15);
+        };
+
+        services.AddHttpClient<AuthApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<CustomerApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<SupplierApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<ProductApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<InventoryApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<SalesApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<PurchaseApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<CashApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<AccountsReceivableApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<AccountsPayableApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<AccountingApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<TreasuryApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<FixedAssetsApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<PosApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<UserApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
+        services.AddHttpClient<AdministrationApiClient>(configureClient).AddHttpMessageHandler<JwtAuthHeaderHandler>();
 
         // Register ViewModels
         services.AddSingleton<MainViewModel>();
@@ -141,23 +147,44 @@ public partial class App : Application
     protected override async void OnStartup(StartupEventArgs e)
     {
         base.OnStartup(e);
-        await AppHost!.StartAsync();
 
-        // Check auto-login
-        var authService = AppHost.Services.GetRequiredService<IAuthenticationService>();
-        var autoLoginSuccess = await authService.AutoLoginAsync();
-
-        if (autoLoginSuccess)
+        try
         {
-            var shellWindow = AppHost.Services.GetRequiredService<ShellWindow>();
-            MainWindow = shellWindow;
-            shellWindow.Show();
+            await AppHost!.StartAsync();
+
+            // Check auto-login (max 3 seconds)
+            var authService = AppHost.Services.GetRequiredService<IAuthenticationService>();
+            var autoLoginSuccess = await authService.AutoLoginAsync();
+
+            if (autoLoginSuccess)
+            {
+                var shellWindow = AppHost.Services.GetRequiredService<ShellWindow>();
+                MainWindow = shellWindow;
+                shellWindow.Show();
+            }
+            else
+            {
+                var loginWindow = AppHost.Services.GetRequiredService<LoginWindow>();
+                MainWindow = loginWindow;
+                loginWindow.Show();
+            }
         }
-        else
+        catch (Exception ex)
         {
-            var loginWindow = AppHost.Services.GetRequiredService<LoginWindow>();
-            MainWindow = loginWindow;
-            loginWindow.Show();
+            try
+            {
+                var loginWindow = AppHost?.Services.GetService<LoginWindow>() 
+                                  ?? new LoginWindow(new ViewModels.LoginViewModel(
+                                      AppHost!.Services.GetRequiredService<IAuthenticationService>(),
+                                      AppHost!.Services.GetRequiredService<Services.Dialogs.INotificationService>()));
+                MainWindow = loginWindow;
+                loginWindow.Show();
+            }
+            catch
+            {
+                MessageBox.Show($"Error al inicializar la aplicación: {ex.Message}", "Error de Inicio", MessageBoxButton.OK, MessageBoxImage.Error);
+                Shutdown();
+            }
         }
     }
 

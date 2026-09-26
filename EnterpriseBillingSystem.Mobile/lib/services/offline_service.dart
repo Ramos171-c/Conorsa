@@ -1,6 +1,5 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'image_cache_service.dart';
 
 class OfflineService {
   static const String _keyCachedProducts = 'cached_products';
@@ -16,21 +15,33 @@ class OfflineService {
   Future<void> cacheProducts(List<dynamic> products) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      await prefs.setString(_keyCachedProducts, jsonEncode(products));
+      // Keep essential fields compact to preserve memory and avoid Binder size limits
+      final compactList = products.map((p) {
+        if (p is Map<String, dynamic>) {
+          return {
+            'id': p['id'],
+            'internalCode': p['internalCode'],
+            'barcode': p['barcode'],
+            'name': p['name'],
+            'description': p['description'],
+            'defaultUnitOfMeasureId': p['defaultUnitOfMeasureId'],
+            'defaultUnitOfMeasureCode': p['defaultUnitOfMeasureCode'],
+            'defaultSalePrice': p['defaultSalePrice'] ?? p['defaultPrice'],
+            'imageUrl': p['imageUrl'] ?? p['imagePath'],
+            'isActive': p['isActive'],
+            'isSoldOut': p['isSoldOut'],
+            'categoryId': p['categoryId'],
+            'categoryName': p['categoryName'],
+            'presentations': p['presentations'],
+          };
+        }
+        return p;
+      }).toList();
 
-      // Pre-cache product images in the background
-      final apiUrl = prefs.getString('api_base_url') ?? 'http://167.99.13.177:8081/api/v1';
-      final uri = Uri.parse(apiUrl);
-      final base = '${uri.scheme}://${uri.host}${uri.hasPort ? ":${uri.port}" : ""}';
-
-      final urls = products
-          .map((p) => (p['imageUrl'] as String? ?? p['imagePath'] as String?) ?? '')
-          .where((url) => url.isNotEmpty)
-          .map((url) => url.startsWith('http') ? url : '$base${url.startsWith('/') ? "" : "/"}$url')
-          .toList();
-      ImageCacheService.cacheImages(urls);
+      await prefs.setString(_keyCachedProducts, jsonEncode(compactList));
     } catch (_) {}
   }
+
 
   Future<List<dynamic>> getCachedProducts() async {
     try {

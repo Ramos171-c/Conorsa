@@ -14,6 +14,7 @@ namespace EnterpriseBillingSystem.Application.Customers.Commands;
 public record CreateCustomerAddressInput(
     string AddressLine1,
     string? AddressLine2,
+    string? Neighborhood,
     string City,
     string? State,
     string? ZipCode,
@@ -142,7 +143,6 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
 
     public async Task<Guid> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
     {
-        // Generar código autogenerado
         var customerCode = await _customerRepository.GenerateCustomerCodeAsync(cancellationToken);
 
         Guid? sellerRouteId = null;
@@ -174,7 +174,6 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
             RouteId = request.RouteId ?? sellerRouteId
         };
 
-        // Agregar direcciones
         if (request.Addresses != null)
         {
             foreach (var addr in request.Addresses)
@@ -183,6 +182,7 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
                 {
                     AddressLine1 = addr.AddressLine1,
                     AddressLine2 = addr.AddressLine2,
+                    Neighborhood = addr.Neighborhood,
                     City = addr.City,
                     State = addr.State,
                     ZipCode = addr.ZipCode,
@@ -193,7 +193,6 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
             }
         }
 
-        // Agregar teléfonos
         if (request.Phones != null)
         {
             foreach (var ph in request.Phones)
@@ -207,7 +206,6 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
             }
         }
 
-        // Agregar correos
         if (request.Emails != null)
         {
             foreach (var em in request.Emails)
@@ -221,7 +219,6 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
             }
         }
 
-        // Agregar contactos
         if (request.Contacts != null)
         {
             foreach (var co in request.Contacts)

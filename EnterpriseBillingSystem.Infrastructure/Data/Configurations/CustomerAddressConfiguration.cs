@@ -19,6 +19,9 @@ public class CustomerAddressConfiguration : IEntityTypeConfiguration<CustomerAdd
         builder.Property(ca => ca.AddressLine2)
             .HasMaxLength(200);
 
+        builder.Property(ca => ca.Neighborhood)
+            .HasMaxLength(150);
+
         builder.Property(ca => ca.City)
             .IsRequired()
             .HasMaxLength(100);

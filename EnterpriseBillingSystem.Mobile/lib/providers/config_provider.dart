@@ -53,6 +53,15 @@ class ConfigProvider extends ChangeNotifier {
         _apiUrl = fallbackUrl;
       } else {
         final prefs = await SharedPreferences.getInstance();
+
+        // Safe cleanup of legacy base64 image strings to avoid storage bloating
+        try {
+          final keys = prefs.getKeys().where((k) => k.startsWith('cached_img_')).toList();
+          for (final k in keys) {
+            await prefs.remove(k);
+          }
+        } catch (_) {}
+
         final saved = prefs.getString(_keyApiUrl);
         if (saved != null) {
           _apiUrl = sanitizeUrl(saved);
@@ -71,6 +80,7 @@ class ConfigProvider extends ChangeNotifier {
       notifyListeners();
     }
   }
+
 
   Future<void> updateApiUrl(String newUrl) async {
     _apiUrl = sanitizeUrl(newUrl);

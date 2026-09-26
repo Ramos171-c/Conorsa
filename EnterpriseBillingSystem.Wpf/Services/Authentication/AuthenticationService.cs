@@ -68,7 +68,8 @@ public class AuthenticationService : IAuthenticationService
 
             try
             {
-                var profile = await _authApiClient.GetMeAsync();
+                using var cts = new System.Threading.CancellationTokenSource(TimeSpan.FromSeconds(3));
+                var profile = await _authApiClient.GetMeAsync(cts.Token);
                 if (profile != null)
                 {
                     _currentUserService.CurrentUser = profile;

@@ -36,6 +36,7 @@ public record CustomerAddressDto(
     Guid Id,
     string AddressLine1,
     string? AddressLine2,
+    string? Neighborhood,
     string City,
     string? State,
     string? ZipCode,
@@ -101,6 +102,7 @@ public record CustomerDto(
 public record CreateCustomerAddressInput(
     string AddressLine1,
     string? AddressLine2,
+    string? Neighborhood,
     string City,
     string? State,
     string? ZipCode,
@@ -157,6 +159,7 @@ public record UpdateCustomerAddressInput(
     Guid Id,
     string AddressLine1,
     string? AddressLine2,
+    string? Neighborhood,
     string City,
     string? State,
     string? ZipCode,

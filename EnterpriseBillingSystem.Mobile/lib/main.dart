@@ -21,14 +21,35 @@ class MyHttpOverrides extends HttpOverrides {
 }
 
 void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
   if (!kIsWeb) {
     HttpOverrides.global = MyHttpOverrides();
   }
-  WidgetsFlutterBinding.ensureInitialized();
 
-  // Create core service instances
+  // Global Flutter error handling
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
+    if (kDebugMode) {
+      print('Flutter global error: ${details.exceptionAsString()}');
+    }
+  };
+
+  // Platform async error handling
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (kDebugMode) {
+      print('Platform async error: $error\n$stack');
+    }
+    return true;
+  };
+
+  // Create core service instances safely
   final configProvider = ConfigProvider();
-  await configProvider.loadConfig();
+  try {
+    await configProvider.loadConfig();
+  } catch (e) {
+    if (kDebugMode) print('Config load error: $e');
+  }
 
   final apiService = ApiService(configProvider);
   final authProvider = AuthProvider(apiService);
@@ -48,6 +69,7 @@ void main() async {
     ),
   );
 }
+
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});

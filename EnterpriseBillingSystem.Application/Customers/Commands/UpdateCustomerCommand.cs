@@ -15,6 +15,7 @@ public record UpdateCustomerAddressInput(
     Guid Id,
     string AddressLine1,
     string? AddressLine2,
+    string? Neighborhood,
     string City,
     string? State,
     string? ZipCode,
@@ -86,14 +87,14 @@ public class UpdateCustomerCommandValidator : AbstractValidator<UpdateCustomerCo
         _pricingProfileRepository = pricingProfileRepository;
 
         RuleFor(x => x.Id)
-            .NotEmpty().WithMessage("El ID del cliente es requerido.");
+            .NotEmpty().WithMessage("El identificador del cliente es requerido.");
 
         RuleFor(x => x.IdentificationNumber)
             .NotEmpty().WithMessage("El número de identificación es requerido.")
             .MaximumLength(50).WithMessage("El número de identificación no puede exceder 50 caracteres.")
-            .MustAsync(async (cmd, idNumber, cancellation) =>
+            .MustAsync(async (command, idNumber, cancellation) =>
             {
-                return !await _customerRepository.ExistsByIdentificationAsync(idNumber, cmd.Id, cancellation);
+                return !await _customerRepository.ExistsByIdentificationAsync(idNumber, command.Id, cancellation);
             }).WithMessage("Ya existe otro cliente activo con este número de identificación.");
 
         RuleFor(x => x.Name)
@@ -163,148 +164,138 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
         customer.Status = request.Status;
         customer.RouteId = request.RouteId;
 
-        // 1. Sincronizar Direcciones
-        var inputAddrIds = request.Addresses.Where(a => a.Id != Guid.Empty).Select(a => a.Id).ToList();
-        foreach (var existingAddr in customer.Addresses.ToList())
+        // Actualizar direcciones
+        var incomingAddrIds = request.Addresses.Where(a => a.Id != Guid.Empty).Select(a => a.Id).ToHashSet();
+        foreach (var existing in customer.Addresses.Where(a => !incomingAddrIds.Contains(a.Id)).ToList())
         {
-            if (!inputAddrIds.Contains(existingAddr.Id))
-            {
-                existingAddr.IsDeleted = true;
-            }
+            customer.Addresses.Remove(existing);
         }
-        foreach (var addrInput in request.Addresses)
+        foreach (var incoming in request.Addresses)
         {
-            if (addrInput.Id == Guid.Empty)
+            if (incoming.Id == Guid.Empty)
             {
                 customer.Addresses.Add(new CustomerAddress
                 {
-                    AddressLine1 = addrInput.AddressLine1,
-                    AddressLine2 = addrInput.AddressLine2,
-                    City = addrInput.City,
-                    State = addrInput.State,
-                    ZipCode = addrInput.ZipCode,
-                    Country = addrInput.Country,
-                    AddressType = addrInput.AddressType,
-                    IsDefault = addrInput.IsDefault
+                    AddressLine1 = incoming.AddressLine1,
+                    AddressLine2 = incoming.AddressLine2,
+                    Neighborhood = incoming.Neighborhood,
+                    City = incoming.City,
+                    State = incoming.State,
+                    ZipCode = incoming.ZipCode,
+                    Country = incoming.Country,
+                    AddressType = incoming.AddressType,
+                    IsDefault = incoming.IsDefault
                 });
             }
             else
             {
-                var existing = customer.Addresses.FirstOrDefault(a => a.Id == addrInput.Id);
-                if (existing != null)
+                var addr = customer.Addresses.FirstOrDefault(a => a.Id == incoming.Id);
+                if (addr != null)
                 {
-                    existing.AddressLine1 = addrInput.AddressLine1;
-                    existing.AddressLine2 = addrInput.AddressLine2;
-                    existing.City = addrInput.City;
-                    existing.State = addrInput.State;
-                    existing.ZipCode = addrInput.ZipCode;
-                    existing.Country = addrInput.Country;
-                    existing.AddressType = addrInput.AddressType;
-                    existing.IsDefault = addrInput.IsDefault;
+                    addr.AddressLine1 = incoming.AddressLine1;
+                    addr.AddressLine2 = incoming.AddressLine2;
+                    addr.Neighborhood = incoming.Neighborhood;
+                    addr.City = incoming.City;
+                    addr.State = incoming.State;
+                    addr.ZipCode = incoming.ZipCode;
+                    addr.Country = incoming.Country;
+                    addr.AddressType = incoming.AddressType;
+                    addr.IsDefault = incoming.IsDefault;
                 }
             }
         }
 
-        // 2. Sincronizar Teléfonos
-        var inputPhoneIds = request.Phones.Where(p => p.Id != Guid.Empty).Select(p => p.Id).ToList();
-        foreach (var existingPhone in customer.Phones.ToList())
+        // Actualizar teléfonos
+        var incomingPhoneIds = request.Phones.Where(p => p.Id != Guid.Empty).Select(p => p.Id).ToHashSet();
+        foreach (var existing in customer.Phones.Where(p => !incomingPhoneIds.Contains(p.Id)).ToList())
         {
-            if (!inputPhoneIds.Contains(existingPhone.Id))
-            {
-                existingPhone.IsDeleted = true;
-            }
+            customer.Phones.Remove(existing);
         }
-        foreach (var phoneInput in request.Phones)
+        foreach (var incoming in request.Phones)
         {
-            if (phoneInput.Id == Guid.Empty)
+            if (incoming.Id == Guid.Empty)
             {
                 customer.Phones.Add(new CustomerPhone
                 {
-                    PhoneNumber = phoneInput.PhoneNumber,
-                    PhoneType = phoneInput.PhoneType,
-                    IsDefault = phoneInput.IsDefault
+                    PhoneNumber = incoming.PhoneNumber,
+                    PhoneType = incoming.PhoneType,
+                    IsDefault = incoming.IsDefault
                 });
             }
             else
             {
-                var existing = customer.Phones.FirstOrDefault(p => p.Id == phoneInput.Id);
-                if (existing != null)
+                var ph = customer.Phones.FirstOrDefault(p => p.Id == incoming.Id);
+                if (ph != null)
                 {
-                    existing.PhoneNumber = phoneInput.PhoneNumber;
-                    existing.PhoneType = phoneInput.PhoneType;
-                    existing.IsDefault = phoneInput.IsDefault;
+                    ph.PhoneNumber = incoming.PhoneNumber;
+                    ph.PhoneType = incoming.PhoneType;
+                    ph.IsDefault = incoming.IsDefault;
                 }
             }
         }
 
-        // 3. Sincronizar Correos
-        var inputEmailIds = request.Emails.Where(e => e.Id != Guid.Empty).Select(e => e.Id).ToList();
-        foreach (var existingEmail in customer.Emails.ToList())
+        // Actualizar correos
+        var incomingEmailIds = request.Emails.Where(e => e.Id != Guid.Empty).Select(e => e.Id).ToHashSet();
+        foreach (var existing in customer.Emails.Where(e => !incomingEmailIds.Contains(e.Id)).ToList())
         {
-            if (!inputEmailIds.Contains(existingEmail.Id))
-            {
-                existingEmail.IsDeleted = true;
-            }
+            customer.Emails.Remove(existing);
         }
-        foreach (var emailInput in request.Emails)
+        foreach (var incoming in request.Emails)
         {
-            if (emailInput.Id == Guid.Empty)
+            if (incoming.Id == Guid.Empty)
             {
                 customer.Emails.Add(new CustomerEmail
                 {
-                    EmailAddress = emailInput.EmailAddress,
-                    EmailType = emailInput.EmailType,
-                    IsDefault = emailInput.IsDefault
+                    EmailAddress = incoming.EmailAddress,
+                    EmailType = incoming.EmailType,
+                    IsDefault = incoming.IsDefault
                 });
             }
             else
             {
-                var existing = customer.Emails.FirstOrDefault(e => e.Id == emailInput.Id);
-                if (existing != null)
+                var em = customer.Emails.FirstOrDefault(e => e.Id == incoming.Id);
+                if (em != null)
                 {
-                    existing.EmailAddress = emailInput.EmailAddress;
-                    existing.EmailType = emailInput.EmailType;
-                    existing.IsDefault = emailInput.IsDefault;
+                    em.EmailAddress = incoming.EmailAddress;
+                    em.EmailType = incoming.EmailType;
+                    em.IsDefault = incoming.IsDefault;
                 }
             }
         }
 
-        // 4. Sincronizar Contactos
-        var inputContactIds = request.Contacts.Where(c => c.Id != Guid.Empty).Select(c => c.Id).ToList();
-        foreach (var existingContact in customer.Contacts.ToList())
+        // Actualizar contactos
+        var incomingContactIds = request.Contacts.Where(c => c.Id != Guid.Empty).Select(c => c.Id).ToHashSet();
+        foreach (var existing in customer.Contacts.Where(c => !incomingContactIds.Contains(c.Id)).ToList())
         {
-            if (!inputContactIds.Contains(existingContact.Id))
-            {
-                existingContact.IsDeleted = true;
-            }
+            customer.Contacts.Remove(existing);
         }
-        foreach (var contactInput in request.Contacts)
+        foreach (var incoming in request.Contacts)
         {
-            if (contactInput.Id == Guid.Empty)
+            if (incoming.Id == Guid.Empty)
             {
                 customer.Contacts.Add(new CustomerContact
                 {
-                    FirstName = contactInput.FirstName,
-                    LastName = contactInput.LastName,
-                    JobTitle = contactInput.JobTitle,
-                    Phone = contactInput.Phone,
-                    Email = contactInput.Email,
-                    Notes = contactInput.Notes,
-                    IsDefault = contactInput.IsDefault
+                    FirstName = incoming.FirstName,
+                    LastName = incoming.LastName,
+                    JobTitle = incoming.JobTitle,
+                    Phone = incoming.Phone,
+                    Email = incoming.Email,
+                    Notes = incoming.Notes,
+                    IsDefault = incoming.IsDefault
                 });
             }
             else
             {
-                var existing = customer.Contacts.FirstOrDefault(c => c.Id == contactInput.Id);
-                if (existing != null)
+                var co = customer.Contacts.FirstOrDefault(c => c.Id == incoming.Id);
+                if (co != null)
                 {
-                    existing.FirstName = contactInput.FirstName;
-                    existing.LastName = contactInput.LastName;
-                    existing.JobTitle = contactInput.JobTitle;
-                    existing.Phone = contactInput.Phone;
-                    existing.Email = contactInput.Email;
-                    existing.Notes = contactInput.Notes;
-                    existing.IsDefault = contactInput.IsDefault;
+                    co.FirstName = incoming.FirstName;
+                    co.LastName = incoming.LastName;
+                    co.JobTitle = incoming.JobTitle;
+                    co.Phone = incoming.Phone;
+                    co.Email = incoming.Email;
+                    co.Notes = incoming.Notes;
+                    co.IsDefault = incoming.IsDefault;
                 }
             }
         }

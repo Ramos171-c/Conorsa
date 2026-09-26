@@ -22,6 +22,9 @@ class MockApiService implements ApiService {
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 
   @override
+  Function()? onSessionExpired;
+
+  @override
   Future<bool> hasSession() async => false;
 
   @override
@@ -32,6 +35,7 @@ class MockApiService implements ApiService {
     return http.Response('{"items": []}', 200);
   }
 }
+
 
 void main() {
   testWidgets('App initialization smoke test', (WidgetTester tester) async {
@@ -55,10 +59,12 @@ void main() {
     );
 
     // Let the checking session and post-frame callbacks complete
-    await tester.pumpAndSettle();
+    await tester.pump();
+    await tester.pump(const Duration(milliseconds: 500));
 
     // Now it should land on the CatalogScreen
     expect(find.text('Catálogo de Productos'), findsOneWidget);
   });
 }
+
 

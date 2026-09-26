@@ -35,6 +35,9 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
   String _country = 'Nicaragua';
   String _phoneNumber = '';
   String _emailAddress = '';
+  String _neighborhood = '';
+  String? _selectedRouteId;
+  List<dynamic> _routes = [];
 
   // Options lists loaded from backend
   List<dynamic> _categories = [];
@@ -77,6 +80,19 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
         loadedProfiles = jsonDecode(profResponse.body) as List<dynamic>? ?? [];
         await offlineService.cachePricingProfiles(loadedProfiles);
       }
+
+      // 3. Fetch routes
+      try {
+        final routesResponse = await apiService.get('/routes?pageNumber=1&pageSize=100');
+        if (routesResponse.statusCode == 200) {
+          final rData = jsonDecode(routesResponse.body);
+          if (rData is Map && rData['items'] != null) {
+            _routes = rData['items'] as List<dynamic>;
+          } else if (rData is List) {
+            _routes = rData;
+          }
+        }
+      } catch (_) {}
     } catch (e) {
       // Load from cache on error
       loadedCategories = await offlineService.getCachedCustomerCategories();
@@ -109,6 +125,9 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
           orElse: () => _pricingProfiles.first,
         );
         _selectedPricingProfileId = retailProfile['id'];
+      }
+      if (_routes.isNotEmpty && _selectedRouteId == null) {
+        _selectedRouteId = _routes[0]['id']?.toString();
       }
     });
 
@@ -149,6 +168,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
         addresses.add({
           'AddressLine1': _addressLine1.trim().isNotEmpty ? _addressLine1.trim() : 'Dirección principal',
           'AddressLine2': '',
+          'Neighborhood': _neighborhood.trim().isNotEmpty ? _neighborhood.trim() : null,
           'City': _city.trim().isNotEmpty ? _city.trim() : 'Managua',
           'State': '',
           'ZipCode': '',
@@ -186,6 +206,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
         'LegalName': _legalName.trim().isNotEmpty ? _legalName.trim() : null,
         'CustomerCategoryId': _selectedCategoryId,
         'CustomerPricingProfileId': _selectedPricingProfileId,
+        'RouteId': _selectedRouteId,
         'CreditLimit': _canUseCredit ? _creditLimit : 0.0,
         'CreditDays': _canUseCredit ? _creditDays : 0,
         'CanUseCredit': _canUseCredit,
@@ -411,6 +432,28 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
                             value == null || value.trim().isEmpty ? 'El nombre es requerido.' : null,
                         onSaved: (val) => _name = val ?? '',
                       ),
+                      if (_routes.isNotEmpty) ...[
+                        const SizedBox(height: 16),
+                        DropdownButtonFormField<String>(
+                          value: _selectedRouteId,
+                          decoration: const InputDecoration(
+                            labelText: 'Ruta Asignada',
+                            prefixIcon: Icon(Icons.alt_route_rounded),
+                            border: OutlineInputBorder(),
+                          ),
+                          items: _routes.map((r) {
+                            return DropdownMenuItem<String>(
+                              value: r['id']?.toString(),
+                              child: Text(r['name']?.toString() ?? 'Ruta'),
+                            );
+                          }).toList(),
+                          onChanged: (val) {
+                            setState(() {
+                              _selectedRouteId = val;
+                            });
+                          },
+                        ),
+                      ],
                     ]),
 
                     const SizedBox(height: 20),
@@ -448,6 +491,16 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
                           border: OutlineInputBorder(),
                         ),
                         onSaved: (val) => _addressLine1 = val ?? '',
+                      ),
+                      const SizedBox(height: 16),
+                      TextFormField(
+                        decoration: const InputDecoration(
+                          labelText: 'Barrio / Colonia / Comarca',
+                          hintText: 'Ej. Barrio San Judas o Col. Centroamérica',
+                          prefixIcon: Icon(Icons.holiday_village_outlined),
+                          border: OutlineInputBorder(),
+                        ),
+                        onSaved: (val) => _neighborhood = val ?? '',
                       ),
                       const SizedBox(height: 16),
                       Row(

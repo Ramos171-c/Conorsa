@@ -64,12 +64,19 @@ public class AuthApiClient
         throw new Exception($"[(HTTP {(int)response.StatusCode})] {cleanMessage}");
     }
 
-    public async Task<CurrentUserDto?> GetMeAsync()
+    public async Task<CurrentUserDto?> GetMeAsync(System.Threading.CancellationToken cancellationToken = default)
     {
-        var response = await _httpClient.GetAsync("auth/me");
-        if (response.IsSuccessStatusCode)
+        try
         {
-            return await response.Content.ReadFromJsonAsync<CurrentUserDto>();
+            var response = await _httpClient.GetAsync("auth/me", cancellationToken);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<CurrentUserDto>(cancellationToken: cancellationToken);
+            }
+        }
+        catch
+        {
+            // Timeout or network error
         }
         return null;
     }

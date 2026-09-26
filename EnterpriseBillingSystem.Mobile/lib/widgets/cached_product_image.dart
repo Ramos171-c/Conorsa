@@ -1,9 +1,7 @@
-import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/config_provider.dart';
-import '../services/image_cache_service.dart';
 
 class CachedProductImage extends StatefulWidget {
   final String? imageUrl;
@@ -13,55 +11,42 @@ class CachedProductImage extends StatefulWidget {
   final double iconSize;
 
   const CachedProductImage({
-    Key? key,
+    super.key,
     required this.imageUrl,
     this.width,
     this.height,
     this.fit = BoxFit.cover,
     this.iconSize = 50,
-  }) : super(key: key);
+  });
 
   @override
   State<CachedProductImage> createState() => _CachedProductImageState();
 }
 
 class _CachedProductImageState extends State<CachedProductImage> {
-  String? _base64Data;
   String? _resolvedUrl;
-  bool _isLoading = true;
 
   @override
   void initState() {
     super.initState();
-    _loadImage();
+    _resolveUrl();
   }
 
   @override
   void didUpdateWidget(covariant CachedProductImage oldWidget) {
     super.didUpdateWidget(oldWidget);
     if (oldWidget.imageUrl != widget.imageUrl) {
-      _loadImage();
+      _resolveUrl();
     }
   }
 
-  Future<void> _loadImage() async {
-    setState(() {
-      _isLoading = true;
-    });
-
+  void _resolveUrl() {
     var url = widget.imageUrl ?? '';
     if (url.isEmpty || url.contains('default-product.png')) {
-      if (mounted) {
-        setState(() {
-          _base64Data = null;
-          _resolvedUrl = null;
-          _isLoading = false;
-        });
-      }
+      _resolvedUrl = null;
       return;
     }
 
-    // Resolve URL to match the current active API base URL (handling localhost, 127.0.0.1, relative paths, port mismatches)
     try {
       final config = Provider.of<ConfigProvider>(context, listen: false);
       final apiUri = Uri.parse(config.apiUrl);
@@ -77,90 +62,45 @@ class _CachedProductImageState extends State<CachedProductImage> {
       }
     } catch (_) {}
 
-    // On Flutter Web, use browser native network loading and caching directly
     if (kIsWeb) {
-      // Add hourly cache-buster so the browser always loads the latest image
-      // without caching stale versions across image updates
       final hourBucket = DateTime.now().millisecondsSinceEpoch ~/ (1000 * 60 * 60);
-      final bustUrl = url.contains('?') ? '$url&_v=$hourBucket' : '$url?_v=$hourBucket';
-      if (mounted) {
-        setState(() {
-          _resolvedUrl = bustUrl;
-          _isLoading = false;
-        });
-      }
-      return;
-    }
-
-    // 1. Check local cache first on native platforms
-    final cached = await ImageCacheService.getCachedImageBase64(url);
-    if (cached != null) {
-      if (mounted) {
-        setState(() {
-          _base64Data = cached;
-          _isLoading = false;
-        });
-      }
-      return;
-    }
-
-    // 2. Download and cache on-the-fly on native platforms
-    final downloaded = await ImageCacheService.downloadAndCacheOnTheFly(url);
-    if (mounted) {
-      setState(() {
-        _base64Data = downloaded;
-        _isLoading = false;
-      });
+      _resolvedUrl = url.contains('?') ? '$url&_v=$hourBucket' : '$url?_v=$hourBucket';
+    } else {
+      _resolvedUrl = url;
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    if (_isLoading) {
-      return Container(
-        width: widget.width,
-        height: widget.height,
-        color: const Color(0xFFF8FAFC),
-        child: const Center(
-          child: SizedBox(
-            width: 24,
-            height: 24,
-            child: CircularProgressIndicator(
-              strokeWidth: 2,
-              color: Color(0xFF94A3B8),
-            ),
-          ),
-        ),
-      );
+    if (_resolvedUrl == null || _resolvedUrl!.isEmpty) {
+      return _buildPlaceholder();
     }
 
-    if (kIsWeb && _resolvedUrl != null && _resolvedUrl!.isNotEmpty) {
-      return Image.network(
-        _resolvedUrl!,
-        width: widget.width,
-        height: widget.height,
-        fit: widget.fit,
-        errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
-      );
-    }
-
-    if (_base64Data != null && _base64Data!.isNotEmpty) {
-      try {
-        final bytes = base64Decode(_base64Data!);
-        return Image.memory(
-          bytes,
+    return Image.network(
+      _resolvedUrl!,
+      width: widget.width,
+      height: widget.height,
+      fit: widget.fit,
+      loadingBuilder: (context, child, loadingProgress) {
+        if (loadingProgress == null) return child;
+        return Container(
           width: widget.width,
           height: widget.height,
-          fit: widget.fit,
-          errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+          color: const Color(0xFFF8FAFC),
+          child: const Center(
+            child: SizedBox(
+              width: 20,
+              height: 20,
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                color: Color(0xFF94A3B8),
+              ),
+            ),
+          ),
         );
-      } catch (_) {
-        return _buildPlaceholder();
-      }
-    }
-
-    // Fallback if not loaded, not cached, and no internet
-    return _buildPlaceholder();
+      },
+      errorBuilder: (context, error, stackTrace) => _buildPlaceholder(),
+    );
   }
 
   Widget _buildPlaceholder() {
@@ -178,3 +118,4 @@ class _CachedProductImageState extends State<CachedProductImage> {
     );
   }
 }
+

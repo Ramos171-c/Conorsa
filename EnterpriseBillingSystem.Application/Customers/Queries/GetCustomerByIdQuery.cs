@@ -45,7 +45,7 @@ public class GetCustomerByIdQueryHandler : IRequestHandler<GetCustomerByIdQuery,
             customer.DefaultDiscountPercentage,
             customer.Status,
             customer.Addresses.Select(a => new CustomerAddressDto(
-                a.Id, a.AddressLine1, a.AddressLine2, a.City, a.State, a.ZipCode, a.Country, a.AddressType, a.IsDefault
+                a.Id, a.AddressLine1, a.AddressLine2, a.Neighborhood, a.City, a.State, a.ZipCode, a.Country, a.AddressType, a.IsDefault
             )).ToList(),
             customer.Phones.Select(p => new CustomerPhoneDto(
                 p.Id, p.PhoneNumber, p.PhoneType, p.IsDefault
