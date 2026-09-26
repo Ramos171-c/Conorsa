@@ -54,13 +54,15 @@ class ConfigProvider extends ChangeNotifier {
       } else {
         final prefs = await SharedPreferences.getInstance();
 
-        // Safe cleanup of legacy base64 image strings to avoid storage bloating
-        try {
-          final keys = prefs.getKeys().where((k) => k.startsWith('cached_img_')).toList();
-          for (final k in keys) {
-            await prefs.remove(k);
-          }
-        } catch (_) {}
+        // Async non-blocking cleanup of legacy base64 image keys
+        Future.microtask(() async {
+          try {
+            final keys = prefs.getKeys().where((k) => k.startsWith('cached_img_')).toList();
+            for (final k in keys) {
+              await prefs.remove(k);
+            }
+          } catch (_) {}
+        });
 
         final saved = prefs.getString(_keyApiUrl);
         if (saved != null) {

@@ -294,6 +294,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
           addresses.add({
             'AddressLine1': _addressLine1.trim().isNotEmpty ? _addressLine1.trim() : 'Dirección principal',
             'AddressLine2': '',
+            'Neighborhood': _neighborhood.trim().isNotEmpty ? _neighborhood.trim() : null,
             'City': _city.trim().isNotEmpty ? _city.trim() : 'Managua',
             'State': '',
             'ZipCode': '',
@@ -342,7 +343,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
           'phones': phones,
           'emails': emails,
           'contacts': [],
-          'routeId': authProv.userProfile?.routeId,
+          'routeId': _selectedRouteId ?? authProv.userProfile?.routeId,
         };
 
         await offlineService.saveOfflineCustomer(offlineCustomer);

@@ -11,17 +11,28 @@ import 'register_customer_screen.dart';
 import 'goals_screen.dart';
 import 'dashboard_screen.dart';
 
-class HomeScreen extends StatelessWidget {
+class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
+
+  @override
+  State<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends State<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        Provider.of<OrderProvider>(context, listen: false).syncOfflineData();
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
     final auth = Provider.of<AuthProvider>(context);
     final profile = auth.userProfile;
-
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      Provider.of<OrderProvider>(context, listen: false).syncOfflineData();
-    });
 
     return Scaffold(
       backgroundColor: const Color(0xFFF1F5F9), // Light grey

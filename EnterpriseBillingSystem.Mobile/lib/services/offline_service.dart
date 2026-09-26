@@ -15,21 +15,18 @@ class OfflineService {
   Future<void> cacheProducts(List<dynamic> products) async {
     try {
       final prefs = await SharedPreferences.getInstance();
-      // Keep essential fields compact to preserve memory and avoid Binder size limits
-      final compactList = products.map((p) {
+      // Cap at top 200 products and strip large metadata to avoid SharedPreferences / Android Binder bloat
+      final boundedList = products.take(200);
+      final compactList = boundedList.map((p) {
         if (p is Map<String, dynamic>) {
           return {
             'id': p['id'],
             'internalCode': p['internalCode'],
-            'barcode': p['barcode'],
             'name': p['name'],
-            'description': p['description'],
-            'defaultUnitOfMeasureId': p['defaultUnitOfMeasureId'],
-            'defaultUnitOfMeasureCode': p['defaultUnitOfMeasureCode'],
             'defaultSalePrice': p['defaultSalePrice'] ?? p['defaultPrice'],
             'imageUrl': p['imageUrl'] ?? p['imagePath'],
-            'isActive': p['isActive'],
-            'isSoldOut': p['isSoldOut'],
+            'isActive': p['isActive'] ?? true,
+            'isSoldOut': p['isSoldOut'] ?? false,
             'categoryId': p['categoryId'],
             'categoryName': p['categoryName'],
             'presentations': p['presentations'],

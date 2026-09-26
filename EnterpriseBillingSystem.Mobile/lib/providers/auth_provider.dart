@@ -36,27 +36,38 @@ class AuthProvider extends ChangeNotifier {
     try {
       final hasToken = await apiService.hasSession();
       if (hasToken) {
+        // 1. Immediately try to load cached profile from local storage
         try {
-          // Load the profile to confirm token is valid
+          final prefs = await SharedPreferences.getInstance();
+          final cachedData = prefs.getString('cached_user_profile');
+          if (cachedData != null) {
+            _userProfile = UserProfile.fromJson(jsonDecode(cachedData));
+            _isLoggedIn = true;
+          }
+        } catch (_) {}
+
+        // 2. Fetch or refresh profile from API without kicking user on transient network errors
+        try {
           final success = await fetchUserProfile();
           if (success) {
             _isLoggedIn = true;
-          } else {
-            // Token is invalid/expired and refresh failed
+          } else if (_userProfile == null) {
+            // Only clear auth data if we have no valid cached profile
             _isLoggedIn = false;
             await apiService.clearAuthData();
           }
-        } on NetworkException {
-          // Server unreachable, but we have local token & cached profile.
-          // Keep user logged in offline.
-          _isLoggedIn = true;
+        } catch (_) {
+          // Network error or timeout: keep session active if token exists
+          if (_userProfile != null) {
+            _isLoggedIn = true;
+          }
         }
       } else {
         _isLoggedIn = false;
       }
     } catch (e) {
       _isLoggedIn = false;
-      _errorMessage = 'Error al verificar sesión: $e';
+      _errorMessage = 'Error al verificar sesión: ';
     } finally {
       _isLoading = false;
       notifyListeners();
