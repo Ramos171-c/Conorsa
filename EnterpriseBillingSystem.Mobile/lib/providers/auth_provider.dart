@@ -23,15 +23,25 @@ class AuthProvider extends ChangeNotifier {
     apiService.onSessionExpired = () {
       _isLoggedIn = false;
       _userProfile = null;
-      notifyListeners();
+      _safeNotifyListeners();
     };
     checkActiveSession();
+  }
+
+  void _safeNotifyListeners() {
+    try {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        notifyListeners();
+      });
+    } catch (_) {
+      notifyListeners();
+    }
   }
 
   // Check if a session already exists and is valid
   Future<void> checkActiveSession() async {
     _isLoading = true;
-    notifyListeners();
+    _safeNotifyListeners();
 
     try {
       final hasToken = await apiService.hasSession();
@@ -67,10 +77,10 @@ class AuthProvider extends ChangeNotifier {
       }
     } catch (e) {
       _isLoggedIn = false;
-      _errorMessage = 'Error al verificar sesión: ';
+      _errorMessage = 'Error al verificar sesión: $e';
     } finally {
       _isLoading = false;
-      notifyListeners();
+      _safeNotifyListeners();
     }
   }
 

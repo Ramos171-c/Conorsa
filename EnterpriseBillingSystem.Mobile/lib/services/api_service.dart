@@ -137,8 +137,24 @@ class ApiService {
     return response;
   }
 
-  // Attempt to refresh JWT token
+  Future<bool>? _refreshFuture;
+
+  // Attempt to refresh JWT token (Thread-safe mutex to prevent concurrent refresh requests)
   Future<bool> _attemptTokenRefresh() async {
+    if (_refreshFuture != null) {
+      return _refreshFuture!;
+    }
+
+    _refreshFuture = _doAttemptTokenRefresh();
+    try {
+      final result = await _refreshFuture!;
+      return result;
+    } finally {
+      _refreshFuture = null;
+    }
+  }
+
+  Future<bool> _doAttemptTokenRefresh() async {
     try {
       final prefs = await SharedPreferences.getInstance();
       final currentToken = prefs.getString(_keyToken);
@@ -160,22 +176,24 @@ class ApiService {
           'Token': currentToken,
           'RefreshToken': refreshToken,
         }),
-      );
+      ).timeout(const Duration(seconds: 10));
 
       if (response.statusCode == 200) {
         final data = jsonDecode(response.body);
         await saveAuthData(
-          accessToken: data['accessToken'],
-          refreshToken: data['refreshToken'],
-          expiration: data['expiration'],
-          username: data['username'],
+          accessToken: data['accessToken']?.toString() ?? '',
+          refreshToken: data['refreshToken']?.toString() ?? '',
+          expiration: data['expiration']?.toString() ?? '',
+          username: data['username']?.toString() ?? '',
         );
         if (kDebugMode) print('API Token refreshed successfully.');
         return true;
       } else {
         if (kDebugMode) print('API Token refresh failed. Status: ${response.statusCode}');
-        await clearAuthData();
-        onSessionExpired?.call();
+        if (response.statusCode == 400 || response.statusCode == 401 || response.statusCode == 403) {
+          await clearAuthData();
+          onSessionExpired?.call();
+        }
         return false;
       }
     } catch (e) {

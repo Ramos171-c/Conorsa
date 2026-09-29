@@ -89,8 +89,8 @@ class _HomeScreenState extends State<HomeScreen> {
                         radius: 30,
                         backgroundColor: const Color(0xFF38BDF8),
                         child: Text(
-                          profile?.firstName.isNotEmpty == true 
-                              ? profile!.firstName[0].toUpperCase() 
+                          (profile?.firstName != null && profile!.firstName.isNotEmpty)
+                              ? profile.firstName[0].toUpperCase()
                               : 'U',
                           style: const TextStyle(
                             fontSize: 24, 
