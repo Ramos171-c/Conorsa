@@ -164,9 +164,9 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
 
       // Build addresses list
       final List<Map<String, dynamic>> addresses = [];
-      if (_addressLine1.trim().isNotEmpty || _city.trim().isNotEmpty) {
+      if (_addressLine1.trim().isNotEmpty || _city.trim().isNotEmpty || _neighborhood.trim().isNotEmpty) {
         addresses.add({
-          'AddressLine1': _addressLine1.trim().isNotEmpty ? _addressLine1.trim() : 'Dirección principal',
+          'AddressLine1': _addressLine1.trim().isNotEmpty ? _addressLine1.trim() : (_neighborhood.trim().isNotEmpty ? 'Barrio ${_neighborhood.trim()}' : 'Dirección principal'),
           'AddressLine2': '',
           'Neighborhood': _neighborhood.trim().isNotEmpty ? _neighborhood.trim() : null,
           'City': _city.trim().isNotEmpty ? _city.trim() : 'Managua',
@@ -290,9 +290,9 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
         final tempId = 'temp_${DateTime.now().millisecondsSinceEpoch}';
         
         final List<Map<String, dynamic>> addresses = [];
-        if (_addressLine1.trim().isNotEmpty || _city.trim().isNotEmpty) {
+        if (_addressLine1.trim().isNotEmpty || _city.trim().isNotEmpty || _neighborhood.trim().isNotEmpty) {
           addresses.add({
-            'AddressLine1': _addressLine1.trim().isNotEmpty ? _addressLine1.trim() : 'Dirección principal',
+            'AddressLine1': _addressLine1.trim().isNotEmpty ? _addressLine1.trim() : (_neighborhood.trim().isNotEmpty ? 'Barrio ${_neighborhood.trim()}' : 'Dirección principal'),
             'AddressLine2': '',
             'Neighborhood': _neighborhood.trim().isNotEmpty ? _neighborhood.trim() : null,
             'City': _city.trim().isNotEmpty ? _city.trim() : 'Managua',

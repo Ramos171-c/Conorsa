@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../providers/order_provider.dart';
 import '../providers/auth_provider.dart';
 import '../models/product.dart';
+import 'register_customer_screen.dart';
 
 class CreateOrderScreen extends StatefulWidget {
   const CreateOrderScreen({super.key});
@@ -309,15 +310,43 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          TextField(
-            controller: _customerSearchController,
-            decoration: InputDecoration(
-              prefixIcon: const Icon(Icons.search),
-              hintText: 'Buscar cliente por nombre o código...',
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
-              filled: true,
-              fillColor: Colors.white,
-            ),
+          Row(
+            children: [
+              Expanded(
+                child: TextField(
+                  controller: _customerSearchController,
+                  decoration: InputDecoration(
+                    prefixIcon: const Icon(Icons.search),
+                    hintText: 'Buscar por nombre o código...',
+                    border: OutlineInputBorder(borderRadius: BorderRadius.circular(12)),
+                    filled: true,
+                    fillColor: Colors.white,
+                    contentPadding: const EdgeInsets.symmetric(vertical: 12),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 8),
+              ElevatedButton.icon(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF0F172A),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 14),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+                label: const Text('Nuevo', style: TextStyle(fontWeight: FontWeight.bold)),
+                onPressed: () async {
+                  final result = await Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const RegisterCustomerScreen()),
+                  );
+                  if (result == true) {
+                    final authProv = Provider.of<AuthProvider>(context, listen: false);
+                    Provider.of<OrderProvider>(context, listen: false).fetchCustomers(routeId: authProv.userProfile?.effectiveRouteId);
+                  }
+                },
+              ),
+            ],
           ),
           const SizedBox(height: 16),
           Expanded(

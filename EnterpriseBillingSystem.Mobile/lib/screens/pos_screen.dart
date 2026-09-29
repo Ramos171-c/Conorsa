@@ -7,6 +7,7 @@ import '../providers/pos_provider.dart';
 import '../models/product.dart';
 import '../models/customer.dart';
 import '../widgets/cached_product_image.dart';
+import 'register_customer_screen.dart';
 
 class PosScreen extends StatefulWidget {
   const PosScreen({super.key});
@@ -386,7 +387,31 @@ class _PosScreenState extends State<PosScreen> {
           builder: (context, setDialogState) {
             return AlertDialog(
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-              title: const Text('Seleccionar Cliente', style: TextStyle(fontWeight: FontWeight.bold)),
+              title: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text('Seleccionar Cliente', style: TextStyle(fontWeight: FontWeight.bold)),
+                  TextButton.icon(
+                    style: TextButton.styleFrom(
+                      backgroundColor: const Color(0xFFE0F2FE),
+                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+                    ),
+                    icon: const Icon(Icons.person_add_alt_1_rounded, size: 18, color: Color(0xFF0284C7)),
+                    label: const Text('Nuevo', style: TextStyle(color: Color(0xFF0284C7), fontWeight: FontWeight.bold, fontSize: 13)),
+                    onPressed: () async {
+                      final result = await Navigator.push(
+                        context,
+                        MaterialPageRoute(builder: (context) => const RegisterCustomerScreen()),
+                      );
+                      if (result == true) {
+                        await orderProv.fetchCustomers(routeId: authProv.userProfile?.effectiveRouteId);
+                        setDialogState(() {});
+                      }
+                    },
+                  ),
+                ],
+              ),
               content: SizedBox(
                 width: double.maxFinite,
                 height: 400,
