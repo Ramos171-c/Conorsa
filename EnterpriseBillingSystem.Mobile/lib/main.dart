@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
@@ -11,58 +10,52 @@ import 'screens/catalog_screen.dart';
 import 'screens/home_screen.dart';
 import 'utils/http_overrides.dart';
 
-void main() {
-  runZonedGuarded(() async {
-    WidgetsFlutterBinding.ensureInitialized();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
 
-    setupHttpOverrides();
+  setupHttpOverrides();
 
-    // Global Flutter error handling
-    FlutterError.onError = (FlutterErrorDetails details) {
-      FlutterError.presentError(details);
-      if (kDebugMode) {
-        print('Flutter global error: ${details.exceptionAsString()}');
-      }
-    };
-
-    // Platform async error handling
-    PlatformDispatcher.instance.onError = (error, stack) {
-      if (kDebugMode) {
-        print('Platform async error: $error\n$stack');
-      }
-      return true;
-    };
-
-    // Create core service instances safely
-    final configProvider = ConfigProvider();
-    try {
-      await configProvider.loadConfig();
-    } catch (e) {
-      if (kDebugMode) print('Config load error: $e');
-    }
-
-    final apiService = ApiService(configProvider);
-    final authProvider = AuthProvider(apiService);
-    final orderProvider = OrderProvider(apiService);
-    final posProvider = PosProvider(apiService);
-
-    runApp(
-      MultiProvider(
-        providers: [
-          ChangeNotifierProvider.value(value: configProvider),
-          Provider.value(value: apiService),
-          ChangeNotifierProvider.value(value: authProvider),
-          ChangeNotifierProvider.value(value: orderProvider),
-          ChangeNotifierProvider.value(value: posProvider),
-        ],
-        child: const MyApp(),
-      ),
-    );
-  }, (error, stack) {
+  // Global Flutter error handling
+  FlutterError.onError = (FlutterErrorDetails details) {
+    FlutterError.presentError(details);
     if (kDebugMode) {
-      print('Uncaught root zone error: $error\n$stack');
+      print('Flutter global error: ${details.exceptionAsString()}');
     }
-  });
+  };
+
+  // Platform async error handling
+  PlatformDispatcher.instance.onError = (error, stack) {
+    if (kDebugMode) {
+      print('Platform async error: $error\n$stack');
+    }
+    return true;
+  };
+
+  // Create core service instances safely
+  final configProvider = ConfigProvider();
+  try {
+    await configProvider.loadConfig();
+  } catch (e) {
+    if (kDebugMode) print('Config load error: $e');
+  }
+
+  final apiService = ApiService(configProvider);
+  final authProvider = AuthProvider(apiService);
+  final orderProvider = OrderProvider(apiService);
+  final posProvider = PosProvider(apiService);
+
+  runApp(
+    MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: configProvider),
+        Provider.value(value: apiService),
+        ChangeNotifierProvider.value(value: authProvider),
+        ChangeNotifierProvider.value(value: orderProvider),
+        ChangeNotifierProvider.value(value: posProvider),
+      ],
+      child: const MyApp(),
+    ),
+  );
 }
 
 class MyApp extends StatelessWidget {
