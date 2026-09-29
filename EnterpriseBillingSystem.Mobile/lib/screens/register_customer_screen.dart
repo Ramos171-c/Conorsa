@@ -438,11 +438,23 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
                         DropdownButtonFormField<String>(
                           value: _selectedRouteId,
                           isExpanded: true,
+                          isDense: true,
                           decoration: const InputDecoration(
                             labelText: 'Ruta Asignada',
                             prefixIcon: Icon(Icons.alt_route_rounded),
                             border: OutlineInputBorder(),
+                            contentPadding: EdgeInsets.symmetric(horizontal: 12, vertical: 14),
                           ),
+                          selectedItemBuilder: (BuildContext context) {
+                            return _routes.map<Widget>((r) {
+                              return Text(
+                                r['name']?.toString() ?? 'Ruta',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                                softWrap: false,
+                              );
+                            }).toList();
+                          },
                           items: _routes.map((r) {
                             return DropdownMenuItem<String>(
                               value: r['id']?.toString(),
@@ -450,6 +462,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
                                 r['name']?.toString() ?? 'Ruta',
                                 overflow: TextOverflow.ellipsis,
                                 maxLines: 1,
+                                softWrap: false,
                               ),
                             );
                           }).toList(),
