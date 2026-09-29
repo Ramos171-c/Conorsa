@@ -437,6 +437,7 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
                         const SizedBox(height: 16),
                         DropdownButtonFormField<String>(
                           value: _selectedRouteId,
+                          isExpanded: true,
                           decoration: const InputDecoration(
                             labelText: 'Ruta Asignada',
                             prefixIcon: Icon(Icons.alt_route_rounded),
@@ -445,7 +446,11 @@ class _RegisterCustomerScreenState extends State<RegisterCustomerScreen> {
                           items: _routes.map((r) {
                             return DropdownMenuItem<String>(
                               value: r['id']?.toString(),
-                              child: Text(r['name']?.toString() ?? 'Ruta'),
+                              child: Text(
+                                r['name']?.toString() ?? 'Ruta',
+                                overflow: TextOverflow.ellipsis,
+                                maxLines: 1,
+                              ),
                             );
                           }).toList(),
                           onChanged: (val) {
