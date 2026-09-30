@@ -41,7 +41,7 @@ public class Product : AuditableEntity
     public string? ShortDescription { get; set; }
     public string? CatalogBadge { get; set; }
     public int DisplayOrder { get; set; } = 0;
-    public bool AutoMarkSoldOut { get; set; } = true;
+    public bool AutoMarkSoldOut { get; set; } = false;
 
     public bool IsActive { get; set; } = true;
 

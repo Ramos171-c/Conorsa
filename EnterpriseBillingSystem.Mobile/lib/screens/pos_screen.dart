@@ -671,6 +671,7 @@ class _PosScreenState extends State<PosScreen> {
                             localError = null;
                           });
                           
+                          final wasEditing = posProv.editingOrderId != null;
                           final success = await posProv.checkout(
                             notes: notesController.text.trim(),
                             customDate: isAdmin ? selectedDate : null,
@@ -679,6 +680,10 @@ class _PosScreenState extends State<PosScreen> {
                           if (success) {
                             if (!context.mounted) return;
                             Navigator.pop(context); // Close checkout
+                            if (wasEditing) {
+                              Navigator.pop(context); // Return from POS to OrderList
+                              Provider.of<OrderProvider>(context, listen: false).fetchOrders();
+                            }
                             ScaffoldMessenger.of(context).showSnackBar(
                               SnackBar(
                                 content: Text(posProv.successMessage ?? 'Pedido registrado con éxito.'),

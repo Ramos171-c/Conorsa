@@ -58,7 +58,7 @@ public class ProductConfiguration : IEntityTypeConfiguration<Product>
             .HasDefaultValue(0);
 
         builder.Property(p => p.AutoMarkSoldOut)
-            .HasDefaultValue(true);
+            .HasDefaultValue(false);
 
         builder.Property(p => p.SoldOutBy)
             .HasMaxLength(100);

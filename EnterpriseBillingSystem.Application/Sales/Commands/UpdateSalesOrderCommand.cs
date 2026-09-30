@@ -142,12 +142,13 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
             totalDiscount += discountAmount;
             totalTax += taxAmount;
 
-            var existingDetail = order.Details.FirstOrDefault(d => d.ProductId == req.ProductId);
+            var existingDetail = order.Details.FirstOrDefault(d => d.ProductId == req.ProductId && d.UnitOfMeasureId == req.UnitOfMeasureId);
             if (existingDetail != null)
             {
                 // Actualizar detalle existente — EF lo detecta como Modified automáticamente
                 existingDetail.UnitOfMeasureId = req.UnitOfMeasureId;
                 existingDetail.Quantity = req.Quantity;
+                existingDetail.OriginalPresaleQuantity = req.Quantity;
                 existingDetail.UnitPrice = req.UnitPrice;
                 existingDetail.DiscountPercentage = req.DiscountPercentage;
                 existingDetail.DiscountAmount = discountAmount;
@@ -166,6 +167,7 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
                     ProductId = req.ProductId,
                     UnitOfMeasureId = req.UnitOfMeasureId,
                     Quantity = req.Quantity,
+                    OriginalPresaleQuantity = req.Quantity,
                     UnitPrice = req.UnitPrice,
                     DiscountPercentage = req.DiscountPercentage,
                     DiscountAmount = discountAmount,

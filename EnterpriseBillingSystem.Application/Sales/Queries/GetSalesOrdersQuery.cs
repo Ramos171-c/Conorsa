@@ -171,7 +171,7 @@ public class GetSalesOrderByIdQueryHandler : IRequestHandler<GetSalesOrderByIdQu
                 d.Product?.InternalCode ?? string.Empty,
                 d.UnitOfMeasureId,
                 d.UnitOfMeasure?.Code ?? string.Empty,
-                originalQty,
+                d.Quantity,
                 d.UnitPrice,
                 d.DiscountPercentage,
                 d.DiscountAmount,
