@@ -379,7 +379,7 @@ class PosProvider extends ChangeNotifier {
         final updateBody = {
           'Id': _editingOrderId,
           'CustomerId': customerId,
-          'OrderDate': DateTime.now().toUtc().toIso8601String(),
+          'OrderDate': (customDate ?? DateTime.now()).toIso8601String(),
           'Notes': notes ?? 'Pedido Modificado desde POS Móvil (Vendedor)',
           'Details': _cart.map((item) {
             return {
@@ -412,7 +412,7 @@ class PosProvider extends ChangeNotifier {
       // Create Sales Order request command
       final createBody = {
         'CustomerId': customerId,
-        'OrderDate': DateTime.now().toUtc().toIso8601String(),
+        'OrderDate': (customDate ?? DateTime.now()).toIso8601String(),
         'Notes': notes ?? 'Pedido desde POS Móvil (Vendedor)',
         'Details': _cart.map((item) {
           return {
@@ -451,7 +451,7 @@ class PosProvider extends ChangeNotifier {
             'orderNumber': 'OFFLINE-${DateTime.now().millisecondsSinceEpoch.toString().substring(7)}',
             'CustomerId': customerId,
             'customerName': _selectedCustomer?.name ?? 'Cliente Offline',
-            'OrderDate': DateTime.now().toUtc().toIso8601String(),
+            'OrderDate': DateTime.now().toIso8601String(),
             'subTotal': _subtotalCommercial,
             'totalAmount': _subtotalCommercial,
             'Notes': notes ?? 'Pedido desde POS Móvil (Vendedor)',

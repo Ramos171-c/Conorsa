@@ -39,8 +39,8 @@ public class SalesOrderRepository : Repository<SalesOrder>, ISalesOrderRepositor
 
     public async Task<string> GenerateOrderNumberAsync(CancellationToken cancellationToken = default)
     {
-        // Formato: SO-yyyyMMdd-NNNNN (contador diario)
-        var today = DateTime.UtcNow.Date;
+        // Formato: SO-yyyyMMdd-NNNNN (contador diario en hora local)
+        var today = EnterpriseBillingSystem.Domain.Common.DateTimeHelper.Today;
         var prefix = $"SO-{today:yyyyMMdd}-";
 
         var lastToday = await _context.SalesOrders

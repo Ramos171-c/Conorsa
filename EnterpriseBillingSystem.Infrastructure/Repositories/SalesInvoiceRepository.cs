@@ -42,8 +42,8 @@ public class SalesInvoiceRepository : Repository<SalesInvoice>, ISalesInvoiceRep
 
     public async Task<string> GenerateInvoiceNumberAsync(CancellationToken cancellationToken = default)
     {
-        // Formato: INV-yyyyMMdd-NNNNN (contador diario)
-        var today = DateTime.UtcNow.Date;
+        // Formato: INV-yyyyMMdd-NNNNN (contador diario en hora local)
+        var today = EnterpriseBillingSystem.Domain.Common.DateTimeHelper.Today;
         var prefix = $"INV-{today:yyyyMMdd}-";
 
         var lastToday = await _context.SalesInvoices

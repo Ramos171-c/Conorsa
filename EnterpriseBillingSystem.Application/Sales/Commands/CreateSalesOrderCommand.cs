@@ -165,7 +165,7 @@ public class CreateSalesOrderCommandHandler : IRequestHandler<CreateSalesOrderCo
             Id = Guid.NewGuid(),
             OrderNumber = orderNumber,
             CustomerId = request.CustomerId,
-            OrderDate = request.OrderDate,
+            OrderDate = EnterpriseBillingSystem.Domain.Common.DateTimeHelper.ToLocalTime(request.OrderDate),
             SubTotal = subTotal,
             DiscountAmount = totalDiscount,
             TaxAmount = totalTax,

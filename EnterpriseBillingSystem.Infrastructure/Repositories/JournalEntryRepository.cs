@@ -35,7 +35,7 @@ public class JournalEntryRepository : Repository<JournalEntry>, IJournalEntryRep
 
     public async Task<string> GenerateEntryNumberAsync(CancellationToken cancellationToken = default)
     {
-        var today = DateTime.UtcNow.ToString("yyyyMMdd");
+        var today = EnterpriseBillingSystem.Domain.Common.DateTimeHelper.Today.ToString("yyyyMMdd");
         var prefix = $"JE-{today}-";
 
         var maxEntry = await _context.JournalEntries

@@ -72,7 +72,7 @@ public class InventoryMovementRepository : Repository<InventoryMovement>, IInven
 
     public async Task<string> GenerateMovementNumberAsync(CancellationToken cancellationToken = default)
     {
-        var prefix = $"MOV-{DateTime.UtcNow:yyyyMMdd}";
+        var prefix = $"MOV-{EnterpriseBillingSystem.Domain.Common.DateTimeHelper.LocalNow:yyyyMMdd}";
         var lastMovement = await _context.InventoryMovements
             .Where(m => m.MovementNumber.StartsWith(prefix))
             .OrderByDescending(m => m.MovementNumber)

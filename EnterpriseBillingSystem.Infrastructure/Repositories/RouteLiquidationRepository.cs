@@ -78,7 +78,7 @@ public class RouteLiquidationRepository : Repository<RouteLiquidation>, IRouteLi
 
     public async Task<string> GenerateNextLiquidationNumberAsync(CancellationToken cancellationToken = default)
     {
-        var yearMonth = DateTime.UtcNow.ToString("yyyyMM");
+        var yearMonth = EnterpriseBillingSystem.Domain.Common.DateTimeHelper.Today.ToString("yyyyMM");
         var prefix = $"LIQ-{yearMonth}-";
 
         var lastNumber = await _context.RouteLiquidations

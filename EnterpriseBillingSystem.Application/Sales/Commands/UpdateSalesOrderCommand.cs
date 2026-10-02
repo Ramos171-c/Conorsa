@@ -216,7 +216,7 @@ public class UpdateSalesOrderCommandHandler : IRequestHandler<UpdateSalesOrderCo
 
         // 4. Actualizar pedido
         order.CustomerId = request.CustomerId;
-        order.OrderDate = request.OrderDate;
+        order.OrderDate = EnterpriseBillingSystem.Domain.Common.DateTimeHelper.ToLocalTime(request.OrderDate);
         order.SubTotal = subTotal;
         order.DiscountAmount = totalDiscount;
         order.TaxAmount = totalTax;

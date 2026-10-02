@@ -137,8 +137,8 @@ public class InventoryRepository : Repository<Inventory>, IInventoryRepository
                                     select i.PhysicalStock * pr.Cost)
                                    .SumAsync(cancellationToken);
 
-        // Today's adjustments and transfers count (UTC date comparison)
-        var today = DateTime.UtcNow.Date;
+        // Today's adjustments and transfers count (Local date comparison)
+        var today = EnterpriseBillingSystem.Domain.Common.DateTimeHelper.Today;
         var todayAdjustments = await _context.InventoryMovements
             .CountAsync(m => m.MovementDate >= today && 
                 (m.MovementType == Domain.Enums.MovementType.PositiveAdjustment || m.MovementType == Domain.Enums.MovementType.NegativeAdjustment) &&

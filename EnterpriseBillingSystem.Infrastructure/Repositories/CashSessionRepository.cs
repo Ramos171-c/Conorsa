@@ -43,7 +43,7 @@ public class CashSessionRepository : Repository<CashSession>, ICashSessionReposi
 
     public async Task<string> GenerateSessionNumberAsync(CancellationToken cancellationToken = default)
     {
-        var today = DateTime.UtcNow.ToString("yyyyMMdd");
+        var today = EnterpriseBillingSystem.Domain.Common.DateTimeHelper.Today.ToString("yyyyMMdd");
         var prefix = $"CS-{today}-";
 
         var maxSession = await _context.CashSessions
