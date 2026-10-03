@@ -111,6 +111,7 @@ class SalesOrderDetail {
   final String? notes;
   final DateTime createdOnUtc;
   final List<SalesOrderDetailItem> details;
+  final String? customerAddress;
 
   SalesOrderDetail({
     required this.id,
@@ -127,6 +128,7 @@ class SalesOrderDetail {
     this.notes,
     required this.createdOnUtc,
     required this.details,
+    this.customerAddress,
   });
 
   factory SalesOrderDetail.fromJson(Map<String, dynamic> json) {
@@ -150,6 +152,7 @@ class SalesOrderDetail {
       notes: json['notes']?.toString(),
       createdOnUtc: (DateTime.tryParse(json['createdOnUtc']?.toString() ?? json['orderDate']?.toString() ?? '') ?? DateTime.now()).toLocal(),
       details: detailsList,
+      customerAddress: json['customerAddress']?.toString(),
     );
   }
 }

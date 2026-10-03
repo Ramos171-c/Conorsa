@@ -99,6 +99,9 @@ class _OrderListScreenState extends State<OrderListScreen> {
     ticketBuffer.writeln('Pedido No: ${detail.orderNumber}');
     ticketBuffer.writeln('Fecha:     $formattedDate');
     ticketBuffer.writeln('Cliente:   ${detail.customerName}');
+    if (detail.customerAddress != null && detail.customerAddress!.isNotEmpty) {
+      ticketBuffer.writeln('Dirección: ${detail.customerAddress}');
+    }
     ticketBuffer.writeln('Estado:    ${_getStatusText(detail.status)}');
     ticketBuffer.writeln('---------------------------------');
     ticketBuffer.writeln('PRODUCTOS:');

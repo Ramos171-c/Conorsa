@@ -145,9 +145,21 @@ public class GetSalesOrderByIdQueryHandler : IRequestHandler<GetSalesOrderByIdQu
         {
             var parts = new List<string>();
             if (!string.IsNullOrWhiteSpace(addressObj.AddressLine1)) parts.Add(addressObj.AddressLine1.Trim());
+            if (!string.IsNullOrWhiteSpace(addressObj.Neighborhood))
+            {
+                var n = addressObj.Neighborhood.Trim();
+                var prefix = (n.StartsWith("barrio", StringComparison.OrdinalIgnoreCase) ||
+                              n.StartsWith("b°", StringComparison.OrdinalIgnoreCase) ||
+                              n.StartsWith("colonia", StringComparison.OrdinalIgnoreCase) ||
+                              n.StartsWith("col.", StringComparison.OrdinalIgnoreCase))
+                    ? n
+                    : $"Barrio {n}";
+                parts.Add(prefix);
+            }
             if (!string.IsNullOrWhiteSpace(addressObj.AddressLine2)) parts.Add(addressObj.AddressLine2.Trim());
             if (!string.IsNullOrWhiteSpace(addressObj.City)) parts.Add(addressObj.City.Trim());
-            if (!string.IsNullOrWhiteSpace(addressObj.State)) parts.Add(addressObj.State.Trim());
+            if (!string.IsNullOrWhiteSpace(addressObj.State) && !string.Equals(addressObj.State.Trim(), addressObj.City?.Trim(), StringComparison.OrdinalIgnoreCase))
+                parts.Add(addressObj.State.Trim());
             if (parts.Count > 0) customerAddress = string.Join(", ", parts);
         }
 

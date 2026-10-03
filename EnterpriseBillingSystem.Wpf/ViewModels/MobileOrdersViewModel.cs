@@ -457,7 +457,24 @@ public partial class MobileOrdersViewModel : ViewModelBase
                     var address = customer.Addresses?.FirstOrDefault(a => a.IsDefault) ?? customer.Addresses?.FirstOrDefault();
                     if (address != null)
                     {
-                        custPara.Inlines.Add(new System.Windows.Documents.Run($"Dirección:   {address.AddressLine1}, {address.City}\n"));
+                        var addrParts = new System.Collections.Generic.List<string>();
+                        if (!string.IsNullOrWhiteSpace(address.AddressLine1)) addrParts.Add(address.AddressLine1.Trim());
+                        if (!string.IsNullOrWhiteSpace(address.Neighborhood))
+                        {
+                            var n = address.Neighborhood.Trim();
+                            var prefix = (n.StartsWith("barrio", StringComparison.OrdinalIgnoreCase) ||
+                                          n.StartsWith("b°", StringComparison.OrdinalIgnoreCase) ||
+                                          n.StartsWith("colonia", StringComparison.OrdinalIgnoreCase) ||
+                                          n.StartsWith("col.", StringComparison.OrdinalIgnoreCase))
+                                ? n
+                                : $"Barrio {n}";
+                            addrParts.Add(prefix);
+                        }
+                        if (!string.IsNullOrWhiteSpace(address.City)) addrParts.Add(address.City.Trim());
+                        if (addrParts.Count > 0)
+                        {
+                            custPara.Inlines.Add(new System.Windows.Documents.Run($"Dirección:   {string.Join(", ", addrParts)}\n"));
+                        }
                     }
                     var phone = customer.Phones?.FirstOrDefault()?.PhoneNumber;
                     if (!string.IsNullOrEmpty(phone))
