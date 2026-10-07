@@ -15,6 +15,7 @@ namespace EnterpriseBillingSystem.Wpf.ViewModels;
 public partial class ReportsDashboardViewModel : ObservableObject
 {
     private readonly SalesApiClient _salesApiClient;
+    private readonly CustomerApiClient _customerApiClient;
     private readonly INotificationService _notificationService;
 
     [ObservableProperty]
@@ -25,6 +26,9 @@ public partial class ReportsDashboardViewModel : ObservableObject
 
     [ObservableProperty]
     private DateTime? _toDate = DateTime.Today;
+
+    [ObservableProperty]
+    private RouteDto? _selectedRoute;
 
     [ObservableProperty]
     private string _dateRangeLabel = "Cargando...";
@@ -55,27 +59,60 @@ public partial class ReportsDashboardViewModel : ObservableObject
     private string _effectivenessSub = "Cumplimiento Global";
 
     public ObservableCollection<RouteReturnsChartDto> RouteReturns { get; } = new();
+    public ObservableCollection<RouteDto> Routes { get; } = new();
 
-    public ReportsDashboardViewModel(SalesApiClient salesApiClient, INotificationService notificationService)
+    private bool _routesLoaded = false;
+
+    public ReportsDashboardViewModel(SalesApiClient salesApiClient, CustomerApiClient customerApiClient, INotificationService notificationService)
     {
         _salesApiClient = salesApiClient;
+        _customerApiClient = customerApiClient;
         _notificationService = notificationService;
         _ = LoadDashboardDataAsync();
+    }
+
+    private async Task EnsureRoutesLoadedAsync()
+    {
+        if (_routesLoaded) return;
+        try
+        {
+            var routesList = await _customerApiClient.GetRoutesAsync();
+            Routes.Clear();
+            var allRoutesItem = new RouteDto(Guid.Empty, "TODAS", "Todas las Rutas", true);
+            Routes.Add(allRoutesItem);
+            if (routesList != null)
+            {
+                foreach (var r in routesList)
+                {
+                    Routes.Add(r);
+                }
+            }
+            SelectedRoute = allRoutesItem;
+            _routesLoaded = true;
+        }
+        catch (Exception ex)
+        {
+            Debug.WriteLine($"Error al cargar rutas: {ex.Message}");
+        }
     }
 
     [RelayCommand]
     public async Task LoadDashboardDataAsync()
     {
+        await EnsureRoutesLoadedAsync();
+
         IsLoading = true;
         try
         {
             var from = FromDate ?? DateTime.Today.AddDays(-30);
             var to = ToDate ?? DateTime.Today;
+            var routeId = (SelectedRoute != null && SelectedRoute.Id != Guid.Empty) ? SelectedRoute.Id : (Guid?)null;
             
             // Format label
-            DateRangeLabel = $"Período: {from:dd/MM/yyyy} al {to:dd/MM/yyyy}";
+            var routeSuffix = (SelectedRoute != null && SelectedRoute.Id != Guid.Empty) ? $" | Ruta: {SelectedRoute.Name}" : " | Todas las Rutas";
+            DateRangeLabel = $"Período: {from:dd/MM/yyyy} al {to:dd/MM/yyyy}{routeSuffix}";
 
-            var analytics = await _salesApiClient.GetDashboardAnalyticsAsync(from, to);
+            var analytics = await _salesApiClient.GetDashboardAnalyticsAsync(from, to, routeId);
             if (analytics != null)
             {
                 // Directly bind the metrics computed by the API
@@ -120,19 +157,31 @@ public partial class ReportsDashboardViewModel : ObservableObject
     [RelayCommand]
     private void OpenSellerReportPdf()
     {
-        OpenPdf("http://167.99.13.177:8080/api/v1/sales-orders/seller-report/pdf");
+        OpenPdf(BuildPdfUrl("http://167.99.13.177:8080/api/v1/sales-orders/seller-report/pdf"));
     }
 
     [RelayCommand]
     private void OpenReturnsReportPdf()
     {
-        OpenPdf("http://167.99.13.177:8080/api/v1/route-liquidations/returns-report/pdf");
+        OpenPdf(BuildPdfUrl("http://167.99.13.177:8080/api/v1/route-liquidations/returns-report/pdf"));
     }
 
     [RelayCommand]
     private void OpenShortagesReportPdf()
     {
-        OpenPdf("http://167.99.13.177:8080/api/v1/sales-orders/shortages-report/pdf");
+        OpenPdf(BuildPdfUrl("http://167.99.13.177:8080/api/v1/sales-orders/shortages-report/pdf"));
+    }
+
+    private string BuildPdfUrl(string baseUrl)
+    {
+        var from = FromDate ?? DateTime.Today.AddDays(-30);
+        var to = ToDate ?? DateTime.Today;
+        var url = $"{baseUrl}?fromDate={from:yyyy-MM-ddTHH:mm:ss}&toDate={to:yyyy-MM-ddTHH:mm:ss}";
+        if (SelectedRoute != null && SelectedRoute.Id != Guid.Empty)
+        {
+            url += $"&routeId={SelectedRoute.Id}";
+        }
+        return url;
     }
 
     private void OpenPdf(string url)

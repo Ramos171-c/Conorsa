@@ -14,9 +14,10 @@ class ProductDetailScreen extends StatelessWidget {
   void _showSalespersonAddDialog(BuildContext context) {
     final provider = Provider.of<OrderProvider>(context, listen: false);
     final auth = Provider.of<AuthProvider>(context, listen: false);
+    final isAdmin = auth.userProfile?.isAdmin == true;
     final isCostSeller = auth.userProfile?.isCostSeller == true;
 
-    final availablePresentations = isCostSeller
+    final availablePresentations = (isCostSeller || isAdmin)
         ? product.presentations
         : product.presentations.where((p) => p.allowDetailChannel).toList();
 
@@ -39,7 +40,7 @@ class ProductDetailScreen extends StatelessWidget {
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            final price = isCostSeller
+            final price = (isCostSeller || product.isCostChannelOnly)
                 ? selectedPresentation.costSellerPrice
                 : (selectedPresentation.retailPrice > 0 
                     ? selectedPresentation.retailPrice 
@@ -52,12 +53,34 @@ class ProductDetailScreen extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
+                  if (product.isCostChannelOnly)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(8),
+                      decoration: BoxDecoration(
+                        color: Colors.purple.shade50,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: Colors.purple.shade200),
+                      ),
+                      child: const Row(
+                        children: [
+                          Icon(Icons.info_outline, color: Colors.purple, size: 18),
+                          SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              'Producto Exclusivo de Costo (Aplica Precio Costo)',
+                              style: TextStyle(color: Colors.purple, fontSize: 12, fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   const Text('Presentación:', style: TextStyle(fontWeight: FontWeight.bold)),
                   DropdownButton<ProductPresentation>(
                     value: selectedPresentation,
                     isExpanded: true,
                     items: availablePresentations.map((p) {
-                      final pPrice = isCostSeller
+                      final pPrice = (isCostSeller || product.isCostChannelOnly)
                           ? p.costSellerPrice
                           : (p.retailPrice > 0 ? p.retailPrice : product.defaultSalePrice);
                       final conversionText = p.conversionFactor > 1 
@@ -153,7 +176,7 @@ class ProductDetailScreen extends StatelessWidget {
                   style: ElevatedButton.styleFrom(backgroundColor: const Color(0xFF0F172A)),
                   onPressed: () {
                     final auth = Provider.of<AuthProvider>(context, listen: false);
-                    provider.addToCart(product, selectedPresentation, quantity, isCostSeller: auth.userProfile?.isCostSeller == true);
+                    provider.addToCart(product, selectedPresentation, quantity, isCostSeller: auth.userProfile?.isCostSeller == true || product.isCostChannelOnly);
                     Navigator.pop(context); // Close dialog
                     Navigator.pop(context); // Close detail screen
                     
@@ -351,6 +374,29 @@ class ProductDetailScreen extends StatelessWidget {
                                       'Unidad de medida: $uomCode',
                                       style: const TextStyle(fontSize: 12, color: Color(0xFF64748B)),
                                     ),
+                                    const SizedBox(height: 4),
+                                    if (auth.userProfile?.isAdmin == true) ...[
+                                      Text(
+                                        product.isCostChannelOnly
+                                            ? 'Precio Costo: C\$ ${pres.costSellerPrice.toStringAsFixed(2)} (Exclusivo Costo)'
+                                            : 'Detalle: C\$ ${pres.retailPrice.toStringAsFixed(2)} | Costo: C\$ ${pres.costSellerPrice.toStringAsFixed(2)}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          fontWeight: FontWeight.bold,
+                                          color: product.isCostChannelOnly ? Colors.purple.shade700 : const Color(0xFF1E3A8A),
+                                        ),
+                                      ),
+                                    ] else if (auth.userProfile?.isCostSeller == true || product.isCostChannelOnly) ...[
+                                      Text(
+                                        'Precio Costo: C\$ ${pres.costSellerPrice.toStringAsFixed(2)}',
+                                        style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Colors.purple.shade700),
+                                      ),
+                                    ] else ...[
+                                      Text(
+                                        'Precio Detalle: C\$ ${pres.retailPrice.toStringAsFixed(2)}',
+                                        style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold, color: Color(0xFF1E3A8A)),
+                                      ),
+                                    ],
                                   ],
                                 ),
                               ),

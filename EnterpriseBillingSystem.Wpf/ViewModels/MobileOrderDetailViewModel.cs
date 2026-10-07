@@ -711,7 +711,7 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             headerPara.Inlines.Add(new System.Windows.Documents.Run("Dirección: Matagalpa\n") { FontSize = 11, FontWeight = FontWeights.Bold });
             headerPara.Inlines.Add(new System.Windows.Documents.Run("Teléfono:  86953060\n") { FontSize = 11, FontWeight = FontWeights.Bold });
             headerPara.Inlines.Add(new System.Windows.Documents.Run("TICKET DE ENTREGA\n") { FontSize = 13, FontWeight = FontWeights.Bold });
-            headerPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n") { FontWeight = FontWeights.Bold });
+            headerPara.Inlines.Add(new System.Windows.Documents.Run("══════════════════════════════════\n") { FontWeight = FontWeights.Bold });
             sec.Blocks.Add(headerPara);
 
             // Customer Details
@@ -741,7 +741,7 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                     custPara.Inlines.Add(new System.Windows.Documents.Run($"Teléfono:    {phone}\n"));
                 }
             }
-            custPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n") { FontWeight = FontWeights.Bold });
+            custPara.Inlines.Add(new System.Windows.Documents.Run("══════════════════════════════════\n") { FontWeight = FontWeights.Bold });
             sec.Blocks.Add(custPara);
 
             // Order Lines
@@ -751,18 +751,23 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                 Margin = new Thickness(0, 0, 0, 4)
             };
             itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run("DETALLE DEL PEDIDO\n")));
-            itemsPara.Inlines.Add(new System.Windows.Documents.Run("----------------------------------\n") { FontWeight = FontWeights.Bold });
+            // Column headers matching receipt format
+            itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run(
+                string.Format("{0,-6}{1,-10}{2,8}{3,10}\n", "Cant.", "U/M.", "P/U", "Total"))));
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("――――――――――――――――――――――――――――――――――\n"));
             
             decimal delSubtotal = 0;
             decimal delDiscount = 0;
             decimal delTax = 0;
 
             var billableDetails = Details.Where(d => d.DeliveredQuantity > 0).ToList();
-            int itemIndex = 0;
 
             foreach (var item in billableDetails)
             {
-                decimal baseAmount = item.DeliveredQuantity * item.UnitPrice;
+                // Use the same EffectiveNetAmount that is displayed per line
+                decimal qtyToBill = item.Quantity - item.MissingQuantity - item.ReturnedQuantity;
+                if (qtyToBill < 0) qtyToBill = 0;
+                decimal baseAmount = qtyToBill * item.UnitPrice;
                 decimal disc = baseAmount * (item.DiscountPercentage / 100m);
                 decimal tax = (baseAmount - disc) * (item.TaxPercentage / 100m);
 
@@ -772,21 +777,20 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
 
                 string codePrefix = !string.IsNullOrWhiteSpace(item.ProductCode) ? $"[{item.ProductCode}] " : "";
                 string displayName = !string.IsNullOrWhiteSpace(item.ProductDescription) ? item.ProductDescription : item.ProductName;
+                decimal lineTotal = item.EffectiveNetAmount;
 
-                // Line 1: Product Code + Description (with U/E)
+                // Line 1: Product name/description (full width)
                 itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"{codePrefix}{displayName}\n")));
                 
-                // Line 2: Cantidad x Precio Unitario = Total (Se imprime solo lo entregado)
-                itemsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"   {item.DeliveredQuantity:N2} {item.UnitOfMeasure} x C${item.UnitPrice:N2} = C${item.EffectiveNetAmount:N2}\n")));
+                // Line 2: Tabular columns - Cant. | U/M. | P/U | Total
+                string uom = item.UnitOfMeasure ?? "UND";
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run(
+                    string.Format("{0,-6}{1,-10}{2,8:N2}{3,10:N2}\n", $"{qtyToBill:N2}", uom, item.UnitPrice, lineTotal)));
 
                 // Divider line between items
-                itemIndex++;
-                if (itemIndex < billableDetails.Count)
-                {
-                    itemsPara.Inlines.Add(new System.Windows.Documents.Run("----------------------------------\n"));
-                }
+                itemsPara.Inlines.Add(new System.Windows.Documents.Run("――――――――――――――――――――――――――――――――――\n"));
             }
-            itemsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n") { FontWeight = FontWeights.Bold });
+            itemsPara.Inlines.Add(new System.Windows.Documents.Run("══════════════════════════════════\n") { FontWeight = FontWeights.Bold });
             sec.Blocks.Add(itemsPara);
 
             // Totals
@@ -813,7 +817,7 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             
             decimal totalUsd = delTotal / 36.5m;
             totalsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run($"TOTAL USD:     ${totalUsd:N2}\n")));
-            totalsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n") { FontWeight = FontWeights.Bold });
+            totalsPara.Inlines.Add(new System.Windows.Documents.Run("══════════════════════════════════\n") { FontWeight = FontWeights.Bold });
             sec.Blocks.Add(totalsPara);
 
             // Observations
@@ -822,14 +826,24 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
             if (!string.IsNullOrWhiteSpace(Notes))
             {
                 var cleanNotes = Notes.Trim();
-                bool isDefaultNote = string.Equals(cleanNotes, "Pedido desde POS movil (Vendedor)", StringComparison.OrdinalIgnoreCase) ||
-                                     string.Equals(cleanNotes, "Pedido desde POS Móvil (Vendedor)", StringComparison.OrdinalIgnoreCase);
+                // Filter out default POS mobile note
+                bool isDefaultNote = cleanNotes.StartsWith("Pedido desde POS", StringComparison.OrdinalIgnoreCase);
                                      
                 if (!isDefaultNote)
                 {
-                    // Strip any [Faltantes] / [PRODUCTOS NO ENTREGADOS] block from printed ticket observations
+                    // Strip ALL faltante/missing product blocks from printed ticket observations
                     notesText = cleanNotes;
-                    string[] tagsToStrip = new[] { "[Faltantes]:", "[PRODUCTOS NO ENTREGADOS", "[PRODUCTOS FALTANTES" };
+                    string[] tagsToStrip = new[]
+                    {
+                        "[Faltantes]:",
+                        "[FALTANTE POR STOCK]:",
+                        "[FALTANTE POR STOCK",
+                        "[FALTANTE",
+                        "[PRODUCTOS NO ENTREGADOS",
+                        "[PRODUCTOS FALTANTES",
+                        "Pedido=",
+                        "Faltante="
+                    };
                     foreach (var tag in tagsToStrip)
                     {
                         int idx = notesText.IndexOf(tag, StringComparison.OrdinalIgnoreCase);
@@ -853,7 +867,7 @@ public partial class MobileOrderDetailViewModel : ViewModelBase
                 };
                 obsPara.Inlines.Add(new System.Windows.Documents.Bold(new System.Windows.Documents.Run("OBSERVACIONES:\n")));
                 obsPara.Inlines.Add(new System.Windows.Documents.Run($"- Vendedor:  {notesText}\n"));
-                obsPara.Inlines.Add(new System.Windows.Documents.Run("==================================\n") { FontWeight = FontWeights.Bold });
+                obsPara.Inlines.Add(new System.Windows.Documents.Run("══════════════════════════════════\n") { FontWeight = FontWeights.Bold });
                 sec.Blocks.Add(obsPara);
             }
 

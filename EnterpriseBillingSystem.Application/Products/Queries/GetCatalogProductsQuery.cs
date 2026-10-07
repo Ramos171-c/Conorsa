@@ -81,6 +81,8 @@ public class GetCatalogProductsQueryHandler : IRequestHandler<GetCatalogProducts
                         IsDefaultSalePresentation: pr.IsDefaultSalePresentation,
                         AllowPurchase: pr.AllowPurchase,
                         AllowSale: pr.AllowSale,
+                        AllowDetailChannel: pr.AllowDetailChannel,
+                        AllowCostChannel: pr.AllowCostChannel,
                         IsActive: pr.IsActive
                     );
                 })

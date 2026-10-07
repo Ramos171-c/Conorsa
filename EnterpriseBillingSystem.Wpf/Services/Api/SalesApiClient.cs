@@ -273,6 +273,29 @@ public class SalesApiClient
 
         return await _httpClient.GetFromJsonAsync<DashboardAnalyticsDto>(url);
     }
+
+    public async Task<SellerSalesReportDto?> GetSellerSalesReportAsync(DateTime? fromDate = null, DateTime? toDate = null, Guid? routeId = null, string? sellerName = null)
+    {
+        var url = "sales-orders/seller-report?";
+        if (fromDate.HasValue) url += $"fromDate={fromDate.Value:yyyy-MM-ddTHH:mm:ss}&";
+        if (toDate.HasValue) url += $"toDate={toDate.Value:yyyy-MM-ddTHH:mm:ss}&";
+        if (routeId.HasValue && routeId.Value != Guid.Empty) url += $"routeId={routeId.Value}&";
+        if (!string.IsNullOrWhiteSpace(sellerName)) url += $"sellerName={Uri.EscapeDataString(sellerName)}&";
+        url = url.TrimEnd('&', '?');
+
+        return await _httpClient.GetFromJsonAsync<SellerSalesReportDto>(url);
+    }
+
+    public async Task<PresaleShortagesReportDto?> GetPresaleShortagesReportAsync(DateTime? fromDate = null, DateTime? toDate = null, Guid? routeId = null)
+    {
+        var url = "sales-orders/shortages-report?";
+        if (fromDate.HasValue) url += $"fromDate={fromDate.Value:yyyy-MM-ddTHH:mm:ss}&";
+        if (toDate.HasValue) url += $"toDate={toDate.Value:yyyy-MM-ddTHH:mm:ss}&";
+        if (routeId.HasValue && routeId.Value != Guid.Empty) url += $"routeId={routeId.Value}&";
+        url = url.TrimEnd('&', '?');
+
+        return await _httpClient.GetFromJsonAsync<PresaleShortagesReportDto>(url);
+    }
 }
 
 public class DashboardSummaryResponseDto

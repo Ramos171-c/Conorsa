@@ -156,6 +156,11 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
                             order.Notes = $"[FALTANTE POR STOCK]: {missingMsg}";
                         else if (!order.Notes.Contains(product.Name))
                             order.Notes += $"\n[FALTANTE POR STOCK]: {missingMsg}";
+
+                        if (order.Notes.Length > 500)
+                        {
+                            order.Notes = order.Notes.Substring(0, 497) + "...";
+                        }
                     }
 
                     // Update detail quantity to reflect ONLY the delivered units
@@ -207,6 +212,11 @@ public class UpdateSalesOrderStatusCommandHandler : IRequestHandler<UpdateSalesO
         order.Status = request.Status;
         order.LastModifiedBy = _currentUserService.UserId ?? "System";
         order.LastModifiedOnUtc = DateTime.UtcNow;
+
+        if (order.Notes != null && order.Notes.Length > 500)
+        {
+            order.Notes = order.Notes.Substring(0, 497) + "...";
+        }
 
         _salesOrderRepository.Update(order);
 

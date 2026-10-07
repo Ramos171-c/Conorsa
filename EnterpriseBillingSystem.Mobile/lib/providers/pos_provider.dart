@@ -314,7 +314,7 @@ class PosProvider extends ChangeNotifier {
       _subtotalBase += item.quantity * item.presentation.retailPrice;
     }
 
-    // 2. Determine Level using manual override (defaults to 'DETALLE')
+    // 3. Determine Level using manual override (defaults to 'DETALLE')
     int finalLevel = 0;
     if (_manualPricingLevelOverride == 'MAYORISTA') {
       finalLevel = 2;
@@ -322,7 +322,7 @@ class PosProvider extends ChangeNotifier {
       finalLevel = 1;
     }
 
-    // 3. Map final level and update unitPriceDisplayed/lineTotal on all items
+    // 4. Map final level and update unitPriceDisplayed/lineTotal on all items
     _subtotalCommercial = 0.0;
     _currentLevel = finalLevel == 2 
         ? 'MAYORISTA' 

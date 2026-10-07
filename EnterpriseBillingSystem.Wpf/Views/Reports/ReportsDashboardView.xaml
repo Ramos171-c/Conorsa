@@ -26,8 +26,9 @@
             </StackPanel>
 
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
-                <DatePicker SelectedDate="{Binding FromDate}" Width="120" Margin="0,0,12,0" materialDesign:HintAssist.Hint="Fecha Inicio" Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
-                <DatePicker SelectedDate="{Binding ToDate}" Width="120" Margin="0,0,16,0" materialDesign:HintAssist.Hint="Fecha Fin" Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+                <DatePicker SelectedDate="{Binding FromDate}" Width="110" Margin="0,0,10,0" materialDesign:HintAssist.Hint="Fecha Inicio" Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+                <DatePicker SelectedDate="{Binding ToDate}" Width="110" Margin="0,0,10,0" materialDesign:HintAssist.Hint="Fecha Fin" Style="{StaticResource MaterialDesignFloatingHintDatePicker}" />
+                <ComboBox ItemsSource="{Binding Routes}" SelectedItem="{Binding SelectedRoute}" DisplayMemberPath="Name" Width="170" Margin="0,0,14,0" materialDesign:HintAssist.Hint="Filtrar por Ruta" Style="{StaticResource MaterialDesignFloatingHintComboBox}" />
                 <Button Command="{Binding RefreshDashboardCommand}" Style="{StaticResource MaterialDesignRaisedButton}" Background="#4F46E5" BorderBrush="#4F46E5">
                     <StackPanel Orientation="Horizontal">
                         <materialDesign:PackIcon Kind="Refresh" Width="18" Height="18" Margin="0,0,8,0" VerticalAlignment="Center" />

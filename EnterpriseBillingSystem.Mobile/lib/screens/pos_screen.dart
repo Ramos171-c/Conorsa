@@ -125,8 +125,8 @@ class _PosScreenState extends State<PosScreen> {
     final qtyController = TextEditingController(text: '1');
 
     // Calculate initial price based on level and category
-    double initialPrice = isCostSeller ? selectedPresentation.costSellerPrice : selectedPresentation.retailPrice;
-    if (!isCostSeller) {
+    double initialPrice = (isCostSeller || product.isCostChannelOnly) ? selectedPresentation.costSellerPrice : selectedPresentation.retailPrice;
+    if (!isCostSeller && !product.isCostChannelOnly) {
       if (posProv.currentLevel == 'COSTO') {
         initialPrice = selectedPresentation.costSellerPrice;
       } else if (posProv.currentLevel == 'MAYORISTA') {
@@ -178,8 +178,8 @@ class _PosScreenState extends State<PosScreen> {
                           selectedPresentation = val;
                           
                           // Recalculate price
-                          double newPrice = isCostSeller ? selectedPresentation.costSellerPrice : selectedPresentation.retailPrice;
-                          if (!isCostSeller) {
+                          double newPrice = (isCostSeller || product.isCostChannelOnly) ? selectedPresentation.costSellerPrice : selectedPresentation.retailPrice;
+                          if (!isCostSeller && !product.isCostChannelOnly) {
                             if (posProv.currentLevel == 'COSTO') {
                               newPrice = selectedPresentation.costSellerPrice;
                             } else if (posProv.currentLevel == 'MAYORISTA') {
@@ -754,7 +754,7 @@ class _PosScreenState extends State<PosScreen> {
                 ),
               ),
               const SizedBox(width: 8),
-              if (isCostSeller)
+              if (isCostSeller && auth.userProfile?.isAdmin != true)
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                   decoration: BoxDecoration(
@@ -812,6 +812,17 @@ class _PosScreenState extends State<PosScreen> {
                         ],
                       ),
                     ),
+                    if (auth.userProfile?.isAdmin == true)
+                      PopupMenuItem(
+                        value: 'COSTO',
+                        child: Row(
+                          children: [
+                            Icon(Icons.monetization_on_rounded, color: Colors.purple.shade700),
+                            const SizedBox(width: 8),
+                            const Text('Costo'),
+                          ],
+                        ),
+                      ),
                   ],
                   child: Container(
                     padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
@@ -1060,7 +1071,7 @@ class _PosScreenState extends State<PosScreen> {
         ? orderProv.topProducts
         : orderProv.products;
 
-    // Filter by channel exclusivity (Cost-only products must not appear in Detalle/Semi/Mayorista)
+    // Filter by channel exclusivity (Cost-only products MUST NOT appear in Detalle/Semi/Mayorista levels)
     if (posProv.currentLevel != 'COSTO') {
       displayedProducts = displayedProducts.where((p) => !p.isCostChannelOnly).toList();
     }

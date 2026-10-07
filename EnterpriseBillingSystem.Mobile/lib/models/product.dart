@@ -132,61 +132,9 @@ class Product {
   }
 
   bool get isCostChannelOnly {
-    // 1. If explicitly set via database flags on presentation
-    if (presentations.any((p) => p.isExclusiveCostChannel)) {
-      return true;
-    }
-
-    // 2. Filter by SKUs and Product Names exclusive to Cost Channel
-    final code = internalCode.toUpperCase().trim();
-    final upperName = name.toUpperCase().trim();
-    final upperDesc = (description ?? '').toUpperCase().trim();
-
-    const exclusiveSkus = {
-      'CA052', 'CA053', 'CA054', 'CA055', 'CA056', 'CA057',
-      'CA066', 'CA067', 'CA068', 'CA069', 'CA070', 'CA071', 'CA072',
-      'CA074', 'CA075', 'CA076', 'CA077', 'CA078', 'CA079', 'CA080', 'CA081', 'CA082', 'CA083', 'CA084', 'CA085',
-      'MA016', 'MA017', 'MA018', 'MA019',
-      'TO041'
-    };
-
-    if (exclusiveSkus.contains(code)) {
-      return true;
-    }
-
-    const exclusiveNames = [
-      'COCKTAIL JELLY',
-      'PALETA LUZ LOLLIPOP',
-      'BUCK TEETH CANDY',
-      'HIGH BURGER',
-      'CHICLE ROCCKER',
-      'BOLSO DE GELATINA',
-      'TOTY MALVAVICO',
-      'MY MAGICAL UNICORN',
-      'CARTON MARSHMALLOW',
-      'MARSHMALLOW HOT DOG',
-      'ASORTED FRUIT GUM BALLS',
-      'FRUIT FLAVOR FRESA',
-      'FRUIT FLAVOR OJO',
-      'FRUIT FLAVOR BALON',
-      'TARRO STRAWBERRY',
-      'SUPER ICE COLD GUM',
-      'HAPPY POP FRIES',
-      'DOUBLE DECKER CHOCOLATE',
-      'CHOCOPARTY',
-      'BUCKET CHOCOPARTY',
-      'AILESI CHOCOLATE',
-      'SQUARE GIFT BOX',
-      'RAMO DE CHOCOLATE'
-    ];
-
-    for (var n in exclusiveNames) {
-      if (upperName.contains(n) || upperDesc.contains(n)) {
-        return true;
-      }
-    }
-
-    return false;
+    // Dynamic check based strictly on database flags configured per presentation
+    if (presentations.isEmpty) return false;
+    return presentations.every((p) => p.isExclusiveCostChannel || (p.allowCostChannel && !p.allowDetailChannel));
   }
 
   bool get isAllowedInMobile {

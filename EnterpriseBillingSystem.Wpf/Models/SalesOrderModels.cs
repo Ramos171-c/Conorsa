@@ -201,3 +201,97 @@ public record UpdateSalesOrderCommandDto(
     List<SalesOrderDetailRequestDto> Details,
     int? Status = null
 );
+
+public record SellerSalesSummaryDto(
+    string SellerName,
+    int TotalOrdersCount,
+    int DeliveredOrdersCount,
+    int CancelledOrdersCount,
+    decimal TotalPresaleAmount,
+    decimal TotalDeliveredAmount,
+    decimal TotalReturnedAmount,
+    decimal DeliveryEffectivenessPercentage
+);
+
+public record SellerSalesReportDto(
+    DateTime? FromDate,
+    DateTime? ToDate,
+    Guid? RouteId,
+    int TotalSellersCount,
+    int TotalOrdersCount,
+    decimal GrandTotalPresaleAmount,
+    decimal GrandTotalDeliveredAmount,
+    decimal GrandTotalReturnedAmount,
+    decimal OverallEffectivenessPercentage,
+    IEnumerable<SellerSalesSummaryDto> Sellers
+);
+
+public record PresaleShortageItemDto(
+    string ProductCode,
+    string ProductName,
+    string UnitOfMeasureCode,
+    decimal RequestedQuantity,
+    decimal DeliveredQuantity,
+    decimal ShortageQuantity,
+    decimal UnitPrice,
+    decimal TotalLossAmount
+);
+
+public record PresaleShortagesReportDto(
+    DateTime? FromDate,
+    DateTime? ToDate,
+    Guid? RouteId,
+    int TotalUniqueProductsWithShortage,
+    decimal TotalMissingPiecesCount,
+    decimal TotalPresaleLossAmount,
+    IEnumerable<PresaleShortageItemDto> Items
+);
+
+public class WeeklySalesSummaryDto
+{
+    public string WeekLabel { get; set; } = string.Empty;
+    public DateTime WeekStartDate { get; set; }
+    public DateTime WeekEndDate { get; set; }
+    public int OrdersCount { get; set; }
+    public decimal TotalBilled { get; set; }
+    public decimal TotalDelivered { get; set; }
+    public decimal TotalShortage { get; set; }
+    public decimal EstimatedCost { get; set; }
+    public decimal GrossProfit { get; set; }
+    public double ProfitMargin { get; set; }
+    public double DeliveryEffectiveness { get; set; }
+}
+
+public class PriceTypeSalesSummaryDto
+{
+    public string PriceTypeName { get; set; } = string.Empty;
+    public string Description { get; set; } = string.Empty;
+    public string BadgeColor { get; set; } = "#1976D2";
+    public int OrdersCount { get; set; }
+    public decimal TotalSales { get; set; }
+    public decimal EstimatedCost { get; set; }
+    public decimal GrossProfit { get; set; }
+    public double ProfitMargin { get; set; }
+    public double SharePercentage { get; set; }
+}
+
+public class SalesOrderReportItemDto
+{
+    public Guid Id { get; set; }
+    public string OrderNumber { get; set; } = string.Empty;
+    public Guid CustomerId { get; set; }
+    public string CustomerName { get; set; } = string.Empty;
+    public string CustomerCode { get; set; } = string.Empty;
+    public string ZoneName { get; set; } = "Sin Zona";
+    public DateTime OrderDate { get; set; }
+    public decimal TotalAmount { get; set; }
+    public decimal DeliveredAmount { get; set; }
+    public decimal ShortageAmount { get; set; }
+    public decimal EstimatedCost { get; set; }
+    public decimal EstimatedProfit { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public string CreatedBy { get; set; } = string.Empty;
+    public string SellerDisplayName { get; set; } = string.Empty;
+    public string PricingType { get; set; } = "Detalle";
+    public string PricingBadgeColor { get; set; } = "#1976D2";
+}

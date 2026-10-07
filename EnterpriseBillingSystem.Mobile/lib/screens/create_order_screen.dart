@@ -63,9 +63,10 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
   // Show Product Presentation & Qty selector dialog
   void _showAddProductDialog(Product product) {
     final auth = Provider.of<AuthProvider>(context, listen: false);
+    final isAdmin = auth.userProfile?.isAdmin == true;
     final isCostSeller = auth.userProfile?.isCostSeller == true;
 
-    final availablePresentations = isCostSeller
+    final availablePresentations = (isCostSeller || isAdmin)
         ? product.presentations
         : product.presentations.where((p) => p.allowDetailChannel).toList();
 
@@ -89,7 +90,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
       builder: (context) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            final price = isCostSeller
+            final price = (isCostSeller || product.isCostChannelOnly)
                 ? selectedPresentation.costSellerPrice
                 : (selectedPresentation.retailPrice > 0 
                     ? selectedPresentation.retailPrice 
@@ -103,12 +104,34 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
                   mainAxisSize: MainAxisSize.min,
                   crossAxisAlignment: CrossAxisAlignment.stretch,
                   children: [
+                    if (product.isCostChannelOnly)
+                      Container(
+                        margin: const EdgeInsets.only(bottom: 12),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: Colors.purple.shade50,
+                          borderRadius: BorderRadius.circular(8),
+                          border: Border.all(color: Colors.purple.shade200),
+                        ),
+                        child: const Row(
+                          children: [
+                            Icon(Icons.info_outline, color: Colors.purple, size: 18),
+                            SizedBox(width: 8),
+                            Expanded(
+                              child: Text(
+                                'Producto Exclusivo de Costo (Aplica Precio Costo)',
+                                style: TextStyle(color: Colors.purple, fontSize: 12, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
                     const Text('Presentación:', style: TextStyle(fontWeight: FontWeight.bold)),
                     DropdownButton<ProductPresentation>(
                       value: selectedPresentation,
                       isExpanded: true,
                       items: availablePresentations.map((p) {
-                        final pPrice = isCostSeller
+                        final pPrice = (isCostSeller || product.isCostChannelOnly)
                             ? p.costSellerPrice
                             : (p.retailPrice > 0 ? p.retailPrice : product.defaultSalePrice);
                         return DropdownMenuItem(
@@ -203,7 +226,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
                   onPressed: () {
                     final auth = Provider.of<AuthProvider>(context, listen: false);
                     final provider = Provider.of<OrderProvider>(context, listen: false);
-                    provider.addToCart(product, selectedPresentation, quantity, isCostSeller: auth.userProfile?.isCostSeller == true);
+                    provider.addToCart(product, selectedPresentation, quantity, isCostSeller: auth.userProfile?.isCostSeller == true || product.isCostChannelOnly);
                     Navigator.pop(context);
                     
                     ScaffoldMessenger.of(context).showSnackBar(
@@ -463,6 +486,7 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
   // UI Step 2: Select Products
   Widget _buildProductsStep(OrderProvider provider) {
     final authProv = Provider.of<AuthProvider>(context, listen: false);
+    final isAdmin = authProv.userProfile?.isAdmin == true;
     final isCostSeller = authProv.userProfile?.isCostSeller == true;
 
     final availableProducts = isCostSeller
@@ -519,9 +543,11 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text('SKU: ${product.internalCode}'),
-                                  Text(isCostSeller
-                                      ? 'Precio costo (+2%): \$${product.defaultCostSellerPrice.toStringAsFixed(2)}'
-                                      : 'Precio base: \$${product.defaultSalePrice.toStringAsFixed(2)}'),
+                                  Text(isAdmin
+                                      ? 'Base: \$${product.defaultSalePrice.toStringAsFixed(2)} | Costo: \$${product.defaultCostSellerPrice.toStringAsFixed(2)}'
+                                      : (isCostSeller
+                                          ? 'Precio costo (+2%): \$${product.defaultCostSellerPrice.toStringAsFixed(2)}'
+                                          : 'Precio base: \$${product.defaultSalePrice.toStringAsFixed(2)}')),
                                   Text('Presentaciones: ${product.presentations.length}'),
                                 ],
                               ),
@@ -586,17 +612,17 @@ class _CreateOrderScreenState extends State<CreateOrderScreen> with SingleTicker
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          Icon(Icons.shopping_cart_outlined, size: 70, color: const Color(0xFFCBD5E1)),
+                          Icon(Icons.shopping_cart_outlined, size: 70, color: Color(0xFFCBD5E1)),
                           const SizedBox(height: 12),
                           Text(
                             'Su carrito está vacío',
-                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: const Color(0xFF475569)),
+                            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16, color: Color(0xFF475569)),
                           ),
                           const SizedBox(height: 6),
                           Text(
                             'Agregue productos desde la pestaña "2. Productos" para armar el pedido.',
                             textAlign: TextAlign.center,
-                            style: TextStyle(fontSize: 13, color: const Color(0xFF64748B)),
+                            style: TextStyle(fontSize: 13, color: Color(0xFF64748B)),
                           ),
                         ],
                       ),
